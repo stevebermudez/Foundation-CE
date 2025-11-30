@@ -255,18 +255,24 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
     realEstateType: "all",
   });
 
-  // Fetch courses from API
+  // Fetch courses from API with state filter
   const { data: dbCourses = [], isLoading } = useQuery({
-    queryKey: ["/api/courses"],
+    queryKey: ["/api/courses", { state: selectedState }],
     queryFn: async () => {
-      const res = await fetch("/api/courses");
+      const res = await fetch(`/api/courses?state=${selectedState}`);
       if (!res.ok) throw new Error("Failed to fetch courses");
       return res.json();
     },
   });
 
-  // Transform database courses to UI format
-  const courses = dbCourses.length > 0 ? dbCourses.map(transformCourse) : mockCourses;
+  // Transform database courses to UI format, use real courses if available
+  const courses = useMemo(() => {
+    if (dbCourses.length > 0) {
+      return dbCourses.map(transformCourse);
+    }
+    // Fallback to mock courses filtered by selected state
+    return mockCourses.filter(c => c.state === selectedState);
+  }, [dbCourses, selectedState]);
 
   const handleProfessionChange = (profession: "real_estate" | "insurance") => {
     setSelectedProfession(profession);
