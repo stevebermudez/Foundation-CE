@@ -1,0 +1,284 @@
+Alright, on to **Unit 8** for FoundationCE.
+
+I will give you:
+
+* Structure for about **3 hours** of instruction
+* **Three Sora ready lesson scripts**
+* **Twenty question quiz** in Florida exam style
+
+All focused on **property rights, estates, tenancies, condos, co ops, HOAs, CDDs, and time shares.**
+
+---
+
+## UNIT 8   PROPERTY RIGHTS, ESTATES AND TENANCIES, CONDOS, CO OPS, CDDs, HOAs, TIME SHARES
+
+Target duration in course: **3 hours**
+
+### Learning objectives
+
+By the end of Unit 8, the student should be able to:
+
+* Describe the bundle of legal rights associated with real property
+* Distinguish real property from personal property
+* Explain types of estates in real property
+
+  * Freehold estates
+  * Leasehold estates
+* Compare tenancies
+
+  * Tenancy in common
+  * Joint tenancy
+  * Tenancy by the entireties
+* Describe forms of ownership
+
+  * Severalty
+  * Co ownership
+* Explain Florida homestead protections in simple, exam oriented terms
+* Describe the basic features of condominiums, cooperatives, homeowners associations, and community development districts
+* Explain time share ownership structures
+* Apply these concepts to exam scenarios
+
+---
+
+## UNIT 8 STRUCTURE FOR LMS
+
+1. **Lesson 8.1**   Real property, bundle of rights, estates
+2. **Lesson 8.2**   Tenancies, co ownership, homestead
+3. **Lesson 8.3**   Condos, co ops, HOAs, CDDs, time shares
+4. **Unit 8 Quiz**   20 questions
+
+---
+
+## LESSON 8.1 SCRIPT
+
+**Real Property, Bundle of Rights, Estates**
+
+> Welcome to Unit 8 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+>
+> In this unit, we move deeper into what exactly is being bought and sold in a real estate transaction. When someone buys property, they receive much more than walls and land. They receive legal rights that can be separated, limited, or transferred. Understanding these rights is essential for the state exam and for professional practice.
+>
+> Start with the difference between **real property** and **personal property**.
+>
+> Real property consists of land and anything permanently attached to the land, along with the legal rights associated with ownership. Personal property is movable property that is not fixed to the land. Furniture, vehicles, and most appliances are examples of personal property. Real property includes the surface of the land, the air space above, and the subsurface, subject to legal limits.
+>
+> The legal rights associated with real property are often described as a **bundle of rights**. These rights include the right to possess, use, exclude others, enjoy, and dispose of the property. An owner can sell some rights and keep others. For example, an owner might sell oil or mineral rights and keep surface rights.
+>
+> Now let us talk about **estates in real property**. An estate is the degree, quantity, nature, and extent of interest a person has in real property. Estates are grouped into **freehold estates** and **leasehold estates**.
+>
+> A **freehold estate** is an ownership interest that is for an indefinite length of time. Examples include fee simple absolute, life estates, and fee simple subject to certain conditions. Fee simple absolute is the largest and most complete bundle of rights available.
+>
+> A **life estate** is an ownership interest that lasts for the lifetime of a specified person. When the life tenant dies, the property either reverts back to the original grantor or passes to a remainderman, depending on the deed.
+>
+> **Leasehold estates** are interests in real property for a definite period, usually created by a lease. The tenant has the right of possession but not ownership. Leasehold estates include estate for years, tenancy at will, and tenancy at sufferance.
+>
+> For exam purposes, focus on these distinctions. Fee simple means full ownership with the greatest bundle of rights. A life estate is ownership that ends at death of a named person. Leasehold means possession for a limited time under a lease.
+>
+> In the next lesson, we will compare forms of co ownership and homestead protections.
+
+---
+
+## LESSON 8.2 SCRIPT
+
+**Tenancies, Co Ownership, Homestead**
+
+> In this lesson, we compare different ways people can hold title together and we introduce Florida homestead protections in a test friendly way.
+>
+> First, consider **ownership in severalty**. This means title is held by a single person or a single legal entity. Corporate ownership is ownership in severalty because the corporation is considered one legal person.
+>
+> **Co ownership** exists when title is held by two or more persons at the same time. The most common forms of co ownership for the exam are tenancy in common, joint tenancy, and tenancy by the entireties.
+>
+> **Tenancy in common** has no right of survivorship. Each co owner has an undivided interest in the whole property, which may be equal or unequal. If one tenant in common dies, that person’s share passes to their heirs or according to their will.
+>
+> **Joint tenancy** includes the right of survivorship. If one joint tenant dies, that person’s share automatically passes to the surviving joint tenants, not to heirs. Joint tenancy usually requires the four unities of possession, interest, time, and title.
+>
+> **Tenancy by the entireties** is a special form of co ownership for married couples. It includes the right of survivorship and treats the couple as one legal person. If one spouse dies, the surviving spouse becomes the sole owner automatically. Tenancy by the entireties also provides some protection against individual creditors of one spouse.
+>
+> You may see an exam question that asks what type of ownership a married couple takes by default when they both appear on a Florida deed. The usual answer is tenancy by the entireties if the deed names them as husband and wife.
+>
+> Now let us look at **homestead** protections in Florida. Florida homestead rules give certain protections to an owner’s primary residence. Homestead protections may limit forced sale by most judgment creditors, provide a constitutional tax exemption, and impose restrictions on how homestead property can be devised in a will when there is a surviving spouse or minor children.
+>
+> For exam purposes, remember that homestead protections apply primarily to the primary residence of the owner, up to certain acreage limits, and that special rules apply to devise and descent. For example, if there is a surviving spouse and minor children, the property usually passes in a specific manner and cannot simply be willed away to someone else.
+>
+> The details of probate law are beyond the scope of your entry level exam, but you should know that homestead exists and that it affects creditors and inheritance.
+>
+> In the next lesson, we discuss modern ownership structures for groups of units such as condominiums, cooperatives, and planned communities.
+
+---
+
+## LESSON 8.3 SCRIPT
+
+**Condos, Co Ops, HOAs, CDDs, Time Shares**
+
+> In the last lesson for Unit 8, we focus on common interest communities and time share ownership. These ownership forms are very common in Florida and appear frequently on exams.
+>
+> Start with **condominiums**. A condominium is a form of ownership that combines individual ownership of a unit with shared ownership of common elements. The unit owner owns the interior space of the unit and an undivided share of common areas such as hallways, pools, and recreational facilities.
+>
+> Condominiums are created by a declaration that describes the property and the rights of unit owners. Buyers must receive specific documents, such as the declaration, articles of incorporation of the association, bylaws, rules, and most recent financial information. Florida law provides a rescission period during which a purchaser may cancel after receiving the required documents.
+>
+> **Cooperatives**, or co ops, are different. In a cooperative, a corporation owns the building, and residents purchase shares of stock in the corporation. The shareholder receives a proprietary lease to occupy a specific unit. The resident does not own real property directly, but rather an interest in a corporation that owns the property. Financing and transfer rules can be more complex than condominiums.
+>
+> **Homeowners associations**, or HOAs, govern planned developments where owners hold title to their lots or units and also share ownership or use rights in common areas such as private roads, parks, or amenities. HOAs enforce covenants, conditions, and restrictions, often called CC and Rs. Owners must comply with association rules and pay assessments.
+>
+> **Community development districts**, or CDDs, are special purpose units of local government that finance infrastructure and community improvements in certain developments. Property owners in a CDD pay assessments that help repay bonds issued for roads, utilities, and amenities. The presence of a CDD affects property taxes and assessments, so buyers must be informed.
+>
+> Finally, let us cover **time shares**. A time share is a form of ownership or right to use property for a specific period each year. Two broad types of time share structures are fee simple interests and right to use or lease interests. In a fee simple time share, the buyer owns a fractional interest in the property. In a right to use arrangement, the buyer has the contractual right to occupy a unit for a certain period for a certain number of years, but does not own the real property.
+>
+> Time shares are heavily regulated to protect consumers against high pressure sales tactics. Purchasers typically have a rescission period during which they can cancel the contract.
+>
+> As you prepare for the exam, focus on:
+>
+> * Who owns what in a condo versus a cooperative
+> * The role of associations and assessments
+> * The difference between fee simple and right to use time shares
+>
+> You are now ready to take the Unit 8 quiz.
+
+---
+
+## UNIT 8 QUIZ
+
+**20 exam style multiple choice questions**
+
+1. Which of the following best describes real property
+   A. Land only
+   B. Land and personal property
+   C. Land and everything permanently attached to it, plus legal rights
+   D. Movable property only
+   **Answer:** C
+
+2. The bundle of rights in real property includes all of the following except
+   A. right of possession
+   B. right of exclusion
+   C. right to determine zoning
+   D. right of disposition
+   **Answer:** C
+
+3. A fee simple estate is
+   A. a leasehold interest with a definite termination date
+   B. a freehold estate with the greatest bundle of rights
+   C. an interest limited to the holder’s lifetime
+   D. a non inheritable estate
+   **Answer:** B
+
+4. A life estate
+   A. always includes the right of survivorship
+   B. lasts for a specific number of years
+   C. terminates at the death of a named person
+   D. is the same as a leasehold estate
+   **Answer:** C
+
+5. A tenant who has possession of property for a fixed term under a written lease holds
+   A. a fee simple estate
+   B. a tenancy in common
+   C. an estate for years
+   D. a life estate
+   **Answer:** C
+
+6. Ownership in severalty means title is held
+   A. by two or more persons
+   B. by a single person or legal entity
+   C. under a lease
+   D. by a married couple
+   **Answer:** B
+
+7. In a tenancy in common
+   A. each co owner has a right of survivorship
+   B. each co owner’s interest passes to heirs on death
+   C. only married couples may hold title
+   D. the interests must be equal
+   **Answer:** B
+
+8. The form of ownership for married couples in Florida that includes the right of survivorship is
+   A. tenancy in common
+   B. joint tenancy
+   C. tenancy by the entireties
+   D. ownership in severalty
+   **Answer:** C
+
+9. Which statement regarding joint tenancy is correct
+   A. It has no right of survivorship
+   B. It usually requires the four unities of possession, interest, time, and title
+   C. It is only available to spouses
+   D. It is the same as tenancy in common
+   **Answer:** B
+
+10. Florida homestead protections apply primarily to
+    A. any rental property
+    B. any vacant land
+    C. an owner’s primary residence, subject to certain limits
+    D. commercial property only
+    **Answer:** C
+
+11. In a condominium, the owner typically holds
+    A. a leasehold interest only
+    B. stock in a corporation and a proprietary lease
+    C. title to the unit interior plus an undivided interest in common elements
+    D. no ownership in common areas
+    **Answer:** C
+
+12. In a cooperative, a resident usually owns
+    A. the interior of the unit in fee simple
+    B. shares of stock in the corporation that owns the building
+    C. the land but not the building
+    D. no legal interest in the property
+    **Answer:** B
+
+13. An HOA primarily
+    A. finances county government
+    B. enforces covenants and collects assessments in a planned community
+    C. manages only commercial property
+    D. guarantees appreciation in value
+    **Answer:** B
+
+14. A community development district
+    A. is a special unit of local government that finances infrastructure and improvements in a development
+    B. is a private company
+    C. has no power to levy assessments
+    D. applies only to condominiums
+    **Answer:** A
+
+15. A fee simple time share interest gives the buyer
+    A. no ownership, only a right to use
+    B. an ownership interest in real property for a specific period each year
+    C. unlimited year round occupancy
+    D. only a leasehold right for one year
+    **Answer:** B
+
+16. A right to use time share
+    A. is a freehold estate
+    B. provides a long term lease or contractual right to use without fee simple ownership
+    C. guarantees appreciation
+    D. is identical to joint tenancy
+    **Answer:** B
+
+17. A buyer who purchases a new condominium unit from a developer in Florida usually has
+    A. no right to cancel
+    B. a rescission period provided by law
+    C. a right to cancel only if the seller agrees
+    D. a right to cancel only before signing the contract
+    **Answer:** B
+
+18. Which statement about tenancy in common and joint tenancy is correct
+    A. Both forms require equal interests
+    B. Both forms have a right of survivorship
+    C. Only joint tenancy has a right of survivorship
+    D. Only tenancy in common has a right of survivorship
+    **Answer:** C
+
+19. Which of the following best describes common elements in a condominium
+    A. Property owned by the association for its exclusive use
+    B. Property within the unit interior
+    C. Areas such as hallways, pool, and grounds that are owned in common by unit owners
+    D. Commercial units only
+    **Answer:** C
+
+20. Homestead status in Florida may affect which of the following
+    A. Fire insurance rates only
+    B. Mortgage interest rates only
+    C. Tax exemptions and certain protections from forced sale by judgment creditors
+    D. Zoning classification
+    **Answer:** C
+
+---
+
+If you want to keep moving, say **next** again and I will build **Unit 9   Title, Deeds and Ownership Restrictions** with scripts and quiz in the same style.

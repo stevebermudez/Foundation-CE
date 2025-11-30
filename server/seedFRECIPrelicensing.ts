@@ -1268,8 +1268,122 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit5Questions.length} sample questions to Unit 5 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 6-19)
-    for (let i = 5; i < units.length; i++) {
+    // Unit 6 - Violations of License Law (20 questions)
+    const unit6Questions = [
+      { text: "The primary purpose of disciplinary action under Florida real estate license law is to", options: ["A. punish licensees", "B. protect the public", "C. increase state revenue", "D. reduce the number of licensees"], correctAnswer: "B", explanation: "Disciplinary action exists to protect the public from dishonest or incompetent licensees." },
+      { text: "Commingling occurs when a broker", options: ["A. mixes escrow funds with personal or business funds", "B. deposits escrow funds in a title company", "C. places a sign on a property without permission", "D. pays commission to a cooperating broker"], correctAnswer: "A", explanation: "Commingling is mixing client funds with the broker's personal or business funds." },
+      { text: "Conversion occurs when a broker", options: ["A. returns escrow funds to the wrong party by mistake", "B. deposits escrow funds in a trust account", "C. uses client funds for personal or business expenses without authorization", "D. changes from one broker to another"], correctAnswer: "C", explanation: "Conversion is using client funds for personal or business purposes without authorization." },
+      { text: "Practicing real estate without a license is", options: ["A. a minor administrative infraction only", "B. a criminal offense and a violation of license law", "C. allowed if supervised by a broker", "D. permitted for out of state brokers"], correctAnswer: "B", explanation: "Practicing without a license is both a criminal offense and violation of license law." },
+      { text: "Which of the following is the first step in the disciplinary process", options: ["A. probable cause determination", "B. filing of a formal complaint", "C. investigation", "D. receipt of a legally sufficient complaint"], correctAnswer: "D", explanation: "The process begins with receipt of a legally sufficient complaint." },
+      { text: "A complaint is legally sufficient when it", options: ["A. is in writing and notarized", "B. contains facts that, if true, would be a violation of law or rule", "C. is submitted by another licensee", "D. is reviewed by the governor"], correctAnswer: "B", explanation: "Legal sufficiency requires facts that would constitute a violation if proven true." },
+      { text: "After a complaint is found legally sufficient, the next step is", options: ["A. judicial review", "B. filing a lawsuit in civil court", "C. an investigation", "D. immediate suspension of the license"], correctAnswer: "C", explanation: "Investigation follows determination that the complaint is legally sufficient." },
+      { text: "The probable cause panel", options: ["A. conducts the initial investigation", "B. issues the final order", "C. determines whether there is sufficient evidence of a violation", "D. pays claims from the Recovery Fund"], correctAnswer: "C", explanation: "The panel determines if probable cause exists based on the investigative report." },
+      { text: "An informal hearing before FREC is used when", options: ["A. the licensee disputes material facts", "B. the licensee admits the facts but wants to be heard on the penalty", "C. the case involves criminal charges", "D. the complainant demands a jury trial"], correctAnswer: "B", explanation: "An informal hearing is for cases where facts are not disputed, only penalty is at issue." },
+      { text: "A formal hearing is conducted by", options: ["A. the governor", "B. the Real Estate Recovery Fund", "C. an administrative law judge", "D. a county court judge"], correctAnswer: "C", explanation: "Formal hearings are before an administrative law judge for disputed material facts." },
+      { text: "A final order in a disciplinary case is issued by", options: ["A. the administrative law judge", "B. the Department of State", "C. the Florida Real Estate Commission", "D. the county clerk"], correctAnswer: "C", explanation: "FREC issues the final order after the hearing process." },
+      { text: "A notice of noncompliance is most likely used for", options: ["A. conversion of escrow funds", "B. serious criminal misconduct", "C. a minor first time violation that can be corrected", "D. unlicensed practice"], correctAnswer: "C", explanation: "Notices of noncompliance are for minor, first-time violations that can be quickly corrected." },
+      { text: "A citation issued by DBPR", options: ["A. is a criminal charge", "B. is a type of administrative fine for certain listed violations", "C. automatically revokes a license", "D. cannot be disputed"], correctAnswer: "B", explanation: "A citation is an administrative fine that resolves certain violations without a full hearing." },
+      { text: "Which of the following is a possible administrative penalty that FREC may impose", options: ["A. incarceration", "B. probation", "C. revocation followed by imprisonment", "D. only a warning, never suspension"], correctAnswer: "B", explanation: "FREC may impose probation as an administrative penalty; criminal penalties are not FREC's power." },
+      { text: "Suspension of a real estate license means", options: ["A. the license is null and void and cannot be reinstated", "B. the licensee may practice only commercial real estate", "C. the licensee temporarily loses the right to practice for a set period", "D. the licensee may practice only under supervision"], correctAnswer: "C", explanation: "Suspension temporarily removes practice rights for a set period; the license is not permanent." },
+      { text: "The Real Estate Recovery Fund is designed to", options: ["A. pay commissions to cooperating brokers", "B. reimburse licensees for business losses", "C. reimburse members of the public who suffer monetary damages because of licensee misconduct in certain situations", "D. pay advertising expenses for the Commission"], correctAnswer: "C", explanation: "The Fund reimburses injured consumers for certain monetary damages from licensee dishonesty." },
+      { text: "Before a claimant may receive payment from the Real Estate Recovery Fund, the claimant usually must", options: ["A. file a complaint with the MLS", "B. obtain a civil judgment and show that collection was attempted and failed", "C. request an informal hearing", "D. apply to the local association of Realtors"], correctAnswer: "B", explanation: "A civil judgment and failed collection attempt are prerequisites for Recovery Fund claims." },
+      { text: "Payment from the Real Estate Recovery Fund on behalf of a licensee generally results in", options: ["A. promotion of the licensee", "B. automatic suspension of the license until the Fund is repaid", "C. no effect on the licensee's status", "D. automatic renewal of the license"], correctAnswer: "B", explanation: "Fund payment triggers automatic license suspension until the Fund is repaid by the licensee." },
+      { text: "Which of the following is most likely to result in revocation of a real estate license", options: ["A. Failing to complete continuing education on time one time", "B. Minor record keeping errors", "C. Conversion of escrow funds and serious fraud", "D. Failure to return a phone call"], correctAnswer: "C", explanation: "Serious violations like conversion and fraud are the most likely to result in revocation." },
+      { text: "Judicial review of a final order in a disciplinary case is obtained by", options: ["A. filing a request with the Recovery Fund", "B. filing an appeal in the appropriate court within the allowed time", "C. appealing to the MLS", "D. sending a letter directly to FREC"], correctAnswer: "B", explanation: "Judicial review requires filing an appeal in the proper court within the legal timeframe." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit6Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[5].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit6Questions.length} questions to Unit 6 Quiz`);
+
+    // Unit 7 - Federal and State Laws (20 questions)
+    const unit7Questions = [
+      { text: "The Civil Rights Act of 1866 prohibits discrimination based on", options: ["A. race only", "B. race and religion", "C. race and sex", "D. all protected classes"], correctAnswer: "A", explanation: "The Civil Rights Act of 1866 prohibits discrimination based solely on race with no exemptions." },
+      { text: "Familial status under the Fair Housing Act includes", options: ["A. married couples only", "B. households with a child under eighteen", "C. senior citizens only", "D. individuals living alone"], correctAnswer: "B", explanation: "Familial status refers to households with children under age eighteen or pregnant individuals." },
+      { text: "Steering occurs when a licensee", options: ["A. encourages owners to sell based on protected class", "B. directs buyers to or away from neighborhoods based on protected class", "C. refuses to finance a loan", "D. charges higher commissions"], correctAnswer: "B", explanation: "Steering is guiding buyers to or away from neighborhoods based on protected class membership." },
+      { text: "Blockbusting involves", options: ["A. urging owners to sell because protected classes are moving in", "B. refusing to negotiate with buyers", "C. refusing to maintain a rental unit", "D. soliciting rentals in senior housing"], correctAnswer: "A", explanation: "Blockbusting is encouraging owners to sell based on protected classes moving into the area." },
+      { text: "The Fair Housing Act protects all except", options: ["A. race", "B. sex", "C. marital status", "D. disability"], correctAnswer: "C", explanation: "The Fair Housing Act does not protect marital status; it protects seven classes including race, religion, sex, national origin, disability, and familial status." },
+      { text: "The ADA applies primarily to", options: ["A. private residences only", "B. public accommodations such as sales and leasing offices", "C. all property with four or fewer units", "D. any home over ten years old"], correctAnswer: "B", explanation: "The ADA applies to public accommodations like model homes with public areas and sales offices." },
+      { text: "RESPA prohibits", options: ["A. paying referral fees for sending customers to a lender", "B. collecting rent", "C. showing property without disclosure", "D. paying advertising costs"], correctAnswer: "A", explanation: "RESPA prohibits referral fees and kickbacks for business referrals." },
+      { text: "A violation of RESPA can occur if a broker", options: ["A. receives a fee for actual title services performed", "B. receives a referral fee for sending business to a mortgage company", "C. provides a Loan Estimate", "D. charges a commission"], correctAnswer: "B", explanation: "RESPA violations include receiving referral fees; only fees for actual services are permitted." },
+      { text: "ECOA prohibits discrimination based on", options: ["A. political affiliation", "B. marital status", "C. hobbies", "D. rental history"], correctAnswer: "B", explanation: "ECOA prohibits credit discrimination based on marital status and other protected factors." },
+      { text: "Under antitrust law, price fixing occurs when", options: ["A. a broker charges a high commission", "B. two brokers agree to charge the same commission rate", "C. sellers agree to all accept offers at the same price", "D. buyers negotiate together"], correctAnswer: "B", explanation: "Price fixing is an illegal agreement between competitors to charge the same rates." },
+      { text: "Market allocation occurs when brokers", options: ["A. advertise their listings together", "B. participate in a multiple offer situation", "C. agree to avoid competing in certain areas", "D. use the same photographer"], correctAnswer: "C", explanation: "Market allocation is an illegal agreement to divide geographic areas and avoid competition." },
+      { text: "The Florida Residential Landlord Tenant Act requires landlords to", options: ["A. allow tenants to make any modifications they want without permission", "B. maintain the property in compliance with building, housing, and health codes", "C. pay for all tenant damages immediately", "D. never enter the rental unit during the lease term"], correctAnswer: "B", explanation: "Landlords must maintain habitability and comply with building and health codes." },
+      { text: "Security deposits under Florida law must", options: ["A. be held in a non interest-bearing account only", "B. be refunded within 30 days regardless of damages", "C. be handled according to strict written notice and claims procedures", "D. be kept by the landlord as automatic compensation"], correctAnswer: "C", explanation: "Strict rules govern deposits including written notice of where held, interest bearing status, and claim procedures." },
+      { text: "The Telephone Consumer Protection Act prohibits", options: ["A. all marketing calls", "B. marketing calls to do-not-call numbers without prior consent or business relationship", "C. telephone conversations only", "D. all business calls before 9 AM"], correctAnswer: "B", explanation: "The TCPA restricts calls to do-not-call numbers and limits calling hours for marketing." },
+      { text: "The CAN-SPAM Act requires commercial emails to include", options: ["A. the sender's personal cell phone number", "B. a valid physical address of the sender and a clear opt-out link", "C. the recipient's social security number", "D. credit card information for verification"], correctAnswer: "B", explanation: "CAN-SPAM requires physical address, clear subject lines, and working unsubscribe links." },
+      { text: "Which statement regarding commission rates is correct", options: ["A. Commissions are set by state law", "B. Commissions are set by local real estate associations", "C. Commissions are always negotiable between parties", "D. Commissions cannot exceed 6 percent"], correctAnswer: "C", explanation: "Commissions are negotiable; agreeing on standard rates violates antitrust law." },
+      { text: "A group boycott violates antitrust law when", options: ["A. real estate agents refuse to work with a disreputable broker", "B. agents collectively agree not to cooperate with a specific firm or person", "C. a broker terminates an unproductive agent", "D. an agent changes brokers"], correctAnswer: "B", explanation: "Group boycotts are illegal agreements where competitors collectively refuse to deal with another party." },
+      { text: "Redlining is prohibited under fair housing law and involves", options: ["A. refusing loans or insurance based on neighborhood characteristics rather than borrower qualifications", "B. using red pens to mark documents", "C. only affecting commercial properties", "D. requiring proof of citizenship"], correctAnswer: "A", explanation: "Redlining is denying credit or insurance based on neighborhood characteristics, not borrower merit." },
+      { text: "A reasonable accommodation for a person with a disability might include", options: ["A. allowing a service animal in a no-pets policy", "B. physically modifying the property", "C. changing lease terms or policies", "D. any of the above"], correctAnswer: "D", explanation: "Reasonable accommodations include policy changes, modifications, and adaptive devices." },
+      { text: "Affiliated business arrangements under RESPA", options: ["A. are always prohibited", "B. are permitted if proper written disclosure is provided and the arrangement is not mandatory", "C. require loan approval before disclosure", "D. are only allowed between family members"], correctAnswer: "B", explanation: "Affiliated businesses are legal with proper disclosure and without forcing buyer use of the affiliate." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit7Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[6].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit7Questions.length} questions to Unit 7 Quiz`);
+
+    // Unit 8 - Property Rights & Estates (20 questions)
+    const unit8Questions = [
+      { text: "Which of the following best describes real property", options: ["A. Land only", "B. Land and personal property", "C. Land and everything permanently attached to it, plus legal rights", "D. Movable property only"], correctAnswer: "C", explanation: "Real property includes land, permanent attachments, and the legal rights of ownership." },
+      { text: "The bundle of rights in real property includes all of the following except", options: ["A. right of possession", "B. right of exclusion", "C. right to determine zoning", "D. right of disposition"], correctAnswer: "C", explanation: "Zoning is determined by government entities, not individual property owners." },
+      { text: "A fee simple estate is", options: ["A. a leasehold interest with a definite termination date", "B. a freehold estate with the greatest bundle of rights", "C. an interest limited to the holder's lifetime", "D. a non inheritable estate"], correctAnswer: "B", explanation: "Fee simple absolute is the largest freehold estate with the greatest bundle of property rights." },
+      { text: "A life estate", options: ["A. always includes the right of survivorship", "B. lasts for a specific number of years", "C. terminates at the death of a named person", "D. is the same as a leasehold estate"], correctAnswer: "C", explanation: "A life estate terminates upon the death of the named life tenant." },
+      { text: "A tenant who has possession of property for a fixed term under a written lease holds", options: ["A. a fee simple estate", "B. a tenancy in common", "C. an estate for years", "D. a life estate"], correctAnswer: "C", explanation: "An estate for years is a leasehold estate for a definite period under a lease." },
+      { text: "Ownership in severalty means title is held", options: ["A. by two or more persons", "B. by a single person or legal entity", "C. under a lease", "D. by a married couple"], correctAnswer: "B", explanation: "Severalty ownership means a single person or entity holds exclusive title." },
+      { text: "In a tenancy in common", options: ["A. each co owner has a right of survivorship", "B. each co owner's interest passes to heirs on death", "C. only married couples may hold title", "D. the interests must be equal"], correctAnswer: "B", explanation: "In a tenancy in common, interests pass to heirs or per will, with no right of survivorship." },
+      { text: "The form of ownership for married couples in Florida that includes the right of survivorship is", options: ["A. tenancy in common", "B. joint tenancy", "C. tenancy by the entireties", "D. ownership in severalty"], correctAnswer: "C", explanation: "Tenancy by the entireties is for married couples and includes automatic survivorship rights." },
+      { text: "Which statement regarding joint tenancy is correct", options: ["A. It has no right of survivorship", "B. It usually requires the four unities of possession, interest, time, and title", "C. It is only available to spouses", "D. It is the same as tenancy in common"], correctAnswer: "B", explanation: "Joint tenancy requires unity of possession, interest, time, and title to be valid." },
+      { text: "Florida homestead protections apply primarily to", options: ["A. any rental property", "B. any vacant land", "C. an owner's primary residence, subject to certain limits", "D. commercial property only"], correctAnswer: "C", explanation: "Homestead protections are limited to the owner's primary residence with acreage limits." },
+      { text: "In a condominium, the owner typically holds", options: ["A. a leasehold interest only", "B. stock in a corporation and a proprietary lease", "C. title to the unit interior plus an undivided interest in common elements", "D. no ownership in common areas"], correctAnswer: "C", explanation: "Condominium owners hold title to their unit and an undivided share of common areas." },
+      { text: "In a cooperative, a resident usually owns", options: ["A. the interior of the unit in fee simple", "B. shares of stock in the corporation that owns the building", "C. an undivided interest in the entire building", "D. only a leasehold interest"], correctAnswer: "B", explanation: "Cooperative residents own corporate shares and have a proprietary lease to occupy a unit." },
+      { text: "A condominium must be created by", options: ["A. a verbal agreement of all residents", "B. a county ordinance only", "C. a recorded declaration describing the property and unit owner rights", "D. approval by the local homeowners association"], correctAnswer: "C", explanation: "Condominiums are created by a recorded declaration that describes rights and common elements." },
+      { text: "Homeowners associations enforce", options: ["A. criminal laws", "B. state building codes only", "C. covenants, conditions, and restrictions (CC&Rs)", "D. federal tax law"], correctAnswer: "C", explanation: "HOAs enforce CC&Rs, which are private contractual restrictions on property use." },
+      { text: "A Community Development District (CDD)", options: ["A. is the same as a homeowners association", "B. is a special purpose government unit that finances infrastructure improvements", "C. only applies to commercial property", "D. has no impact on property owner assessments"], correctAnswer: "B", explanation: "CDDs are special government entities that finance infrastructure and levy assessments on residents." },
+      { text: "In a fee simple time share, the buyer", options: ["A. owns a contractual right to use property for a period", "B. owns a fractional interest in real property", "C. cannot transfer the interest to heirs", "D. owns only a leasehold interest"], correctAnswer: "B", explanation: "Fee simple time shares involve ownership of a fractional real property interest." },
+      { text: "In a right-to-use time share arrangement, the buyer", options: ["A. owns the entire property in fee simple", "B. owns a real property interest that can be inherited", "C. has a contractual right to occupy for a period but does not own real property", "D. owns stock in a corporation"], correctAnswer: "C", explanation: "Right-to-use is a contractual license to occupy; no real property ownership is transferred." },
+      { text: "Time share contracts typically allow purchasers", options: ["A. no cancellation rights", "B. a rescission period during which they can cancel", "C. one year to decide if they want to keep it", "D. permanent transfer limitations"], correctAnswer: "B", explanation: "Consumer protection laws provide a rescission period for time share purchases." },
+      { text: "A declaration of condominium must disclose", options: ["A. all unit owners' personal financial information", "B. the description of property, unit boundaries, common elements, and owner rights", "C. all resident complaints about neighbors", "D. future plans to increase assessments"], correctAnswer: "B", explanation: "Declarations must include property description, unit definitions, common areas, and owner rights." },
+      { text: "The main difference between a condominium and a cooperative is", options: ["A. cooperatives have more amenities", "B. condos involve real property ownership; cooperatives involve corporate stock ownership", "C. only cooperatives are found in Florida", "D. condos always cost more"], correctAnswer: "B", explanation: "Condominiums involve direct real property ownership; cooperatives involve indirect ownership via corporate shares." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit8Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[7].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit8Questions.length} questions to Unit 8 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 9-19)
+    for (let i = 8; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1287,7 +1401,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 6-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 9-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
