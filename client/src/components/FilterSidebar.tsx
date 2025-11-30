@@ -27,6 +27,7 @@ interface FilterSidebarProps {
   onFiltersChange: (filters: FilterState) => void;
   onClose?: () => void;
   isMobile?: boolean;
+  selectedProfession?: "real_estate" | "insurance";
 }
 
 const stateOptions = [
@@ -79,6 +80,7 @@ export default function FilterSidebar({
   onFiltersChange,
   onClose,
   isMobile = false,
+  selectedProfession = "real_estate",
 }: FilterSidebarProps) {
   const handleCheckboxChange = (
     key: "states" | "professions" | "categories" | "realEstateType",
@@ -156,7 +158,7 @@ export default function FilterSidebar({
       <Separator className="mb-4" />
 
       <div className="flex-1 overflow-y-auto">
-        <Accordion type="multiple" defaultValue={["state", "profession", "education", "testing"]} className="w-full">
+        <Accordion type="multiple" defaultValue={["state", "education", "testing"]} className="w-full">
           <AccordionItem value="state">
             <AccordionTrigger className="text-sm font-medium">State</AccordionTrigger>
             <AccordionContent>
@@ -173,32 +175,6 @@ export default function FilterSidebar({
                     />
                     <Label
                       htmlFor={`state-${option.value}`}
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="profession">
-            <AccordionTrigger className="text-sm font-medium">Profession</AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-3">
-                {professionOptions.map((option) => (
-                  <div key={option.value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`profession-${option.value}`}
-                      checked={filters.professions.includes(option.value)}
-                      onCheckedChange={(checked) =>
-                        handleCheckboxChange("professions", option.value, checked as boolean)
-                      }
-                      data-testid={`checkbox-profession-${option.value}`}
-                    />
-                    <Label
-                      htmlFor={`profession-${option.value}`}
                       className="text-sm font-normal cursor-pointer"
                     >
                       {option.label}
@@ -241,7 +217,7 @@ export default function FilterSidebar({
             </AccordionContent>
           </AccordionItem>
 
-          {filters.professions.includes("real_estate") && (
+          {selectedProfession === "real_estate" && (
             <AccordionItem value="realestate-type">
               <AccordionTrigger className="text-sm font-medium">Real Estate Type</AccordionTrigger>
               <AccordionContent>

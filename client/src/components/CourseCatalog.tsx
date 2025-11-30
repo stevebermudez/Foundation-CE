@@ -210,15 +210,29 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [selectedProfession, setSelectedProfession] = useState<"real_estate" | "insurance">("real_estate");
   const [filters, setFilters] = useState<FilterState>({
     states: [selectedState],
-    professions: [],
+    professions: [selectedProfession],
     categories: [],
     testingMode: "all",
     ceHours: "all",
     educationType: "all",
     realEstateType: "all",
   });
+
+  const handleProfessionChange = (profession: "real_estate" | "insurance") => {
+    setSelectedProfession(profession);
+    setFilters({
+      states: [selectedState],
+      professions: [profession],
+      categories: [],
+      testingMode: "all",
+      ceHours: "all",
+      educationType: "all",
+      realEstateType: profession === "real_estate" ? "all" : "all",
+    });
+  };
 
   const filteredCourses = useMemo(() => {
     return mockCourses.filter((course) => {
@@ -304,10 +318,29 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
   return (
     <section className="py-12 px-4">
       <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex gap-2">
+            <Button
+              variant={selectedProfession === "real_estate" ? "secondary" : "outline"}
+              onClick={() => handleProfessionChange("real_estate")}
+              data-testid="button-profession-real-estate"
+            >
+              Real Estate
+            </Button>
+            <Button
+              variant={selectedProfession === "insurance" ? "secondary" : "outline"}
+              onClick={() => handleProfessionChange("insurance")}
+              data-testid="button-profession-insurance"
+            >
+              Insurance
+            </Button>
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-8">
           <aside className="hidden lg:block w-64 shrink-0">
             <div className="sticky top-20 p-4 bg-card rounded-lg border">
-              <FilterSidebar filters={filters} onFiltersChange={setFilters} />
+              <FilterSidebar filters={filters} onFiltersChange={setFilters} selectedProfession={selectedProfession} />
             </div>
           </aside>
 
@@ -338,6 +371,7 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
                       onFiltersChange={setFilters}
                       onClose={() => setFilterOpen(false)}
                       isMobile
+                      selectedProfession={selectedProfession}
                     />
                   </SheetContent>
                 </Sheet>
@@ -410,11 +444,13 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
                   onClick={() => {
                     setSearchQuery("");
                     setFilters({
-                      states: [],
-                      professions: [],
+                      states: [selectedState],
+                      professions: [selectedProfession],
                       categories: [],
                       testingMode: "all",
                       ceHours: "all",
+                      educationType: "all",
+                      realEstateType: "all",
                     });
                   }}
                   data-testid="button-clear-filters"
