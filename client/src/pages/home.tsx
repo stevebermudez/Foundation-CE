@@ -41,23 +41,29 @@ export default function HomePage() {
   return (
     <div>
       <Hero
-        onBrowseCourses={() => freci && setLocation(`/course/${freci.id}`)}
-        onGetStarted={() => freci && handleEnroll(freci.id)}
+        onBrowseCourses={() => setLocation("/courses/fl")}
+        onGetStarted={() => {
+          if (freci) {
+            handleEnroll(freci.id);
+          } else {
+            setLocation("/courses/fl");
+          }
+        }}
       />
       <TrustBadges />
 
-      {/* Featured Prelicensing Course */}
-      {freci && (
-        <section className="py-16 px-4 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-8 text-center">
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                Florida Sales Associate Prelicensing
-              </h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Complete your 63-hour requirement and get licensed in real estate
-              </p>
-            </div>
+      {/* Featured Prelicensing Course - always show even if loading */}
+      <section className="py-16 px-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              Florida Sales Associate Prelicensing
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Complete your 63-hour requirement and get licensed in real estate
+            </p>
+          </div>
+          {freci ? (
             <Card className="border-2 border-blue-200 shadow-lg hover-elevate">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -117,9 +123,15 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </section>
-      )}
+          ) : (
+            <Card className="border-2 border-blue-200 shadow-lg">
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">Loading course information...</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </section>
 
       <FeaturesSection />
     </div>
