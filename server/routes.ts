@@ -420,5 +420,26 @@ export async function registerRoutes(
     }
   });
 
+  // Completed Courses & Redo Routes
+  app.get("/api/enrollments/completed/:userId", async (req, res) => {
+    try {
+      const completed = await storage.getCompletedEnrollments(req.params.userId);
+      res.json(completed);
+    } catch (err) {
+      console.error("Error fetching completed enrollments:", err);
+      res.status(500).json({ error: "Failed to fetch completed courses" });
+    }
+  });
+
+  app.post("/api/enrollments/:id/reset", async (req, res) => {
+    try {
+      const enrollment = await storage.resetEnrollment(req.params.id);
+      res.json({ message: "Enrollment reset successfully", enrollment });
+    } catch (err) {
+      console.error("Error resetting enrollment:", err);
+      res.status(500).json({ error: "Failed to reset enrollment" });
+    }
+  });
+
   return httpServer;
 }

@@ -49,6 +49,8 @@ export interface IStorage {
   getCouponByCode(code: string): Promise<Coupon | undefined>;
   validateCoupon(code: string, productType?: string): Promise<{ valid: boolean; discount?: number; message: string }>;
   applyCoupon(userId: string, couponId: string, enrollmentId?: string, discountAmount?: number): Promise<CouponUsage>;
+  getCompletedEnrollments(userId: string): Promise<(Enrollment & { course: Course })[]>;
+  resetEnrollment(enrollmentId: string): Promise<Enrollment>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -562,6 +564,41 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return usage;
+  }
+
+  async getCompletedEnrollments(userId: string): Promise<(Enrollment & { course: Course })[]> {
+    const completed = await db
+      .select()
+      .from(enrollments)
+      .innerJoin(courses, eq(enrollments.courseId, courses.id))
+      .where(
+        and(
+          eq(enrollments.userId, userId),
+          eq(enrollments.completed, 1)
+        )
+      )
+      .orderBy(desc(enrollments.completedAt));
+
+    return completed.map((row: any) => ({
+      ...row.enrollments,
+      course: row.courses
+    }));
+  }
+
+  async resetEnrollment(enrollmentId: string): Promise<Enrollment> {
+    const [updated] = await db
+      .update(enrollments)
+      .set({
+        completed: 0,
+        completedAt: null,
+        progress: 0,
+        hoursCompleted: 0,
+        certificateUrl: null,
+        updatedAt: new Date()
+      })
+      .where(eq(enrollments.id, enrollmentId))
+      .returning();
+    return updated;
   }
 }
 
