@@ -1610,8 +1610,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit14Questions.length} questions to Unit 14 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 15-19)
-    for (let i = 14; i < units.length; i++) {
+    // Unit 15 - Property Management (20 questions)
+    const unit15Questions = [
+      { text: "The primary objective of a property manager is to", options: ["A. increase property taxes", "B. maximize net operating income", "C. increase tenant turnover", "D. eliminate maintenance"], correctAnswer: "B", explanation: "The primary objective is to protect the owner's investment and maximize net operating income." },
+      { text: "The management agreement must", options: ["A. be oral", "B. be written", "C. be renewed weekly", "D. be recorded"], correctAnswer: "B", explanation: "The property management agreement must always be in writing to be enforceable." },
+      { text: "A property manager is an agent for", options: ["A. the tenant", "B. the state", "C. the owner", "D. the buyer"], correctAnswer: "C", explanation: "A property manager is an agent and fiduciary for the property owner." },
+      { text: "Screening tenants must comply with", options: ["A. fair housing laws", "B. local custom only", "C. the property owner's personal preferences", "D. marketing budgets"], correctAnswer: "A", explanation: "Screening must follow equal housing laws." },
+      { text: "A lease should include", options: ["A. rent, term, names, and responsibilities", "B. only the rent amount", "C. only the tenant name", "D. a property appraisal"], correctAnswer: "A", explanation: "A lease should include the parties' names, term, rent, payment schedule, and maintenance responsibilities." },
+      { text: "Preventive maintenance", options: ["A. repairs broken items", "B. reduces future repairs", "C. is illegal in Florida", "D. is performed only by contractors"], correctAnswer: "B", explanation: "Preventive maintenance reduces repairs and extends equipment life." },
+      { text: "Corrective maintenance involves", options: ["A. emergency response only", "B. fixing items that have failed", "C. lowering rent", "D. marketing the property"], correctAnswer: "B", explanation: "Corrective maintenance repairs items that have failed." },
+      { text: "Routine maintenance includes", options: ["A. capital repairs", "B. regular cleaning and minor repairs", "C. structural redesign", "D. appraisal work"], correctAnswer: "B", explanation: "Routine maintenance includes regular cleaning and minor repairs." },
+      { text: "Effective gross income equals", options: ["A. potential gross income plus expenses", "B. vacancy losses minus taxes", "C. potential gross income minus vacancy plus other income", "D. rent plus capital expenditures"], correctAnswer: "C", explanation: "Effective gross income is potential gross income minus vacancy and collection losses plus other income." },
+      { text: "Net operating income equals", options: ["A. effective gross income minus operating expenses", "B. rent minus mortgage", "C. taxes minus reserves", "D. gross income minus loan balance"], correctAnswer: "A", explanation: "Net operating income is effective gross income minus operating expenses." },
+      { text: "Cash flow equals", options: ["A. rent minus vacancies", "B. net operating income minus debt service", "C. gross income minus taxes", "D. operating expenses minus repairs"], correctAnswer: "B", explanation: "Cash flow is net operating income minus debt service." },
+      { text: "Positive cash flow means", options: ["A. vacancies are increasing", "B. expenses exceed rent", "C. the property generates income after debt service", "D. the lender is losing money"], correctAnswer: "C", explanation: "Positive cash flow means the property produces income after loan payments." },
+      { text: "Hazard insurance covers", options: ["A. rent loss only", "B. damage from fire or wind", "C. tenant negligence only", "D. loan default"], correctAnswer: "B", explanation: "Hazard insurance covers damage from fire or wind." },
+      { text: "Liability insurance covers", options: ["A. injuries occurring on the property", "B. only mortgage payments", "C. roof leaks only", "D. depreciation"], correctAnswer: "A", explanation: "Liability insurance covers injuries occurring on the property." },
+      { text: "Rent loss insurance covers", options: ["A. vacancies", "B. lost rent due to insured damage", "C. unpaid security deposits", "D. eviction costs"], correctAnswer: "B", explanation: "Rent loss insurance covers lost rent due to insured damage." },
+      { text: "Property managers can reduce risk by", options: ["A. eliminating maintenance", "B. refusing to inspect units", "C. performing regular maintenance", "D. removing all insurance"], correctAnswer: "C", explanation: "Reducing risk through maintenance is a key risk management technique." },
+      { text: "Security deposits in Florida", options: ["A. may be used for manager payroll", "B. must be handled according to Chapter 83", "C. may be commingled with operating funds", "D. can be held for any length of time without notice"], correctAnswer: "B", explanation: "Florida law requires security deposits to be handled according to Chapter 83 of the Florida Statutes." },
+      { text: "Operating expenses include", options: ["A. mortgage payments", "B. capital improvements", "C. utilities and repairs", "D. loan principal"], correctAnswer: "C", explanation: "Operating expenses include utilities, repairs, salaries, and property taxes but not mortgage payments." },
+      { text: "A management agreement that sets compensation and duties is", options: ["A. a listing agreement", "B. a lease agreement", "C. a property management agreement", "D. a bill of sale"], correctAnswer: "C", explanation: "The property management agreement defines the relationship between owner and manager." },
+      { text: "Tenant relations include", options: ["A. ignoring maintenance requests", "B. timely communication and rule enforcement", "C. raising rent monthly", "D. limiting repairs to once per year"], correctAnswer: "B", explanation: "Good tenant relations require timely communication and enforcement of lease rules." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit15Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[14].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit15Questions.length} questions to Unit 15 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 16-19)
+    for (let i = 15; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1629,7 +1667,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 15-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 16-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
