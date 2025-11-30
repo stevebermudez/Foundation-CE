@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Clock, BookOpen, PlayCircle, Timer, TimerOff, Award } from "lucide-react";
+import { Clock, BookOpen, PlayCircle, Award } from "lucide-react";
 import { Link } from "wouter";
 
 export interface Course {
@@ -16,8 +16,6 @@ export interface Course {
   profession: "real_estate" | "insurance" | "nmls";
   educationType: "ce" | "pre_license";
   realEstateType?: "salesperson" | "broker";
-  timedOption: boolean;
-  untimedOption: boolean;
   duration: string;
   lessons: number;
   price: number;
@@ -108,21 +106,6 @@ export default function CourseCard({ course, onEnroll, onContinue }: CourseCardP
             <BookOpen className="h-4 w-4" />
             <span>{course.lessons} lessons</span>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 mt-3">
-          {course.untimedOption && (
-            <Badge variant="outline" className="gap-1 text-xs text-green-600 border-green-200 dark:border-green-900">
-              <TimerOff className="h-3 w-3" />
-              No Timer
-            </Badge>
-          )}
-          {course.timedOption && (
-            <Badge variant="outline" className="gap-1 text-xs">
-              <Timer className="h-3 w-3" />
-              Timed
-            </Badge>
-          )}
         </div>
 
         {course.enrolled && course.progress !== undefined && !course.completed && (

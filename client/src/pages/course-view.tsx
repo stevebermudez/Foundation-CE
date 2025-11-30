@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/VideoPlayer";
 import QuizComponent from "@/components/QuizComponent";
-import { ArrowLeft, Clock, Award, Timer, TimerOff, FileText } from "lucide-react";
+import { ArrowLeft, Clock, Award, FileText } from "lucide-react";
 import { Link } from "wouter";
 
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
@@ -89,7 +89,6 @@ export default function CourseViewPage() {
   const params = useParams<{ id: string }>();
   const [currentLesson, setCurrentLesson] = useState(mockLessons[2]);
   const [activeTab, setActiveTab] = useState("lessons");
-  const [testMode, setTestMode] = useState<"timed" | "untimed" | null>(null);
 
   // Fetch course data from API
   const { data: course, isLoading } = useQuery({
@@ -162,16 +161,6 @@ export default function CourseViewPage() {
                   </Badge>
                 </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <Badge variant="outline" className="gap-1 text-green-600 border-green-200 dark:border-green-900">
-                <TimerOff className="h-3 w-3" />
-                No Timer Available
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <Timer className="h-3 w-3" />
-                Timed Available
-              </Badge>
             </div>
           </div>
         </div>
