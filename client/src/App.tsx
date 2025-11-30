@@ -18,11 +18,11 @@ import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
 
 function Router() {
-  const [selectedState, setSelectedState] = useState<"CA" | "FL">("CA");
+  const [selectedProfession, setSelectedProfession] = useState<"real_estate" | "insurance">("real_estate");
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header selectedState={selectedState} onStateChange={setSelectedState} />
+      <Header selectedProfession={selectedProfession} onProfessionChange={setSelectedProfession} />
       <main className="flex-1">
         <Switch>
           <Route path="/" component={HomePage} />

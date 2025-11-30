@@ -30,14 +30,14 @@ import {
   Settings,
 } from "lucide-react";
 
-type State = "CA" | "FL";
+type Profession = "real_estate" | "insurance";
 
 interface HeaderProps {
-  selectedState: State;
-  onStateChange: (state: State) => void;
+  selectedProfession: Profession;
+  onProfessionChange: (profession: Profession) => void;
 }
 
-export default function Header({ selectedState, onStateChange }: HeaderProps) {
+export default function Header({ selectedProfession, onProfessionChange }: HeaderProps) {
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -68,21 +68,19 @@ export default function Header({ selectedState, onStateChange }: HeaderProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1" data-testid="button-state-selector">
+                <Button variant="outline" size="sm" className="gap-1" data-testid="button-profession-selector">
                   <Badge variant="secondary" className="mr-1">
-                    {selectedState}
+                    {selectedProfession === "real_estate" ? "Real Estate" : "Insurance"}
                   </Badge>
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => onStateChange("CA")} data-testid="menu-item-california">
-                  <span className="font-medium">California</span>
-                  <span className="ml-2 text-muted-foreground text-sm">DRE</span>
+                <DropdownMenuItem onClick={() => onProfessionChange("real_estate")} data-testid="menu-item-real-estate">
+                  <span className="font-medium">Real Estate</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onStateChange("FL")} data-testid="menu-item-florida">
-                  <span className="font-medium">Florida</span>
-                  <span className="ml-2 text-muted-foreground text-sm">FREC</span>
+                <DropdownMenuItem onClick={() => onProfessionChange("insurance")} data-testid="menu-item-insurance">
+                  <span className="font-medium">Insurance</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
