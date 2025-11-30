@@ -132,6 +132,42 @@ export const companyCompliance = pgTable("company_compliance", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Course bundles (e.g., 45-hour packages)
+export const courseBundles = pgTable("course_bundles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  state: varchar("state").notNull(), // "CA", "TX", etc.
+  licenseType: varchar("license_type").notNull(), // "salesperson", "broker"
+  totalHours: integer("total_hours").notNull(),
+  bundlePrice: integer("bundle_price").notNull(), // in cents (4500 = $45.00)
+  individualCoursePrice: integer("individual_course_price").notNull(), // in cents (1500 = $15.00)
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Map courses to bundles
+export const bundleCourses = pgTable("bundle_courses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  bundleId: varchar("bundle_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  sequence: integer("sequence").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Track bundle purchases and enrollments
+export const bundleEnrollments = pgTable("bundle_enrollments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  bundleId: varchar("bundle_id").notNull(),
+  enrolledAt: timestamp("enrolled_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  hoursCompleted: integer("hours_completed").default(0),
+  isComplete: integer("is_complete").default(0),
+  certificateUrl: varchar("certificate_url"),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -142,3 +178,5 @@ export type UserOrganization = typeof userOrganizations.$inferSelect;
 export type OrganizationCourse = typeof organizationCourses.$inferSelect;
 export type CompanyAccount = typeof companyAccounts.$inferSelect;
 export type CompanyCompliance = typeof companyCompliance.$inferSelect;
+export type CourseBundle = typeof courseBundles.$inferSelect;
+export type BundleEnrollment = typeof bundleEnrollments.$inferSelect;

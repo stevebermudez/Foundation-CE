@@ -72,5 +72,38 @@ export async function registerRoutes(
     res.json(course);
   });
 
+  // Course Bundle Routes
+  app.get("/api/bundles", async (req, res) => {
+    const bundles = await storage.getCourseBundles({
+      state: req.query.state as string,
+      licenseType: req.query.licenseType as string,
+    });
+    res.json(bundles);
+  });
+
+  app.get("/api/bundles/:id", async (req, res) => {
+    const bundle = await storage.getCourseBundle(req.params.id);
+    if (!bundle) return res.status(404).json({ error: "Bundle not found" });
+    const bundleCourses = await storage.getBundleCourses(req.params.id);
+    res.json({ ...bundle, courses: bundleCourses });
+  });
+
+  app.post("/api/bundles/:id/enroll", async (req, res) => {
+    const { userId } = req.body;
+    const enrollment = await storage.createBundleEnrollment(userId, req.params.id);
+    res.status(201).json(enrollment);
+  });
+
+  app.get("/api/bundles/:id/enrollment/:userId", async (req, res) => {
+    const enrollment = await storage.getBundleEnrollment(
+      req.params.userId,
+      req.params.id
+    );
+    if (!enrollment) {
+      return res.status(404).json({ error: "Enrollment not found" });
+    }
+    res.json(enrollment);
+  });
+
   return httpServer;
 }

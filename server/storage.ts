@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment } from "@shared/schema";
 import { eq, and, lt, gte } from "drizzle-orm";
 import { db } from "./db";
 
@@ -24,6 +24,11 @@ export interface IStorage {
   updateCompanyCompliance(id: string, data: Partial<CompanyCompliance>): Promise<CompanyCompliance>;
   getExpiringCompliance(daysUntilExpiry: number): Promise<(CompanyCompliance & { company: CompanyAccount })[]>;
   markComplianceComplete(id: string, hoursCompleted: number): Promise<CompanyCompliance>;
+  getCourseBundles(filters?: { state?: string; licenseType?: string }): Promise<CourseBundle[]>;
+  getCourseBundle(id: string): Promise<CourseBundle | undefined>;
+  getBundleCourses(bundleId: string): Promise<Course[]>;
+  createBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment>;
+  getBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -256,6 +261,64 @@ export class DatabaseStorage implements IStorage {
       .where(eq(companyCompliance.id, id))
       .returning();
     return updated;
+  }
+
+  async getCourseBundles(filters?: { state?: string; licenseType?: string }): Promise<CourseBundle[]> {
+    let query = db.select().from(courseBundles).where(eq(courseBundles.isActive, 1)) as any;
+    
+    if (filters?.state) {
+      query = query.where(eq(courseBundles.state, filters.state));
+    }
+    if (filters?.licenseType) {
+      query = query.where(eq(courseBundles.licenseType, filters.licenseType));
+    }
+    
+    return await query;
+  }
+
+  async getCourseBundle(id: string): Promise<CourseBundle | undefined> {
+    const [bundle] = await db
+      .select()
+      .from(courseBundles)
+      .where(eq(courseBundles.id, id));
+    return bundle;
+  }
+
+  async getBundleCourses(bundleId: string): Promise<Course[]> {
+    const bundleCourseList = await db
+      .select({ courseId: bundleCourses.courseId })
+      .from(bundleCourses)
+      .where(eq(bundleCourses.bundleId, bundleId))
+      .orderBy(bundleCourses.sequence);
+
+    const courseIds = bundleCourseList.map((bc: any) => bc.courseId);
+    if (courseIds.length === 0) return [];
+
+    return await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseIds[0]));
+  }
+
+  async createBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment> {
+    const [enrollment] = await db
+      .insert(bundleEnrollments)
+      .values({ userId, bundleId })
+      .returning();
+    return enrollment;
+  }
+
+  async getBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment | undefined> {
+    const [enrollment] = await db
+      .select()
+      .from(bundleEnrollments)
+      .where(
+        and(
+          eq(bundleEnrollments.userId, userId),
+          eq(bundleEnrollments.bundleId, bundleId)
+        )
+      );
+    return enrollment;
   }
 }
 
