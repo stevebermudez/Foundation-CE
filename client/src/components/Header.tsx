@@ -59,7 +59,7 @@ export default function Header({ selectedState, onStateChange }: HeaderProps) {
             <Link href="/" className="flex items-center gap-3 hover-elevate rounded-md px-2 py-1">
               <img src={logoImage} alt="FoundationCE Logo" className="h-10 w-10" />
               <span 
-                className="font-black text-xl text-blue-600" 
+                className="font-black text-sm text-blue-600 whitespace-nowrap" 
                 data-testid="text-logo"
               >
                 Foundation CE
