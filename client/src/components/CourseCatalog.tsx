@@ -36,8 +36,6 @@ function transformCourse(dbCourse: any): Course {
     profession: (dbCourse.productType === "Insurance" ? "insurance" : "real_estate") as any,
     educationType: (dbCourse.requirementCycleType === "Post-Licensing" ? "pre_license" : "ce") as any,
     realEstateType: dbCourse.licenseType?.toLowerCase().includes("broker") ? "broker" : "salesperson",
-    timedOption: true,
-    untimedOption: true,
     duration: `${dbCourse.hoursRequired}h`,
     lessons: Math.ceil((dbCourse.hoursRequired || 0) / 0.5),
     price: Math.round(dbCourse.price / 100),
@@ -57,8 +55,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "ce",
     realEstateType: "salesperson",
-    timedOption: true,
-    untimedOption: true,
     duration: "3h 30m",
     lessons: 12,
     price: 15,
@@ -76,8 +72,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "ce",
     realEstateType: "salesperson",
-    timedOption: true,
-    untimedOption: true,
     duration: "3h 15m",
     lessons: 10,
     price: 15,
@@ -93,8 +87,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "pre_license",
     realEstateType: "broker",
-    timedOption: true,
-    untimedOption: false,
     duration: "6h 45m",
     lessons: 18,
     price: 15,
@@ -109,8 +101,6 @@ const mockCourses: Course[] = [
     state: "FL",
     profession: "insurance",
     educationType: "ce",
-    timedOption: true,
-    untimedOption: true,
     duration: "4h 45m",
     lessons: 15,
     price: 15,
@@ -125,8 +115,6 @@ const mockCourses: Course[] = [
     state: "FL",
     profession: "insurance",
     educationType: "pre_license",
-    timedOption: true,
-    untimedOption: false,
     duration: "24h 30m",
     lessons: 48,
     price: 15,
@@ -142,8 +130,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "ce",
     realEstateType: "salesperson",
-    timedOption: true,
-    untimedOption: true,
     duration: "3h 20m",
     lessons: 11,
     price: 15,
@@ -162,8 +148,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "ce",
     realEstateType: "broker",
-    timedOption: false,
-    untimedOption: true,
     duration: "3h 10m",
     lessons: 9,
     price: 15,
@@ -178,8 +162,6 @@ const mockCourses: Course[] = [
     state: "FL",
     profession: "insurance",
     educationType: "ce",
-    timedOption: true,
-    untimedOption: true,
     duration: "8h 30m",
     lessons: 24,
     price: 15,
@@ -195,8 +177,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "ce",
     realEstateType: "salesperson",
-    timedOption: true,
-    untimedOption: true,
     duration: "6h 15m",
     lessons: 18,
     price: 15,
@@ -214,8 +194,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "ce",
     realEstateType: "salesperson",
-    timedOption: true,
-    untimedOption: true,
     duration: "4h 30m",
     lessons: 14,
     price: 15,
@@ -231,8 +209,6 @@ const mockCourses: Course[] = [
     profession: "real_estate",
     educationType: "pre_license",
     realEstateType: "salesperson",
-    timedOption: true,
-    untimedOption: false,
     duration: "9h 30m",
     lessons: 28,
     price: 15,
@@ -249,7 +225,6 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
     states: [selectedState],
     professions: [selectedProfession],
     categories: [],
-    testingMode: "all",
     ceHours: "all",
     educationType: "all",
     realEstateType: "all",
@@ -280,7 +255,6 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
       states: [selectedState],
       professions: [profession],
       categories: [],
-      testingMode: "all",
       ceHours: "all",
       educationType: "all",
       realEstateType: profession === "real_estate" ? "all" : "all",
@@ -321,13 +295,6 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
         if (course.realEstateType !== filters.realEstateType) {
           return false;
         }
-      }
-
-      if (filters.testingMode === "untimed" && !course.untimedOption) {
-        return false;
-      }
-      if (filters.testingMode === "timed" && !course.timedOption) {
-        return false;
       }
 
       if (filters.ceHours !== "all") {

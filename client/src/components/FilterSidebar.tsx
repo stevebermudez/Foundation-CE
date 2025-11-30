@@ -16,7 +16,6 @@ export interface FilterState {
   states: string[];
   professions: string[];
   categories: string[];
-  testingMode: string;
   ceHours: string;
   educationType: string;
   realEstateType: string;
@@ -62,12 +61,6 @@ const categoryOptions = [
   { value: "laws_regulations", label: "Laws & Regulations" },
 ];
 
-const testingModeOptions = [
-  { value: "all", label: "All Options" },
-  { value: "untimed", label: "No Timer Only" },
-  { value: "timed", label: "Timed Only" },
-];
-
 const ceHoursOptions = [
   { value: "all", label: "All CE Hours" },
   { value: "1-3", label: "1-3 Hours" },
@@ -93,7 +86,7 @@ export default function FilterSidebar({
     onFiltersChange({ ...filters, [key]: newValues });
   };
 
-  const handleRadioChange = (key: "testingMode" | "ceHours" | "educationType" | "realEstateType", value: string) => {
+  const handleRadioChange = (key: "ceHours" | "educationType" | "realEstateType", value: string) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
@@ -102,7 +95,6 @@ export default function FilterSidebar({
       states: [],
       professions: [],
       categories: [],
-      testingMode: "all",
       ceHours: "all",
       educationType: "all",
       realEstateType: "all",
@@ -113,7 +105,6 @@ export default function FilterSidebar({
     filters.states.length +
     filters.professions.length +
     filters.categories.length +
-    (filters.testingMode !== "all" ? 1 : 0) +
     (filters.ceHours !== "all" ? 1 : 0) +
     (filters.educationType !== "all" ? 1 : 0) +
     (filters.realEstateType !== "all" ? 1 : 0);
@@ -250,32 +241,6 @@ export default function FilterSidebar({
               </AccordionContent>
             </AccordionItem>
           )}
-
-          <AccordionItem value="testing">
-            <AccordionTrigger className="text-sm font-medium">Testing Mode</AccordionTrigger>
-            <AccordionContent>
-              <RadioGroup
-                value={filters.testingMode}
-                onValueChange={(value) => handleRadioChange("testingMode", value)}
-              >
-                {testingModeOptions.map((option) => (
-                  <div key={option.value} className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value={option.value}
-                      id={`testing-${option.value}`}
-                      data-testid={`radio-testing-${option.value}`}
-                    />
-                    <Label
-                      htmlFor={`testing-${option.value}`}
-                      className="text-sm font-normal cursor-pointer"
-                    >
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </AccordionContent>
-          </AccordionItem>
 
           <AccordionItem value="ceHours">
             <AccordionTrigger className="text-sm font-medium">CE Hours</AccordionTrigger>
