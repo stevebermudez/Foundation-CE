@@ -48,19 +48,19 @@ export default function StateSelector({ onSelectState }: StateSelectorProps) {
           {states.map((state) => (
             <Card
               key={state.id}
-              className="overflow-hidden cursor-pointer hover-elevate"
+              className="overflow-hidden cursor-pointer hover-elevate group border-0 shadow-lg"
               onClick={() => onSelectState(state.id)}
               data-testid={`card-state-${state.id}`}
             >
-              <div className="relative h-40 overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
                 <img
                   src={state.image}
                   alt={state.name}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-2xl font-bold text-white">{state.name}</h3>
+                  <h3 className="text-3xl font-bold text-white group-hover:text-white transition-colors">{state.name}</h3>
                 </div>
               </div>
 
