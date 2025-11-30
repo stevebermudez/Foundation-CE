@@ -27,11 +27,17 @@ export const courses = pgTable("courses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: varchar("title").notNull(),
   description: text("description"),
-  type: varchar("type").notNull(), // "prelicense" or "renewal"
+  state: varchar("state").notNull(), // "CA", "FL"
+  licenseType: varchar("license_type").notNull(), // "Sales Associate", "Broker", "Sales Associate & Broker"
+  requirementCycleType: varchar("requirement_cycle_type").notNull(), // "Post-Licensing" or "Continuing Education (Renewal)"
+  requirementBucket: varchar("requirement_bucket").notNull(), // "Core Law", "Ethics & Business Practices", "Specialty / Elective", "Post-Licensing Mandatory", "Package"
   hoursRequired: integer("hours_required").notNull(),
+  deliveryMethod: varchar("delivery_method").default("Self-Paced Online"), // "Self-Paced Online", "Live Webinar", "Classroom"
+  difficultyLevel: varchar("difficulty_level"), // "Basic", "Intermediate", "Advanced"
   price: integer("price").notNull(), // in cents (5999 = $59.99)
-  renewalPeriodYears: integer("renewal_period_years"), // null for prelicense, 4 for renewal
-  targetLicense: varchar("target_license").notNull(), // "salesperson" or "broker"
+  sku: varchar("sku").unique(), // course code
+  renewalApplicable: integer("renewal_applicable").default(1), // true for renewal, false for prelicense
+  renewalPeriodYears: integer("renewal_period_years"), // 2 for FL, 4 for CA
   createdAt: timestamp("created_at").defaultNow(),
 });
 

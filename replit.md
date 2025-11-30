@@ -24,10 +24,18 @@ A full-stack real estate licensing education platform for salespersons and broke
 - **Payments**: Stripe integration
 - **Styling**: Tailwind CSS + shadcn components
 
-## Database Setup
-The database schema is defined in `shared/schema.ts`. To populate Florida and California courses:
-1. Run: `npx tsx server/seedCourses.ts` (California courses)
-2. Run: `npx tsx server/seedFloridaCourses.ts` (Florida courses)
+## Course Classification System
+The platform now uses comprehensive course attributes to distinguish requirements:
+
+**Classification Fields:**
+- `state`: "CA", "FL"
+- `licenseType`: "Sales Associate", "Broker", "Sales Associate & Broker"
+- `requirementCycleType`: "Post-Licensing" or "Continuing Education (Renewal)"
+- `requirementBucket`: "Core Law", "Ethics & Business Practices", "Specialty / Elective", "Post-Licensing Mandatory"
+- `deliveryMethod`: "Self-Paced Online", "Live Webinar", "Classroom"
+- `difficultyLevel`: "Basic", "Intermediate", "Advanced"
+- `sku`: Unique course code (e.g., "FL-CE-14PKG")
+- `renewalApplicable`: Boolean (true for renewal, false for prelicense)
 
 **Florida CE Structure:**
 - **Post-Licensing (First Renewal):**
@@ -35,9 +43,9 @@ The database schema is defined in `shared/schema.ts`. To populate Florida and Ca
   - Brokers: 60 hours ($69.99)
 - **Continuing Education (Every 2 Years):**
   - All licensees: 14 hours ($39.99)
-    - 3 hours Core Law
-    - 3 hours Ethics & Business Practices
-    - 8 hours Specialty (elective)
+    - 3 hours Core Law (red badge)
+    - 3 hours Ethics & Business Practices (blue badge)
+    - 8 hours Specialty/Elective (purple badge)
   
 **California CE Structure:**
 - **Renewal (Every 4 Years):**
@@ -46,6 +54,9 @@ The database schema is defined in `shared/schema.ts`. To populate Florida and Ca
 **Pricing Options:**
 - Bundle: Pay full price for all courses in package
 - À la Carte: $15 per individual course
+
+**Course Display:**
+Courses display with color-coded requirement buckets and detailed classification information via CourseDisplay component.
 
 ## Recent Changes
 - **Florida CE Courses Added**:

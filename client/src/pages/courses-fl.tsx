@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { CourseBundle } from "@/components/CourseBundle";
+import { CourseDisplay } from "@/components/CourseDisplay";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle } from "lucide-react";
@@ -13,6 +14,20 @@ interface Bundle {
   totalHours: number;
   bundlePrice: number;
   individualCoursePrice: number;
+}
+
+interface Course {
+  id: string;
+  title: string;
+  description?: string;
+  licenseType: string;
+  requirementCycleType: string;
+  requirementBucket: string;
+  hoursRequired: number;
+  deliveryMethod: string;
+  difficultyLevel?: string;
+  price: number;
+  sku?: string;
 }
 
 export default function FloridaCourses() {
@@ -97,6 +112,12 @@ export default function FloridaCourses() {
             <div>
               <p className="font-semibold text-gray-900">À la Carte Options Available</p>
               <p className="text-sm text-gray-600 mt-1">Purchase individual courses for $15 each</p>
+              <p className="text-xs text-gray-500 mt-2">Courses are color-coded by requirement type:</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Badge className="bg-red-100 text-red-800">Core Law (3h)</Badge>
+                <Badge className="bg-blue-100 text-blue-800">Ethics & Business Practices (3h)</Badge>
+                <Badge className="bg-purple-100 text-purple-800">Specialty / Elective (8h)</Badge>
+              </div>
             </div>
           </CardContent>
         </Card>

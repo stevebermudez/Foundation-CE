@@ -7,7 +7,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   getEnrollment(userId: string, courseId: string): Promise<Enrollment | undefined>;
   createEnrollment(userId: string, courseId: string): Promise<Enrollment>;
-  getCourses(filters?: { type?: string; targetLicense?: string }): Promise<Course[]>;
+  getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
   getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined>;
   createComplianceRequirement(requirement: Omit<ComplianceRequirement, 'id' | 'updatedAt'>): Promise<ComplianceRequirement>;
@@ -70,14 +70,17 @@ export class DatabaseStorage implements IStorage {
     return enrollment;
   }
 
-  async getCourses(filters?: { type?: string; targetLicense?: string }): Promise<Course[]> {
+  async getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]> {
     let query = db.select().from(courses) as any;
     
-    if (filters?.type) {
-      query = query.where(eq(courses.type, filters.type));
+    if (filters?.state) {
+      query = query.where(eq(courses.state, filters.state));
     }
-    if (filters?.targetLicense) {
-      query = query.where(eq(courses.targetLicense, filters.targetLicense));
+    if (filters?.licenseType) {
+      query = query.where(eq(courses.licenseType, filters.licenseType));
+    }
+    if (filters?.requirementBucket) {
+      query = query.where(eq(courses.requirementBucket, filters.requirementBucket));
     }
     
     return await query;

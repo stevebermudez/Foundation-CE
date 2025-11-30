@@ -1,0 +1,217 @@
+Here is the full, clean Florida catalog buildout with bundled pricing, individual à la carte pricing, and a ready-to-use course structure that fits directly into your CE platform.
+
+No em dashes used.
+
+⸻
+
+Florida Real Estate CE and Post-Licensing Catalog
+
+All pricing aligned to your requested structure.
+
+⸻
+
+1. Bundled Packages
+
+Florida Sales Associate Post-Licensing Package
+
+45 hours
+Price: 59.99
+
+Includes:
+	•	Florida Real Estate Post-Licensing Mandatory Curriculum
+	•	Full 45 hour requirement for first renewal
+	•	State approved
+	•	Instant reporting to DBPR
+
+Course Composition:
+	•	45 hours total
+	•	One comprehensive package
+
+⸻
+
+Florida Broker Post-Licensing Package
+
+60 hours
+Price: 69.99
+
+Includes:
+	•	Florida Real Estate Broker Post-Licensing Mandatory Curriculum
+	•	Full 60 hour requirement for first renewal
+	•	State approved
+	•	Instant reporting to DBPR
+
+Course Composition:
+	•	60 hours total
+	•	One comprehensive package
+
+⸻
+
+Florida Continuing Education Renewal Package
+
+14 hours
+Price: 39.99
+
+Includes:
+	•	3 hours Core Law
+	•	3 hours Ethics and Business Practices
+	•	8 hours Electives
+	•	State approved CE package for brokers and sales associates
+	•	Instant reporting to DBPR
+
+Course Composition:
+	•	14 hours total
+	•	All mandatory topics included
+
+⸻
+
+2. Individual À La Carte Courses
+
+Each à la carte course: 15 dollars
+Perfect for students who only need specific categories or have partial credit.
+
+⸻
+
+Core Law
+
+Course: Florida Core Law
+Hours: 3
+Price: 15
+Category: Mandatory legal update for renewal
+
+⸻
+
+Ethics and Business Practices
+
+Course: Ethics and Business Practices
+Hours: 3
+Price: 15
+Category: Mandatory ethics content for renewal
+
+⸻
+
+Elective Courses
+
+Each is 3 to 8 hours, all priced at 15 dollars per course regardless of hours.
+
+Suggested catalog:
+
+Electives (3 hour options)
+
+Price: 15 each
+	•	Real Estate Marketing Essentials
+	•	Florida Property Management Basics
+	•	Understanding Agency and Disclosure
+	•	Fair Housing in Florida
+	•	Real Estate Investment Fundamentals
+	•	Florida Contracts and Forms Review
+
+Electives (4 to 8 hour options)
+
+Price: 15 each
+	•	Florida Real Estate Finance (6 hours)
+	•	Florida Legal Compliance Deep Dive (8 hours)
+	•	Residential Construction and Inspection Basics for Agents (4 hours)
+	•	Negotiation Strategies for Real Estate (6 hours)
+
+⸻
+
+3. Full Database Style Structure
+
+Below is a ready to import JSON catalog for all Florida offerings.
+
+{
+  "state": "FL",
+  "packages": [
+    {
+      "name": "Florida Sales Associate Post Licensing Package",
+      "hours": 45,
+      "price": 59.99,
+      "license_type": "Sales Associate",
+      "cycle": "Post Licensing",
+      "courses_included": ["FL-PL-SA-45"],
+      "sku": "FL-PL-SA-PKG"
+    },
+    {
+      "name": "Florida Broker Post Licensing Package",
+      "hours": 60,
+      "price": 69.99,
+      "license_type": "Broker",
+      "cycle": "Post Licensing",
+      "courses_included": ["FL-PL-BR-60"],
+      "sku": "FL-PL-BR-PKG"
+    },
+    {
+      "name": "Florida Continuing Education Renewal Package",
+      "hours": 14,
+      "price": 39.99,
+      "license_type": "Sales Associate and Broker",
+      "cycle": "Continuing Education",
+      "courses_included": ["FL-CE-CORELAW-3", "FL-CE-ETHICS-3", "FL-CE-ELECTIVE-8"],
+      "sku": "FL-CE-14PKG"
+    }
+  ],
+  "courses": [
+    {
+      "name": "Florida Core Law",
+      "hours": 3,
+      "price": 15,
+      "category": "Core Law",
+      "sku": "FL-CE-CORELAW-3"
+    },
+    {
+      "name": "Ethics and Business Practices",
+      "hours": 3,
+      "price": 15,
+      "category": "Ethics",
+      "sku": "FL-CE-ETHICS-3"
+    },
+    {
+      "name": "Florida Elective Package",
+      "hours": 8,
+      "price": 15,
+      "category": "Elective",
+      "sku": "FL-CE-ELECTIVE-8"
+    },
+    {
+      "name": "Florida Sales Associate Post Licensing Course",
+      "hours": 45,
+      "price": 15,
+      "category": "Post Licensing",
+      "license_type": "Sales Associate",
+      "sku": "FL-PL-SA-45"
+    },
+    {
+      "name": "Florida Broker Post Licensing Course",
+      "hours": 60,
+      "price": 15,
+      "category": "Post Licensing",
+      "license_type": "Broker",
+      "sku": "FL-PL-BR-60"
+    }
+  ]
+}
+
+
+⸻
+
+4. Ready to Launch Pricing Table
+
+Course or Package	Hours	Price
+Sales Associate Post Licensing Package	45	59.99
+Broker Post Licensing Package	60	69.99
+CE Renewal Package	14	39.99
+Core Law (a la carte)	3	15
+Ethics (a la carte)	3	15
+Electives (a la carte)	3 to 8	15
+
+
+⸻
+
+If you want, I can now create:
+
+• The California version
+• The national 50 state template
+• A full Replit project folder structure for your CE platform
+• A marketing landing page for these Florida packages
+
+Just tell me.

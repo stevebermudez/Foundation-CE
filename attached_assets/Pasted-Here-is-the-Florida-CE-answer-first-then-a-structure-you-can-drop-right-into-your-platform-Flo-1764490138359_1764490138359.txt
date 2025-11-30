@@ -1,0 +1,108 @@
+Here is the Florida CE answer first, then a structure you can drop right into your platform.
+
+⸻
+
+Florida CE hours
+
+After first renewal
+
+For both real estate sales associates and brokers in Florida:
+	•	Total: 14 hours of continuing education every 2 years
+	•	3 hours Core Law
+	•	3 hours Ethics and Business Practices
+	•	8 hours Specialty / Elective
+
+First renewal after initial licensure
+
+This is post-licensing, not standard CE:
+	•	Sales associate: 45 hours post-licensing
+	•	Broker: 60 hours post-licensing
+
+⸻
+
+Suggested catalog structure for your CE platform
+
+Here is a clean schema you can use to distinguish courses in your system.
+
+Core classification fields
+
+For each course, store:
+	1.	state
+	•	Example: "FL"
+	2.	license_type
+	•	"Sales Associate"
+	•	"Broker"
+	•	"Sales Associate & Broker" (for shared CE)
+	3.	requirement_cycle_type
+	•	"Post-Licensing"
+	•	"Continuing Education (Renewal)"
+	4.	requirement_bucket
+	•	"Core Law"
+	•	"Ethics & Business Practices"
+	•	"Specialty / Elective"
+	•	"Post-Licensing Mandatory"
+	5.	hours
+	•	Numeric, example: 3, 8, 14, 45, 60
+	6.	delivery_method
+	•	"Self-Paced Online"
+	•	"Live Webinar"
+	•	"Classroom"
+	7.	difficulty_level (optional but helpful)
+	•	"Basic"
+	•	"Intermediate"
+	•	"Advanced"
+	8.	sku or course_code
+	9.	price
+	10.	renewal_applicable (boolean)
+	•	true for the 14 hour CE blocks
+	•	false for pre-licensing or exam prep
+
+⸻
+
+Example Florida records
+
+Course 1: Florida 14 Hour Renewal Package
+
+{
+  "state": "FL",
+  "license_type": "Sales Associate & Broker",
+  "requirement_cycle_type": "Continuing Education (Renewal)",
+  "requirement_bucket": "Package",
+  "hours": 14,
+  "delivery_method": "Self-Paced Online",
+  "includes": [
+    {"bucket": "Core Law", "hours": 3},
+    {"bucket": "Ethics & Business Practices", "hours": 3},
+    {"bucket": "Specialty / Elective", "hours": 8}
+  ],
+  "sku": "FL-CE-14PKG",
+  "price": 49
+}
+
+Course 2: Florida Sales Associate Post Licensing 45 Hours
+
+{
+  "state": "FL",
+  "license_type": "Sales Associate",
+  "requirement_cycle_type": "Post-Licensing",
+  "requirement_bucket": "Post-Licensing Mandatory",
+  "hours": 45,
+  "delivery_method": "Self-Paced Online",
+  "sku": "FL-PL-SA-45",
+  "price": 159
+}
+
+Course 3: Florida Broker Post Licensing 60 Hours
+
+{
+  "state": "FL",
+  "license_type": "Broker",
+  "requirement_cycle_type": "Post-Licensing",
+  "requirement_bucket": "Post-Licensing Mandatory",
+  "hours": 60,
+  "delivery_method": "Self-Paced Online",
+  "sku": "FL-PL-BR-60",
+  "price": 199
+}
+
+If you tell me your pricing strategy and target branding (discount bundles, subscription, premium tiers), I can format a full catalog table for Florida and then extend the exact same structure to California and the rest of the 50 states.
