@@ -61,8 +61,47 @@ export const complianceRequirements = pgTable("compliance_requirements", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// White label organizations table
+export const organizations = pgTable("organizations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  slug: varchar("slug").unique().notNull(), // URL-friendly identifier
+  logoUrl: varchar("logo_url"),
+  primaryColor: varchar("primary_color").default("3b82f6"), // hex without #
+  secondaryColor: varchar("secondary_color").default("1f2937"),
+  accentColor: varchar("accent_color").default("8b5cf6"),
+  domain: varchar("domain").unique(), // custom domain
+  customCss: text("custom_css"), // additional custom CSS
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Map users to organizations
+export const userOrganizations = pgTable("user_organizations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  organizationId: varchar("organization_id").notNull(),
+  role: varchar("role").default("member"), // "admin" or "member"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// White label course catalog (org-specific courses)
+export const organizationCourses = pgTable("organization_courses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  customTitle: varchar("custom_title"), // override course title
+  customPrice: integer("custom_price"), // override price (in cents)
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
 export type Course = typeof courses.$inferSelect;
 export type ComplianceRequirement = typeof complianceRequirements.$inferSelect;
+export type Organization = typeof organizations.$inferSelect;
+export type UserOrganization = typeof userOrganizations.$inferSelect;
+export type OrganizationCourse = typeof organizationCourses.$inferSelect;

@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db";
 
@@ -12,6 +12,11 @@ export interface IStorage {
   getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined>;
   createComplianceRequirement(requirement: Omit<ComplianceRequirement, 'id' | 'updatedAt'>): Promise<ComplianceRequirement>;
   updateEnrollmentHours(enrollmentId: string, hoursCompleted: number): Promise<Enrollment>;
+  getOrganization(id: string): Promise<Organization | undefined>;
+  getOrganizationBySlug(slug: string): Promise<Organization | undefined>;
+  createOrganization(org: Omit<Organization, 'id' | 'createdAt' | 'updatedAt'>): Promise<Organization>;
+  getUserOrganizations(userId: string): Promise<Organization[]>;
+  getOrganizationCourses(organizationId: string): Promise<Course[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -40,7 +45,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(enrollments)
       .where(
-        eq(enrollments.userId, userId) && eq(enrollments.courseId, courseId)
+        and(eq(enrollments.userId, userId), eq(enrollments.courseId, courseId))
       );
     return enrollment;
   }
@@ -51,6 +56,124 @@ export class DatabaseStorage implements IStorage {
       .values({ userId, courseId })
       .returning();
     return enrollment;
+  }
+
+  async getCourses(filters?: { type?: string; targetLicense?: string }): Promise<Course[]> {
+    let query = db.select().from(courses);
+    
+    if (filters?.type) {
+      query = query.where(eq(courses.type, filters.type));
+    }
+    if (filters?.targetLicense) {
+      query = query.where(eq(courses.targetLicense, filters.targetLicense));
+    }
+    
+    return await query;
+  }
+
+  async getCourse(id: string): Promise<Course | undefined> {
+    const [course] = await db.select().from(courses).where(eq(courses.id, id));
+    return course;
+  }
+
+  async getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined> {
+    const [requirement] = await db
+      .select()
+      .from(complianceRequirements)
+      .where(eq(complianceRequirements.userId, userId));
+    return requirement;
+  }
+
+  async createComplianceRequirement(
+    requirement: Omit<ComplianceRequirement, 'id' | 'updatedAt'>
+  ): Promise<ComplianceRequirement> {
+    const [result] = await db
+      .insert(complianceRequirements)
+      .values(requirement)
+      .returning();
+    return result;
+  }
+
+  async updateEnrollmentHours(
+    enrollmentId: string,
+    hoursCompleted: number
+  ): Promise<Enrollment> {
+    const [enrollment] = await db
+      .select()
+      .from(enrollments)
+      .where(eq(enrollments.id, enrollmentId));
+
+    if (!enrollment) throw new Error("Enrollment not found");
+
+    const [updated] = await db
+      .update(enrollments)
+      .set({ hoursCompleted })
+      .where(eq(enrollments.id, enrollmentId))
+      .returning();
+    
+    return updated;
+  }
+
+  async getOrganization(id: string): Promise<Organization | undefined> {
+    const [org] = await db
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, id));
+    return org;
+  }
+
+  async getOrganizationBySlug(slug: string): Promise<Organization | undefined> {
+    const [org] = await db
+      .select()
+      .from(organizations)
+      .where(eq(organizations.slug, slug));
+    return org;
+  }
+
+  async createOrganization(
+    org: Omit<Organization, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<Organization> {
+    const [created] = await db
+      .insert(organizations)
+      .values(org)
+      .returning();
+    return created;
+  }
+
+  async getUserOrganizations(userId: string): Promise<Organization[]> {
+    const userOrgs = await db
+      .select({ id: organizations.id })
+      .from(userOrganizations)
+      .innerJoin(organizations, eq(userOrganizations.organizationId, organizations.id))
+      .where(eq(userOrganizations.userId, userId));
+
+    const orgIds = userOrgs.map((uo) => uo.id);
+    if (orgIds.length === 0) return [];
+
+    return await db
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, orgIds[0]));
+  }
+
+  async getOrganizationCourses(organizationId: string): Promise<Course[]> {
+    const orgCourses = await db
+      .select({ courseId: organizationCourses.courseId })
+      .from(organizationCourses)
+      .where(
+        and(
+          eq(organizationCourses.organizationId, organizationId),
+          eq(organizationCourses.isActive, 1)
+        )
+      );
+
+    const courseIds = orgCourses.map((oc) => oc.courseId);
+    if (courseIds.length === 0) return [];
+
+    return await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseIds[0]));
   }
 }
 
