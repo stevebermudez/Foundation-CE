@@ -70,7 +70,7 @@ export default function Header({ selectedProfession, onProfessionChange }: Heade
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-1" data-testid="button-profession-selector">
                   <Badge variant="secondary" className="mr-1">
-                    {selectedProfession === "real_estate" ? "Real Estate" : "Insurance"}
+                    {selectedProfession === "real_estate" ? "RE" : "Ins"}
                   </Badge>
                   <ChevronDown className="h-3 w-3" />
                 </Button>
