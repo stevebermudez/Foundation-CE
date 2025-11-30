@@ -72,7 +72,7 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
               className="gap-2"
               data-testid="button-get-started"
             >
-              Get Started Free
+              Get Started Today
               <ArrowRight className="h-4 w-4" />
             </Button>
             <Button
