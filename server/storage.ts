@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 
@@ -42,6 +42,13 @@ export interface IStorage {
   rejectCEReview(id: string, notes: string): Promise<CEReview>;
   getSupervisor(userId: string): Promise<Supervisor | undefined>;
   createSupervisor(supervisor: Omit<Supervisor, 'id' | 'createdAt' | 'updatedAt'>): Promise<Supervisor>;
+  getPracticeExams(courseId: string): Promise<PracticeExam[]>;
+  getPracticeExam(examId: string): Promise<PracticeExam | undefined>;
+  getExamQuestions(examId: string): Promise<ExamQuestion[]>;
+  createExamAttempt(attempt: Omit<ExamAttempt, 'id' | 'createdAt'>): Promise<ExamAttempt>;
+  submitExamAnswer(answer: Omit<ExamAnswer, 'id' | 'answeredAt'>): Promise<ExamAnswer>;
+  completeExamAttempt(attemptId: string, score: number, correctAnswers: number, passed: number, timeSpent: number): Promise<ExamAttempt>;
+  getUserExamAttempts(userId: string, examId: string): Promise<ExamAttempt[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -477,6 +484,72 @@ export class DatabaseStorage implements IStorage {
       .values(supervisor)
       .returning();
     return created;
+  }
+
+  async getPracticeExams(courseId: string): Promise<PracticeExam[]> {
+    return await db
+      .select()
+      .from(practiceExams)
+      .where(and(eq(practiceExams.courseId, courseId), eq(practiceExams.isActive, 1)))
+      .orderBy(practiceExams.createdAt);
+  }
+
+  async getPracticeExam(examId: string): Promise<PracticeExam | undefined> {
+    const [exam] = await db.select().from(practiceExams).where(eq(practiceExams.id, examId));
+    return exam;
+  }
+
+  async getExamQuestions(examId: string): Promise<ExamQuestion[]> {
+    return await db
+      .select()
+      .from(examQuestions)
+      .where(eq(examQuestions.examId, examId))
+      .orderBy(examQuestions.sequence);
+  }
+
+  async createExamAttempt(attempt: Omit<ExamAttempt, 'id' | 'createdAt'>): Promise<ExamAttempt> {
+    const [created] = await db
+      .insert(examAttempts)
+      .values(attempt)
+      .returning();
+    return created;
+  }
+
+  async submitExamAnswer(answer: Omit<ExamAnswer, 'id' | 'answeredAt'>): Promise<ExamAnswer> {
+    const [created] = await db
+      .insert(examAnswers)
+      .values(answer)
+      .returning();
+    return created;
+  }
+
+  async completeExamAttempt(
+    attemptId: string,
+    score: number,
+    correctAnswers: number,
+    passed: number,
+    timeSpent: number
+  ): Promise<ExamAttempt> {
+    const [updated] = await db
+      .update(examAttempts)
+      .set({
+        score,
+        correctAnswers,
+        passed,
+        timeSpent,
+        completedAt: new Date(),
+      })
+      .where(eq(examAttempts.id, attemptId))
+      .returning();
+    return updated;
+  }
+
+  async getUserExamAttempts(userId: string, examId: string): Promise<ExamAttempt[]> {
+    return await db
+      .select()
+      .from(examAttempts)
+      .where(and(eq(examAttempts.userId, userId), eq(examAttempts.examId, examId)))
+      .orderBy(desc(examAttempts.createdAt));
   }
 }
 

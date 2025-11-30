@@ -239,6 +239,59 @@ export const supervisors = pgTable("supervisors", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Practice exams
+export const practiceExams = pgTable("practice_exams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id").notNull(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  totalQuestions: integer("total_questions").notNull(),
+  passingScore: integer("passing_score").default(70), // percentage
+  timeLimit: integer("time_limit"), // in minutes, optional
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Exam questions
+export const examQuestions = pgTable("exam_questions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  examId: varchar("exam_id").notNull(),
+  questionText: text("question_text").notNull(),
+  questionType: varchar("question_type").notNull(), // "multiple_choice", "true_false"
+  correctAnswer: varchar("correct_answer").notNull(),
+  explanation: text("explanation"), // shown after answer
+  options: text("options").notNull(), // JSON array of options
+  sequence: integer("sequence").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User exam attempts
+export const examAttempts = pgTable("exam_attempts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  examId: varchar("exam_id").notNull(),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  score: integer("score"),
+  totalQuestions: integer("total_questions").notNull(),
+  correctAnswers: integer("correct_answers").default(0),
+  passed: integer("passed"), // 1 for pass (>= 70%), 0 for fail
+  timeSpent: integer("time_spent"), // in seconds
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User exam answers (tracks each answer during exam)
+export const examAnswers = pgTable("exam_answers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  attemptId: varchar("attempt_id").notNull(),
+  questionId: varchar("question_id").notNull(),
+  userAnswer: varchar("user_answer").notNull(),
+  isCorrect: integer("is_correct"), // 1 for correct, 0 for incorrect
+  answeredAt: timestamp("answered_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -255,3 +308,7 @@ export type SirconReport = typeof sirconReports.$inferSelect;
 export type UserLicense = typeof userLicenses.$inferSelect;
 export type CEReview = typeof ceReviews.$inferSelect;
 export type Supervisor = typeof supervisors.$inferSelect;
+export type PracticeExam = typeof practiceExams.$inferSelect;
+export type ExamQuestion = typeof examQuestions.$inferSelect;
+export type ExamAttempt = typeof examAttempts.$inferSelect;
+export type ExamAnswer = typeof examAnswers.$inferSelect;

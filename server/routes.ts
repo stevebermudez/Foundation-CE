@@ -295,5 +295,93 @@ export async function registerRoutes(
     }
   });
 
+  // Practice Exam Routes
+  app.get("/api/exams/course/:courseId", async (req, res) => {
+    try {
+      const exams = await storage.getPracticeExams(req.params.courseId);
+      res.json(exams);
+    } catch (err) {
+      console.error("Error fetching exams:", err);
+      res.status(500).json({ error: "Failed to fetch exams" });
+    }
+  });
+
+  app.get("/api/exams/:examId", async (req, res) => {
+    try {
+      const exam = await storage.getPracticeExam(req.params.examId);
+      if (!exam) return res.status(404).json({ error: "Exam not found" });
+      const questions = await storage.getExamQuestions(req.params.examId);
+      res.json({ ...exam, questions });
+    } catch (err) {
+      console.error("Error fetching exam:", err);
+      res.status(500).json({ error: "Failed to fetch exam" });
+    }
+  });
+
+  app.post("/api/exams/:examId/start", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      const exam = await storage.getPracticeExam(req.params.examId);
+      if (!exam) return res.status(404).json({ error: "Exam not found" });
+
+      const attempt = await storage.createExamAttempt({
+        userId,
+        examId: req.params.examId,
+        totalQuestions: exam.totalQuestions,
+      });
+      res.status(201).json(attempt);
+    } catch (err) {
+      console.error("Error starting exam:", err);
+      res.status(500).json({ error: "Failed to start exam" });
+    }
+  });
+
+  app.post("/api/exams/attempts/:attemptId/answer", async (req, res) => {
+    try {
+      const { questionId, userAnswer, correctAnswer } = req.body;
+      const isCorrect = correctAnswer === userAnswer ? 1 : 0;
+
+      const answer = await storage.submitExamAnswer({
+        attemptId: req.params.attemptId,
+        questionId,
+        userAnswer,
+        isCorrect,
+      });
+      res.status(201).json(answer);
+    } catch (err) {
+      console.error("Error submitting answer:", err);
+      res.status(500).json({ error: "Failed to submit answer" });
+    }
+  });
+
+  app.post("/api/exams/attempts/:attemptId/complete", async (req, res) => {
+    try {
+      const { score, correctAnswers, timeSpent } = req.body;
+      const passed = score >= 70 ? 1 : 0;
+
+      const completed = await storage.completeExamAttempt(
+        req.params.attemptId,
+        score,
+        correctAnswers,
+        passed,
+        timeSpent
+      );
+      res.json(completed);
+    } catch (err) {
+      console.error("Error completing exam:", err);
+      res.status(500).json({ error: "Failed to complete exam" });
+    }
+  });
+
+  app.get("/api/exams/:examId/attempts/:userId", async (req, res) => {
+    try {
+      const attempts = await storage.getUserExamAttempts(req.params.userId, req.params.examId);
+      res.json(attempts);
+    } catch (err) {
+      console.error("Error fetching attempts:", err);
+      res.status(500).json({ error: "Failed to fetch attempts" });
+    }
+  });
+
   return httpServer;
 }
