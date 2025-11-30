@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import CoursesCAPage from "@/pages/courses-ca";
@@ -15,16 +16,21 @@ import CompliancePage from "@/pages/compliance";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route path="/courses/ca" component={CoursesCAPage} />
-      <Route path="/courses/fl" component={CoursesFLPage} />
-      <Route path="/course/:id" component={CourseViewPage} />
-      <Route path="/account-setup" component={AccountSetupPage} />
-      <Route path="/dashboard" component={DashboardPage} />
-      <Route path="/compliance" component={CompliancePage} />
-      <Route component={NotFound} />
-    </Switch>
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1">
+        <Switch>
+          <Route path="/" component={HomePage} />
+          <Route path="/courses/ca" component={CoursesCAPage} />
+          <Route path="/courses/fl" component={CoursesFLPage} />
+          <Route path="/course/:id" component={CourseViewPage} />
+          <Route path="/account-setup" component={AccountSetupPage} />
+          <Route path="/dashboard" component={DashboardPage} />
+          <Route path="/compliance" component={CompliancePage} />
+          <Route component={NotFound} />
+        </Switch>
+      </main>
+      <Footer />
+    </div>
   );
 }
 
