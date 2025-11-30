@@ -386,5 +386,39 @@ export async function registerRoutes(
     }
   });
 
+  // Coupon Routes
+  app.post("/api/coupons/validate", async (req, res) => {
+    try {
+      const { code, productType } = req.body;
+      const result = await storage.validateCoupon(code, productType);
+      res.json(result);
+    } catch (err) {
+      console.error("Error validating coupon:", err);
+      res.status(500).json({ error: "Failed to validate coupon" });
+    }
+  });
+
+  app.post("/api/coupons/apply", async (req, res) => {
+    try {
+      const { userId, couponId, enrollmentId, discountAmount } = req.body;
+      const usage = await storage.applyCoupon(userId, couponId, enrollmentId, discountAmount);
+      res.status(201).json(usage);
+    } catch (err) {
+      console.error("Error applying coupon:", err);
+      res.status(500).json({ error: "Failed to apply coupon" });
+    }
+  });
+
+  app.get("/api/coupons/:code", async (req, res) => {
+    try {
+      const coupon = await storage.getCouponByCode(req.params.code);
+      if (!coupon) return res.status(404).json({ error: "Coupon not found" });
+      res.json(coupon);
+    } catch (err) {
+      console.error("Error fetching coupon:", err);
+      res.status(500).json({ error: "Failed to fetch coupon" });
+    }
+  });
+
   return httpServer;
 }

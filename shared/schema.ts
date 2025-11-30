@@ -275,6 +275,32 @@ export const subscriptions = pgTable("subscriptions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Coupon codes for discounts and registration
+export const coupons = pgTable("coupons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code").unique().notNull(), // "EARLY50", "WELCOME25", etc.
+  discountType: varchar("discount_type").notNull(), // "percentage" or "fixed"
+  discountValue: integer("discount_value").notNull(), // percentage (50 = 50%) or cents (2500 = $25.00)
+  description: varchar("description"),
+  maxUses: integer("max_uses"), // null = unlimited
+  timesUsed: integer("times_used").default(0),
+  expirationDate: timestamp("expiration_date"),
+  isActive: integer("is_active").default(1),
+  applicableProductTypes: varchar("applicable_product_types"), // "RealEstate", "Insurance", or both (JSON)
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Track coupon usage per user
+export const couponUsage = pgTable("coupon_usage", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  couponId: varchar("coupon_id").notNull(),
+  enrollmentId: varchar("enrollment_id"), // which enrollment used it
+  discountAmount: integer("discount_amount").notNull(), // in cents
+  usedAt: timestamp("used_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -294,3 +320,5 @@ export type ExamQuestion = typeof examQuestions.$inferSelect;
 export type ExamAttempt = typeof examAttempts.$inferSelect;
 export type ExamAnswer = typeof examAnswers.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
+export type Coupon = typeof coupons.$inferSelect;
+export type CouponUsage = typeof couponUsage.$inferSelect;

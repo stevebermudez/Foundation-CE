@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 
@@ -46,6 +46,9 @@ export interface IStorage {
   createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>): Promise<Subscription>;
   updateSubscription(id: string, data: Partial<Subscription>): Promise<Subscription>;
   cancelSubscription(id: string): Promise<Subscription>;
+  getCouponByCode(code: string): Promise<Coupon | undefined>;
+  validateCoupon(code: string, productType?: string): Promise<{ valid: boolean; discount?: number; message: string }>;
+  applyCoupon(userId: string, couponId: string, enrollmentId?: string, discountAmount?: number): Promise<CouponUsage>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -505,6 +508,60 @@ export class DatabaseStorage implements IStorage {
       .where(eq(subscriptions.id, id))
       .returning();
     return updated;
+  }
+
+  async getCouponByCode(code: string): Promise<Coupon | undefined> {
+    const [coupon] = await db
+      .select()
+      .from(coupons)
+      .where(eq(coupons.code, code));
+    return coupon;
+  }
+
+  async validateCoupon(code: string, productType?: string): Promise<{ valid: boolean; discount?: number; message: string }> {
+    const coupon = await this.getCouponByCode(code);
+    
+    if (!coupon) {
+      return { valid: false, message: "Coupon code not found" };
+    }
+
+    if (!coupon.isActive) {
+      return { valid: false, message: "Coupon is inactive" };
+    }
+
+    if (coupon.expirationDate && new Date() > coupon.expirationDate) {
+      return { valid: false, message: "Coupon has expired" };
+    }
+
+    if (coupon.maxUses && coupon.timesUsed >= coupon.maxUses) {
+      return { valid: false, message: "Coupon usage limit reached" };
+    }
+
+    return { 
+      valid: true, 
+      discount: coupon.discountValue,
+      message: "Coupon is valid"
+    };
+  }
+
+  async applyCoupon(userId: string, couponId: string, enrollmentId?: string, discountAmount?: number): Promise<CouponUsage> {
+    // Increment usage count
+    await db
+      .update(coupons)
+      .set({ timesUsed: sql`${coupons.timesUsed} + 1` })
+      .where(eq(coupons.id, couponId));
+
+    // Record usage
+    const [usage] = await db
+      .insert(couponUsage)
+      .values({
+        userId,
+        couponId,
+        enrollmentId,
+        discountAmount: discountAmount || 0,
+      })
+      .returning();
+    return usage;
   }
 }
 
