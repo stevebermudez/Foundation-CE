@@ -19,7 +19,7 @@ export interface RegulatoryAgency {
     renewalPeriod: string;
     mandatoryTopics?: { topic: string; hours: number }[];
   };
-  reportingMethod: "auto" | "manual" | "zircon";
+  reportingMethod: "auto" | "manual" | "sircon";
   supportsUntimedExams: boolean;
 }
 
@@ -88,7 +88,7 @@ export const REGULATORY_AGENCIES: Record<string, RegulatoryAgency> = {
         { topic: "Annuity Training", hours: 4 },
       ],
     },
-    reportingMethod: "zircon",
+    reportingMethod: "sircon",
     supportsUntimedExams: true,
   },
   FL_FREC: {
@@ -124,7 +124,7 @@ export const REGULATORY_AGENCIES: Record<string, RegulatoryAgency> = {
         { topic: "Laws & Rules Update", hours: 5 },
       ],
     },
-    reportingMethod: "zircon",
+    reportingMethod: "sircon",
     supportsUntimedExams: true,
   },
   FL_DBPR: {

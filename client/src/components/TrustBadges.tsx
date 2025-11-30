@@ -2,11 +2,6 @@ import { Shield, Users, Award, Star } from "lucide-react";
 
 const stats = [
   {
-    icon: Users,
-    value: "50,000+",
-    label: "Licensed Professionals Served",
-  },
-  {
     icon: Award,
     value: "150+",
     label: "Approved Courses",
@@ -20,6 +15,11 @@ const stats = [
     icon: Shield,
     value: "100%",
     label: "Compliance Rate",
+  },
+  {
+    icon: Users,
+    value: "50 States",
+    label: "Regulatory Support",
   },
 ];
 

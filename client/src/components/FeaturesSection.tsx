@@ -70,7 +70,7 @@ export default function FeaturesSection() {
             Everything You Need to Stay Compliant
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Our platform is designed with busy professionals in mind, offering flexible learning options modeled after industry leaders like First Tuesday and Better CE.
+            Our platform is designed with busy professionals in mind, offering flexible learning options and comprehensive compliance tracking.
           </p>
         </div>
 

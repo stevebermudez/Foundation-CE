@@ -1,7 +1,7 @@
 /**
- * Zircon Integration Module
+ * Sircon Integration Module
  * 
- * Zircon is a third-party service that handles CE reporting to insurance
+ * Sircon is a third-party service that handles CE reporting to insurance
  * regulatory agencies across multiple states. This integration enables
  * automatic course completion reporting to:
  * - California Department of Insurance (CDI)
@@ -9,7 +9,7 @@
  * - Other state insurance regulators as they are enabled
  */
 
-export interface ZirconCourseCompletion {
+export interface SirconCourseCompletion {
   studentId: string;
   courseId: string;
   courseTitle: string;
@@ -22,7 +22,7 @@ export interface ZirconCourseCompletion {
   courseApprovalNumber: string;
 }
 
-export interface ZirconReportingStatus {
+export interface SirconReportingStatus {
   completionId: string;
   status: "pending" | "submitted" | "accepted" | "rejected";
   submittedAt?: string;
@@ -31,32 +31,32 @@ export interface ZirconReportingStatus {
   errorMessage?: string;
 }
 
-export interface ZirconConfig {
+export interface SirconConfig {
   apiEndpoint: string;
   providerId: string;
   providerName: string;
   supportedStates: string[];
 }
 
-export const ZIRCON_CONFIG: ZirconConfig = {
-  apiEndpoint: "https://api.zircon.io/v1", // placeholder
+export const SIRCON_CONFIG: SirconConfig = {
+  apiEndpoint: "https://api.sircon.io/v1", // placeholder
   providerId: "PROCE-001",
   providerName: "ProCE Professional Education",
   supportedStates: ["CA", "FL", "TX", "NY", "IL", "PA", "OH", "GA", "NC", "MI"],
 };
 
 /**
- * Submit a course completion to Zircon for reporting to the state insurance regulator
+ * Submit a course completion to Sircon for reporting to the state insurance regulator
  */
 export async function submitCourseCompletion(
-  completion: ZirconCourseCompletion
-): Promise<ZirconReportingStatus> {
-  // todo: implement actual API call to Zircon
-  console.log("Submitting to Zircon:", completion);
+  completion: SirconCourseCompletion
+): Promise<SirconReportingStatus> {
+  // todo: implement actual API call to Sircon
+  console.log("Submitting to Sircon:", completion);
   
   // Simulated response for demo
   return {
-    completionId: `ZRC-${Date.now()}`,
+    completionId: `SRC-${Date.now()}`,
     status: "pending",
     submittedAt: new Date().toISOString(),
   };
@@ -67,9 +67,9 @@ export async function submitCourseCompletion(
  */
 export async function checkReportingStatus(
   completionId: string
-): Promise<ZirconReportingStatus> {
-  // todo: implement actual API call to Zircon
-  console.log("Checking Zircon status for:", completionId);
+): Promise<SirconReportingStatus> {
+  // todo: implement actual API call to Sircon
+  console.log("Checking Sircon status for:", completionId);
   
   // Simulated response for demo
   return {
@@ -86,8 +86,8 @@ export async function checkReportingStatus(
  */
 export async function getPendingReports(
   studentId: string
-): Promise<ZirconReportingStatus[]> {
-  // todo: implement actual API call to Zircon
+): Promise<SirconReportingStatus[]> {
+  // todo: implement actual API call to Sircon
   console.log("Getting pending reports for student:", studentId);
   
   return [];
@@ -122,7 +122,7 @@ export function validateLicenseNumber(
 }
 
 /**
- * Get Zircon provider approval status for a state
+ * Get Sircon provider approval status for a state
  */
 export function getProviderStatus(state: string): {
   approved: boolean;

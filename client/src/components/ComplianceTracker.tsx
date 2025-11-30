@@ -35,7 +35,7 @@ import {
   Zap,
 } from "lucide-react";
 import { type StateCode, getAgenciesByState, REGULATORY_AGENCIES } from "@/lib/stateRegulators";
-import { ZIRCON_CONFIG } from "@/lib/zirconIntegration";
+import { SIRCON_CONFIG } from "@/lib/zirconIntegration";
 
 interface ComplianceTrackerProps {
   selectedState: StateCode;
@@ -137,8 +137,8 @@ const mockReportingHistory = [
     ceHours: 3,
     agency: "CDI",
     status: "reported",
-    confirmationNumber: "ZRC-2025-45678",
-    method: "zircon",
+    confirmationNumber: "SRC-2025-45678",
+    method: "sircon",
   },
   {
     id: "3",
@@ -148,7 +148,7 @@ const mockReportingHistory = [
     agency: "CDI",
     status: "pending",
     confirmationNumber: null,
-    method: "zircon",
+    method: "sircon",
   },
 ];
 
@@ -182,11 +182,11 @@ export default function ComplianceTracker({ selectedState }: ComplianceTrackerPr
   };
 
   const getReportingMethodBadge = (method: string) => {
-    if (method === "zircon") {
+    if (method === "sircon") {
       return (
         <Badge variant="secondary" className="gap-1 text-xs">
           <Zap className="h-3 w-3" />
-          Zircon
+          Sircon
         </Badge>
       );
     }
@@ -357,19 +357,19 @@ export default function ComplianceTracker({ selectedState }: ComplianceTrackerPr
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {license.agency.reportingMethod === "zircon" ? (
+                        {license.agency.reportingMethod === "sircon" ? (
                           <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-900">
                             <div className="flex items-center gap-2 mb-2">
                               <Zap className="h-4 w-4 text-purple-600" />
                               <span className="font-medium text-purple-800 dark:text-purple-200">
-                                Zircon Integration Active
+                                Sircon Integration Active
                               </span>
                             </div>
                             <p className="text-sm text-purple-700 dark:text-purple-300 mb-2">
-                              Your insurance CE completions are automatically reported via Zircon to {license.agency.abbreviation}.
+                              Your insurance CE completions are automatically reported via Sircon to {license.agency.abbreviation}.
                             </p>
                             <p className="text-xs text-purple-600 dark:text-purple-400">
-                              Provider: {ZIRCON_CONFIG.providerName}
+                              Provider: {SIRCON_CONFIG.providerName}
                             </p>
                           </div>
                         ) : (
