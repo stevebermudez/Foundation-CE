@@ -89,6 +89,10 @@ export async function registerRoutes(
           licenseNumber,
           licenseType: (licenseType as any) || "property",
           status: "pending",
+          confirmationNumber: null,
+          errorMessage: null,
+          submittedAt: null,
+          confirmedAt: null,
         });
         return res.status(201).json({ enrollment, sirconStatus });
       }
