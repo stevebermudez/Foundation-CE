@@ -40,8 +40,8 @@ export interface SirconConfig {
 
 export const SIRCON_CONFIG: SirconConfig = {
   apiEndpoint: "https://api.sircon.io/v1", // placeholder
-  providerId: "PROCE-001",
-  providerName: "ProCE Professional Education",
+  providerId: "FCE-001",
+  providerName: "FoundationCE Professional Education",
   supportedStates: ["CA", "FL", "TX", "NY", "IL", "PA", "OH", "GA", "NC", "MI"],
 };
 
@@ -129,8 +129,8 @@ export function getProviderStatus(state: string): {
   providerNumber?: string;
 } {
   const providerNumbers: Record<string, string> = {
-    CA: "CDI-PROCE-2024-001",
-    FL: "OIR-PROCE-2024-001",
+    CA: "CDI-FCE-2024-001",
+    FL: "OIR-FCE-2024-001",
   };
 
   const providerNumber = providerNumbers[state];

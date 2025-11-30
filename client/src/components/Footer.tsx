@@ -128,7 +128,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                support@proce.com
+                support@foundationc e.com
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
@@ -141,7 +141,7 @@ export default function Footer() {
         <div className="mt-12 pt-8 border-t">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              &copy; {currentYear} ProCE. All rights reserved.
+              &copy; {currentYear} FoundationCE. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span>CA DRE Provider #S0123</span>
