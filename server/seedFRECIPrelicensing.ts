@@ -1030,8 +1030,246 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit4Questions.length} sample questions to Unit 4 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 5-19)
-    for (let i = 4; i < units.length; i++) {
+    // Unit 5 questions (Brokerage Activities and Procedures)
+    const unit5Questions = [
+      {
+        text: "A broker's office must be",
+        options: [
+          "A. a temporary shelter used for open houses",
+          "B. a stationary physical location where business can be conducted privately",
+          "C. located in a residence only",
+          "D. registered every month",
+        ],
+        correctAnswer: "B",
+        explanation: "A broker's office must be a physical, stationary building that provides privacy for conducting business.",
+      },
+      {
+        text: "A branch office must be registered if",
+        options: [
+          "A. business is conducted there more than temporarily",
+          "B. it is used only for negotiations",
+          "C. it is located out of state",
+          "D. it has fewer than three employees",
+        ],
+        correctAnswer: "A",
+        explanation: "A branch office must be registered if the broker intends to conduct real estate business there more than temporarily.",
+      },
+      {
+        text: "Which name must appear on the entrance sign of a brokerage office",
+        options: [
+          "A. The names of all sales associates",
+          "B. The broker's name and the words Licensed Real Estate Broker",
+          "C. The name of the MLS",
+          "D. The team name only",
+        ],
+        correctAnswer: "B",
+        explanation: "The entrance sign must include the broker's name and the words Licensed Real Estate Broker or the abbreviation Lic Real Estate Broker.",
+      },
+      {
+        text: "A sales associate must deliver an earnest money deposit to the broker",
+        options: [
+          "A. immediately",
+          "B. within three business days",
+          "C. by the end of the next business day",
+          "D. within five calendar days",
+        ],
+        correctAnswer: "C",
+        explanation: "A sales associate must deliver a deposit to their broker no later than the end of the next business day.",
+      },
+      {
+        text: "A broker must deposit earnest money into an escrow account",
+        options: [
+          "A. by the end of the third business day after the associate received it",
+          "B. immediately",
+          "C. by the end of the first business day",
+          "D. within one week",
+        ],
+        correctAnswer: "A",
+        explanation: "The broker must deposit funds into the trust account by the end of the third business day following receipt of the deposit by the licensee.",
+      },
+      {
+        text: "Commingling occurs when a broker",
+        options: [
+          "A. deposits escrow funds into operating accounts",
+          "B. deposits funds with a title company",
+          "C. pays rent on behalf of a tenant",
+          "D. accepts a check payable to a seller",
+        ],
+        correctAnswer: "A",
+        explanation: "Commingling occurs when a broker mixes escrow funds with operating accounts, which is prohibited.",
+      },
+      {
+        text: "A blind ad is one that",
+        options: [
+          "A. includes only the brokerage phone number",
+          "B. fails to include the registered brokerage name",
+          "C. lists the price without permission",
+          "D. contains the broker's name only",
+        ],
+        correctAnswer: "B",
+        explanation: "A blind ad is an advertisement that fails to disclose the licensed name of the brokerage.",
+      },
+      {
+        text: "A sales associate may receive compensation from",
+        options: [
+          "A. the seller",
+          "B. the buyer",
+          "C. only their employing broker",
+          "D. any broker participating in the transaction",
+        ],
+        correctAnswer: "C",
+        explanation: "A sales associate may only be paid by their employing broker.",
+      },
+      {
+        text: "Brokerage records must be retained for",
+        options: [
+          "A. three years",
+          "B. five years",
+          "C. ten years",
+          "D. seven years",
+        ],
+        correctAnswer: "B",
+        explanation: "A broker is required to maintain business records for at least five years.",
+      },
+      {
+        text: "A Florida broker may pay a referral fee to an out of state broker if",
+        options: [
+          "A. the out of state broker participates physically in the Florida transaction",
+          "B. the out of state broker does not physically participate",
+          "C. both brokers are members of the same MLS",
+          "D. the buyer agrees in writing",
+        ],
+        correctAnswer: "B",
+        explanation: "A Florida broker may pay a referral fee to an out of state broker if the out of state broker does not physically participate in the transaction.",
+      },
+      {
+        text: "Listings are legally the property of",
+        options: [
+          "A. the sales associate",
+          "B. the buyer",
+          "C. the broker",
+          "D. the seller",
+        ],
+        correctAnswer: "C",
+        explanation: "Listings are legally the property of the broker, not the sales associate.",
+      },
+      {
+        text: "A sales associate leaves a brokerage. The associate may",
+        options: [
+          "A. take all personal clients and listings",
+          "B. take only buyer clients",
+          "C. take no listings unless the broker agrees",
+          "D. transfer all pending closings to the new broker",
+        ],
+        correctAnswer: "C",
+        explanation: "When a sales associate changes employers, they may not take listings without the broker's permission.",
+      },
+      {
+        text: "An escrow dispute exists when",
+        options: [
+          "A. the buyer fails to make a deposit on time",
+          "B. the buyer and seller make conflicting demands for the deposit",
+          "C. the associate loses the deposit check",
+          "D. the title company refuses to close",
+        ],
+        correctAnswer: "B",
+        explanation: "An escrow dispute arises when there is a good faith doubt as to which party should receive the escrowed funds.",
+      },
+      {
+        text: "One authorized settlement procedure is",
+        options: [
+          "A. commingling",
+          "B. issuing a blind ad",
+          "C. mediation",
+          "D. self adjudication",
+        ],
+        correctAnswer: "C",
+        explanation: "Authorized settlement procedures include mediation, arbitration, litigation, or a request for an escrow disbursement order.",
+      },
+      {
+        text: "A sales associate holds an earnest money check over a weekend. The associate must",
+        options: [
+          "A. hold it until the buyer's lender approves",
+          "B. deliver it to the broker no later than the end of the next business day",
+          "C. hold it until the seller signs",
+          "D. deliver it when convenient",
+        ],
+        correctAnswer: "B",
+        explanation: "A sales associate must deliver deposits to the broker no later than the end of the next business day.",
+      },
+      {
+        text: "A broker may keep personal money in an escrow account for",
+        options: [
+          "A. any purpose",
+          "B. paying marketing expenses",
+          "C. covering bank fees",
+          "D. earning interest",
+        ],
+        correctAnswer: "C",
+        explanation: "A broker may place a small amount of personal money in the trust account to cover bank fees only.",
+      },
+      {
+        text: "Team advertising must always",
+        options: [
+          "A. use a team name that is larger than the brokerage name",
+          "B. identify the brokerage name clearly",
+          "C. include home addresses of all team members",
+          "D. list the names of all team members",
+        ],
+        correctAnswer: "B",
+        explanation: "Team advertising must follow strict rules and clearly identify the registered brokerage name.",
+      },
+      {
+        text: "Failure to deposit escrow funds on time is",
+        options: [
+          "A. a ministerial issue only",
+          "B. grounds for disciplinary action",
+          "C. acceptable if disclosed",
+          "D. permitted in new construction transactions",
+        ],
+        correctAnswer: "B",
+        explanation: "Failure to deposit escrow funds on time is grounds for disciplinary action against the licensee.",
+      },
+      {
+        text: "Which statement is correct regarding earnest money deposits",
+        options: [
+          "A. An associate may deposit checks directly into the escrow account",
+          "B. The broker must deposit funds by the end of the third business day after receipt",
+          "C. Deposits are returned automatically if a contract is cancelled",
+          "D. Deposits must be held in an interest bearing account",
+        ],
+        correctAnswer: "B",
+        explanation: "The broker must deposit earnest money into the trust account by the end of the third business day after receipt.",
+      },
+      {
+        text: "Misleading advertising by a licensee is",
+        options: [
+          "A. legal if no one complains",
+          "B. a violation of Florida law",
+          "C. permitted online only",
+          "D. allowed if the advertiser is a broker associate",
+        ],
+        correctAnswer: "B",
+        explanation: "Misleading advertising by a licensee is a violation of Florida law and subject to disciplinary action.",
+      },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit5Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[4].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit5Questions.length} sample questions to Unit 5 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 6-19)
+    for (let i = 5; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1049,7 +1287,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 5-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 6-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
