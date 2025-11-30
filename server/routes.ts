@@ -9,14 +9,16 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Seed FREC I course if not already present
+  // Seed FREC I course on startup
   try {
-    const existingCourse = await storage.getCourses({ state: "FL", licenseType: "Sales Associate" });
-    if (!existingCourse || existingCourse.length === 0) {
-      await seedFRECIPrelicensing();
+    await seedFRECIPrelicensing();
+    console.log("✓ FREC I course seeded successfully");
+  } catch (err: any) {
+    if (err.message && err.message.includes("duplicate key")) {
+      console.log("✓ FREC I course already exists");
+    } else {
+      console.error("Error seeding FREC I course:", err);
     }
-  } catch (err) {
-    console.log("FREC I course already seeded or seeding skipped");
   }
   // Course Routes
   app.get("/api/courses", async (req, res) => {
