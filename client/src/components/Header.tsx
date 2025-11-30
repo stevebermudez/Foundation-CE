@@ -56,7 +56,10 @@ export default function Header({ selectedState, onStateChange }: HeaderProps) {
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2 hover-elevate rounded-md px-2 py-1">
-              <span className="font-bold text-xl text-gray-900 dark:text-white" data-testid="text-logo">
+              <span 
+                className="font-black text-2xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight" 
+                data-testid="text-logo"
+              >
                 FoundationCE
               </span>
             </Link>
