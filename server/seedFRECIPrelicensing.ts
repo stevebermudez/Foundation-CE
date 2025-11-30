@@ -1648,8 +1648,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit15Questions.length} questions to Unit 15 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 16-19)
-    for (let i = 15; i < units.length; i++) {
+    // Unit 16 - Real Estate Appraisal (20 questions)
+    const unit16Questions = [
+      { text: "An appraisal is", options: ["A. a guarantee of value", "B. a professional opinion of value", "C. a home inspection", "D. a title search"], correctAnswer: "B", explanation: "An appraisal is a professional opinion of value developed by a licensed appraiser." },
+      { text: "USPAP establishes", options: ["A. zoning rules", "B. ethical and performance standards for appraisers", "C. closing instructions", "D. lending ratios"], correctAnswer: "B", explanation: "The Uniform Standards of Professional Appraisal Practice establishes ethical conduct and standards for appraisals." },
+      { text: "Value requires", options: ["A. only scarcity", "B. only demand", "C. scarcity, utility, demand, and transferability", "D. age and size only"], correctAnswer: "C", explanation: "Value requires four essential characteristics: scarcity, utility, demand, and transferability." },
+      { text: "Highest and best use means", options: ["A. the most attractive design", "B. the most profitable legal use", "C. the owner's preferred use", "D. the assessor's use"], correctAnswer: "B", explanation: "Highest and best use identifies the most productive legal use of the property." },
+      { text: "The principle of substitution states that", options: ["A. older homes always have more value", "B. buyers will choose the most expensive property", "C. buyers will not pay more than the cost of a similar substitute", "D. value is unrelated to alternatives"], correctAnswer: "C", explanation: "Substitution states that buyers will not pay more for a property than the cost of acquiring a similar one." },
+      { text: "The sales comparison approach is most reliable for", options: ["A. vacant land and residential property", "B. factories only", "C. large shopping centers", "D. hotels"], correctAnswer: "A", explanation: "The sales comparison approach is most reliable for residential properties and vacant lots." },
+      { text: "Adjustments in the sales comparison approach mean", options: ["A. subtract value if the comparable is superior", "B. add value if the comparable is superior", "C. ignore differences", "D. adjust only land value"], correctAnswer: "A", explanation: "If the comparable is superior, subtract value; if inferior, add value." },
+      { text: "The cost approach is most reliable for", options: ["A. older homes", "B. special purpose properties", "C. rental apartments", "D. condominiums"], correctAnswer: "B", explanation: "The cost approach is most reliable for new construction and special use properties." },
+      { text: "In the cost approach, the first step is", options: ["A. calculate depreciation", "B. estimate land value", "C. choose comparable sales", "D. determine GRM"], correctAnswer: "B", explanation: "The first step is to estimate the land value." },
+      { text: "Physical deterioration refers to", options: ["A. outdated design", "B. external noise", "C. wear and tear", "D. oversupply"], correctAnswer: "C", explanation: "Physical deterioration includes wear and tear on the property." },
+      { text: "Functional obsolescence refers to", options: ["A. broken heating systems", "B. out of date features or poor design", "C. noise from nearby highways", "D. high interest rates"], correctAnswer: "B", explanation: "Functional obsolescence includes outdated design or features." },
+      { text: "External obsolescence refers to", options: ["A. wear and tear in the home", "B. design problems", "C. negative influences outside the property", "D. a damaged roof"], correctAnswer: "C", explanation: "External obsolescence includes negative influences outside the property such as noise or pollution." },
+      { text: "Gross rent multiplier equals", options: ["A. price divided by net income", "B. rent divided by price", "C. price divided by gross monthly rent", "D. annual rent divided by vacancy"], correctAnswer: "C", explanation: "GRM equals price divided by gross monthly rent." },
+      { text: "Gross income multiplier uses", options: ["A. annual income", "B. monthly rent only", "C. replacement cost", "D. net operating income only"], correctAnswer: "A", explanation: "GIM uses annual income for commercial and larger properties." },
+      { text: "In the income approach, value equals", options: ["A. net operating income divided by capitalization rate", "B. gross monthly rent times interest rate", "C. land value minus depreciation", "D. cost plus taxes"], correctAnswer: "A", explanation: "In the income approach, value equals net operating income divided by the capitalization rate." },
+      { text: "Depreciation that is cost effective to cure is", options: ["A. external", "B. curable", "C. incurable", "D. functional only"], correctAnswer: "B", explanation: "Curable depreciation can be cost effectively repaired." },
+      { text: "Reconciliation means", options: ["A. averaging all three approaches", "B. selecting the most credible approach or weighting them appropriately", "C. discarding the highest value", "D. using only the cost approach"], correctAnswer: "B", explanation: "Reconciliation is reviewing the reliability of each approach and giving weight to the most appropriate one." },
+      { text: "The cost approach usually uses which cost", options: ["A. market cost", "B. reproduction or replacement cost", "C. tax cost", "D. insurance cost only"], correctAnswer: "B", explanation: "The cost approach estimates reproduction or replacement cost of improvements." },
+      { text: "The final opinion of value is", options: ["A. the average of all calculations", "B. the reconciled value after reviewing all approaches", "C. the seller's preferred price", "D. the assessed value"], correctAnswer: "B", explanation: "The final opinion of value is the reconciled value after reviewing all approaches." },
+      { text: "GRM is most appropriate for", options: ["A. shopping malls", "B. one to four unit residential rentals", "C. hotels", "D. industrial plants"], correctAnswer: "B", explanation: "GRM is used for one to four unit residential rentals." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit16Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[15].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit16Questions.length} questions to Unit 16 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 17-19)
+    for (let i = 16; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1667,7 +1705,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 16-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 17-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {

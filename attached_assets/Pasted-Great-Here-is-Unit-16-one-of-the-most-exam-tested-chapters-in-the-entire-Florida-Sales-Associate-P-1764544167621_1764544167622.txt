@@ -1,0 +1,269 @@
+Great. Here is Unit 16, one of the most exam tested chapters in the entire Florida Sales Associate Pre Licensing Course.
+Real estate appraisal concepts appear heavily on both the state and national portions of the exam.
+
+This is a complete, fresh unit, fully rebuilt, structured, and Sora ready.
+
+No em dashes.
+
+⸻
+
+UNIT 16   REAL ESTATE APPRAISAL
+
+Target Duration: 3 hours
+Includes: three Sora ready narration scripts + twenty question exam style quiz
+
+⸻
+
+UNIT 16 LEARNING OBJECTIVES
+
+Students should be able to:
+	•	Explain the purpose of an appraisal and when it is required
+	•	Understand USPAP and ethical standards
+	•	Distinguish price, cost, and value
+	•	Identify the four characteristics of value
+	•	Apply principles of value
+	•	Understand highest and best use
+	•	Identify and compute the three approaches to value
+	•	Understand reconciliation and the final opinion of value
+	•	Calculate gross rent multiplier and gross income multiplier
+	•	Recognize depreciation types
+
+⸻
+
+UNIT 16 STRUCTURE
+	1.	Lesson 16.1   Purpose of appraisal, USPAP, value concepts, principles of value
+	2.	Lesson 16.2   Approaches to value: sales comparison, cost, and income
+	3.	Lesson 16.3   Depreciation, GRM, GIM, reconciliation, exam strategy
+	4.	Quiz   Twenty exam style questions
+
+⸻
+
+LESSON 16.1 SCRIPT
+
+Purpose of Appraisal, USPAP, Value Concepts, Principles of Value
+
+Welcome to Unit 16 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+
+Appraisals are professional opinions of value developed by licensed appraisers. Lenders require appraisals to ensure that the property provides sufficient collateral for the loan.
+
+Appraisers must follow the Uniform Standards of Professional Appraisal Practice, known as USPAP. USPAP establishes ethical conduct, confidentiality, impartiality, and standards for appraisal reports.
+
+Before we discuss valuation methods, we must review the basic concepts of value. Value is influenced by four essential characteristics: scarcity, utility, demand, and transferability.
+
+Scarcity means supply is limited.
+
+Utility means the property is useful.
+
+Demand means people want and can afford the property.
+
+Transferability means ownership rights can be conveyed.
+
+Several economic principles drive property value. These include substitution, conformity, competition, contribution, highest and best use, progression, regression, and anticipation.
+
+Substitution states that buyers will not pay more for a property than the cost of acquiring a similar one.
+
+Conformity suggests that value is maximized when a property fits its surroundings.
+
+Contribution measures how much a feature adds to overall value.
+
+Highest and best use identifies the most productive legal use of the property.
+
+These concepts are the foundation for the three approaches to value, which we will cover next.
+
+⸻
+
+LESSON 16.2 SCRIPT
+
+Sales Comparison, Cost Approach, Income Approach
+
+In this lesson, we analyze the three approaches used by appraisers to estimate value.
+
+The sales comparison approach compares the subject property to similar properties that have sold recently. Adjustments are made for differences in features such as size, condition, location, and amenities.
+
+The key rule is: if the comparable property is superior to the subject, subtract value. If the comparable is inferior, add value.
+
+This approach is most reliable for residential properties and vacant lots.
+
+Next is the cost approach. This method estimates the value of the land plus the cost to reproduce or replace the improvements, minus depreciation.
+
+The steps in the cost approach are:
+estimate the land value,
+estimate reproduction or replacement cost,
+subtract depreciation,
+add the land value to the depreciated cost.
+
+Depreciation can be physical deterioration, functional obsolescence, or external obsolescence.
+
+Physical deterioration includes wear and tear.
+
+Functional obsolescence includes outdated design or features.
+
+External obsolescence includes negative influences outside the property such as nearby noise or pollution.
+
+The income approach values property based on the income it produces.
+
+Two common methods are the gross rent multiplier and the capitalization rate method.
+
+The gross rent multiplier is used for one to four unit residential rentals. GRM equals price divided by gross monthly rent.
+
+To estimate value using GRM, multiply gross monthly rent by the GRM.
+
+For larger commercial properties, the income approach uses net operating income divided by the capitalization rate.
+
+These approaches are reconciled to reach a final opinion of value, which we cover next.
+
+⸻
+
+LESSON 16.3 SCRIPT
+
+Depreciation, GRM, GIM, Reconciliation, Exam Strategy
+
+In this final lesson of Unit 16, we focus on depreciation, income multipliers, and the reconciliation process.
+
+Depreciation is the loss of value from any cause. It may be curable or incurable. Curable depreciation can be cost effectively repaired. Incurable depreciation costs more to fix than the value gained.
+
+Income multipliers are simple tools used for quick estimates.
+
+GRM is gross rent multiplier. It uses gross monthly rent for small residential income properties.
+
+GIM is gross income multiplier. It uses annual income for commercial and larger properties.
+
+Reconciliation is the final step of the appraisal. The appraiser reviews the reliability of each approach and gives weight to the most appropriate one. The result is the final opinion of value.
+
+The sales comparison approach is most reliable for homes.
+
+The income approach is most reliable for income producing properties.
+
+The cost approach is most reliable for new construction, special use properties, and properties with little or no comparable sales.
+
+With these concepts completed, you are now ready for the Unit 16 quiz.
+
+⸻
+
+UNIT 16 QUIZ
+
+Twenty exam style questions
+	1.	An appraisal is
+A. a guarantee of value
+B. a professional opinion of value
+C. a home inspection
+D. a title search
+Answer: B
+	2.	USPAP establishes
+A. zoning rules
+B. ethical and performance standards for appraisers
+C. closing instructions
+D. lending ratios
+Answer: B
+	3.	Value requires
+A. only scarcity
+B. only demand
+C. scarcity, utility, demand, and transferability
+D. age and size only
+Answer: C
+	4.	Highest and best use means
+A. the most attractive design
+B. the most profitable legal use
+C. the owner’s preferred use
+D. the assessor’s use
+Answer: B
+	5.	The principle of substitution states that
+A. older homes always have more value
+B. buyers will choose the most expensive property
+C. buyers will not pay more than the cost of a similar substitute
+D. value is unrelated to alternatives
+Answer: C
+	6.	The sales comparison approach is most reliable for
+A. vacant land and residential property
+B. factories only
+C. large shopping centers
+D. hotels
+Answer: A
+	7.	Adjustments in the sales comparison approach mean
+A. subtract value if the comparable is superior
+B. add value if the comparable is superior
+C. ignore differences
+D. adjust only land value
+Answer: A
+	8.	The cost approach is most reliable for
+A. older homes
+B. special purpose properties
+C. rental apartments
+D. condominiums
+Answer: B
+	9.	In the cost approach, the first step is
+A. calculate depreciation
+B. estimate land value
+C. choose comparable sales
+D. determine GRM
+Answer: B
+	10.	Physical deterioration refers to
+A. outdated design
+B. external noise
+C. wear and tear
+D. oversupply
+Answer: C
+	11.	Functional obsolescence refers to
+A. broken heating systems
+B. out of date features or poor design
+C. noise from nearby highways
+D. high interest rates
+Answer: B
+	12.	External obsolescence refers to
+A. wear and tear in the home
+B. design problems
+C. negative influences outside the property
+D. a damaged roof
+Answer: C
+	13.	Gross rent multiplier equals
+A. price divided by net income
+B. rent divided by price
+C. price divided by gross monthly rent
+D. annual rent divided by vacancy
+Answer: C
+	14.	Gross income multiplier uses
+A. annual income
+B. monthly rent only
+C. replacement cost
+D. net operating income only
+Answer: A
+	15.	In the income approach, value equals
+A. net operating income divided by capitalization rate
+B. gross monthly rent times interest rate
+C. land value minus depreciation
+D. cost plus taxes
+Answer: A
+	16.	Depreciation that is cost effective to cure is
+A. external
+B. curable
+C. incurable
+D. functional only
+Answer: B
+	17.	Reconciliation means
+A. averaging all three approaches
+B. selecting the most credible approach or weighting them appropriately
+C. discarding the highest value
+D. using only the cost approach
+Answer: B
+	18.	The cost approach usually uses which cost
+A. market cost
+B. reproduction or replacement cost
+C. tax cost
+D. insurance cost only
+Answer: B
+	19.	The final opinion of value is
+A. the average of all calculations
+B. the reconciled value after reviewing all approaches
+C. the seller’s preferred price
+D. the assessed value
+Answer: B
+	20.	GRM is most appropriate for
+A. shopping malls
+B. one to four unit residential rentals
+C. hotels
+D. industrial plants
+Answer: B
+
+⸻
+
+If you want to continue, say next step, and I will build Unit 17   Real Estate Investments and Business Brokerage with full Sora narration and quiz.
