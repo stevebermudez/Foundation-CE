@@ -9,16 +9,26 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Seed FREC I course on startup
+  // Seed FREC I course on startup if not already present
   try {
-    await seedFRECIPrelicensing();
-    console.log("✓ FREC I course seeded successfully");
-  } catch (err: any) {
-    if (err.message && err.message.includes("duplicate key")) {
-      console.log("✓ FREC I course already exists");
+    const db = (await import("./db")).db;
+    const { courses } = (await import("@shared/schema"));
+    const { eq } = (await import("drizzle-orm"));
+    
+    const existing = await db
+      .select()
+      .from(courses)
+      .where(eq(courses.sku, "FL-RE-PL-SA-FRECI-63"))
+      .limit(1);
+    
+    if (existing.length === 0) {
+      await seedFRECIPrelicensing();
+      console.log("✓ FREC I course seeded successfully");
     } else {
-      console.error("Error seeding FREC I course:", err);
+      console.log("✓ FREC I course already exists");
     }
+  } catch (err: any) {
+    console.error("Error with FREC I seeding:", err);
   }
   // Course Routes
   app.get("/api/courses", async (req, res) => {
