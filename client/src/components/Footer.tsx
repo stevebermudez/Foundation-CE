@@ -7,28 +7,28 @@ export default function Footer() {
 
   const footerLinks = {
     courses: [
-      { label: "Real Estate CE", href: "/courses?profession=real_estate" },
-      { label: "Insurance CE", href: "/courses?profession=insurance" },
-      { label: "California Courses", href: "/courses?state=CA" },
-      { label: "Florida Courses", href: "/courses?state=FL" },
+      { label: "California Courses", href: "/courses/ca" },
+      { label: "Florida Courses", href: "/courses/fl" },
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Compliance Tracker", href: "/compliance" },
     ],
     support: [
-      { label: "Help Center", href: "/help" },
-      { label: "Contact Us", href: "/contact" },
-      { label: "FAQs", href: "/faq" },
-      { label: "Technical Support", href: "/support" },
+      { label: "Get Started", href: "/account-setup" },
+      { label: "Browse Courses", href: "/" },
+      { label: "Contact", href: "#contact" },
+      { label: "Email: support@foundationce.com", href: "mailto:support@foundationce.com" },
     ],
     compliance: [
-      { label: "DRE Requirements", href: "/compliance/ca" },
-      { label: "FREC Requirements", href: "/compliance/fl" },
-      { label: "Course Approvals", href: "/approvals" },
-      { label: "Reporting Status", href: "/reporting" },
+      { label: "California Requirements", href: "/compliance" },
+      { label: "Florida Requirements", href: "/compliance" },
+      { label: "Home", href: "/" },
+      { label: "Dashboard", href: "/dashboard" },
     ],
     company: [
-      { label: "About Us", href: "/about" },
-      { label: "Careers", href: "/careers" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
+      { label: "Home", href: "/" },
+      { label: "Terms & Conditions", href: "#terms" },
+      { label: "Privacy", href: "#privacy" },
+      { label: "Support Email", href: "mailto:support@foundationce.com" },
     ],
   };
 

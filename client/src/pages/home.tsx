@@ -12,14 +12,14 @@ export default function HomePage() {
 
   const handleStateSelect = (state: "CA" | "FL") => {
     setSelectedState(state);
-    setLocation("/courses");
+    setLocation(state === "CA" ? "/courses/ca" : "/courses/fl");
   };
 
   return (
     <div>
       <Hero
-        onBrowseCourses={() => setLocation("/courses")}
-        onGetStarted={() => setLocation("/courses")}
+        onBrowseCourses={() => setLocation(selectedState === "CA" ? "/courses/ca" : "/courses/fl")}
+        onGetStarted={() => setLocation(selectedState === "CA" ? "/courses/ca" : "/courses/fl")}
       />
       <TrustBadges />
       <StateSelector onSelectState={handleStateSelect} />

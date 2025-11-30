@@ -25,7 +25,7 @@ function Router() {
           <Route path="/course/:id" component={CourseViewPage} />
           <Route path="/account-setup" component={AccountSetupPage} />
           <Route path="/dashboard" component={DashboardPage} />
-          <Route path="/compliance" component={CompliancePage} />
+          <Route path="/compliance" component={() => <CompliancePage />} />
           <Route component={NotFound} />
         </Switch>
       </main>
