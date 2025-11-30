@@ -564,8 +564,236 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit2Questions.length} sample questions to Unit 2 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 3-19)
-    for (let i = 2; i < units.length; i++) {
+    // Unit 3 questions (Real Estate License Law & Commission Rules)
+    const unit3Questions = [
+      {
+        text: "The main purpose of the Florida Real Estate Commission is to",
+        options: [
+          "A. promote the real estate industry",
+          "B. protect the public",
+          "C. regulate mortgage lenders",
+          "D. increase commission rates",
+        ],
+        correctAnswer: "B",
+        explanation: "FREC's mission is to protect the public by regulating real estate practice in Florida.",
+      },
+      {
+        text: "How many members sit on the Florida Real Estate Commission",
+        options: ["A. five", "B. six", "C. seven", "D. nine"],
+        correctAnswer: "C",
+        explanation: "FREC is a seven-member commission appointed by the Governor and confirmed by the Florida Senate.",
+      },
+      {
+        text: "How many FREC members must be consumer members",
+        options: ["A. one", "B. two", "C. three", "D. four"],
+        correctAnswer: "B",
+        explanation: "Two FREC members must be consumer members with no connection to the real estate industry to balance industry expertise with public interest.",
+      },
+      {
+        text: "Which FREC members must have at least five years of active broker experience",
+        options: [
+          "A. all licensed members",
+          "B. two members",
+          "C. four members",
+          "D. one member",
+        ],
+        correctAnswer: "C",
+        explanation: "Four FREC members must be licensed brokers with at least five years of active experience.",
+      },
+      {
+        text: "FREC's quasi-legislative powers allow the Commission to",
+        options: [
+          "A. issue criminal penalties",
+          "B. adopt rules",
+          "C. conduct ministerial tasks only",
+          "D. prosecute licensees",
+        ],
+        correctAnswer: "B",
+        explanation: "Quasi-legislative powers allow FREC to make rules that become part of the Florida Administrative Code under Rule Chapter 61J2.",
+      },
+      {
+        text: "FREC's quasi-judicial powers include",
+        options: [
+          "A. appointing DBPR staff",
+          "B. issuing administrative discipline",
+          "C. establishing real estate laws",
+          "D. preparing state exams",
+        ],
+        correctAnswer: "B",
+        explanation: "Quasi-judicial powers allow FREC to discipline licensees, impose fines, suspend or revoke licenses, and grant or deny applications.",
+      },
+      {
+        text: "Prima facie evidence means",
+        options: [
+          "A. evidence requiring expert testimony",
+          "B. evidence based entirely on speculation",
+          "C. evidence that appears valid on its face",
+          "D. evidence that cannot be rebutted",
+        ],
+        correctAnswer: "C",
+        explanation: "Prima facie means 'on its face.' A current, valid real estate license is prima facie evidence that the licensee is properly licensed.",
+      },
+      {
+        text: "Which disciplinary action may FREC impose",
+        options: [
+          "A. imprisonment",
+          "B. summary suspension",
+          "C. civil forfeiture",
+          "D. wage garnishment",
+        ],
+        correctAnswer: "B",
+        explanation: "Summary suspension may be issued when a licensee poses an immediate, serious danger to the public.",
+      },
+      {
+        text: "FREC rules are found in the",
+        options: [
+          "A. Federal Register",
+          "B. Florida Administrative Code",
+          "C. Florida Building Code",
+          "D. United States Code",
+        ],
+        correctAnswer: "B",
+        explanation: "FREC rules are adopted and found in Rule Chapter 61J2 of the Florida Administrative Code.",
+      },
+      {
+        text: "A current, valid real estate license issued by DBPR is considered",
+        options: [
+          "A. conclusive proof of competence",
+          "B. prima facie evidence of licensure",
+          "C. evidence only if notarized",
+          "D. insufficient proof of authority",
+        ],
+        correctAnswer: "B",
+        explanation: "A valid real estate license constitutes prima facie evidence that the licensee is properly licensed and authorized.",
+      },
+      {
+        text: "A licensee who fails to renew by the expiration date becomes",
+        options: [
+          "A. revoked",
+          "B. suspended",
+          "C. involuntarily inactive",
+          "D. null and void immediately",
+        ],
+        correctAnswer: "C",
+        explanation: "Failure to renew on time results in the license becoming involuntarily inactive.",
+      },
+      {
+        text: "A license that is involuntarily inactive for too long becomes",
+        options: [
+          "A. extended automatically",
+          "B. placed on probation",
+          "C. null and void",
+          "D. transferred to another broker",
+        ],
+        correctAnswer: "C",
+        explanation: "If an involuntarily inactive license is not reactivated within the prescribed period, the license becomes null and void.",
+      },
+      {
+        text: "Which term describes a license that no longer exists and cannot be reinstated",
+        options: [
+          "A. revoked",
+          "B. suspended",
+          "C. null and void",
+          "D. expired",
+        ],
+        correctAnswer: "C",
+        explanation: "Null and void means the license no longer exists and cannot be reactivated through the standard reactivation process.",
+      },
+      {
+        text: "Advertising by a sales associate must be in the name of",
+        options: [
+          "A. the associate",
+          "B. the broker of record",
+          "C. the MLS",
+          "D. the developer",
+        ],
+        correctAnswer: "B",
+        explanation: "All advertising by a sales associate must be in the name of the broker of record, not the associate personally.",
+      },
+      {
+        text: "A single licensee may",
+        options: [
+          "A. work for two brokers at the same time",
+          "B. advertise without including the brokerage name",
+          "C. pay compensation directly to another licensee",
+          "D. work for only one employing broker at a time",
+        ],
+        correctAnswer: "D",
+        explanation: "A sales associate or broker associate may only work for one employer at a time under FREC rules.",
+      },
+      {
+        text: "A sales associate changes brokerages. The associate must",
+        options: [
+          "A. notify DBPR",
+          "B. notify only the MLS",
+          "C. take the exam again",
+          "D. obtain a new Social Security number",
+        ],
+        correctAnswer: "A",
+        explanation: "When changing employers, a licensee must notify the state (DBPR) and update their license record.",
+      },
+      {
+        text: "FREC may issue a summary suspension when",
+        options: [
+          "A. a licensee requests a hearing",
+          "B. a licensee poses an immediate danger to the public",
+          "C. a licensee wants to change employers",
+          "D. a licensee fails to complete CE",
+        ],
+        correctAnswer: "B",
+        explanation: "Summary suspension is an emergency action available when a licensee poses an immediate, serious danger to the public.",
+      },
+      {
+        text: "The Real Estate Recovery Fund is used to",
+        options: [
+          "A. pay commissions",
+          "B. reimburse consumers harmed by licensee misconduct",
+          "C. fund MLS systems",
+          "D. issue licenses faster",
+        ],
+        correctAnswer: "B",
+        explanation: "The Recovery Fund may compensate injured parties for certain damages caused by a licensee, who must later reimburse the Fund.",
+      },
+      {
+        text: "FREC members serve",
+        options: [
+          "A. two-year terms",
+          "B. four-year staggered terms",
+          "C. life appointments",
+          "D. unlimited consecutive terms",
+        ],
+        correctAnswer: "B",
+        explanation: "FREC members serve staggered four-year terms and cannot serve more than two consecutive terms.",
+      },
+      {
+        text: "The adoption of administrative rules by FREC is an example of",
+        options: [
+          "A. judicial power",
+          "B. ministerial power",
+          "C. quasi-legislative power",
+          "D. summary power",
+        ],
+        correctAnswer: "C",
+        explanation: "Rulemaking is a quasi-legislative power that allows FREC to interpret and implement Chapter 475 of Florida Statutes.",
+      },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit3Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[2].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit3Questions.length} sample questions to Unit 3 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 4-19)
+    for (let i = 3; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -583,7 +811,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 3-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 4-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
