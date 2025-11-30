@@ -60,7 +60,7 @@ export default function Header({ selectedState, onStateChange }: HeaderProps) {
                 <GraduationCap className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="hidden font-semibold text-lg sm:inline-block" data-testid="text-logo">
-                ProCE
+                Foundation CE
               </span>
             </Link>
 
