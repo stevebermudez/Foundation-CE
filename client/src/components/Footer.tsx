@@ -19,10 +19,10 @@ export default function Footer() {
       { label: "Email: support@foundationce.com", href: "mailto:support@foundationce.com" },
     ],
     compliance: [
-      { label: "California Requirements", href: "/compliance" },
-      { label: "Florida Requirements", href: "/compliance" },
-      { label: "Home", href: "/" },
+      { label: "Compliance Tracker", href: "/compliance" },
       { label: "Dashboard", href: "/dashboard" },
+      { label: "Home", href: "/" },
+      { label: "Account Setup", href: "/account-setup" },
     ],
     company: [
       { label: "Home", href: "/" },

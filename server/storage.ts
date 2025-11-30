@@ -1,5 +1,5 @@
 import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking } from "@shared/schema";
-import { eq, and, lt, gte, desc, sql } from "drizzle-orm";
+import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -199,7 +199,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(organizations)
-      .where(eq(organizations.id, orgIds[0]));
+      .where(inArray(organizations.id, orgIds));
   }
 
   async getOrganizationCourses(organizationId: string): Promise<Course[]> {
@@ -219,7 +219,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(courses)
-      .where(eq(courses.id, courseIds[0]));
+      .where(inArray(courses.id, courseIds));
   }
 
   async getCourseBundles(filters?: { state?: string; licenseType?: string }): Promise<CourseBundle[]> {
@@ -256,7 +256,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(courses)
-      .where(eq(courses.id, courseIds[0]));
+      .where(inArray(courses.id, courseIds));
   }
 
   async createBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment> {
