@@ -47,18 +47,18 @@ export function CourseBundle({ bundleId, userId }: BundleProps) {
     enabled: !!userId && !!bundleId,
   });
 
-  const enrollMutation = useMutation(
-    async () => {
+  const enrollMutation = useMutation({
+    mutationFn: async () => {
       return await apiRequest("POST", `/api/bundles/${bundleId}/enroll`, {
         userId,
       });
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["/api/bundles", bundleId, "enrollment", userId]);
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["/api/bundles", bundleId, "enrollment", userId],
+      });
+    },
+  });
 
   if (isLoading) return <div className="text-center text-gray-500">Loading bundle...</div>;
   if (!bundle) return <div className="text-center text-red-500">Bundle not found</div>;
