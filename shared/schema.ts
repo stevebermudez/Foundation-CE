@@ -39,7 +39,6 @@ export const courses = pgTable("courses", {
   sku: varchar("sku").notNull(), // course code (unique per product type + state)
   renewalApplicable: integer("renewal_applicable").default(1), // true for renewal, false for prelicense
   renewalPeriodYears: integer("renewal_period_years"), // 2 for FL, 4 for CA
-  allowRedo: integer("allow_redo").default(1), // 1 = allow users to retake, 0 = one-time only
   createdAt: timestamp("created_at").defaultNow(),
 });
 
