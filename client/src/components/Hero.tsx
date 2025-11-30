@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Shield } from "lucide-react";
+import { ArrowRight, Zap, Shield, CheckCircle } from "lucide-react";
 import heroImage from "@assets/generated_images/professional_real_estate_training_classroom.png";
 
 interface HeroProps {
