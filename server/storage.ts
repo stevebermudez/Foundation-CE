@@ -1,15 +1,17 @@
-import { users, enrollments, type User, type UpsertUser } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { users, enrollments, courses, complianceRequirements, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  getEnrollment(userId: string, courseId: string): Promise<any | undefined>;
-  createEnrollment(
-    userId: string,
-    courseId: string
-  ): Promise<{ id: string; userId: string; courseId: string }>;
+  getEnrollment(userId: string, courseId: string): Promise<Enrollment | undefined>;
+  createEnrollment(userId: string, courseId: string): Promise<Enrollment>;
+  getCourses(filters?: { type?: string; targetLicense?: string }): Promise<Course[]>;
+  getCourse(id: string): Promise<Course | undefined>;
+  getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined>;
+  createComplianceRequirement(requirement: Omit<ComplianceRequirement, 'id' | 'updatedAt'>): Promise<ComplianceRequirement>;
+  updateEnrollmentHours(enrollmentId: string, hoursCompleted: number): Promise<Enrollment>;
 }
 
 export class DatabaseStorage implements IStorage {
