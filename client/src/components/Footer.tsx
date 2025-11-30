@@ -7,14 +7,13 @@ export default function Footer() {
 
   const footerLinks = {
     courses: [
-      { label: "California Courses", href: "/courses/ca" },
       { label: "Florida Courses", href: "/courses/fl" },
       { label: "Dashboard", href: "/dashboard" },
       { label: "Compliance Tracker", href: "/compliance" },
     ],
     support: [
       { label: "Get Started", href: "/account-setup" },
-      { label: "Browse Courses", href: "/" },
+      { label: "Browse Courses", href: "/courses/fl" },
       { label: "Contact", href: "#contact" },
       { label: "Email: support@foundationce.com", href: "mailto:support@foundationce.com" },
     ],
@@ -44,7 +43,7 @@ export default function Footer() {
               <span className="font-semibold text-lg">FoundationCE</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
-              State-approved continuing education for real estate and insurance professionals in California and Florida.
+              State-approved continuing education and prelicensing for real estate professionals in Florida.
             </p>
             <div className="flex gap-3">
               <a
@@ -140,8 +139,6 @@ export default function Footer() {
               &copy; {currentYear} FoundationCE. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <span>CA DRE Provider #S0123</span>
-              <span>|</span>
               <span>FL DBPR Provider #0012345</span>
             </div>
           </div>

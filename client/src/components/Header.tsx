@@ -35,24 +35,16 @@ import {
   Settings,
 } from "lucide-react";
 
-type Profession = "real_estate" | "insurance";
-
-interface HeaderProps {
-  selectedProfession: Profession;
-  onProfessionChange: (profession: Profession) => void;
-}
-
-export default function Header({ selectedProfession, onProfessionChange }: HeaderProps) {
+export default function Header() {
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const navItems = [
-    { label: "Browse Courses", href: "/courses", icon: BookOpen },
+    { label: "Courses", href: "/courses/fl", icon: BookOpen },
     { label: "My Courses", href: "/dashboard", icon: GraduationCap },
     { label: "Compliance", href: "/compliance", icon: ClipboardCheck },
-    { label: "Resources", href: "/resources", icon: FileText },
   ];
 
   const isActive = (path: string) => location === path;
@@ -71,25 +63,6 @@ export default function Header({ selectedProfession, onProfessionChange }: Heade
                 Foundation CE
               </span>
             </Link>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-1" data-testid="button-profession-selector">
-                  <Badge variant="secondary" className="mr-1">
-                    {selectedProfession === "real_estate" ? "RE" : "Ins"}
-                  </Badge>
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => onProfessionChange("real_estate")} data-testid="menu-item-real-estate">
-                  <span className="font-medium">Real Estate</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onProfessionChange("insurance")} data-testid="menu-item-insurance">
-                  <span className="font-medium">Insurance</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
 
           <nav className="hidden lg:flex items-center gap-1">

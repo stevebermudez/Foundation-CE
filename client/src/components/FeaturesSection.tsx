@@ -25,7 +25,7 @@ const features = [
     icon: Shield,
     title: "State Approved",
     description:
-      "All courses are approved by DRE (California) and FREC (Florida) for CE credit.",
+      "All courses are approved by FREC (Florida) for CE and prelicensing credit.",
   },
   {
     icon: Award,

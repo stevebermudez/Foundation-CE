@@ -30,14 +30,11 @@ interface FilterSidebarProps {
 }
 
 const stateOptions = [
-  { value: "CA", label: "California (DRE)" },
   { value: "FL", label: "Florida (FREC)" },
 ];
 
 const professionOptions = [
   { value: "real_estate", label: "Real Estate" },
-  { value: "insurance", label: "Insurance" },
-  { value: "nmls", label: "NMLS" },
 ];
 
 const educationTypeOptions = [
