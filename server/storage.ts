@@ -544,7 +544,7 @@ export class DatabaseStorage implements IStorage {
       return { valid: false, message: "Coupon has expired" };
     }
 
-    if (coupon.maxUses && coupon.timesUsed >= coupon.maxUses) {
+    if (coupon.maxUses && (coupon.timesUsed ?? 0) >= coupon.maxUses) {
       return { valid: false, message: "Coupon usage limit reached" };
     }
 
@@ -602,8 +602,7 @@ export class DatabaseStorage implements IStorage {
         completedAt: null,
         progress: 0,
         hoursCompleted: 0,
-        certificateUrl: null,
-        updatedAt: new Date()
+        certificateUrl: null
       })
       .where(eq(enrollments.id, enrollmentId))
       .returning();

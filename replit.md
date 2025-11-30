@@ -1,7 +1,7 @@
-# Real Estate Education Platform
+# FoundationCE - Continuing Education Platform
 
 ## Overview
-A full-stack real estate licensing education platform for salespersons and brokers, offering prelicense and renewal courses with compliance tracking.
+A comprehensive white-label continuing education platform (FoundationCE) for real estate and insurance professionals in California and Florida. Supports both web and native mobile apps with practice exams, compliance tracking, and supervisor workflows.
 
 ## Key Requirements
 - 45-hour renewal requirement every 4 years (salespersons & brokers)
@@ -11,18 +11,29 @@ A full-stack real estate licensing education platform for salespersons and broke
 - State-specific regulatory requirements
 
 ## Project Structure
-- **Frontend**: React + TypeScript (client/src)
-  - Pages: /courses/ca, /courses/fl for state-specific courses
-  - Components: CourseBundle, ComplianceMonitor
-- **Backend**: Express.js + Node.js (server)
-  - Seed files: seedCourses.ts, seedFloridaCourses.ts
-  - Routes: /api/bundles/*, /api/courses/*, /api/compliance/*
+- **Web App**: React + TypeScript (client/src)
+  - Pages: home, courses by state (CA/FL), course-view, dashboard, account-setup, compliance
+  - Components: CourseBundle, PracticeExam, Dashboard, ComplianceTracker
+  - UI: shadcn/ui components with Tailwind CSS
+  - Ports to: http://0.0.0.0:5000
+  
+- **Native Mobile App**: Expo/React Native (native/)
+  - Tab navigation: Courses, Dashboard, Settings
+  - Cross-platform: iOS + Android via Expo
+  - Setup: `cd native && npm install --legacy-peer-deps && npx expo start`
+  
+- **Backend**: Express.js + Node.js (server/)
+  - API routes: /api/courses/*, /api/exams/*, /api/enrollments/*, /api/coupons/*, /api/emails/*
+  - Services: Stripe payments, Bitcoin integration, email campaigns with tracking
+  - Supervisor workflows: CE review management, license tracking
+  
 - **Database**: PostgreSQL (Neon)
-  - Tables: courses, courseBundles, bundleCourses, bundleEnrollments
-  - Tables: companyAccounts, companyCompliance for corporate tracking
-- **Authentication**: Replit Auth
-- **Payments**: Stripe integration
-- **Styling**: Tailwind CSS + shadcn components
+  - Core tables: users, courses, enrollments, subscriptions
+  - Features: practice exams, CE reviews, supervisor tracking, email campaigns, coupons
+  
+- **Authentication**: Replit Auth (Google, GitHub, X, Apple social logins)
+- **Payments**: Stripe + Bitcoin (BTCPAY_SERVER or Coinbase integration ready)
+- **Styling**: Tailwind CSS + shadcn components with dark mode
 
 ## Course Classification System
 The platform uses comprehensive course attributes to distinguish between ALL factors:
@@ -91,15 +102,22 @@ Courses display with color-coded requirement buckets and detailed classification
 - **Color-Coded Display:** Red (Core Law), Blue (Ethics), Purple (Specialty)
 - **Pages:** /courses/fl for Florida, /courses/ca for California
 
-## User Preferences
-- Full-stack JavaScript application
-- Minimize files, collapse similar components
-- Frontend-heavy architecture
-- Use existing shadcn components
-- Dark mode support
+## Platform Features
+- **Course Management**: State-specific (CA/FL), license-type filtering, requirement buckets
+- **Practice Exams**: Auto-scoring (70% pass threshold), real-time explanations, answer tracking
+- **Subscriptions**: Monthly/annual billing via Stripe
+- **Coupons**: Discount codes with usage limits and validation
+- **Email Blasts**: Campaign creation with open/click tracking and analytics
+- **Supervisor Workflows**: CE review management, license expiration tracking
+- **White-Label Support**: Multi-tenant architecture for organizations
+- **Mobile Ready**: Native iOS/Android via Expo, web responsive design
+- **Dark Mode**: Full light/dark theme support
 
 ## Architecture Notes
+- Individual-only accounts (company accounts removed in recent update)
 - Using Replit's built-in PostgreSQL database
-- Stripe integration for payments
+- Stripe + Bitcoin payment options
 - Server handles data persistence and API calls
 - Frontend manages UI state with React Query
+- Authentication: Replit Auth with social login support
+- No "Choose Account Type" landing page - users go straight to individual setup
