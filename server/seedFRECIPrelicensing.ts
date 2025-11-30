@@ -1534,8 +1534,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit12Questions.length} questions to Unit 12 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 13-19)
-    for (let i = 12; i < units.length; i++) {
+    // Unit 13 - Real Estate Finance (20 questions)
+    const unit13Questions = [
+      { text: "The promissory note", options: ["A. pledges property as collateral", "B. is the borrower's written promise to repay", "C. conveys title to the lender", "D. sets real estate taxes"], correctAnswer: "B", explanation: "The promissory note is the borrower's written promise to repay the debt." },
+      { text: "The mortgage", options: ["A. sets loan interest rates", "B. pledges the property as security", "C. guarantees title", "D. replaces the promissory note"], correctAnswer: "B", explanation: "The mortgage is the security instrument that pledges property as collateral." },
+      { text: "The clause that requires full repayment when property is transferred is the", options: ["A. habendum clause", "B. due on sale clause", "C. seisin clause", "D. covenant of further assurance"], correctAnswer: "B", explanation: "The due on sale clause requires the loan balance be paid if property is transferred." },
+      { text: "One discount point equals", options: ["A. one percent of the purchase price", "B. one percent of the loan amount", "C. one eighth of one percent of the interest rate", "D. one half of the property value"], correctAnswer: "B", explanation: "One discount point equals one percent of the loan amount." },
+      { text: "One discount point typically increases lender yield by", options: ["A. one percent", "B. one half of one percent", "C. one eighth of one percent", "D. one tenth of one percent"], correctAnswer: "C", explanation: "One discount point typically increases lender yield by one eighth of one percent." },
+      { text: "Origination fees are", options: ["A. prepaid taxes", "B. charges for processing and underwriting the loan", "C. optional for FHA loans only", "D. credits from the seller"], correctAnswer: "B", explanation: "Origination fees are charges for processing and underwriting the loan." },
+      { text: "Simple interest is calculated on", options: ["A. principal only", "B. interest plus principal", "C. the original purchase price", "D. the down payment"], correctAnswer: "A", explanation: "Simple interest is calculated on the principal only." },
+      { text: "The Federal Reserve increases credit availability by", options: ["A. raising the discount rate", "B. selling government securities", "C. lowering reserve requirements", "D. removing mortgage insurance"], correctAnswer: "C", explanation: "The Federal Reserve increases credit by lowering reserve requirements." },
+      { text: "The primary mortgage market is where", options: ["A. loans are sold", "B. loans are originated", "C. securities are guaranteed", "D. taxes are assessed"], correctAnswer: "B", explanation: "The primary mortgage market is where lenders originate loans." },
+      { text: "Fannie Mae purchases", options: ["A. only conventional loans", "B. conventional, FHA, and VA loans", "C. only VA loans", "D. only second mortgages"], correctAnswer: "B", explanation: "Fannie Mae buys conventional, FHA, and VA loans." },
+      { text: "Freddie Mac purchases", options: ["A. FHA loans only", "B. VA loans only", "C. conventional loans", "D. construction loans"], correctAnswer: "C", explanation: "Freddie Mac purchases conventional loans." },
+      { text: "Ginnie Mae guarantees", options: ["A. securities backed by FHA and VA loans", "B. conventional loan underwriting", "C. discount points", "D. real estate taxes"], correctAnswer: "A", explanation: "Ginnie Mae guarantees securities backed by FHA and VA loans." },
+      { text: "Loan to value is", options: ["A. loan amount divided by property value", "B. down payment divided by loan amount", "C. interest rate divided by term", "D. closing costs divided by loan amount"], correctAnswer: "A", explanation: "Loan to value is calculated by dividing loan amount by property value." },
+      { text: "Down payment equals", options: ["A. loan amount minus interest", "B. purchase price minus loan amount", "C. loan amount multiplied by interest rate", "D. commission multiplied by price"], correctAnswer: "B", explanation: "Down payment is the difference between purchase price and loan amount." },
+      { text: "Monthly interest is calculated by", options: ["A. dividing the loan amount by twelve", "B. dividing interest by loan term", "C. multiplying principal by annual rate then dividing by twelve", "D. multiplying down payment by annual rate"], correctAnswer: "C", explanation: "Monthly interest is calculated by multiplying principal by annual rate then dividing by twelve." },
+      { text: "Early payments in a fully amortized loan consist mostly of", options: ["A. principal", "B. tax escrow", "C. interest", "D. private mortgage insurance"], correctAnswer: "C", explanation: "Early payments consist mostly of interest." },
+      { text: "The housing expense ratio compares", options: ["A. total monthly debts to net income", "B. housing costs to gross monthly income", "C. loan value to property value", "D. interest rate to term"], correctAnswer: "B", explanation: "The housing expense ratio compares housing costs to gross monthly income." },
+      { text: "The total debt ratio compares", options: ["A. all monthly obligations to gross monthly income", "B. only mortgage interest to income", "C. housing payment plus down payment", "D. interest rate to principal"], correctAnswer: "A", explanation: "The total debt ratio compares all monthly obligations to gross monthly income." },
+      { text: "A mortgage buydown", options: ["A. increases the interest rate", "B. temporarily or permanently reduces the interest rate", "C. eliminates lender yield", "D. removes escrow requirements"], correctAnswer: "B", explanation: "A buydown temporarily or permanently reduces the interest rate." },
+      { text: "A fully amortized mortgage", options: ["A. never reduces principal", "B. becomes interest only after year five", "C. pays the loan to zero at the end of the term", "D. requires annual lump sum payments"], correctAnswer: "C", explanation: "A fully amortized mortgage pays the loan to zero at the end of the term." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit13Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[12].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit13Questions.length} questions to Unit 13 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 14-19)
+    for (let i = 13; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1553,7 +1591,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 13-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 14-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {

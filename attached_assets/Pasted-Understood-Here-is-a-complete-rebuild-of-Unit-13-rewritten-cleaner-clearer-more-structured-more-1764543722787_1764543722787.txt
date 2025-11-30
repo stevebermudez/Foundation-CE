@@ -1,0 +1,270 @@
+Understood. Here is a complete rebuild of Unit 13, rewritten cleaner, clearer, more structured, more exam focused, and optimized for Sora narration pacing.
+This is not a revision. It is a totally fresh version.
+
+No em dashes.
+
+⸻
+
+UNIT 13   REAL ESTATE FINANCE (REDONE)
+
+Target Duration: 3 hours
+Includes: three Sora ready narration scripts + twenty question exam style quiz
+
+This version is sharper, more organized, and more aligned with how Pearson VUE tests finance.
+
+⸻
+
+UNIT 13 LEARNING OBJECTIVES
+
+Students should be able to:
+	•	Explain how the mortgage market functions
+	•	Identify the instruments in a mortgage loan
+	•	Understand interest, principal, yield, points, and origination fees
+	•	Differentiate loan types and mortgage programs
+	•	Understand how the Federal Reserve influences credit
+	•	Describe primary and secondary mortgage markets
+	•	Calculate LTV, down payment, interest portions, discount points
+	•	Apply qualifying ratios and basic mortgage math
+	•	Recognize features of amortized loans
+
+⸻
+
+UNIT 13 STRUCTURE
+	1.	Lesson 13.1   Mortgage instruments, interest, yield, discount points
+	2.	Lesson 13.2   Federal Reserve, primary vs secondary markets, loan programs
+	3.	Lesson 13.3   Mortgage math, LTV, ratios, amortization, lender calculations
+	4.	Quiz   20 exam style questions
+
+⸻
+
+LESSON 13.1 SCRIPT
+
+Mortgage Instruments, Interest, Yield, Points
+
+Welcome to Unit 13 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+
+This unit explains how mortgage loans work, how lenders earn money, and how borrowers repay loans. These topics are tested heavily on the Florida licensing exam.
+
+A mortgage loan contains two separate instruments.
+
+The promissory note is the borrower’s written promise to repay the debt. It states the interest rate, loan term, payment schedule, and total amount borrowed.
+
+The mortgage is the security instrument. It pledges the property as collateral. If the borrower defaults, the lender may foreclose.
+
+Mortgage instruments include important clauses.
+
+The acceleration clause allows the lender to require full repayment if the borrower defaults.
+
+The due on sale clause requires the balance to be paid in full if the property is transferred.
+
+The defeasance clause states that the lender must release the lien once the loan is paid in full.
+
+Now let us discuss how lenders make money.
+
+Interest is the fee charged for the use of borrowed money. It is usually calculated using simple interest applied to the unpaid principal.
+
+Lenders may increase earnings using discount points. One discount point equals one percent of the loan amount. Points increase the lender’s yield. For exam purposes, one point typically increases the lender’s yield by one eighth of one percent.
+
+Origination fees are charged for processing and underwriting the loan and are often expressed as a percentage of the loan amount.
+
+Loans can have fixed interest rates or adjustable rates. A fixed rate loan has the same rate for the full term. An adjustable rate mortgage, or ARM, adjusts periodically based on an index plus a margin.
+
+This completes the essential building blocks of mortgage financing. In the next lesson, we examine the broader financial system behind mortgage lending.
+
+⸻
+
+LESSON 13.2 SCRIPT
+
+Federal Reserve, Primary and Secondary Markets, Loan Programs
+
+In this lesson, we study the financial system that supports mortgage lending.
+
+Begin with the Federal Reserve System. The Federal Reserve influences credit conditions and interest rates through three primary tools.
+
+The discount rate is the interest rate the Federal Reserve charges banks that borrow directly from it. A higher discount rate reduces credit availability.
+
+Reserve requirements specify the percentage of deposits banks must keep on hand. Higher reserve requirements reduce loan capacity.
+
+Open market operations involve buying and selling government securities. When the Federal Reserve buys securities, money flows into the banking system, increasing available credit.
+
+Now let us discuss the primary mortgage market. This is where loans are originated. Banks, mortgage lenders, savings associations, and credit unions operate in the primary market.
+
+Loans are often sold into the secondary mortgage market. Selling loans allows lenders to free capital so they can make more loans.
+
+The major agencies in the secondary market are:
+
+Fannie Mae, which buys conventional, FHA, and VA loans.
+
+Freddie Mac, which buys conventional loans.
+
+Ginnie Mae, which guarantees securities backed by FHA and VA loans.
+
+These agencies help stabilize mortgage flows and keep housing credit available.
+
+Next let us compare major loan programs.
+
+Conventional loans are not insured or guaranteed by the federal government. They generally require higher credit scores and larger down payments.
+
+FHA loans are insured by the Federal Housing Administration. FHA does not lend money. It insures lenders against losses. FHA loans allow low down payments and require mortgage insurance premiums.
+
+VA loans are guaranteed by the Department of Veterans Affairs. Eligible veterans may receive loans with no down payment and no monthly mortgage insurance.
+
+With these programs understood, we now apply mortgage math in the next lesson.
+
+⸻
+
+LESSON 13.3 SCRIPT
+
+Mortgage Math, Ratios, LTV, Amortization
+
+In this lesson, we calculate loan amounts, qualifying ratios, interest portions, and amortization.
+
+Loan to value ratio, or LTV, is calculated by dividing the loan amount by the property’s value.
+
+To calculate the loan amount, multiply the value by the LTV percentage. If a property is valued at three hundred thousand dollars and the lender offers an eighty percent LTV loan, the loan amount is two hundred forty thousand dollars.
+
+The down payment is the difference between the purchase price and the loan amount.
+
+To calculate monthly interest, multiply the annual interest rate by the current principal balance, then divide by twelve.
+
+Early payments in a fully amortized loan consist mainly of interest. As payments continue, more of each payment goes toward principal.
+
+Borrowers must meet qualifying ratios.
+
+The housing expense ratio compares the monthly housing payment, including mortgage, property taxes, insurance, and association dues, to gross monthly income.
+
+The total debt ratio compares all monthly debts, including housing expense, car loans, student loans, credit cards, and child support, to gross monthly income.
+
+These ratios help lenders determine if the borrower can handle the loan obligation.
+
+This completes Unit 13. You are now ready for the Unit 13 quiz.
+
+⸻
+
+UNIT 13 QUIZ (REDONE)
+
+Twenty exam style questions
+	1.	The promissory note
+A. pledges property as collateral
+B. is the borrower’s written promise to repay
+C. conveys title to the lender
+D. sets real estate taxes
+Answer: B
+	2.	The mortgage
+A. sets loan interest rates
+B. pledges the property as security
+C. guarantees title
+D. replaces the promissory note
+Answer: B
+	3.	The clause that requires full repayment when property is transferred is the
+A. habendum clause
+B. due on sale clause
+C. seisin clause
+D. covenant of further assurance
+Answer: B
+	4.	One discount point equals
+A. one percent of the purchase price
+B. one percent of the loan amount
+C. one eighth of one percent of the interest rate
+D. one half of the property value
+Answer: B
+	5.	One discount point typically increases lender yield by
+A. one percent
+B. one half of one percent
+C. one eighth of one percent
+D. one tenth of one percent
+Answer: C
+	6.	Origination fees are
+A. prepaid taxes
+B. charges for processing and underwriting the loan
+C. optional for FHA loans only
+D. credits from the seller
+Answer: B
+	7.	Simple interest is calculated on
+A. principal only
+B. interest plus principal
+C. the original purchase price
+D. the down payment
+Answer: A
+	8.	The Federal Reserve increases credit availability by
+A. raising the discount rate
+B. selling government securities
+C. lowering reserve requirements
+D. removing mortgage insurance
+Answer: C
+	9.	The primary mortgage market is where
+A. loans are sold
+B. loans are originated
+C. securities are guaranteed
+D. taxes are assessed
+Answer: B
+	10.	Fannie Mae purchases
+A. only conventional loans
+B. conventional, FHA, and VA loans
+C. only VA loans
+D. only second mortgages
+Answer: B
+	11.	Freddie Mac purchases
+A. FHA loans only
+B. VA loans only
+C. conventional loans
+D. construction loans
+Answer: C
+	12.	Ginnie Mae guarantees
+A. securities backed by FHA and VA loans
+B. conventional loan underwriting
+C. discount points
+D. real estate taxes
+Answer: A
+	13.	Loan to value is
+A. loan amount divided by property value
+B. down payment divided by loan amount
+C. interest rate divided by term
+D. closing costs divided by loan amount
+Answer: A
+	14.	Down payment equals
+A. loan amount minus interest
+B. purchase price minus loan amount
+C. loan amount multiplied by interest rate
+D. commission multiplied by price
+Answer: B
+	15.	Monthly interest is calculated by
+A. dividing the loan amount by twelve
+B. dividing interest by loan term
+C. multiplying principal by annual rate then dividing by twelve
+D. multiplying down payment by annual rate
+Answer: C
+	16.	Early payments in a fully amortized loan consist mostly of
+A. principal
+B. tax escrow
+C. interest
+D. private mortgage insurance
+Answer: C
+	17.	The housing expense ratio compares
+A. total monthly debts to net income
+B. housing costs to gross monthly income
+C. loan value to property value
+D. interest rate to term
+Answer: B
+	18.	The total debt ratio compares
+A. all monthly obligations to gross monthly income
+B. only mortgage interest to income
+C. housing payment plus down payment
+D. interest rate to principal
+Answer: A
+	19.	A mortgage buydown
+A. increases the interest rate
+B. temporarily or permanently reduces the interest rate
+C. eliminates lender yield
+D. removes escrow requirements
+Answer: B
+	20.	A fully amortized mortgage
+A. never reduces principal
+B. becomes interest only after year five
+C. pays the loan to zero at the end of the term
+D. requires annual lump sum payments
+Answer: C
+
+⸻
+
+If you want to continue, say next step, and I will build Unit 14   Computations and Closing Transactions in the same high quality format.
