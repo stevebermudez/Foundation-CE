@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
+import CoursesSelectPage from "@/pages/courses-select";
 import CoursesCAPage from "@/pages/courses-ca";
 import CoursesFLPage from "@/pages/courses-fl";
 import CourseViewPage from "@/pages/course-view";
@@ -20,6 +21,7 @@ function Router() {
       <main className="flex-1">
         <Switch>
           <Route path="/" component={HomePage} />
+          <Route path="/courses" component={CoursesSelectPage} />
           <Route path="/courses/ca" component={CoursesCAPage} />
           <Route path="/courses/fl" component={CoursesFLPage} />
           <Route path="/course/:id" component={CourseViewPage} />
