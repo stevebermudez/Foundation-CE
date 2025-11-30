@@ -1,0 +1,289 @@
+Great. Moving directly into **Unit 11** of the 63 hour Florida Sales Associate Pre Licensing Course for FoundationCE.
+
+This unit is **long, technical, and heavily tested**, so I will build it clean, clear, exam aligned, and Sora ready.
+
+No em dashes.
+
+You will receive:
+
+* Full **3 hour instructional unit**
+* **Three Sora ready narration scripts**
+* **Twenty question exam style quiz**
+
+---
+
+# **UNIT 11   RESIDENTIAL MORTGAGES**
+
+Target duration: 3 hours
+
+This unit covers:
+
+* Mortgage theory and terminology
+* Lien theory versus title theory
+* Promissory note and mortgage
+* Loan origination and qualification
+* Loan to value
+* Interest types
+* Amortization
+* Discount points
+* Mortgage features
+* Foreclosure and alternatives
+* Primary and secondary mortgage markets
+* FHA, VA, conventional loans
+
+---
+
+# **UNIT 11 LEARNING OBJECTIVES**
+
+By the end of this unit, the student should be able to:
+
+* Explain lien theory in Florida
+* Identify components of a mortgage loan
+* Distinguish between note and mortgage
+* Understand loan to value calculations
+* Explain adjustable rate mortgages, buydowns, discount points, and amortization
+* Compare FHA, VA, and conventional loans
+* Identify features of the primary and secondary mortgage markets
+* Recognize foreclosure processes and alternatives
+* Understand qualifying ratios and underwriting basics
+
+---
+
+# **UNIT 11 STRUCTURE**
+
+1. **Lesson 11.1**   Mortgage basics, lien theory, notes, mortgages, loan features
+2. **Lesson 11.2**   Loan types, FHA, VA, conventional, underwriting, ratios
+3. **Lesson 11.3**   LTV, discount points, amortization, foreclosure
+4. **Quiz**   Twenty questions
+
+Below are the full Sora ready scripts.
+
+---
+
+# **LESSON 11.1 SCRIPT**
+
+**Mortgage Basics, Lien Theory, Notes, Mortgages, Loan Features**
+
+> Welcome to Unit 11 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+>
+> This unit explains how residential mortgage financing works. Nearly all buyers rely on mortgage loans, so these concepts are essential for the Florida exam and for real estate practice.
+>
+> In the United States, states operate under either lien theory or title theory. Florida is a lien theory state. In lien theory, the borrower holds legal title, and the lender has a lien on the property as security for the debt. The lien is removed once the loan is paid in full.
+>
+> Now let us look at the basic components of a mortgage loan. Mortgage financing involves two separate documents: the promissory note and the mortgage.
+>
+> The promissory note is the promise to repay the loan. It specifies the loan amount, interest rate, payment schedule, and repayment terms.
+>
+> The mortgage is the security instrument. It pledges the property as collateral for the debt. If the borrower defaults, the lender may foreclose to recover the amount owed.
+>
+> A mortgage includes several important clauses. The acceleration clause allows the lender to demand full repayment if the borrower defaults. The right to reinstate allows the borrower to bring the loan current. The due on sale clause requires the loan to be paid off if the property is transferred.
+>
+> The loan origination process begins with application, underwriting, approval, and closing. The lender verifies income, employment history, credit, and the property’s value.
+>
+> Mortgage loans may carry fixed interest rates or adjustable rates. A fixed rate loan has the same interest rate for the entire loan term. Adjustable rate mortgages, or ARMs, have interest rates that change at specified intervals based on an index and margin.
+>
+> Some loans involve buydowns or temporary reductions in interest rates. A permanent buydown involves paying discount points to reduce the interest rate for the life of the loan. A temporary buydown, such as a two one buydown, lowers the rate for the first years of the loan only.
+>
+> In the next lesson, we will compare FHA, VA, and conventional loans and review underwriting standards.
+
+---
+
+# **LESSON 11.2 SCRIPT**
+
+**Loan Types, FHA, VA, Conventional, Underwriting, Ratios**
+
+> In this lesson, we discuss the major types of residential mortgage loans and the underwriting guidelines used to qualify borrowers.
+>
+> Conventional loans are loans that are not insured or guaranteed by the federal government. Borrowers usually make larger down payments and must meet lender established credit requirements.
+>
+> FHA loans are insured by the Federal Housing Administration. FHA does not lend money. Instead, it insures the lender against loss if the borrower defaults. FHA loans allow lower down payments and are often used by first time buyers. FHA charges a mortgage insurance premium that includes an upfront amount and an annual amount.
+>
+> VA loans are guaranteed by the Department of Veterans Affairs. VA loans are available to eligible veterans, active duty service members, and certain surviving spouses. VA loans may require no down payment and do not require monthly mortgage insurance.
+>
+> Lenders evaluate loan applicants using underwriting standards. Underwriting reviews the borrower’s credit, income stability, debt levels, and the value of the property.
+>
+> Important qualifying ratios for the exam include the housing expense ratio and the total debt to income ratio.
+>
+> The housing expense ratio compares the monthly housing cost to the borrower’s gross monthly income. Housing cost includes the mortgage payment, taxes, insurance, and association dues.
+>
+> The total debt ratio compares the borrower’s total monthly obligations to gross monthly income.
+>
+> FHA and conventional loans have different ratio limits. For exam purposes, know that FHA allows higher ratios than most conventional lenders.
+>
+> Lenders also consider loan to value ratio, credit score, employment history, reserves, and property appraisal.
+>
+> In the final lesson, we calculate LTV, discount points, amortization, and cover foreclosure procedures.
+
+---
+
+# **LESSON 11.3 SCRIPT**
+
+**LTV, Discount Points, Amortization, Foreclosure**
+
+> In this last lesson for Unit 11, we apply mortgage math and discuss what happens if a borrower defaults.
+>
+> Loan to value ratio, or LTV, is the loan amount divided by the property value. If a buyer purchases a home for three hundred thousand dollars and borrows two hundred forty thousand dollars, the LTV is eighty percent.
+>
+> Discount points are fees paid upfront to reduce the interest rate. One discount point equals one percent of the loan amount. As a general estimate, one point typically lowers the interest rate by one eighth of a percent, though actual results vary.
+>
+> Amortization refers to the repayment of a loan through regular payments that include both principal and interest. In a fully amortized loan, each payment reduces the principal until the loan is paid off at the end of the term.
+>
+> Early payments in an amortized loan consist mostly of interest. As time passes, more of each payment goes toward principal.
+>
+> Now let us discuss foreclosure. Foreclosure is the legal process in which a lender forces the sale of property to satisfy a debt. Foreclosure proceeds through several steps, including notice of default, acceleration, sale, and distribution of proceeds.
+>
+> In some cases, borrowers may seek alternatives to foreclosure. These include repayment plans, loan modifications, short sales, and deeds in lieu of foreclosure.
+>
+> The deficiency judgment is important for exam purposes. If the foreclosure sale does not generate enough money to cover the outstanding loan balance and the lender’s expenses, the lender may seek a deficiency judgment from the borrower to recover the remaining amount.
+>
+> With these key topics completed, you are now ready for the Unit 11 quiz.
+
+---
+
+# **UNIT 11 QUIZ**
+
+Twenty exam style questions
+
+1. Florida is a
+   A. title theory state
+   B. lien theory state
+   C. hybrid theory state
+   D. deed theory state
+   **Answer: B**
+
+2. The promissory note
+   A. pledges the property as collateral
+   B. is the borrower’s written promise to repay the loan
+   C. is recorded in the public records
+   D. conveys title
+   **Answer: B**
+
+3. The mortgage
+   A. transfers title to the lender
+   B. pledges the property as security
+   C. sets the interest rate
+   D. replaces the promissory note
+   **Answer: B**
+
+4. The clause that allows a lender to demand full repayment after default is the
+   A. habendum clause
+   B. acceleration clause
+   C. seisin clause
+   D. granting clause
+   **Answer: B**
+
+5. An adjustable rate mortgage
+   A. has a fixed interest rate for the entire term
+   B. changes interest rates at set intervals based on an index and margin
+   C. contains no interest payments
+   D. can never adjust upward
+   **Answer: B**
+
+6. FHA
+   A. lends money directly to borrowers
+   B. insures lenders against losses
+   C. guarantees loans
+   D. enforces zoning laws
+   **Answer: B**
+
+7. VA loans
+   A. require monthly mortgage insurance
+   B. are insured by FHA
+   C. may require no down payment
+   D. are only for retired veterans
+   **Answer: C**
+
+8. A conventional loan is
+   A. insured by FHA
+   B. guaranteed by VA
+   C. not backed by the federal government
+   D. only available through credit unions
+   **Answer: C**
+
+9. The housing expense ratio compares
+   A. total debt to net income
+   B. monthly housing cost to gross income
+   C. the down payment to property value
+   D. loan costs to closing costs
+   **Answer: B**
+
+10. The total debt ratio includes
+    A. housing costs only
+    B. credit card debt, car loans, and housing costs
+    C. down payment plus taxes
+    D. closing costs
+    **Answer: B**
+
+11. Loan to value ratio equals
+    A. loan amount divided by property value
+    B. down payment divided by loan amount
+    C. interest rate divided by property value
+    D. closing costs divided by loan amount
+    **Answer: A**
+
+12. One discount point equals
+    A. one percent of the purchase price
+    B. one percent of the loan amount
+    C. ten percent of the loan amount
+    D. one half of one percent of the property value
+    **Answer: B**
+
+13. In a fully amortized loan
+    A. interest only is paid
+    B. payments are interest only for the first half of the loan
+    C. the loan balance never reaches zero
+    D. each payment reduces principal
+    **Answer: D**
+
+14. Early payments in an amortized loan
+    A. consist mostly of interest
+    B. consist mostly of principal
+    C. are equal parts principal and interest
+    D. are all applied to the down payment
+    **Answer: A**
+
+15. A short sale occurs when
+    A. the borrower pays off the loan early
+    B. the lender modifies the loan
+    C. the property is sold for less than the loan balance with lender approval
+    D. the loan term is reduced
+    **Answer: C**
+
+16. A deficiency judgment
+    A. occurs when the lender owes the borrower money after foreclosure
+    B. is prohibited in Florida
+    C. is a claim for the unpaid balance after foreclosure
+    D. applies only to FHA loans
+    **Answer: C**
+
+17. The due on sale clause
+    A. prevents foreclosure
+    B. allows the loan to be assumed without approval
+    C. requires the borrower to pay the loan in full if the property is transferred
+    D. applies only to VA loans
+    **Answer: C**
+
+18. FHA loans require
+    A. an upfront mortgage insurance premium
+    B. no mortgage insurance
+    C. a down payment of at least 20 percent
+    D. a veteran’s certificate
+    **Answer: A**
+
+19. VA guarantees
+    A. the borrower’s employment
+    B. part of the loan for eligible veterans
+    C. the home will appraise over value
+    D. the interest rate
+    **Answer: B**
+
+20. The primary mortgage market consists of
+    A. agencies that buy loans from lenders
+    B. lenders who originate loans
+    C. investors who buy mortgage backed securities
+    D. insurance companies only
+    **Answer: B**
+
+---
+
+If you want to continue, say **next step**, and I will build **Unit 12   The Real Estate Market and Analysis** with full scripts and quiz.

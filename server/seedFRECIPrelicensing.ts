@@ -1458,8 +1458,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit10Questions.length} questions to Unit 10 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 11-19)
-    for (let i = 10; i < units.length; i++) {
+    // Unit 11 - Residential Mortgages (20 questions)
+    const unit11Questions = [
+      { text: "Florida is a", options: ["A. title theory state", "B. lien theory state", "C. hybrid theory state", "D. deed theory state"], correctAnswer: "B", explanation: "In lien theory, the borrower holds legal title and the lender has a lien on the property." },
+      { text: "The promissory note", options: ["A. pledges the property as collateral", "B. is the borrower's written promise to repay the loan", "C. is recorded in the public records", "D. conveys title"], correctAnswer: "B", explanation: "The promissory note is the promise to repay the loan specifying amount, rate, and terms." },
+      { text: "The mortgage", options: ["A. transfers title to the lender", "B. pledges the property as security", "C. sets the interest rate", "D. replaces the promissory note"], correctAnswer: "B", explanation: "The mortgage is the security instrument pledging property as collateral for the debt." },
+      { text: "The clause that allows a lender to demand full repayment after default is the", options: ["A. habendum clause", "B. acceleration clause", "C. seisin clause", "D. granting clause"], correctAnswer: "B", explanation: "The acceleration clause allows the lender to demand full repayment if the borrower defaults." },
+      { text: "An adjustable rate mortgage", options: ["A. has a fixed interest rate for the entire term", "B. changes interest rates at set intervals based on an index and margin", "C. contains no interest payments", "D. can never adjust upward"], correctAnswer: "B", explanation: "ARMs have interest rates that change at specified intervals based on an index and margin." },
+      { text: "FHA", options: ["A. lends money directly to borrowers", "B. insures lenders against losses", "C. guarantees loans", "D. enforces zoning laws"], correctAnswer: "B", explanation: "FHA insures lenders against loss if the borrower defaults." },
+      { text: "VA loans", options: ["A. require monthly mortgage insurance", "B. are insured by FHA", "C. may require no down payment", "D. are only for retired veterans"], correctAnswer: "C", explanation: "VA loans are guaranteed by the Department of Veterans Affairs and may require no down payment." },
+      { text: "A conventional loan is", options: ["A. insured by FHA", "B. guaranteed by VA", "C. not backed by the federal government", "D. only available through credit unions"], correctAnswer: "C", explanation: "Conventional loans are not insured or guaranteed by the federal government." },
+      { text: "The housing expense ratio compares", options: ["A. total debt to net income", "B. monthly housing cost to gross income", "C. the down payment to property value", "D. loan costs to closing costs"], correctAnswer: "B", explanation: "The housing expense ratio compares monthly housing cost to borrower's gross monthly income." },
+      { text: "The total debt ratio includes", options: ["A. housing costs only", "B. credit card debt, car loans, and housing costs", "C. down payment plus taxes", "D. closing costs"], correctAnswer: "B", explanation: "The total debt ratio compares all monthly obligations to gross monthly income." },
+      { text: "Loan to value ratio equals", options: ["A. loan amount divided by property value", "B. down payment divided by loan amount", "C. interest rate divided by property value", "D. closing costs divided by loan amount"], correctAnswer: "A", explanation: "LTV is the loan amount divided by the property value." },
+      { text: "One discount point equals", options: ["A. one percent of the purchase price", "B. one percent of the loan amount", "C. ten percent of the loan amount", "D. one half of one percent of the property value"], correctAnswer: "B", explanation: "One discount point equals one percent of the loan amount." },
+      { text: "In a fully amortized loan", options: ["A. interest only is paid", "B. payments are interest only for the first half of the loan", "C. the loan balance never reaches zero", "D. each payment reduces principal"], correctAnswer: "D", explanation: "In a fully amortized loan each payment reduces the principal until the loan is paid off." },
+      { text: "Early payments in an amortized loan", options: ["A. consist mostly of interest", "B. consist mostly of principal", "C. are equal parts principal and interest", "D. are all applied to the down payment"], correctAnswer: "A", explanation: "Early payments in an amortized loan consist mostly of interest." },
+      { text: "A short sale occurs when", options: ["A. the borrower pays off the loan early", "B. the lender modifies the loan", "C. the property is sold for less than the loan balance with lender approval", "D. the loan term is reduced"], correctAnswer: "C", explanation: "A short sale is when property is sold for less than the loan balance with lender approval." },
+      { text: "A deficiency judgment", options: ["A. occurs when the lender owes the borrower money after foreclosure", "B. is prohibited in Florida", "C. is a claim for the unpaid balance after foreclosure", "D. applies only to FHA loans"], correctAnswer: "C", explanation: "A deficiency judgment is a claim for the unpaid balance after foreclosure." },
+      { text: "The due on sale clause", options: ["A. prevents foreclosure", "B. allows the loan to be assumed without approval", "C. requires the borrower to pay the loan in full if the property is transferred", "D. applies only to VA loans"], correctAnswer: "C", explanation: "The due on sale clause requires the loan to be paid off if the property is transferred." },
+      { text: "FHA loans require", options: ["A. an upfront mortgage insurance premium", "B. no mortgage insurance", "C. a down payment of at least 20 percent", "D. a veteran's certificate"], correctAnswer: "A", explanation: "FHA loans require an upfront mortgage insurance premium plus annual amounts." },
+      { text: "VA guarantees", options: ["A. the borrower's employment", "B. part of the loan for eligible veterans", "C. the home will appraise over value", "D. the interest rate"], correctAnswer: "B", explanation: "VA guarantees part of the loan for eligible veterans." },
+      { text: "The primary mortgage market consists of", options: ["A. agencies that buy loans from lenders", "B. lenders who originate loans", "C. investors who buy mortgage backed securities", "D. insurance companies only"], correctAnswer: "B", explanation: "The primary mortgage market consists of lenders who originate loans." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit11Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[10].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit11Questions.length} questions to Unit 11 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 12-19)
+    for (let i = 11; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1477,7 +1515,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 11-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 12-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
