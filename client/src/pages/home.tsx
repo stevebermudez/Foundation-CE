@@ -42,97 +42,9 @@ export default function HomePage() {
     <div>
       <Hero
         onBrowseCourses={() => setLocation("/courses/fl")}
-        onGetStarted={() => {
-          if (freci) {
-            handleEnroll(freci.id);
-          } else {
-            setLocation("/courses/fl");
-          }
-        }}
+        onGetStarted={() => setLocation("/courses/fl")}
       />
       <TrustBadges />
-
-      {/* Featured Prelicensing Course - always show even if loading */}
-      <section className="py-16 px-4 bg-gradient-to-r from-blue-50 to-indigo-50">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3">
-              Florida Sales Associate Prelicensing
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Complete your 63-hour requirement and get licensed in real estate
-            </p>
-          </div>
-          {freci ? (
-            <Card className="border-2 border-blue-200 shadow-lg hover-elevate">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-2xl">{freci.title}</CardTitle>
-                    <CardDescription className="mt-2 text-base">{freci.description}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid sm:grid-cols-4 gap-6 mb-6">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Duration</p>
-                      <p className="font-semibold">{freci.hoursRequired} Hours</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Units</p>
-                      <p className="font-semibold">19 Units</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 text-blue-600">✓</div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Practice Exams</p>
-                      <p className="font-semibold">380 Questions</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Price</p>
-                      <p className="font-semibold">${(freci.price / 100).toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <Button 
-                    size="lg"
-                    onClick={() => handleEnroll(freci.id)}
-                    data-testid="button-buy-course"
-                  >
-                    Buy Now - ${(freci.price / 100).toFixed(2)}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => setLocation(`/course/${freci.id}`)}
-                    data-testid="button-view-course"
-                  >
-                    View Course Details
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-2 border-blue-200 shadow-lg">
-              <CardContent className="pt-6">
-                <p className="text-center text-muted-foreground">Loading course information...</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </section>
-
       <FeaturesSection />
     </div>
   );
