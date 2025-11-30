@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Shield, CheckCircle } from "lucide-react";
+import { ArrowRight, Zap, Shield, CheckCircle, Smartphone } from "lucide-react";
 import heroImage from "@assets/generated_images/professional_real_estate_training_classroom.png";
 
 interface HeroProps {
@@ -31,6 +31,10 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
             <Badge className="bg-white/15 text-white border-white/25 backdrop-blur-sm hover:bg-white/20 transition-colors">
               <Shield className="h-3 w-3 mr-1" />
               Compliance Tracking
+            </Badge>
+            <Badge className="bg-white/15 text-white border-white/25 backdrop-blur-sm hover:bg-white/20 transition-colors">
+              <Smartphone className="h-3 w-3 mr-1" />
+              Mobile Optimized
             </Badge>
           </div>
 
