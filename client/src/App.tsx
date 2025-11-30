@@ -9,6 +9,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HomePage from "@/pages/home";
 import CoursesPage from "@/pages/courses";
+import CaliforniaCourses from "@/pages/courses-ca";
+import FloridaCourses from "@/pages/courses-fl";
 import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
 import ResourcesPage from "@/pages/resources";
@@ -23,6 +25,12 @@ function Router({ selectedState, onStateChange }: { selectedState: "CA" | "FL"; 
       </Route>
       <Route path="/courses">
         <CoursesPage selectedState={selectedState} />
+      </Route>
+      <Route path="/courses/ca">
+        <CaliforniaCourses />
+      </Route>
+      <Route path="/courses/fl">
+        <FloridaCourses />
       </Route>
       <Route path="/course/:id">
         <CourseViewPage />

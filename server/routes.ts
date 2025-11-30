@@ -74,11 +74,16 @@ export async function registerRoutes(
 
   // Course Bundle Routes
   app.get("/api/bundles", async (req, res) => {
-    const bundles = await storage.getCourseBundles({
-      state: req.query.state as string,
-      licenseType: req.query.licenseType as string,
-    });
-    res.json(bundles);
+    try {
+      const bundles = await storage.getCourseBundles({
+        state: req.query.state as string,
+        licenseType: req.query.licenseType as string,
+      });
+      res.json(bundles);
+    } catch (err) {
+      console.error("Error fetching bundles:", err);
+      res.status(500).json({ error: "Failed to fetch bundles" });
+    }
   });
 
   app.get("/api/bundles/:id", async (req, res) => {
