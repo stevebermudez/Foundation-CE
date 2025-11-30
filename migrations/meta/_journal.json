@@ -8,6 +8,13 @@
       "when": 1764490336143,
       "tag": "0000_normal_rick_jones",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1764513879165,
+      "tag": "0001_right_electro",
+      "breakpoints": true
     }
   ]
 }

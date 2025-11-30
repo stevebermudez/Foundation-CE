@@ -25,17 +25,22 @@ A full-stack real estate licensing education platform for salespersons and broke
 - **Styling**: Tailwind CSS + shadcn components
 
 ## Course Classification System
-The platform now uses comprehensive course attributes to distinguish requirements:
+The platform uses comprehensive course attributes to distinguish between ALL factors:
 
 **Classification Fields:**
+- `productType`: "RealEstate" or "Insurance"
 - `state`: "CA", "FL"
-- `licenseType`: "Sales Associate", "Broker", "Sales Associate & Broker"
+- `licenseType`: "Sales Associate", "Broker", "Sales Associate & Broker", etc.
 - `requirementCycleType`: "Post-Licensing" or "Continuing Education (Renewal)"
 - `requirementBucket`: "Core Law", "Ethics & Business Practices", "Specialty / Elective", "Post-Licensing Mandatory"
 - `deliveryMethod`: "Self-Paced Online", "Live Webinar", "Classroom"
-- `difficultyLevel`: "Basic", "Intermediate", "Advanced"
-- `sku`: Unique course code (e.g., "FL-CE-14PKG")
+- `difficultyLevel`: "Basic", "Intermediate", "Advanced" (optional)
+- `sku`: Unique course code (e.g., "FL-RE-CE-14PKG", "CA-RE-CE-45PKG")
 - `renewalApplicable`: Boolean (true for renewal, false for prelicense)
+
+**Product Type Separation:**
+- Real Estate courses: FL, CA with state-specific requirements
+- Insurance courses: Framework ready for expansion (separate pricing, requirements, renewal cycles)
 
 **Florida CE Structure:**
 - **Post-Licensing (First Renewal):**
@@ -60,7 +65,9 @@ Courses display with color-coded requirement buckets and detailed classification
 
 ## Recent Changes
 
-### Florida Complete Catalog Buildout
+### Complete Catalog Buildout (Real Estate - Florida & California)
+
+**Florida Real Estate CE:**
 - **Post-Licensing Packages:**
   - Sales Associate: 45 hours, $59.99
   - Broker: 60 hours, $69.99
@@ -68,17 +75,21 @@ Courses display with color-coded requirement buckets and detailed classification
   - 3 hours Core Law
   - 3 hours Ethics & Business Practices
   - 8 hours Specialty/Elective
-- **À la Carte Individual Courses:** $15 each
-  - 10 elective courses (3-8 hours each)
-  - Core Law (3h)
-  - Ethics (3h)
-- **Seed File:** `server/seedFloridaCatalog.ts` (ready-to-use)
-- **UI:** CourseDisplay component with color-coded requirement buckets
-- **Pages:** /courses/fl for Florida (color-coded display), /courses/ca for California
+- **À la Carte:** $15 per course (13 courses)
+- **SKU Format:** FL-RE-[CE/PL]-[TYPE]-[HOURS]
 
-### Classification System
-- State, License Type, Requirement Cycle Type, Requirement Bucket, Delivery Method, Difficulty Level, SKU
-- Enables filtering and display of courses by requirement
+**California Real Estate CE:**
+- **CE Renewal Package:** 45 hours (quadrennial), $39.99
+  - 7 mandatory courses (18 hours total)
+  - 7 elective courses (27+ hours available)
+- **À la Carte:** $15 per course (14 courses)
+- **SKU Format:** CA-RE-CE-[TYPE]-[HOURS]
+
+### Implementation
+- **Seed Files:** `server/seedFloridaCatalog.ts`, `server/seedCaliforniaCatalog.ts`
+- **UI Component:** CourseDisplay with product type, state, license type, cycle type, bucket, delivery, and pricing
+- **Color-Coded Display:** Red (Core Law), Blue (Ethics), Purple (Specialty)
+- **Pages:** /courses/fl for Florida, /courses/ca for California
 
 ## User Preferences
 - Full-stack JavaScript application

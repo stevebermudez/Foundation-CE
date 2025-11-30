@@ -27,15 +27,16 @@ export const courses = pgTable("courses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: varchar("title").notNull(),
   description: text("description"),
+  productType: varchar("product_type").notNull(), // "RealEstate" or "Insurance"
   state: varchar("state").notNull(), // "CA", "FL"
-  licenseType: varchar("license_type").notNull(), // "Sales Associate", "Broker", "Sales Associate & Broker"
+  licenseType: varchar("license_type").notNull(), // "Sales Associate", "Broker", "Sales Associate & Broker", etc.
   requirementCycleType: varchar("requirement_cycle_type").notNull(), // "Post-Licensing" or "Continuing Education (Renewal)"
-  requirementBucket: varchar("requirement_bucket").notNull(), // "Core Law", "Ethics & Business Practices", "Specialty / Elective", "Post-Licensing Mandatory", "Package"
+  requirementBucket: varchar("requirement_bucket").notNull(), // "Core Law", "Ethics & Business Practices", "Specialty / Elective", "Post-Licensing Mandatory"
   hoursRequired: integer("hours_required").notNull(),
   deliveryMethod: varchar("delivery_method").default("Self-Paced Online"), // "Self-Paced Online", "Live Webinar", "Classroom"
   difficultyLevel: varchar("difficulty_level"), // "Basic", "Intermediate", "Advanced"
   price: integer("price").notNull(), // in cents (5999 = $59.99)
-  sku: varchar("sku").unique(), // course code
+  sku: varchar("sku").notNull(), // course code (unique per product type + state)
   renewalApplicable: integer("renewal_applicable").default(1), // true for renewal, false for prelicense
   renewalPeriodYears: integer("renewal_period_years"), // 2 for FL, 4 for CA
   createdAt: timestamp("created_at").defaultNow(),
@@ -143,6 +144,7 @@ export const courseBundles = pgTable("course_bundles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   description: text("description"),
+  productType: varchar("product_type").notNull(), // "RealEstate" or "Insurance"
   state: varchar("state").notNull(), // "CA", "TX", etc.
   licenseType: varchar("license_type").notNull(), // "salesperson", "broker"
   totalHours: integer("total_hours").notNull(),
