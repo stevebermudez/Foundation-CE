@@ -251,8 +251,11 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
   // Transform database courses to UI format, use real courses if available
   const courses = useMemo(() => {
     if (dbCourses.length > 0) {
-      return dbCourses.map(transformCourse);
+      const transformed = dbCourses.map(transformCourse);
+      console.log(`[CourseCatalog] Transformed ${transformed.length} courses from DB:`, transformed.map(c => c.title));
+      return transformed;
     }
+    console.log(`[CourseCatalog] No DB courses, using mock courses for state ${selectedState}`);
     // Fallback to mock courses filtered by selected state
     return mockCourses.filter(c => c.state === selectedState);
   }, [dbCourses, selectedState]);

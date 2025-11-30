@@ -1,0 +1,320 @@
+Alright, onward to **Unit 6**.
+
+I will build the full **Violations of License Law, Penalties and Procedures** unit for your 63 hour Florida Sales Associate course:
+
+* About **3 hours of instruction**
+* **3 Sora ready lesson scripts**
+* **20 question multiple choice quiz** that feels like the state exam
+
+---
+
+## UNIT 6   VIOLATIONS OF LICENSE LAW, PENALTIES AND PROCEDURES
+
+Target time in course: **3 hours**
+
+Core sources in the real world for this content are:
+
+* Chapter 475, Florida Statutes, particularly sections on discipline and the Recovery Fund
+* Chapter 455, Florida Statutes, professional regulation
+* Rule Chapter 61J2, Florida Administrative Code, disciplinary guidelines and citations
+
+### Learning objectives
+
+By the end of Unit 6, the student should be able to:
+
+* Identify conduct that violates Florida real estate license law
+* Distinguish criminal, civil, and administrative penalties
+* Describe the step by step disciplinary process from complaint to final order
+* Explain the role of probable cause, informal hearing, formal hearing, and judicial review
+* Recognize minor violations that may result in a citation or notice of noncompliance
+* Explain the purpose and limits of the Real Estate Recovery Fund
+* Apply penalties and procedures to exam style scenarios
+
+---
+
+## Unit 6 structure for FoundationCE
+
+Use this layout in your LMS:
+
+1. **Lesson 6.1**   Types of violations and related laws
+2. **Lesson 6.2**   Disciplinary process and procedures
+3. **Lesson 6.3**   Penalties, disciplinary guidelines, Real Estate Recovery Fund
+4. **Unit 6 quiz**   20 questions
+
+Each lesson script below is written so you can drop it straight into Sora for narration.
+
+---
+
+## LESSON 6.1 SCRIPT
+
+**Types of Violations and Related Laws**
+
+> Welcome to Unit 6 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+>
+> In this unit, we deal with the uncomfortable side of real estate, what happens when licensees break the rules. The goal is not to scare you, but to show you exactly where the lines are so you never cross them by accident.
+>
+> Florida regulates real estate under Chapter 475 and Chapter 455 of the Florida Statutes, along with Rule Chapter 61J2 of the Florida Administrative Code. Violations of these laws and rules can result in administrative penalties, civil liability, and even criminal charges.
+>
+> A violation usually falls into one or more categories:
+>
+> * Misrepresentation or fraud
+> * Culpable negligence
+> * Commingling or conversion of escrow funds
+> * False or misleading advertising
+> * Failure to disclose material facts
+> * Unlicensed practice or assisting unlicensed practice
+> * Failure to maintain records
+> * Failure to comply with escrow and trust account rules
+> * Criminal offenses related to real estate or moral turpitude
+>
+> **Misrepresentation** involves making a false statement of a material fact. For example, advertising that a property has a new roof when the roof is ten years old is misrepresentation. Misrepresentation can be intentional fraud or negligent, but either way it is a violation.
+>
+> **Culpable negligence** is more than simple carelessness. It is serious carelessness that shows a reckless disregard for the safety or rights of others. An example is leaving a property unattended with doors unlocked and valuables exposed during a showing.
+>
+> **Commingling** is mixing client funds with the broker’s personal or business funds. **Conversion** is using client funds for personal or business purposes without authorization. If a broker uses escrow money to pay office rent, that is conversion, and it is one of the most serious violations.
+>
+> **False or misleading advertising** includes blind ads, bait and switch tactics, and any ad that creates a false impression about a property, a licensee, or a brokerage.
+>
+> **Unlicensed practice** occurs when someone performs real estate services for another for compensation without holding a valid, active license. A licensed broker or sales associate who helps or cooperates with unlicensed practice also risks discipline.
+>
+> Some violations are also crimes. For example, practicing without a license can be a criminal offense. Certain types of fraud and theft can lead to criminal prosecution in addition to administrative penalties.
+>
+> The exam often gives a scenario and asks whether a violation has occurred and which rule or statute applies. As you study, train yourself to spot misrepresentation, escrow problems, unlicensed activity, and dishonest conduct.
+>
+> In the next lesson, we will walk through the disciplinary process, from a complaint to a final order.
+
+---
+
+## LESSON 6.2 SCRIPT
+
+**Disciplinary Process and Procedures**
+
+> In this lesson, we break down the path a case takes from an initial complaint to final discipline. The order matters, and the exam will test the sequence.
+>
+> Step one is the **complaint**. A complaint is an allegation that a licensee has violated a statute or rule. Complaints may come from customers, other licensees, or other agencies. The Department of Business and Professional Regulation screens the complaint to determine whether it is legally sufficient.
+>
+> A complaint is legally sufficient if it contains facts that, if true, would be a violation of law or rule. If the complaint is not legally sufficient, it may be dismissed.
+>
+> Step two is the **investigation**. If the complaint is legally sufficient, an investigation is opened. Investigators may interview witnesses, obtain documents, and gather evidence. The subject of the investigation may be notified, and a copy of the complaint may be sent to the licensee, unless confidentiality is required.
+>
+> When the investigation is complete, the case moves to the **probable cause** stage. A probable cause panel, usually made up of FREC members, reviews the investigative report and decides whether there is probable cause to believe a violation has occurred. If the panel finds no probable cause, the case is dismissed or closed.
+>
+> If probable cause is found, the Department files a **formal complaint**. The formal complaint is an administrative pleading that states the charges and the facts that support them. The licensee receives a copy and has the right to respond.
+>
+> The licensee then chooses between two types of hearings.
+>
+> * An **informal hearing** before FREC when the licensee does not dispute the facts but wants to be heard on the penalty.
+> * A **formal hearing** before an administrative law judge when the licensee disputes material facts. The judge hears evidence and issues a recommended order.
+>
+> After the hearing, FREC issues a **final order**. The final order states the findings, the decision, and any disciplinary action. The licensee may appeal the final order by filing for **judicial review** in the appropriate court within the allowed time.
+>
+> At several points in the process, minor violations may be handled with a **notice of noncompliance** or a **citation** instead of a full formal complaint. A notice of noncompliance is used for minor first time violations that can be corrected quickly. A citation is a type of administrative fine that resolves certain listed violations without a full disciplinary hearing if the licensee does not dispute it.
+>
+> The key for the exam is to remember the order of events:
+>
+> 1. Complaint
+> 2. Investigation
+> 3. Probable cause
+> 4. Formal complaint and hearing
+> 5. Final order
+> 6. Judicial review
+>
+> In the final lesson, we will examine the range of penalties and the Real Estate Recovery Fund.
+
+---
+
+## LESSON 6.3 SCRIPT
+
+**Penalties, Disciplinary Guidelines and the Real Estate Recovery Fund**
+
+> In this final lesson for Unit 6, we will look at the menu of penalties and the Real Estate Recovery Fund.
+>
+> FREC has authority to impose several types of **administrative penalties**. From least severe to most severe, these include:
+>
+> * Notice of noncompliance for minor first time violations
+> * Citation for certain listed violations, usually with a set fine
+> * Reprimand
+> * Administrative fine
+> * Probation
+> * Suspension
+> * Revocation or denial of licensure
+>
+> Administrative fines can be significant. The law allows FREC to impose fines per offense, subject to limits that are set by statute and rule. For the exam, you should know that fines can reach thousands of dollars per violation and that serious violations such as conversion of escrow funds often result in both fines and license suspension or revocation.
+>
+> **Probation** means the licensee can continue to practice subject to conditions, such as additional education, supervision, or regular reporting.
+>
+> **Suspension** temporarily removes the right to practice for a set period. When the suspension ends and the license is reinstated, the licensee may resume practice if all conditions are satisfied.
+>
+> **Revocation** permanently removes the license, although in some cases the law may allow re application after a significant period or under special conditions. A license that is revoked or that becomes null and void no longer authorizes any real estate services.
+>
+> Now let us look at the **Real Estate Recovery Fund**. The Recovery Fund exists to reimburse members of the public who have suffered monetary losses due to the dishonesty of a real estate licensee in a real estate transaction. The Fund is financed by a portion of license fees and certain fines.
+>
+> To recover from the Fund, an injured party must usually first obtain a civil judgment against a licensee and show that they were unable to collect the judgment. The Fund does not pay punitive damages or attorney fees in most cases, and it does not cover losses from a licensee acting as a principal in their own account in most situations.
+>
+> The Fund has maximum payout limits per transaction and per licensee, and it does not reimburse for non monetary injuries. Once the Fund pays a claim on behalf of a licensee, the license of that licensee is usually subject to automatic suspension until the Fund is repaid, except in limited situations such as a broker who followed a lawful escrow disbursement order.
+>
+> On the exam, watch for questions that test whether a situation qualifies for payment from the Recovery Fund and what happens to the license after the Fund pays. Focus on these points:
+>
+> * Recovery Fund is a last resort for monetary damages
+> * Judgment first, then attempt to collect, then Recovery Fund
+> * Limits apply per transaction and per licensee
+> * Payment usually triggers suspension until reimbursement
+>
+> That concludes Unit 6. You are now ready to complete the Unit 6 quiz.
+
+---
+
+## UNIT 6 QUIZ
+
+**20 multiple choice questions**
+
+1. The primary purpose of disciplinary action under Florida real estate license law is to
+   A. punish licensees
+   B. protect the public
+   C. increase state revenue
+   D. reduce the number of licensees
+   **Answer:** B
+
+2. Commingling occurs when a broker
+   A. mixes escrow funds with personal or business funds
+   B. deposits escrow funds in a title company
+   C. places a sign on a property without permission
+   D. pays commission to a cooperating broker
+   **Answer:** A
+
+3. Conversion occurs when a broker
+   A. returns escrow funds to the wrong party by mistake
+   B. deposits escrow funds in a trust account
+   C. uses client funds for personal or business expenses without authorization
+   D. changes from one broker to another
+   **Answer:** C
+
+4. Practicing real estate without a license is
+   A. a minor administrative infraction only
+   B. a criminal offense and a violation of license law
+   C. allowed if supervised by a broker
+   D. permitted for out of state brokers
+   **Answer:** B
+
+5. Which of the following is the first step in the disciplinary process
+   A. probable cause determination
+   B. filing of a formal complaint
+   C. investigation
+   D. receipt of a legally sufficient complaint
+   **Answer:** D
+
+6. A complaint is legally sufficient when it
+   A. is in writing and notarized
+   B. contains facts that, if true, would be a violation of law or rule
+   C. is submitted by another licensee
+   D. is reviewed by the governor
+   **Answer:** B
+
+7. After a complaint is found legally sufficient, the next step is
+   A. judicial review
+   B. filing a lawsuit in civil court
+   C. an investigation
+   D. immediate suspension of the license
+   **Answer:** C
+
+8. The probable cause panel
+   A. conducts the initial investigation
+   B. issues the final order
+   C. determines whether there is sufficient evidence of a violation
+   D. pays claims from the Recovery Fund
+   **Answer:** C
+
+9. An informal hearing before FREC is used when
+   A. the licensee disputes material facts
+   B. the licensee admits the facts but wants to be heard on the penalty
+   C. the case involves criminal charges
+   D. the complainant demands a jury trial
+   **Answer:** B
+
+10. A formal hearing is conducted by
+    A. the governor
+    B. the Real Estate Recovery Fund
+    C. an administrative law judge
+    D. a county court judge
+    **Answer:** C
+
+11. A final order in a disciplinary case is issued by
+    A. the administrative law judge
+    B. the Department of State
+    C. the Florida Real Estate Commission
+    D. the county clerk
+    **Answer:** C
+
+12. A notice of noncompliance is most likely used for
+    A. conversion of escrow funds
+    B. serious criminal misconduct
+    C. a minor first time violation that can be corrected
+    D. unlicensed practice
+    **Answer:** C
+
+13. A citation issued by DBPR
+    A. is a criminal charge
+    B. is a type of administrative fine for certain listed violations
+    C. automatically revokes a license
+    D. cannot be disputed
+    **Answer:** B
+
+14. Which of the following is a possible administrative penalty that FREC may impose
+    A. incarceration
+    B. probation
+    C. revocation followed by imprisonment
+    D. only a warning, never suspension
+    **Answer:** B
+
+15. Suspension of a real estate license means
+    A. the license is null and void and cannot be reinstated
+    B. the licensee may practice only commercial real estate
+    C. the licensee temporarily loses the right to practice for a set period
+    D. the licensee may practice only under supervision
+    **Answer:** C
+
+16. The Real Estate Recovery Fund is designed to
+    A. pay commissions to cooperating brokers
+    B. reimburse licensees for business losses
+    C. reimburse members of the public who suffer monetary damages because of licensee misconduct in certain situations
+    D. pay advertising expenses for the Commission
+    **Answer:** C
+
+17. Before a claimant may receive payment from the Real Estate Recovery Fund, the claimant usually must
+    A. file a complaint with the MLS
+    B. obtain a civil judgment and show that collection was attempted and failed
+    C. request an informal hearing
+    D. apply to the local association of Realtors
+    **Answer:** B
+
+18. Payment from the Real Estate Recovery Fund on behalf of a licensee generally results in
+    A. promotion of the licensee
+    B. automatic suspension of the license until the Fund is repaid
+    C. no effect on the licensee’s status
+    D. automatic renewal of the license
+    **Answer:** B
+
+19. Which of the following is most likely to result in revocation of a real estate license
+    A. Failing to complete continuing education on time one time
+    B. Minor record keeping errors
+    C. Conversion of escrow funds and serious fraud
+    D. Failure to return a phone call
+    **Answer:** C
+
+20. Judicial review of a final order in a disciplinary case is obtained by
+    A. filing a request with the Recovery Fund
+    B. filing an appeal in the appropriate court within the allowed time
+    C. appealing to the MLS
+    D. sending a letter directly to FREC
+    **Answer:** B
+
+---
+
+You now have Units 1 through 6 fully structured with narration scripts and quizzes for FoundationCE.
+
+If you want to keep rolling, the natural next piece is:
+
+**Unit 7   Federal and State Laws Pertaining to Real Estate**
+(fair housing, ADA, antitrust, RESPA, landlord tenant, and so on)
+
+If you say “next step” again, I will build out Unit 7 in the same format.
