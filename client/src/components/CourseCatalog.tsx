@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -12,6 +13,7 @@ import {
 import CourseCard, { type Course } from "./CourseCard";
 import FilterSidebar, { type FilterState } from "./FilterSidebar";
 import { Search, SlidersHorizontal, LayoutGrid, List } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
 import flRealEstate from "@assets/generated_images/florida_beachfront_properties.png";
@@ -21,7 +23,28 @@ interface CourseCatalogProps {
   selectedState: "CA" | "FL";
 }
 
-// todo: remove mock functionality
+// Transform database course to UI course
+function transformCourse(dbCourse: any): Course {
+  return {
+    id: dbCourse.id,
+    title: dbCourse.title,
+    description: dbCourse.description || "",
+    thumbnail: dbCourse.productType === "Insurance" ? insuranceImg : (dbCourse.state === "CA" ? caRealEstate : flRealEstate),
+    category: dbCourse.requirementBucket || "Course",
+    ceHours: dbCourse.hoursRequired || 0,
+    state: dbCourse.state as "CA" | "FL",
+    profession: (dbCourse.productType === "Insurance" ? "insurance" : "real_estate") as any,
+    educationType: (dbCourse.requirementCycleType === "Post-Licensing" ? "pre_license" : "ce") as any,
+    realEstateType: dbCourse.licenseType?.toLowerCase().includes("broker") ? "broker" : "salesperson",
+    timedOption: true,
+    untimedOption: true,
+    duration: `${dbCourse.hoursRequired}h`,
+    lessons: Math.ceil((dbCourse.hoursRequired || 0) / 0.5),
+    price: Math.round(dbCourse.price / 100),
+  };
+}
+
+// Fallback mock data
 const mockCourses: Course[] = [
   {
     id: "1",
@@ -232,6 +255,19 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
     realEstateType: "all",
   });
 
+  // Fetch courses from API
+  const { data: dbCourses = [], isLoading } = useQuery({
+    queryKey: ["/api/courses"],
+    queryFn: async () => {
+      const res = await fetch("/api/courses");
+      if (!res.ok) throw new Error("Failed to fetch courses");
+      return res.json();
+    },
+  });
+
+  // Transform database courses to UI format
+  const courses = dbCourses.length > 0 ? dbCourses.map(transformCourse) : mockCourses;
+
   const handleProfessionChange = (profession: "real_estate" | "insurance") => {
     setSelectedProfession(profession);
     setFilters({
@@ -246,7 +282,7 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
   };
 
   const filteredCourses = useMemo(() => {
-    return mockCourses.filter((course) => {
+    return courses.filter((course) => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch =
@@ -422,11 +458,23 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
 
             <div className="mb-4">
               <p className="text-sm text-muted-foreground" data-testid="text-course-count">
-                Showing {sortedCourses.length} of {mockCourses.length} courses
+                {isLoading ? "Loading..." : `Showing ${sortedCourses.length} of ${courses.length} courses`}
               </p>
             </div>
 
-            {sortedCourses.length > 0 ? (
+            {isLoading ? (
+              <div className={viewMode === "grid" ? "grid gap-6 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="rounded-lg overflow-hidden">
+                    <Skeleton className="aspect-video" />
+                    <div className="p-4 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : sortedCourses.length > 0 ? (
               <div
                 className={
                   viewMode === "grid"
