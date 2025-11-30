@@ -18,8 +18,8 @@ export default function HomePage() {
   return (
     <div>
       <Hero
-        onBrowseCourses={() => setLocation(selectedState === "CA" ? "/courses/ca" : "/courses/fl")}
-        onGetStarted={() => setLocation(selectedState === "CA" ? "/courses/ca" : "/courses/fl")}
+        onBrowseCourses={() => setLocation("/courses")}
+        onGetStarted={() => setLocation("/courses")}
       />
       <TrustBadges />
       <StateSelector onSelectState={handleStateSelect} />
