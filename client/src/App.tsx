@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -9,8 +8,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
-import CoursesSelectPage from "@/pages/courses-select";
-import CoursesCAPage from "@/pages/courses-ca";
 import CoursesFLPage from "@/pages/courses-fl";
 import CourseViewPage from "@/pages/course-view";
 import AccountSetupPage from "@/pages/account-setup";
@@ -18,16 +15,12 @@ import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
 
 function Router() {
-  const [selectedProfession, setSelectedProfession] = useState<"real_estate" | "insurance">("real_estate");
-
   return (
     <div className="flex flex-col min-h-screen">
-      <Header selectedProfession={selectedProfession} onProfessionChange={setSelectedProfession} />
+      <Header />
       <main className="flex-1">
         <Switch>
           <Route path="/" component={HomePage} />
-          <Route path="/courses" component={CoursesSelectPage} />
-          <Route path="/courses/ca" component={CoursesCAPage} />
           <Route path="/courses/fl" component={CoursesFLPage} />
           <Route path="/course/:id" component={CourseViewPage} />
           <Route path="/account-setup" component={AccountSetupPage} />

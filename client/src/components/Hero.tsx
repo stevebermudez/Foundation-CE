@@ -46,7 +46,7 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-white/85 mb-6 sm:mb-8 leading-relaxed max-w-2xl">
-            Complete state-approved continuing education courses with video lessons and instant certificates. For California and Florida real estate or insurance professionals.
+            Florida real estate prelicensing and continuing education with video lessons and instant certificates.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
