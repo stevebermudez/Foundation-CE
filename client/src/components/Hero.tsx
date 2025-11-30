@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Sparkles, Zap, Shield, CheckCircle } from "lucide-react";
+import { ArrowRight, Zap, Shield, CheckCircle } from "lucide-react";
 import heroImage from "@assets/generated_images/professional_real_estate_training_classroom.png";
 
 interface HeroProps {
@@ -24,10 +24,6 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
       <div className="relative z-10 mx-auto max-w-7xl px-4 w-full">
         <div className="max-w-3xl">
           <div className="mb-8 flex flex-wrap items-center gap-3">
-            <Badge className="bg-white/15 text-white border-white/25 backdrop-blur-sm hover:bg-white/20 transition-colors">
-              <Sparkles className="h-3 w-3 mr-1" />
-              AI-Powered Learning
-            </Badge>
             <Badge className="bg-white/15 text-white border-white/25 backdrop-blur-sm hover:bg-white/20 transition-colors">
               <Zap className="h-3 w-3 mr-1" />
               State Approved
