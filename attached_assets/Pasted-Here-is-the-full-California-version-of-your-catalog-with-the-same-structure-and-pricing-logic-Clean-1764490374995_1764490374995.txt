@@ -1,0 +1,159 @@
+Here is the full California version of your catalog with the same structure and pricing logic. Clean, consistent, and ready to drop into your platform. No em dashes used.
+
+⸻
+
+California Real Estate Continuing Education Catalog
+
+Compliant with California DRE requirements.
+Pricing structure aligned to your Florida model:
+	•	Renewal package: 39.99
+	•	Post licensing does not exist in California.
+	•	Individual courses: 15 each
+
+California rules:
+	•	Renewal requires 45 hours every 4 years
+	•	Includes:
+	•	18 hours of mandatory coursework
+	•	27 hours of consumer protection electives
+	•	Mandatory topics:
+	•	Ethics
+	•	Agency
+	•	Fair housing
+	•	Trust funds
+	•	Risk management
+	•	Implicit bias
+	•	Management and supervision
+
+⸻
+
+1. Bundled Packages
+
+California Salesperson and Broker Renewal Package
+
+45 hours
+Price: 39.99
+
+Includes all required topics:
+	•	Ethics
+	•	Agency
+	•	Trust Funds
+	•	Fair Housing
+	•	Risk Management
+	•	Implicit Bias
+	•	Management and Supervision
+	•	27 hours Consumer Protection Electives
+
+Students can use this for both salesperson and broker renewals.
+
+Course Composition
+	•	Mandatory: 18 hours
+	•	Electives: 27 hours
+
+Package SKU: CA-CE-45PKG
+
+⸻
+
+2. Individual Courses (a la carte)
+
+Price: 15 dollars per course
+All courses below meet California DRE requirements when combined to reach 45 hours.
+
+Mandatory Courses
+
+Each priced at 15.
+
+Course	Hours	SKU
+Ethics	3	CA-CE-ETHICS-3
+Agency	3	CA-CE-AGENCY-3
+Trust Funds	3	CA-CE-TRUSTFUNDS-3
+Fair Housing	3	CA-CE-FAIRHOUSING-3
+Risk Management	3	CA-CE-RISKMGMT-3
+Implicit Bias Training	2	CA-CE-IMPLICITBIAS-2
+Management and Supervision	3	CA-CE-MGMT-3
+
+Elective Courses
+
+All electives priced at 15 each, regardless of hours.
+
+Course	Hours	SKU
+Real Estate Finance	8	CA-CE-FINANCE-8
+Contracts and Disclosures	6	CA-CE-CONTRACTS-6
+Property Management	6	CA-CE-PROP-MGMT-6
+Residential Inspection Basics	4	CA-CE-INSPECTION-4
+Environmental and Hazards	6	CA-CE-ENVIRON-6
+Real Estate Investments	6	CA-CE-INVEST-6
+Advertising Compliance	4	CA-CE-ADV-4
+
+You can optionally expand the elective library.
+
+⸻
+
+3. California JSON Catalog Structure
+
+Ready to plug into your CE platform.
+
+{
+  "state": "CA",
+  "packages": [
+    {
+      "name": "California Real Estate Renewal Package",
+      "hours": 45,
+      "price": 39.99,
+      "license_type": "Salesperson and Broker",
+      "cycle": "Continuing Education",
+      "courses_included": [
+        "CA-CE-ETHICS-3",
+        "CA-CE-AGENCY-3",
+        "CA-CE-TRUSTFUNDS-3",
+        "CA-CE-FAIRHOUSING-3",
+        "CA-CE-RISKMGMT-3",
+        "CA-CE-IMPLICITBIAS-2",
+        "CA-CE-MGMT-3",
+        "CA-CE-ELECTIVE-27"
+      ],
+      "sku": "CA-CE-45PKG"
+    }
+  ],
+  "courses": [
+    { "name": "Ethics", "hours": 3, "price": 15, "category": "Mandatory", "sku": "CA-CE-ETHICS-3" },
+    { "name": "Agency", "hours": 3, "price": 15, "category": "Mandatory", "sku": "CA-CE-AGENCY-3" },
+    { "name": "Trust Funds", "hours": 3, "price": 15, "category": "Mandatory", "sku": "CA-CE-TRUSTFUNDS-3" },
+    { "name": "Fair Housing", "hours": 3, "price": 15, "category": "Mandatory", "sku": "CA-CE-FAIRHOUSING-3" },
+    { "name": "Risk Management", "hours": 3, "price": 15, "category": "Mandatory", "sku": "CA-CE-RISKMGMT-3" },
+    { "name": "Implicit Bias Training", "hours": 2, "price": 15, "category": "Mandatory", "sku": "CA-CE-IMPLICITBIAS-2" },
+    { "name": "Management and Supervision", "hours": 3, "price": 15, "category": "Mandatory", "sku": "CA-CE-MGMT-3" },
+
+    { "name": "Real Estate Finance", "hours": 8, "price": 15, "category": "Elective", "sku": "CA-CE-FINANCE-8" },
+    { "name": "Contracts and Disclosures", "hours": 6, "price": 15, "category": "Elective", "sku": "CA-CE-CONTRACTS-6" },
+    { "name": "Property Management", "hours": 6, "price": 15, "category": "Elective", "sku": "CA-CE-PROP-MGMT-6" },
+    { "name": "Residential Inspection Basics", "hours": 4, "price": 15, "category": "Elective", "sku": "CA-CE-INSPECTION-4" },
+    { "name": "Environmental and Hazards", "hours": 6, "price": 15, "category": "Elective", "sku": "CA-CE-ENVIRON-6" },
+    { "name": "Real Estate Investments", "hours": 6, "price": 15, "category": "Elective", "sku": "CA-CE-INVEST-6" },
+    { "name": "Advertising Compliance", "hours": 4, "price": 15, "category": "Elective", "sku": "CA-CE-ADV-4" },
+
+    { "name": "Elective Bundle Placeholder", "hours": 27, "price": 15, "category": "Elective", "sku": "CA-CE-ELECTIVE-27" }
+  ]
+}
+
+
+⸻
+
+4. Pricing Table
+
+Course or Package	Hours	Price
+CA Renewal Package	45	39.99
+Mandatory courses (Ethics, Agency, Trust Funds, etc.)	2 to 3	15
+Elective courses	4 to 8	15
+
+
+⸻
+
+If you want next steps, I can also produce:
+
+• Texas, Arizona, and Florida insurance CE versions
+• National 50 state database for real estate CE
+• Full Replit folder structure with frontend, backend, database models, and full code
+• Marketing copy for your landing page
+• Visual course cards and category filters
+
+Just tell me what you want built next.

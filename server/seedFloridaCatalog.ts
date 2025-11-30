@@ -6,7 +6,7 @@ export async function seedFloridaCatalog() {
     console.log("Seeding complete Florida CE catalog...");
 
     // 1. Post-Licensing Courses
-    const [saPostLicense] = await db
+    const saPostLicenseResult = await db
       .insert(courses)
       .values({
         title: "Florida Sales Associate Post Licensing Course",
@@ -22,8 +22,9 @@ export async function seedFloridaCatalog() {
         renewalApplicable: 0,
       })
       .returning();
+    const saPostLicense = saPostLicenseResult[0];
 
-    const [brPostLicense] = await db
+    const brPostLicenseResult = await db
       .insert(courses)
       .values({
         title: "Florida Broker Post Licensing Course",
@@ -39,9 +40,10 @@ export async function seedFloridaCatalog() {
         renewalApplicable: 0,
       })
       .returning();
+    const brPostLicense = brPostLicenseResult[0];
 
     // 2. Core Law (3 hours)
-    const [coreLaw] = await db
+    const coreLawResult = await db
       .insert(courses)
       .values({
         title: "Florida Core Law",
@@ -58,9 +60,10 @@ export async function seedFloridaCatalog() {
         renewalPeriodYears: 2,
       })
       .returning();
+    const coreLaw = coreLawResult[0];
 
     // 3. Ethics and Business Practices (3 hours)
-    const [ethics] = await db
+    const ethicsResult = await db
       .insert(courses)
       .values({
         title: "Ethics and Business Practices",
@@ -77,6 +80,7 @@ export async function seedFloridaCatalog() {
         renewalPeriodYears: 2,
       })
       .returning();
+    const ethics = ethicsResult[0];
 
     // 4. Electives (various hours, all $15)
     const electives = [
@@ -94,7 +98,7 @@ export async function seedFloridaCatalog() {
 
     const electiveCourses = [];
     for (const elective of electives) {
-      const [created] = await db
+      const result = await db
         .insert(courses)
         .values({
           title: elective.title,
@@ -110,11 +114,11 @@ export async function seedFloridaCatalog() {
           renewalPeriodYears: 2,
         })
         .returning();
-      electiveCourses.push(created);
+      electiveCourses.push(result[0]);
     }
 
     // 5. Create Bundles
-    const [saPostLicenseBundle] = await db
+    const saPostLicenseBundleResult = await db
       .insert(courseBundles)
       .values({
         name: "Florida Sales Associate Post Licensing Package",
@@ -127,6 +131,7 @@ export async function seedFloridaCatalog() {
         isActive: 1,
       })
       .returning();
+    const saPostLicenseBundle = saPostLicenseBundleResult[0];
 
     await db.insert(bundleCourses).values({
       bundleId: saPostLicenseBundle.id,
@@ -134,7 +139,7 @@ export async function seedFloridaCatalog() {
       sequence: 0,
     });
 
-    const [brPostLicenseBundle] = await db
+    const brPostLicenseBundleResult = await db
       .insert(courseBundles)
       .values({
         name: "Florida Broker Post Licensing Package",
@@ -147,6 +152,7 @@ export async function seedFloridaCatalog() {
         isActive: 1,
       })
       .returning();
+    const brPostLicenseBundle = brPostLicenseBundleResult[0];
 
     await db.insert(bundleCourses).values({
       bundleId: brPostLicenseBundle.id,
@@ -154,7 +160,7 @@ export async function seedFloridaCatalog() {
       sequence: 0,
     });
 
-    const [ceRenewalBundle] = await db
+    const ceRenewalBundleResult = await db
       .insert(courseBundles)
       .values({
         name: "Florida Continuing Education Renewal Package",
@@ -167,6 +173,7 @@ export async function seedFloridaCatalog() {
         isActive: 1,
       })
       .returning();
+    const ceRenewalBundle = ceRenewalBundleResult[0];
 
     // Add CE courses to renewal bundle (3 core law + 3 ethics + 8 electives)
     await db.insert(bundleCourses).values({
