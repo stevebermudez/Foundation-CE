@@ -502,7 +502,6 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
                       states: [selectedState],
                       professions: [selectedProfession],
                       categories: [],
-                      testingMode: "all",
                       ceHours: "all",
                       educationType: "all",
                       realEstateType: "all",
