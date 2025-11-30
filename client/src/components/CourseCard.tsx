@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Clock, BookOpen, PlayCircle, Timer, TimerOff, Award } from "lucide-react";
+import { Link } from "wouter";
 
 export interface Course {
   id: string;
@@ -49,12 +50,13 @@ export default function CourseCard({ course, onEnroll, onContinue }: CourseCardP
 
   return (
     <Card className="overflow-hidden flex flex-col h-full hover-elevate" data-testid={`card-course-${course.id}`}>
-      <div className="relative aspect-video overflow-hidden">
-        <img
-          src={course.thumbnail}
-          alt={course.title}
-          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-        />
+      <Link href={`/course/${course.id}`}>
+        <div className="relative aspect-video overflow-hidden cursor-pointer">
+          <img
+            src={course.thumbnail}
+            alt={course.title}
+            className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+          />
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <Badge variant="secondary" className="bg-background/90 backdrop-blur text-xs">
             {course.state}
@@ -74,7 +76,8 @@ export default function CourseCard({ course, onEnroll, onContinue }: CourseCardP
             </Badge>
           </div>
         )}
-      </div>
+        </div>
+      </Link>
 
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2 mb-2">

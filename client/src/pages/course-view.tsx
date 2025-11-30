@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/VideoPlayer";
 import QuizComponent from "@/components/QuizComponent";
 import { ArrowLeft, Clock, Award, Timer, TimerOff, FileText } from "lucide-react";
 import { Link } from "wouter";
 
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
+import flRealEstate from "@assets/generated_images/florida_beachfront_properties.png";
 
-// todo: remove mock functionality
 const mockLessons = [
   { id: "1", title: "Introduction to Real Estate Ethics", duration: "8:30", completed: true },
   { id: "2", title: "Fiduciary Duties Explained", duration: "12:45", completed: true },
@@ -89,6 +91,17 @@ export default function CourseViewPage() {
   const [activeTab, setActiveTab] = useState("lessons");
   const [testMode, setTestMode] = useState<"timed" | "untimed" | null>(null);
 
+  // Fetch course data from API
+  const { data: course, isLoading } = useQuery({
+    queryKey: ["/api/courses", params.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/courses/${params.id}`);
+      if (!res.ok) throw new Error("Course not found");
+      return res.json();
+    },
+    enabled: !!params.id,
+  });
+
   const handleLessonComplete = () => {
     const updatedLessons = mockLessons.map(l => 
       l.id === currentLesson.id ? { ...l, completed: true } : l
@@ -104,6 +117,25 @@ export default function CourseViewPage() {
     console.log(`Quiz completed - Score: ${score}%, Passed: ${passed}`);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="border-b bg-card">
+          <div className="mx-auto max-w-7xl px-4 py-4">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-1/2" />
+              <Skeleton className="h-4 w-1/3" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const courseTitle = course?.title || "Course";
+  const courseHours = course?.hoursRequired || 3;
+  const courseDuration = `${Math.ceil((courseHours || 3) * 60 / 50)}m`;
+
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b bg-card">
@@ -117,16 +149,16 @@ export default function CourseViewPage() {
               </Link>
               <div>
                 <h1 className="font-semibold text-lg line-clamp-1">
-                  California Real Estate Ethics and Professional Conduct
+                  {courseTitle}
                 </h1>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
-                    3h 30m
+                    {courseDuration}
                   </span>
                   <Badge variant="secondary" className="text-xs">
                     <Award className="h-3 w-3 mr-1" />
-                    3 CE Hours
+                    {courseHours} CE Hours
                   </Badge>
                 </div>
               </div>
@@ -161,7 +193,7 @@ export default function CourseViewPage() {
 
           <TabsContent value="lessons">
             <VideoPlayer
-              courseTitle="California Real Estate Ethics and Professional Conduct"
+              courseTitle={courseTitle}
               currentLesson={currentLesson}
               lessons={mockLessons}
               onLessonSelect={(id) => {
@@ -249,7 +281,7 @@ export default function CourseViewPage() {
               </div>
             ) : (
               <QuizComponent
-                courseTitle="California Real Estate Ethics and Professional Conduct"
+                courseTitle={courseTitle}
                 questions={mockQuestions}
                 isTimed={testMode === "timed"}
                 timeLimit={60}
