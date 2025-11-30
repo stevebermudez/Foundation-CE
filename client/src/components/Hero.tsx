@@ -39,7 +39,7 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight tracking-tight">
-            Your CE Requirements,
+            CE & Prelicensing,
             <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Simplified
             </span>
