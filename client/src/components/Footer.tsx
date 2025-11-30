@@ -132,7 +132,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>123 Education Way<br />Los Angeles, CA 90001</span>
+                <span>10 E Yanonali Street #134<br />Santa Barbara, CA 93101</span>
               </li>
             </ul>
           </div>
