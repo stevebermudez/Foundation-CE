@@ -1572,8 +1572,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit13Questions.length} questions to Unit 13 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 14-19)
-    for (let i = 13; i < units.length; i++) {
+    // Unit 14 - Computations and Closing Transactions (20 questions)
+    const unit14Questions = [
+      { text: "A debit on a closing statement is", options: ["A. an amount received", "B. an amount owed", "C. always a tax", "D. always a buyer item"], correctAnswer: "B", explanation: "A debit is an amount owed or paid that increases what a party must bring to closing." },
+      { text: "A credit on a closing statement", options: ["A. increases what a party must pay", "B. represents money owed to the party", "C. always goes to the seller", "D. eliminates closing costs"], correctAnswer: "B", explanation: "A credit is an amount received or owed to the party that reduces the amount required at closing." },
+      { text: "Earnest money appears on the closing statement as", options: ["A. a seller credit", "B. a buyer credit", "C. a buyer debit", "D. a seller debit"], correctAnswer: "B", explanation: "Earnest money deposits are a buyer credit." },
+      { text: "Real estate taxes in Florida are usually", options: ["A. prepaid", "B. paid monthly", "C. accrued", "D. paid at closing only"], correctAnswer: "C", explanation: "Real estate taxes in Florida are usually accrued because they cover the previous calendar year." },
+      { text: "Prepaid rent collected by a seller is", options: ["A. a seller debit", "B. a buyer credit", "C. a seller credit and buyer debit", "D. an item ignored in closing"], correctAnswer: "C", explanation: "Prepaid items are credited to the seller and debited to the buyer." },
+      { text: "Accrued items are", options: ["A. paid in advance", "B. owed but unpaid", "C. always paid by the buyer", "D. always paid by the lender"], correctAnswer: "B", explanation: "Accrued items are expenses that have been incurred but not yet paid." },
+      { text: "The daily rate using the 365 day method is found by", options: ["A. dividing the annual amount by three hundred sixty five", "B. subtracting days paid", "C. multiplying tax by months", "D. dividing by two"], correctAnswer: "A", explanation: "The 365 day method divides the yearly amount by 365 to find the daily rate." },
+      { text: "Documentary stamps on deeds are paid by", options: ["A. the buyer", "B. the seller", "C. the lender", "D. the broker"], correctAnswer: "B", explanation: "Documentary stamps on deeds are typically a seller debit." },
+      { text: "The deed stamp rate in Florida is", options: ["A. thirty five cents per one hundred dollars", "B. two dollars per thousand", "C. seventy cents per one hundred dollars", "D. one percent of price"], correctAnswer: "C", explanation: "The deed stamp rate is seventy cents per one hundred dollars of consideration." },
+      { text: "Documentary stamps on a note are", options: ["A. on the purchase price", "B. on the loan amount", "C. always paid by the seller", "D. paid monthly"], correctAnswer: "B", explanation: "Documentary stamps on notes apply to the loan amount." },
+      { text: "The rate for note stamps is", options: ["A. seventy cents per one hundred dollars", "B. thirty five cents per one hundred dollars", "C. two dollars per thousand", "D. one dollar per thousand"], correctAnswer: "B", explanation: "The note stamp rate is thirty five cents per one hundred dollars of the loan amount." },
+      { text: "The intangible tax applies to", options: ["A. all mortgages", "B. new mortgages only", "C. deeds only", "D. assumed loans only"], correctAnswer: "B", explanation: "The intangible tax applies to new mortgages only." },
+      { text: "The intangible tax rate is", options: ["A. seventy cents per one hundred dollars", "B. thirty five cents per one hundred dollars", "C. two dollars per thousand", "D. one percent of loan"], correctAnswer: "C", explanation: "The intangible tax rate is two mills, which is two dollars per thousand dollars borrowed." },
+      { text: "On the closing statement, the new mortgage loan amount is a", options: ["A. buyer debit", "B. buyer credit", "C. seller debit", "D. seller credit"], correctAnswer: "B", explanation: "The new mortgage loan amount is a buyer credit." },
+      { text: "Which item is normally a seller debit", options: ["A. deed stamps", "B. intangible tax", "C. survey fee", "D. loan origination fee"], correctAnswer: "A", explanation: "Deed stamps are normally a seller debit." },
+      { text: "Which item is normally a buyer debit", options: ["A. commission", "B. deed stamps", "C. note stamps", "D. natural hazard disclosure"], correctAnswer: "C", explanation: "Note stamps are normally a buyer debit." },
+      { text: "If taxes are paid in arrears", options: ["A. buyer owes seller", "B. seller owes buyer", "C. lender pays at closing", "D. title company pays"], correctAnswer: "B", explanation: "If taxes are paid in arrears, the seller owes the buyer for taxes paid during the seller's ownership." },
+      { text: "The purpose of prorations is to", options: ["A. avoid taxes", "B. allocate expenses fairly between buyer and seller", "C. adjust interest rates", "D. remove escrow requirements"], correctAnswer: "B", explanation: "Prorations allocate expenses or income between parties based on the date of closing." },
+      { text: "If a tenant has paid rent to the seller for a future period", options: ["A. the seller owes the buyer", "B. the buyer owes the seller", "C. the lender pays the rent", "D. it is ignored"], correctAnswer: "A", explanation: "Prepaid rent is credited to the seller and debited to the buyer." },
+      { text: "When calculating deed stamps, the purchase price must be", options: ["A. rounded down to the nearest one hundred", "B. rounded up to the nearest one hundred", "C. multiplied by two", "D. divided by three"], correctAnswer: "B", explanation: "The purchase price is rounded up to the nearest one hundred for deed stamp calculation." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit14Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[13].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit14Questions.length} questions to Unit 14 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 15-19)
+    for (let i = 14; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1591,7 +1629,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 14-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 15-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {

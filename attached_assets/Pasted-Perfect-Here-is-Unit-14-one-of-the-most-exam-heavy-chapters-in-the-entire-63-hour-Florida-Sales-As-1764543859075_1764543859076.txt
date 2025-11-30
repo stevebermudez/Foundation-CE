@@ -1,0 +1,268 @@
+Perfect. Here is Unit 14, one of the most exam heavy chapters in the entire 63 hour Florida Sales Associate Pre Licensing Course.
+This unit includes proration math, debit and credit rules, documentary stamps, intangible tax, state transfer taxes, and closing statement mechanics.
+
+This is a complete build, fresh, clean, and Sora ready.
+
+No em dashes.
+
+⸻
+
+UNIT 14   COMPUTATIONS AND CLOSING TRANSACTIONS
+
+Target Duration: 3 hours
+Includes: three Sora ready narration scripts + twenty question exam style quiz
+
+⸻
+
+UNIT 14 LEARNING OBJECTIVES
+
+By the end of this unit, the student will be able to:
+	•	Prepare and interpret a closing statement
+	•	Apply Florida documentary stamp tax on deeds and notes
+	•	Apply the intangible tax on new mortgages
+	•	Calculate prorations for taxes, rent, interest, insurance
+	•	Apply the 365 day and 360 day methods
+	•	Identify buyer and seller debits and credits
+	•	Calculate state transfer taxes for exam style questions
+	•	Explain earnest money, escrow handling, and adjustments at closing
+	•	Understand prepaid items and accrued items
+	•	Recognize items paid in arrears vs in advance
+
+⸻
+
+UNIT 14 STRUCTURE
+	1.	Lesson 14.1   Closing statement fundamentals, debits and credits
+	2.	Lesson 14.2   Taxes, prorations, prepaid and accrued items
+	3.	Lesson 14.3   Florida transfer taxes, doc stamps, intangible tax, walkthrough examples
+	4.	Quiz   Twenty exam style questions
+
+⸻
+
+LESSON 14.1 SCRIPT
+
+Closing Statements, Debits and Credits
+
+Welcome to Unit 14 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+
+In this unit, we learn how to prepare closing statements, calculate prorations, and apply Florida transfer taxes. These topics appear frequently on the state exam.
+
+A closing statement summarizes the financial details of a real estate transaction. It shows what the buyer must pay and what the seller will receive. The statement lists debits and credits for both parties.
+
+A debit is an amount owed or paid. It increases the amount a party must bring to closing.
+
+A credit is an amount received or owed to the party. It reduces the amount required at closing.
+
+Common buyer debits include purchase price, recording fees, loan origination fees, documentary stamps on the note, intangible tax, and prepaid expenses.
+
+Common seller debits include real estate commission, documentary stamps on the deed, and prorated rent or taxes owed to the buyer.
+
+Common buyer credits include earnest money deposits and new loan proceeds.
+
+Common seller credits include prepaid taxes or prepaid rent collected in advance.
+
+Each item appearing on the closing statement affects only the buyer, only the seller, or both parties.
+
+You must understand the basic question: Who owes this item, and is it owed or received?
+
+In the next lesson, we calculate prorations using both the 365 day and 360 day methods.
+
+⸻
+
+LESSON 14.2 SCRIPT
+
+Prorations, Prepaid Items, Accrued Items
+
+In this lesson, we work through prorations. Prorations allocate expenses or income between the buyer and seller based on the date of closing.
+
+Items may be prepaid or accrued.
+
+Prepaid items are paid in advance. Examples include rent paid by tenants to the seller for a future period or insurance premiums paid ahead of time. Prepaid items are credited to the seller and debited to the buyer.
+
+Accrued items are expenses that have been incurred but not yet paid. Real estate taxes in Florida are usually accrued because they cover the previous calendar year and are paid at the end of the year. Accrued items are credited to the buyer and debited to the seller.
+
+Proration calculations require identifying:
+the annual amount,
+the daily rate,
+and how many days belong to each party.
+
+Two methods exist to find a daily rate.
+
+The 365 day method divides the yearly amount by three hundred sixty five.
+
+The 360 day method divides the yearly amount by three hundred sixty using thirty day months.
+
+The exam may specify which method to use. If not specified, the 365 day method is standard for Florida.
+
+Let us review a tax proration example.
+
+Annual taxes are three thousand six hundred dollars. Closing occurs on October fifteenth. Taxes are paid in arrears.
+
+First calculate the daily rate. Three thousand six hundred divided by three hundred sixty five equals nine dollars and eighty six cents per day.
+
+Next count the seller’s days from January first through October fifteenth. That total is two hundred eighty eight days.
+
+Multiply two hundred eighty eight days by nine dollars and eighty six cents.
+
+The seller owes two thousand eight hundred thirty eight dollars and eight cents to the buyer as a debit. The buyer receives the same amount as a credit.
+
+In the next lesson, we apply Florida tax formulas and compute documentary stamps and intangible tax.
+
+⸻
+
+LESSON 14.3 SCRIPT
+
+Florida Transfer Taxes, Doc Stamps, Intangible Tax, Examples
+
+In this final lesson, we apply Florida’s state transfer taxes. These are tested frequently and must be memorized.
+
+Florida has three major transfer related taxes.
+
+The documentary stamp tax on deeds applies to the transfer of real property. The rate is seventy cents per one hundred dollars of consideration in most counties. To calculate, round the purchase price up to the nearest one hundred dollars, divide by one hundred, then multiply by seventy cents. This tax is typically a seller debit.
+
+The documentary stamp tax on notes applies to new and assumed mortgage notes. The rate is thirty five cents per one hundred dollars of the loan amount. This is typically a buyer debit.
+
+The intangible tax applies to new mortgages only. The rate is two mills, which means two dollars per thousand dollars borrowed. Multiply the loan amount by point zero zero two. This tax is a buyer debit.
+
+Let us work through an example closing calculation.
+
+A home sells for two hundred fifty thousand dollars. The buyer obtains a two hundred thousand dollar new mortgage. Calculate the taxes.
+
+First, documentary stamps on the deed. Round the price to the nearest one hundred dollars. Two hundred fifty thousand divided by one hundred equals two thousand five hundred taxable units. Multiply by seventy cents. The tax is one thousand seven hundred fifty dollars.
+
+Second, documentary stamps on the note. Two hundred thousand divided by one hundred equals two thousand taxable units. Multiply by thirty five cents. The tax is seven hundred dollars.
+
+Third, intangible tax on the mortgage. Multiply two hundred thousand by point zero zero two. The tax is four hundred dollars.
+
+These amounts are placed on the closing statement as a seller debit for the deed stamps and buyer debits for the note stamps and intangible tax.
+
+This completes Unit 14. You are now ready for the Unit 14 quiz.
+
+⸻
+
+UNIT 14 QUIZ
+
+Twenty exam style questions
+	1.	A debit on a closing statement is
+A. an amount received
+B. an amount owed
+C. always a tax
+D. always a buyer item
+Answer: B
+	2.	A credit on a closing statement
+A. increases what a party must pay
+B. represents money owed to the party
+C. always goes to the seller
+D. eliminates closing costs
+Answer: B
+	3.	Earnest money appears on the closing statement as
+A. a seller credit
+B. a buyer credit
+C. a buyer debit
+D. a seller debit
+Answer: B
+	4.	Real estate taxes in Florida are usually
+A. prepaid
+B. paid monthly
+C. accrued
+D. paid at closing only
+Answer: C
+	5.	Prepaid rent collected by a seller is
+A. a seller debit
+B. a buyer credit
+C. a seller credit and buyer debit
+D. an item ignored in closing
+Answer: C
+	6.	Accrued items are
+A. paid in advance
+B. owed but unpaid
+C. always paid by the buyer
+D. always paid by the lender
+Answer: B
+	7.	The daily rate using the 365 day method is found by
+A. dividing the annual amount by three hundred sixty five
+B. subtracting days paid
+C. multiplying tax by months
+D. dividing by two
+Answer: A
+	8.	Documentary stamps on deeds are paid by
+A. the buyer
+B. the seller
+C. the lender
+D. the broker
+Answer: B
+	9.	The deed stamp rate in Florida is
+A. thirty five cents per one hundred dollars
+B. two dollars per thousand
+C. seventy cents per one hundred dollars
+D. one percent of price
+Answer: C
+	10.	Documentary stamps on a note are
+A. on the purchase price
+B. on the loan amount
+C. always paid by the seller
+D. paid monthly
+Answer: B
+	11.	The rate for note stamps is
+A. seventy cents per one hundred dollars
+B. thirty five cents per one hundred dollars
+C. two dollars per thousand
+D. one dollar per thousand
+Answer: B
+	12.	The intangible tax applies to
+A. all mortgages
+B. new mortgages only
+C. deeds only
+D. assumed loans only
+Answer: B
+	13.	The intangible tax rate is
+A. seventy cents per one hundred dollars
+B. thirty five cents per one hundred dollars
+C. two dollars per thousand
+D. one percent of loan
+Answer: C
+	14.	On the closing statement, the new mortgage loan amount is a
+A. buyer debit
+B. buyer credit
+C. seller debit
+D. seller credit
+Answer: B
+	15.	Which item is normally a seller debit
+A. deed stamps
+B. intangible tax
+C. survey fee
+D. loan origination fee
+Answer: A
+	16.	Which item is normally a buyer debit
+A. commission
+B. deed stamps
+C. note stamps
+D. natural hazard disclosure
+Answer: C
+	17.	If taxes are paid in arrears
+A. buyer owes seller
+B. seller owes buyer
+C. lender pays at closing
+D. title company pays
+Answer: B
+	18.	The purpose of prorations is to
+A. avoid taxes
+B. allocate expenses fairly between buyer and seller
+C. adjust interest rates
+D. remove escrow requirements
+Answer: B
+	19.	If a tenant has paid rent to the seller for a future period
+A. the seller owes the buyer
+B. the buyer owes the seller
+C. the lender pays the rent
+D. it is ignored
+Answer: B
+	20.	When calculating deed stamps, the purchase price must be
+A. rounded down to the nearest one hundred
+B. rounded up to the nearest one hundred
+C. multiplied by two
+D. divided by three
+Answer: B
+
+⸻
+
+If you want to continue, say next step, and I will build Unit 15   Property Management with full Sora narration and quiz.
