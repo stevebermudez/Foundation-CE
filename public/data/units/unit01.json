@@ -1,0 +1,289 @@
+{
+  "unitId": "unit01",
+  "title": "The Real Estate Business",
+  "lessons": [
+    {
+      "id": "lesson01",
+      "title": "Introduction to Real Estate",
+      "onscreen": [
+        { "type": "heading", "text": "Real Estate Fundamentals" },
+        { "type": "list", "items": [
+          "Real property includes land and all things permanently attached",
+          "Personal property is movable and not part of real estate",
+          "Real estate professionals facilitate property transfers",
+          "Market knowledge is essential for success"
+        ]}
+      ]
+    },
+    {
+      "id": "lesson02",
+      "title": "Real Estate Careers",
+      "onscreen": [
+        { "type": "heading", "text": "Real Estate Specializations" },
+        { "type": "list", "items": [
+          "Residential sales - houses and multi-family properties",
+          "Commercial sales - office and retail properties",
+          "Industrial sales - warehouses and manufacturing",
+          "Property management - managing properties for owners"
+        ]}
+      ]
+    },
+    {
+      "id": "lesson03",
+      "title": "Professional Development",
+      "onscreen": [
+        { "type": "heading", "text": "Building Success" },
+        { "type": "list", "items": [
+          "Continuing education is required for license renewal",
+          "Professional organizations provide resources and networking",
+          "Ethics are fundamental to real estate practice",
+          "Market research improves agent performance"
+        ]}
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "prompt": "The primary product that a real estate sales associate offers",
+        "choices": [
+          "A. financing at below-market interest rates",
+          "B. expert information on property transfer and markets",
+          "C. the legal right to draft deeds",
+          "D. construction management services"
+        ],
+        "answerIndex": 1,
+        "explanation": "The sales associate's primary product is expert information about property values, market conditions, and transaction procedures."
+      },
+      {
+        "id": "q2",
+        "prompt": "A property manager's main responsibility is to",
+        "choices": [
+          "A. obtain the highest possible selling price",
+          "B. protect the owner's investment and maximize return",
+          "C. originate mortgage loans for tenants",
+          "D. represent tenants in eviction proceedings"
+        ],
+        "answerIndex": 1,
+        "explanation": "Property managers are hired to protect and maximize the owner's return on their real estate investment."
+      },
+      {
+        "id": "q3",
+        "prompt": "Real estate is best defined as",
+        "choices": [
+          "A. property that is movable",
+          "B. land and all things permanently attached to it",
+          "C. money invested in property",
+          "D. rental income from properties"
+        ],
+        "answerIndex": 1,
+        "explanation": "Real estate includes land and all things permanently attached, including buildings and improvements."
+      },
+      {
+        "id": "q4",
+        "prompt": "The difference between real and personal property is",
+        "choices": [
+          "A. location only",
+          "B. value only",
+          "C. real is permanent, personal is movable",
+          "D. real is regulated, personal is not"
+        ],
+        "answerIndex": 2,
+        "explanation": "Real property (land and permanent improvements) cannot be moved, while personal property is movable."
+      },
+      {
+        "id": "q5",
+        "prompt": "Residential specialization in real estate typically includes",
+        "choices": [
+          "A. office buildings and shopping centers",
+          "B. houses and multi-family properties",
+          "C. warehouses and manufacturing facilities",
+          "D. farms and agricultural land"
+        ],
+        "answerIndex": 1,
+        "explanation": "Residential real estate includes single-family homes, apartments, and multi-family properties."
+      },
+      {
+        "id": "q6",
+        "prompt": "Commercial real estate includes",
+        "choices": [
+          "A. single-family homes",
+          "B. apartment buildings only",
+          "C. office buildings and shopping centers",
+          "D. farm properties"
+        ],
+        "answerIndex": 2,
+        "explanation": "Commercial real estate includes income-producing properties like office buildings, retail centers, and hotels."
+      },
+      {
+        "id": "q7",
+        "prompt": "Industrial real estate specialization typically involves",
+        "choices": [
+          "A. residential properties",
+          "B. retail shopping centers",
+          "C. warehouses and manufacturing facilities",
+          "D. office buildings"
+        ],
+        "answerIndex": 2,
+        "explanation": "Industrial real estate includes warehouses, manufacturing facilities, and distribution centers."
+      },
+      {
+        "id": "q8",
+        "prompt": "A comparative market analysis (CMA) is best described as",
+        "choices": [
+          "A. a federally regulated appraisal",
+          "B. an estimate of probable selling price using comparable sales",
+          "C. a tax assessment tool",
+          "D. a mortgage qualification document"
+        ],
+        "answerIndex": 1,
+        "explanation": "A CMA estimates probable selling price by analyzing recent comparable sales in the area."
+      },
+      {
+        "id": "q9",
+        "prompt": "Professional ethics in real estate require",
+        "choices": [
+          "A. always representing the buyer",
+          "B. always representing the seller",
+          "C. fulfilling fiduciary duties to clients",
+          "D. disclosing only favorable information"
+        ],
+        "answerIndex": 2,
+        "explanation": "Ethics require real estate professionals to fulfill fiduciary duties to their clients and provide honest information."
+      },
+      {
+        "id": "q10",
+        "prompt": "Continuing education for real estate licensees is",
+        "choices": [
+          "A. optional",
+          "B. required for license renewal",
+          "C. only for brokers",
+          "D. not necessary in Florida"
+        ],
+        "answerIndex": 1,
+        "explanation": "Continuing education is a requirement for renewal of all real estate licenses in Florida."
+      },
+      {
+        "id": "q11",
+        "prompt": "Market analysis in real estate involves",
+        "choices": [
+          "A. personal opinion only",
+          "B. analyzing comparable properties and market trends",
+          "C. ignoring economic data",
+          "D. relying solely on listing price"
+        ],
+        "answerIndex": 1,
+        "explanation": "Market analysis examines comparable properties, market trends, economic conditions, and supply/demand."
+      },
+      {
+        "id": "q12",
+        "prompt": "The role of a broker in real estate is to",
+        "choices": [
+          "A. transact business without compensation",
+          "B. manage sales associates and ensure compliance",
+          "C. represent only buyers",
+          "D. avoid fiduciary responsibilities"
+        ],
+        "answerIndex": 1,
+        "explanation": "A broker manages sales associates, ensures compliance with regulations, and represents clients."
+      },
+      {
+        "id": "q13",
+        "prompt": "Real estate professionals can help clients by",
+        "choices": [
+          "A. guaranteeing property appreciation",
+          "B. providing expert market knowledge and guidance",
+          "C. avoiding disclosure of defects",
+          "D. controlling the entire transaction"
+        ],
+        "answerIndex": 1,
+        "explanation": "Real estate professionals help clients by providing expert market knowledge and honest guidance."
+      },
+      {
+        "id": "q14",
+        "prompt": "The primary factor affecting real estate value is",
+        "choices": [
+          "A. the color of the house",
+          "B. location and supply/demand",
+          "C. the age of the property only",
+          "D. the broker's opinion"
+        ],
+        "answerIndex": 1,
+        "explanation": "Location, market conditions, and supply/demand are primary factors affecting property value."
+      },
+      {
+        "id": "q15",
+        "prompt": "Consumer protection in real estate transactions includes",
+        "choices": [
+          "A. unlimited price adjustments",
+          "B. disclosure of known defects",
+          "C. avoidance of fair housing laws",
+          "D. broker commission guarantees"
+        ],
+        "answerIndex": 1,
+        "explanation": "Consumer protection requires disclosure of known defects and compliance with fair housing laws."
+      },
+      {
+        "id": "q16",
+        "prompt": "Real estate licensing is required to",
+        "choices": [
+          "A. buy property for yourself",
+          "B. sell properties for compensation",
+          "C. rent your own property",
+          "D. own multiple properties"
+        ],
+        "answerIndex": 1,
+        "explanation": "A license is required to represent others in real estate transactions for compensation."
+      },
+      {
+        "id": "q17",
+        "prompt": "Professional associations in real estate provide",
+        "choices": [
+          "A. guaranteed sales",
+          "B. resources, education, and networking",
+          "C. licenses without exams",
+          "D. exemption from regulations"
+        ],
+        "answerIndex": 1,
+        "explanation": "Professional associations provide education, resources, networking, and code of ethics."
+      },
+      {
+        "id": "q18",
+        "prompt": "Technology in real estate helps agents by",
+        "choices": [
+          "A. eliminating face-to-face meetings",
+          "B. reducing need for market knowledge",
+          "C. providing market data and communication tools",
+          "D. guaranteeing sales success"
+        ],
+        "answerIndex": 2,
+        "explanation": "Technology provides access to market data, communication tools, and productivity improvements."
+      },
+      {
+        "id": "q19",
+        "prompt": "Trust in real estate relationships is built by",
+        "choices": [
+          "A. avoiding communication",
+          "B. providing honest, transparent information",
+          "C. guaranteeing results",
+          "D. hiding potential issues"
+        ],
+        "answerIndex": 1,
+        "explanation": "Trust is built through honest communication, transparency, and ethical professional conduct."
+      },
+      {
+        "id": "q20",
+        "prompt": "The most important skill for a real estate professional is",
+        "choices": [
+          "A. ability to negotiate price only",
+          "B. understanding market conditions and client needs",
+          "C. avoiding difficult conversations",
+          "D. focusing only on commissions"
+        ],
+        "answerIndex": 1,
+        "explanation": "Understanding market conditions, client needs, and providing expert guidance is most important."
+      }
+    ]
+  }
+}

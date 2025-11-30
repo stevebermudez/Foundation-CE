@@ -1,0 +1,538 @@
+Got it. We will treat this as a standalone Replit app that can live on its own URL or custom domain. No Squarespace, no iframe assumptions.
+
+I will keep this tight, but complete enough that a dev can build it straight from here.
+
+⸻
+
+1. Big picture
+
+You want a lightweight LMS that:
+	•	Runs entirely in the browser from Replit hosting
+	•	Serves your Florida 63 hour course for FoundationCE
+	•	Loads all content from JSON (units, lessons, quizzes)
+	•	Tracks progress in localStorage
+	•	Can later be hooked to a backend for logins if you want
+
+So we will build a single page app (SPA) with plain HTML, CSS and JavaScript. No frameworks needed to ship this quickly.
+
+⸻
+
+2. Directory structure
+
+On Replit:
+
+/
+├─ index.html           # Main SPA
+├─ css/
+│  ├─ base.css
+│  ├─ layout.css
+│  └─ components.css
+├─ js/
+│  ├─ main.js           # Bootstraps app
+│  ├─ router.js         # Hash router: unit/lesson/quiz
+│  ├─ state.js          # Progress + completion in localStorage
+│  ├─ api.js            # Loads course + unit JSON
+│  ├─ ui.js             # Renders layout and screens
+│  └─ quiz.js           # Quiz engine
+├─ data/
+│  ├─ course.json       # Global course structure
+│  └─ units/
+│     ├─ unit01.json
+│     ├─ unit02.json
+│     └─ ... unit19.json
+└─ assets/
+   ├─ logo.svg
+   └─ icons/
+
+You can add certificates/ later when you want printable completion docs.
+
+⸻
+
+3. Course data model
+
+data/course.json
+
+This is the master outline of your 63 hour course.
+
+{
+  "provider": "FoundationCE",
+  "courseId": "FL-SA-63",
+  "title": "Florida Real Estate Sales Associate 63 Hour Pre Licensing",
+  "hours": 63,
+  "units": [
+    {
+      "id": "unit10",
+      "title": "Real Estate Contracts",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Contract Fundamentals" },
+        { "id": "lesson02", "title": "Offer, Acceptance, and Writing Requirements" },
+        { "id": "lesson03", "title": "Listings, Buyer Agreements, Assignment, Termination" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    }
+    // plus units 1 through 9 and 11 through 19
+  ]
+}
+
+data/units/unit10.json
+
+Each unit stores:
+	•	Narration chunks (instructor script for Sora)
+	•	On screen student content (bullets, headings etc.)
+	•	Quiz questions
+
+Example for your redone Unit 10:
+
+{
+  "unitId": "unit10",
+  "title": "Real Estate Contracts",
+  "lessons": [
+    {
+      "id": "lesson01",
+      "title": "Contract Fundamentals",
+      "narration": [
+        "In this lesson we define contracts and the elements of a valid contract.",
+        "A contract is an agreement between competent parties that creates a legally enforceable obligation.",
+        "The essential elements are offer and acceptance, consideration, competent parties, and lawful purpose."
+      ],
+      "onscreen": [
+        { "type": "heading", "text": "Essential Elements of a Valid Contract" },
+        {
+          "type": "list",
+          "items": [
+            "Offer and acceptance (meeting of the minds)",
+            "Consideration (something of value)",
+            "Competent parties",
+            "Lawful purpose"
+          ]
+        },
+        { "type": "heading", "text": "Contract Classifications" },
+        {
+          "type": "list",
+          "items": [
+            "Valid, void, voidable, unenforceable",
+            "Express vs. implied",
+            "Unilateral vs. bilateral",
+            "Executory vs. executed"
+          ]
+        }
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "prompt": "Which is required for a valid contract?",
+        "choices": [
+          "Earnest money deposit",
+          "Notarization",
+          "Competent parties",
+          "Recording"
+        ],
+        "answerIndex": 2
+      },
+      {
+        "id": "q2",
+        "prompt": "A bilateral contract is best described as:",
+        "choices": [
+          "A promise for an act",
+          "An act for an act",
+          "A promise for a promise",
+          "An agreement that is void"
+        ],
+        "answerIndex": 2
+      }
+      // expand to your target count for Unit 10
+    ]
+  }
+}
+
+You repeat this pattern for all 19 units and paste in the scripts we already wrote.
+
+⸻
+
+4. Core app flow
+
+index.html skeleton
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FoundationCE - Florida 63 Hour Course</title>
+  <link rel="stylesheet" href="/css/base.css" />
+  <link rel="stylesheet" href="/css/layout.css" />
+  <link rel="stylesheet" href="/css/components.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="app-header">
+      <img src="/assets/logo.svg" alt="FoundationCE" class="logo" />
+      <div class="course-title" id="course-title"></div>
+    </header>
+
+    <div class="app-body">
+      <nav class="sidebar" id="sidebar"></nav>
+      <main class="content" id="content"></main>
+    </div>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>
+
+js/api.js
+
+export async function loadCourseConfig() {
+  const res = await fetch("/data/course.json");
+  return res.json();
+}
+
+export async function loadUnit(unitId) {
+  const res = await fetch(`/data/units/${unitId}.json`);
+  return res.json();
+}
+
+js/state.js
+
+const STORAGE_KEY = "foundationce_fl_sa63_progress";
+
+let state = {
+  courseId: null,
+  units: {} // unitId -> { completedLessons: [], quizScore: null, quizPassed: false }
+};
+
+export function initState(course) {
+  state.courseId = course.courseId;
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.courseId === course.courseId) {
+        state = parsed;
+        return;
+      }
+    } catch {}
+  }
+
+  course.units.forEach(u => {
+    state.units[u.id] = {
+      completedLessons: [],
+      quizScore: null,
+      quizPassed: false
+    };
+  });
+
+  persist();
+}
+
+export function markLessonComplete(unitId, lessonId) {
+  const u = state.units[unitId];
+  if (!u.completedLessons.includes(lessonId)) {
+    u.completedLessons.push(lessonId);
+    persist();
+  }
+}
+
+export function saveQuizResult(unitId, percent, passingScore) {
+  const u = state.units[unitId];
+  u.quizScore = percent;
+  u.quizPassed = percent >= passingScore;
+  persist();
+}
+
+export function getUnitProgress(unitId) {
+  return state.units[unitId];
+}
+
+function persist() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+js/router.js
+
+Simple hash router so you can deep link to #/unit10/lesson02 or #/unit10/quiz.
+
+import { loadUnit } from "./api.js";
+import { renderLesson, renderQuiz } from "./ui.js";
+
+export function initRouter(course) {
+  window.addEventListener("hashchange", () => {
+    handleRoute(course);
+  });
+
+  // initial
+  if (!window.location.hash) {
+    const firstUnit = course.units[0];
+    const firstLesson = firstUnit.lessons[0];
+    window.location.hash = `#/${firstUnit.id}/${firstLesson.id}`;
+  } else {
+    handleRoute(course);
+  }
+}
+
+async function handleRoute(course) {
+  const hash = window.location.hash.slice(2); // remove "#/"
+  const [unitId, viewId] = hash.split("/");
+
+  const unitMeta = course.units.find(u => u.id === unitId);
+  if (!unitMeta) return;
+
+  const unitData = await loadUnit(unitId);
+
+  if (viewId === "quiz") {
+    renderQuiz(unitMeta, unitData);
+  } else {
+    const lessonMeta = unitMeta.lessons.find(l => l.id === viewId);
+    if (!lessonMeta) return;
+    renderLesson(unitMeta, lessonMeta, unitData);
+  }
+}
+
+js/main.js
+
+import { loadCourseConfig } from "./api.js";
+import { initState } from "./state.js";
+import { buildLayout, renderSidebar } from "./ui.js";
+import { initRouter } from "./router.js";
+
+async function main() {
+  const course = await loadCourseConfig();
+  initState(course);
+  buildLayout(course);
+  renderSidebar(course);
+  initRouter(course);
+}
+
+main();
+
+
+⸻
+
+5. UI rendering
+
+You do not need a full design system now, but here is the core idea for ui.js.
+	•	buildLayout(course)
+Sets the course title in header.
+	•	renderSidebar(course)
+Builds list of units with nested lessons.
+When user clicks a lesson, set location.hash to #/unit10/lesson02.
+	•	renderLesson(unitMeta, lessonMeta, unitData)
+	1.	Find the matching lesson in unitData.lessons.
+	2.	Render the title, progress info, navigation buttons (Prev, Next, Quiz).
+	3.	Render onscreen blocks into HTML.
+
+Example snippet:
+
+import { markLessonComplete, getUnitProgress } from "./state.js";
+import { buildQuizElement } from "./quiz.js";
+
+const contentEl = document.getElementById("content");
+const sidebarEl = document.getElementById("sidebar");
+const titleEl = document.getElementById("course-title");
+
+export function buildLayout(course) {
+  titleEl.textContent = course.title;
+}
+
+export function renderSidebar(course) {
+  sidebarEl.innerHTML = "";
+  course.units.forEach(unit => {
+    const unitDiv = document.createElement("div");
+    unitDiv.className = "sidebar-unit";
+
+    const header = document.createElement("div");
+    header.textContent = unit.title;
+    header.className = "sidebar-unit-title";
+    unitDiv.appendChild(header);
+
+    const list = document.createElement("ul");
+    unit.lessons.forEach(lesson => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.textContent = lesson.title;
+      a.href = `#/${unit.id}/${lesson.id}`;
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+
+    if (unit.hasQuiz) {
+      const quizLi = document.createElement("li");
+      const quizLink = document.createElement("a");
+      quizLink.textContent = "Unit Quiz";
+      quizLink.href = `#/${unit.id}/quiz`;
+      quizLi.appendChild(quizLink);
+      list.appendChild(quizLi);
+    }
+
+    unitDiv.appendChild(list);
+    sidebarEl.appendChild(unitDiv);
+  });
+}
+
+export function renderLesson(unitMeta, lessonMeta, unitData) {
+  const lessonFull = unitData.lessons.find(l => l.id === lessonMeta.id);
+  if (!lessonFull) return;
+
+  markLessonComplete(unitMeta.id, lessonMeta.id);
+
+  contentEl.innerHTML = "";
+
+  const h1 = document.createElement("h1");
+  h1.textContent = `${unitMeta.title} - ${lessonMeta.title}`;
+  contentEl.appendChild(h1);
+
+  lessonFull.onscreen.forEach(block => {
+    renderBlock(block, contentEl);
+  });
+
+  // Could show narration below or in a toggle
+}
+
+function renderBlock(block, container) {
+  if (block.type === "heading") {
+    const h2 = document.createElement("h2");
+    h2.textContent = block.text;
+    container.appendChild(h2);
+  } else if (block.type === "list") {
+    const ul = document.createElement("ul");
+    block.items.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  } else if (block.type === "columns") {
+    const wrapper = document.createElement("div");
+    wrapper.className = "columns";
+    block.columns.forEach(col => {
+      const colDiv = document.createElement("div");
+      colDiv.className = "column";
+      const title = document.createElement("h3");
+      title.textContent = col.title;
+      colDiv.appendChild(title);
+      const ul = document.createElement("ul");
+      col.items.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+      colDiv.appendChild(ul);
+      wrapper.appendChild(colDiv);
+    });
+    container.appendChild(wrapper);
+  }
+}
+
+
+⸻
+
+6. Quiz engine hook
+
+ui.js can use a separate quiz builder.
+
+js/quiz.js (short version):
+
+import { saveQuizResult } from "./state.js";
+
+export function buildQuizElement(unitMeta, unitData) {
+  const quiz = unitData.quiz;
+  const wrapper = document.createElement("div");
+  wrapper.className = "quiz-wrapper";
+
+  quiz.questions.forEach((q, idx) => {
+    const card = document.createElement("div");
+    card.className = "quiz-card";
+
+    const prompt = document.createElement("p");
+    prompt.textContent = `${idx + 1}. ${q.prompt}`;
+    card.appendChild(prompt);
+
+    q.choices.forEach((choice, i) => {
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = q.id;
+      input.value = i;
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(choice));
+      card.appendChild(label);
+    });
+
+    wrapper.appendChild(card);
+  });
+
+  const button = document.createElement("button");
+  button.textContent = "Submit Quiz";
+  button.addEventListener("click", () => {
+    const { correct, total, percent } = gradeQuiz(quiz);
+    const passing = unitMeta.passingScore || 70;
+    saveQuizResult(unitMeta.id, percent, passing);
+    showQuizResult(wrapper, correct, total, percent, passing);
+  });
+
+  wrapper.appendChild(button);
+  return wrapper;
+}
+
+function gradeQuiz(quiz) {
+  let correct = 0;
+  quiz.questions.forEach(q => {
+    const selected = document.querySelector(`input[name="${q.id}"]:checked`);
+    if (selected && Number(selected.value) === q.answerIndex) {
+      correct++;
+    }
+  });
+  const total = quiz.questions.length;
+  const percent = Math.round((correct / total) * 100);
+  return { correct, total, percent };
+}
+
+function showQuizResult(wrapper, correct, total, percent, passing) {
+  let banner = wrapper.querySelector(".quiz-result");
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.className = "quiz-result";
+    wrapper.insertBefore(banner, wrapper.firstChild);
+  }
+  const passed = percent >= passing;
+  banner.textContent = passed
+    ? `Passed: ${percent}% (${correct} of ${total})`
+    : `Not passed: ${percent}% (${correct} of ${total})`;
+  banner.classList.toggle("pass", passed);
+  banner.classList.toggle("fail", !passed);
+}
+
+Then in ui.js:
+
+import { buildQuizElement } from "./quiz.js";
+
+export function renderQuiz(unitMeta, unitData) {
+  contentEl.innerHTML = "";
+  const h1 = document.createElement("h1");
+  h1.textContent = `${unitMeta.title} - Unit Quiz`;
+  contentEl.appendChild(h1);
+
+  const quizEl = buildQuizElement(unitMeta, unitData);
+  contentEl.appendChild(quizEl);
+}
+
+
+⸻
+
+7. Where this leaves you
+
+You now have:
+	•	A clear directory structure for the LMS
+	•	A JSON data model that matches the content we already drafted
+	•	A state model that tracks per unit progress locally
+	•	A routing pattern for units, lessons, and quizzes
+	•	Enough JS scaffolding that a dev can wire this up in Replit in one build session
+
+If you want, next I can:
+	•	Take one specific unit (for example Unit 10 or Unit 11)
+	•	Fully draft its unitXX.json from the scripts and quiz we already created, so your dev can copy the pattern for the other 18 units.

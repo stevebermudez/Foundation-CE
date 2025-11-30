@@ -1,0 +1,256 @@
+{
+  "provider": "FoundationCE",
+  "courseId": "FL-SA-63",
+  "title": "Florida Real Estate Sales Associate 63 Hour Pre Licensing",
+  "description": "Complete 63-hour pre-licensing course for Florida real estate sales associates. Includes instruction across 19 units covering real estate law, practices, contracts, mortgages, and state regulations.",
+  "hours": 63,
+  "units": [
+    {
+      "id": "unit01",
+      "number": 1,
+      "title": "The Real Estate Business",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Introduction to Real Estate" },
+        { "id": "lesson02", "title": "Real Estate Careers and Specializations" },
+        { "id": "lesson03", "title": "Market Analysis and Professional Development" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit02",
+      "number": 2,
+      "title": "Real Estate License Law and Qualifications for Licensure",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Florida License Requirements" },
+        { "id": "lesson02", "title": "Qualification Standards" },
+        { "id": "lesson03", "title": "Application and Examination Process" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit03",
+      "number": 3,
+      "title": "Real Estate License Law and Commission Rules",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Regulatory Framework" },
+        { "id": "lesson02", "title": "Commission Authority and Rules" },
+        { "id": "lesson03", "title": "Licensee Responsibilities" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit04",
+      "number": 4,
+      "title": "Authorized Relationships, Duties and Disclosure",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Agency Relationships" },
+        { "id": "lesson02", "title": "Fiduciary Duties" },
+        { "id": "lesson03", "title": "Disclosure Requirements" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit05",
+      "number": 5,
+      "title": "Real Estate Brokerage Activities and Procedures",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Brokerage Operations" },
+        { "id": "lesson02", "title": "Trust Account Management" },
+        { "id": "lesson03", "title": "Transaction Procedures" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit06",
+      "number": 6,
+      "title": "Violations of License Law, Penalties and Procedures",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Prohibited Activities" },
+        { "id": "lesson02", "title": "Violations and Penalties" },
+        { "id": "lesson03", "title": "Disciplinary Procedures" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit07",
+      "number": 7,
+      "title": "Federal and State Laws Pertaining to Real Estate",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Fair Housing Laws" },
+        { "id": "lesson02", "title": "Federal Regulations" },
+        { "id": "lesson03", "title": "Florida Specific Laws" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit08",
+      "number": 8,
+      "title": "Property Rights, Estates and Tenancies",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Property Ownership Types" },
+        { "id": "lesson02", "title": "Estates in Land" },
+        { "id": "lesson03", "title": "Concurrent Ownership" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit09",
+      "number": 9,
+      "title": "Title, Deeds and Ownership Restrictions",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Title Concepts" },
+        { "id": "lesson02", "title": "Deed Requirements" },
+        { "id": "lesson03", "title": "Restrictions on Ownership" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit10",
+      "number": 10,
+      "title": "Real Estate Contracts",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Contract Fundamentals" },
+        { "id": "lesson02", "title": "Essential Contract Terms" },
+        { "id": "lesson03", "title": "Contract Performance and Remedies" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit11",
+      "number": 11,
+      "title": "Residential Mortgages",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Mortgage Basics" },
+        { "id": "lesson02", "title": "Mortgage Terms and Conditions" },
+        { "id": "lesson03", "title": "Mortgage Rights and Remedies" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit12",
+      "number": 12,
+      "title": "Types of Mortgages and Sources of Financing",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Mortgage Types" },
+        { "id": "lesson02", "title": "Financing Sources" },
+        { "id": "lesson03", "title": "Loan Programs" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit13",
+      "number": 13,
+      "title": "Real Estate Related Computations",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Real Estate Math Basics" },
+        { "id": "lesson02", "title": "Commission and Prorations" },
+        { "id": "lesson03", "title": "Mortgage Calculations" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit14",
+      "number": 14,
+      "title": "Closing of Transactions",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Closing Process" },
+        { "id": "lesson02", "title": "Closing Documents" },
+        { "id": "lesson03", "title": "Settlement Statements" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit15",
+      "number": 15,
+      "title": "The Real Estate Markets and Analysis",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Market Analysis" },
+        { "id": "lesson02", "title": "Market Indicators" },
+        { "id": "lesson03", "title": "Property Valuation" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit16",
+      "number": 16,
+      "title": "Real Estate Appraisal",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Appraisal Principles" },
+        { "id": "lesson02", "title": "Appraisal Methods" },
+        { "id": "lesson03", "title": "Appraisal Reports" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit17",
+      "number": 17,
+      "title": "Real Estate Investments and Business Brokerage",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Investment Fundamentals" },
+        { "id": "lesson02", "title": "Investment Analysis" },
+        { "id": "lesson03", "title": "Business Brokerage" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit18",
+      "number": 18,
+      "title": "Taxes Affecting Real Estate",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Property Tax Fundamentals" },
+        { "id": "lesson02", "title": "Federal Income Taxes" },
+        { "id": "lesson03", "title": "Tax Deductions and Planning" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    },
+    {
+      "id": "unit19",
+      "number": 19,
+      "title": "Planning, Zoning, and Environmental Hazards",
+      "hours": 3,
+      "lessons": [
+        { "id": "lesson01", "title": "Planning and Zoning Basics" },
+        { "id": "lesson02", "title": "Zoning Restrictions and Variances" },
+        { "id": "lesson03", "title": "Environmental Concerns" }
+      ],
+      "hasQuiz": true,
+      "passingScore": 70
+    }
+  ]
+}
