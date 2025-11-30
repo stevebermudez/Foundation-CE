@@ -19,6 +19,7 @@ export interface Course {
   untimedOption: boolean;
   duration: string;
   lessons: number;
+  price: number;
   enrolled?: boolean;
   progress?: number;
   completed?: boolean;
@@ -132,7 +133,10 @@ export default function CourseCard({ course, onEnroll, onContinue }: CourseCardP
         )}
       </CardContent>
 
-      <CardFooter className="pt-0">
+      <CardFooter className="pt-0 flex flex-col gap-2">
+        <div className="w-full text-center">
+          <span className="text-lg font-bold">${course.price}</span>
+        </div>
         {course.enrolled ? (
           <Button 
             className="w-full" 
@@ -147,7 +151,7 @@ export default function CourseCard({ course, onEnroll, onContinue }: CourseCardP
             onClick={() => onEnroll(course.id)}
             data-testid={`button-enroll-${course.id}`}
           >
-            Enroll Now
+            Enroll Now - ${course.price}
           </Button>
         )}
       </CardFooter>
