@@ -2,11 +2,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Video,
   FileText,
-  TimerOff,
   Award,
   Shield,
   Smartphone,
-  Clock,
   BookOpen,
 } from "lucide-react";
 
@@ -19,21 +17,9 @@ const features = [
   },
   {
     icon: FileText,
-    title: "Comprehensive PDF Guides",
+    title: "Comprehensive Study Materials",
     description:
-      "Downloadable study materials and guides for each course to reference anytime.",
-  },
-  {
-    icon: TimerOff,
-    title: "No-Timer Option",
-    description:
-      "Take exams at your own pace with our compliant no-timer option for stress-free testing.",
-  },
-  {
-    icon: Clock,
-    title: "Timed Exams Available",
-    description:
-      "Traditional timed exam options for those who prefer structured testing environments.",
+      "Downloadable guides and resources for each course to reference anytime.",
   },
   {
     icon: Shield,
@@ -69,8 +55,6 @@ export default function FeaturesSection() {
     "from-emerald-500/20 to-emerald-600/20 border-emerald-500/30",
     "from-orange-500/20 to-orange-600/20 border-orange-500/30",
     "from-cyan-500/20 to-cyan-600/20 border-cyan-500/30",
-    "from-indigo-500/20 to-indigo-600/20 border-indigo-500/30",
-    "from-rose-500/20 to-rose-600/20 border-rose-500/30",
   ];
 
   const iconColorMap = [
@@ -80,8 +64,6 @@ export default function FeaturesSection() {
     "text-emerald-400",
     "text-orange-400",
     "text-cyan-400",
-    "text-indigo-400",
-    "text-rose-400",
   ];
 
   return (
