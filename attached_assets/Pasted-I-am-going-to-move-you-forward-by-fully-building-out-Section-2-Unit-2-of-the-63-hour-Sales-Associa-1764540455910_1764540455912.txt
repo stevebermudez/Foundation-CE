@@ -1,0 +1,353 @@
+I am going to move you forward by fully building out Section 2 / Unit 2 of the 63 hour Sales Associate course, since that is the backbone of everything: license law, qualifications, who needs a license, and unlicensed activity.
+
+This becomes your next concrete chunk of content to plug into FoundationCE on Replit and feed into Sora.
+
+Unit 2 - Real Estate License Law and Qualifications for Licensure
+
+Target time about 3 hours of instruction
+FREC section 2 in the syllabus 
+
+FREC1SyllabusCleanFinal01012023
+
+Unit 2 learning objectives from FREC (tightened for your course)
+
+By the end of this unit, the student should be able to:
+
+Identify the qualifications for a Florida sales associate license.
+
+Explain the application process, background checks, and nonresident rules.
+
+Describe pre, post, and continuing education requirements.
+
+Distinguish sales associate, broker, and broker associate.
+
+Identify real estate services where licensure is required and common unlicensed activity.
+
+Recognize exemptions from licensure.
+
+Distinguish registration from licensure and explain mutual recognition. 
+
+FREC1SyllabusCleanFinal01012023
+
+Structure of Unit 2 (for Replit and timing)
+
+You can break Unit 2 into three video lessons plus the quiz:
+
+Lesson 2.1 (approx 55 minutes)
+History and purpose of license law, DBPR, DRE, FREC, key statutes and rules.
+
+Lesson 2.2 (approx 55 minutes)
+License categories, qualifications, application requirements, background checks, education, exams.
+
+Lesson 2.3 (approx 55 minutes)
+Licensure vs registration, mutual recognition, who must be licensed, exemptions, unlicensed activity.
+
+Unit 2 quiz 20 multiple choice questions
+Count quiz time as about 15 minutes to land you at a 3 hour unit.
+
+Lesson 2.1 Script
+
+Real Estate License Law, DBPR, DRE, FREC
+(You can read this verbatim into Sora. I will write it in a natural teaching tone, but tight.)
+
+Welcome back to FoundationCE and the Florida Sales Associate Pre Licensing Course.
+
+In this lesson, we will build your foundation in Florida license law. Before you learn what you may or may not do as a licensee, you need to know who makes the rules and why those rules exist.
+
+Florida has a long history of regulating real estate. Real estate is a large target for fraud, misrepresentation, and abuse. The law is designed to protect the public, not to protect licensees. The guiding purpose behind the licensing system is consumer protection.
+
+The modern structure of regulation in Florida starts with three main entities:
+
+The Department of Business and Professional Regulation, called DBPR.
+
+The Division of Real Estate, called DRE.
+
+The Florida Real Estate Commission, called FREC.
+
+DBPR is an umbrella agency in the executive branch of state government. It regulates many professions, including contractors, cosmetologists, and real estate licensees. DBPR issues licenses, investigates complaints, and can initiate disciplinary action.
+
+The Division of Real Estate is a part of DBPR that handles administrative and ministerial work specific to real estate and appraisal regulation. The DRE provides support for FREC, maintains license records, and coordinates the examination process.
+
+The Florida Real Estate Commission, FREC, is the rulemaking and disciplinary body for real estate licensees. FREC members are appointed by the Governor and confirmed by the Senate. FREC adopts rules, interprets Chapter 475 of the Florida Statutes, and imposes discipline when licensees violate license law.
+
+Several important chapters of Florida law control your practice as a licensee. You should know them by number:
+
+Chapter 20 of the Florida Statutes sets out the organizational structure of the executive branch, including DBPR.
+
+Chapter 455 provides general regulation for professions and occupations under DBPR.
+
+Chapter 475 is the primary real estate license law. It defines real estate services, license types, disciplinary grounds, and the Real Estate Recovery Fund.
+
+Chapter 120 sets out administrative procedure, including rulemaking and hearings.
+
+Rule Chapter 61J2 of the Florida Administrative Code contains the detailed rules adopted by FREC. 
+
+FREC1SyllabusCleanFinal01012023
+
+When you see a test question that asks which law controls a particular issue, train your brain to think in terms of these chapters and rules. For example, if the question involves escrow recordkeeping, it is probably covered by Chapter 475 and Rule 61J2, not by a local ordinance or the federal Fair Housing Act.
+
+To summarize this segment, remember three things:
+
+DBPR is the umbrella agency.
+
+DRE is the back office that handles real estate administration.
+
+FREC is the board that writes rules, interprets the law, and disciplines licensees.
+
+In the next segment, we will move from the agencies that regulate you to the requirements you must meet to obtain a Florida sales associate license.
+
+You can drop in slides that visually show:
+
+DBPR hierarchy.
+
+DRE as subdivision.
+
+FREC composition and authority.
+
+Lesson 2.2 Script
+
+License categories, qualifications, application, background, education
+
+Use this for another 20 to 25 minute narrated segment. You can split into shorter clips in the LMS if you prefer.
+
+In this lesson, we are going to talk about you as an applicant. What does Florida expect from you before it will grant you a sales associate license
+
+First, let us define the license categories. There are three basic categories in residential brokerage:
+
+Sales associate.
+
+Broker.
+
+Broker associate. 
+
+FREC1SyllabusCleanFinal01012023
+
+A sales associate performs real estate services for compensation but must work under the direction and control of an employing broker or owner developer. A broker may work for themselves, own a brokerage, and supervise sales associates and broker associates. A broker associate has a broker license, but chooses to work under the supervision of another broker instead of operating independently.
+
+Now let us look at the basic qualifications for a sales associate license. Florida requires that you:
+
+Be at least 18 years old.
+
+Have a high school diploma or its equivalent.
+
+Have a United States Social Security number.
+
+Be honest, trustworthy, and of good moral character. 
+
+FREC1SyllabusCleanFinal01012023
+
+You do not have to be a United States citizen, but you must satisfy the requirements for qualification of immigrants for examination under Florida law. The state is mainly concerned with your honesty and your record.
+
+The application itself is more than a formality. You must respond accurately and completely to every question about your background. If you have ever been arrested, charged, or convicted of a crime, or if you have ever entered a plea of guilty or nolo contendere, even if adjudication was withheld or the record was sealed or expunged, you must carefully follow the instructions on the application. 
+
+FREC1SyllabusCleanFinal01012023
+
+Failure to disclose is often worse than the underlying offense. Many applications are denied not because of the original conduct but because the applicant failed to disclose it. When in doubt, disclose.
+
+After you submit the application and pay the required fees, DBPR orders a background check. Your fingerprints are taken and compared to state and federal criminal databases. The Division of Real Estate prepares a Summary of Applicants (often abbreviated as SOA), which provides FREC with information needed to approve or deny your application. 
+
+FREC1SyllabusCleanFinal01012023
+
+Each application is valid for a limited period. If you do not complete the licensure process and pass the exam within that time, you may have to reapply and pay additional fees.
+
+Next we look at education. The standard rule is that an applicant must complete a state approved pre license course for sales associates before taking the state exam. The course is commonly known as FREC Course I, and it consists of at least 63 hours including the final exam. There are some exemptions for attorneys and certain college degree holders, but those are tested as exceptions. The rule is that education is required, and the exception is that certain applicants may be exempt. 
+
+FREC1SyllabusCleanFinal01012023
+
+After completing the pre license course and passing the school exam, you are eligible to take the state licensure examination. Once you pass the state exam and DBPR issues your license, you are not finished with education. You must complete post licensing education before your first renewal, and then ongoing continuing education for every renewal after that. 
+
+FREC1SyllabusCleanFinal01012023
+
+In the next lesson, we will cover licensure versus registration, mutual recognition, who must be licensed, exemptions from licensure, and unlicensed activity.
+
+Lesson 2.3 Script
+
+Registration vs licensure, mutual recognition, who must be licensed, exemptions, unlicensed activity
+
+In this final lesson for Unit 2, we will connect the license to the work you are allowed to perform.
+
+First, let us separate two key terms: registration and licensure. Registration is the placement of your name and address on the official record. Licensure is the legal authorization to practice a regulated profession. The state may require both registration and licensure, but a license is what authorizes you to perform real estate services. 
+
+FREC1SyllabusCleanFinal01012023
+
+Florida also has mutual recognition agreements with certain other states. Under these agreements, a licensee in another state may obtain a Florida license without taking the full pre license course, provided they meet the experience and law exam requirements and are not Florida residents as defined by statute. Mutual recognition is not reciprocity. It is a specific agreement between Florida and certain states. 
+
+FREC1SyllabusCleanFinal01012023
+
+Now let us clarify who must be licensed. Real estate services in Florida include advertising, buying, appraising, renting, selling, exchanging, leasing, and managing real property for another and for compensation. If a person performs any of these services for someone else for a fee, commission, or other valuable consideration, that person usually must hold an active real estate license. 
+
+FREC1SyllabusCleanFinal01012023
+
+The law also lists several exemptions. For example, owners who handle their own real estate, salaried employees of an owner or of a registered broker or owner developer who perform limited duties, attorneys in fact acting under a power of attorney, and certain government employees performing official duties may be exempt from licensure when acting within the scope of the exemption. You must learn which exemptions exist and where they end.
+
+Unlicensed activity is a serious violation. A person who performs real estate services for another for compensation without a required license can face criminal penalties, administrative fines, and civil liability. Licensees who assist or cooperate with unlicensed activity also risk discipline. Exam questions often describe a scenario where an unlicensed assistant does too much: negotiating commission, giving legal advice, or showing property without supervision.
+
+As you complete this unit, keep asking: Is this person performing real estate services for another and for compensation If the answer is yes, a license is probably required unless an exemption clearly applies.
+
+That concludes Unit 2. You are now ready for the Unit 2 quiz.
+
+Unit 2 Quiz for FoundationCE
+
+20 multiple choice questions, exam style
+
+Each question has four answer options with one best answer.
+
+The primary purpose of Florida real estate license law is to
+A. increase the income of real estate licensees
+B. protect the public by regulating real estate brokers and sales associates
+C. create a standard form of real estate contract
+D. regulate interest rates charged on real estate loans
+
+Answer: B
+
+Which state agency is responsible for licensing and regulating real estate professionals in Florida
+A. Department of Financial Services
+B. Department of Business and Professional Regulation
+C. Department of State
+D. Real Estate Recovery Fund
+
+Answer: B
+
+Which entity provides administrative and ministerial support services specifically for the Florida Real Estate Commission
+A. Division of Professions
+B. Division of Real Estate
+C. Florida Supreme Court
+D. Attorney General
+
+Answer: B
+
+Which Florida statute chapter primarily contains the real estate license law
+A. Chapter 20
+B. Chapter 120
+C. Chapter 455
+D. Chapter 475
+
+Answer: D
+
+Which of the following is one of the basic qualifications for a Florida sales associate license
+A. United States citizenship
+B. Florida residency
+C. High school diploma or equivalent
+D. College degree in real estate
+
+Answer: C
+
+A sales associate applicant was convicted of a misdemeanor 5 years ago and had adjudication withheld. On the license application, the applicant must
+A. omit the information because adjudication was withheld
+B. omit the information because it is older than 3 years
+C. disclose the offense if asked, even if adjudication was withheld
+D. disclose only felonies, not misdemeanors
+
+Answer: C
+
+Failure to disclose a prior criminal conviction on a license application
+A. is acceptable if the conviction was sealed
+B. may be grounds for denial of the application
+C. has no effect if the applicant later passes the exam
+D. is required under privacy laws
+
+Answer: B
+
+Which statement correctly describes the education requirement for a sales associate applicant
+A. The applicant must complete a 72 hour FREC Course II
+B. The applicant must complete a pre license course unless an education exemption applies
+C. The applicant needs only to pass the state exam
+D. The applicant must complete 45 hours of post licensing education before taking the exam
+
+Answer: B
+
+A broker holds a broker license but chooses to work under another broker as an associate. This licensee is
+A. a sales associate
+B. an owner developer
+C. a broker associate
+D. a registered assistant
+
+Answer: C
+
+Registration refers to
+A. the legal authorization to practice real estate
+B. placing the licensee’s name and address on the records of the DBPR
+C. automatic renewal of a license
+D. the post licensing education process
+
+Answer: B
+
+Which of the following is a requirement common to both broker and sales associate applicants
+A. United States citizenship
+B. Minimum of two years of college
+C. Fingerprint based background check
+D. At least two years of real estate experience
+
+Answer: C
+
+Mutual recognition agreements allow
+A. Florida residents to bypass pre license education
+B. nonresident licensees from certain states to obtain a Florida license without the full pre license course
+C. foreign nationals to practice without a Social Security number
+D. any out of state licensee to perform services in Florida without a Florida license
+
+Answer: B
+
+Which activity is considered a real estate service that usually requires a license when performed for another and for compensation
+A. Paying a mortgage payment for a relative
+B. Giving a friend a free estimate of value without expectation of compensation
+C. Advertising and negotiating the sale of property for a commission
+D. Building a home as a licensed contractor
+
+Answer: C
+
+Which person is required to hold an active real estate license
+A. A salaried employee of an owner who leases units in a single building and receives no bonuses based on rentals
+B. An individual paid a fee to market and sell another person’s home
+C. An attorney at law who drafts a contract as part of legal representation
+D. A person who sells their own property
+
+Answer: B
+
+Which of the following is typically exempt from real estate licensure when performing real estate related tasks
+A. A sales associate who works for two brokers at the same time
+B. A property management firm that charges a commission to manage rentals
+C. A partner in a partnership who sells partnership property and receives a share of profits in proportion to their interest
+D. A person who finds tenants for a landlord in exchange for a fee per tenant
+
+Answer: C
+
+A person who performs real estate services for another, for compensation, without a required license is
+A. guilty of unlicensed activity
+B. exempt if the services are occasional
+C. permitted if they work under an owner
+D. subject only to civil, not criminal, penalties
+
+Answer: A
+
+The term “owner developer” refers to
+A. a licensed sales associate who also holds a contractor license
+B. an individual or entity that owns subdivisions or properties and employs licensees to sell them
+C. any person who develops property and sells it through a broker
+D. a government agency that owns and develops public property
+
+Answer: B
+
+Which statement about post licensing and continuing education is correct
+A. A sales associate must complete post licensing education before the first renewal
+B. Continuing education is completed once, and then no further education is required
+C. Post licensing and continuing education are optional
+D. Only brokers are required to complete post licensing education
+
+Answer: A
+
+Which law primarily governs administrative procedure, such as rulemaking and hearings, that affect licensees
+A. Chapter 20, Florida Statutes
+B. Chapter 120, Florida Statutes
+C. Chapter 475, Florida Statutes
+D. Rule Chapter 61J2, Florida Administrative Code
+
+Answer: B
+
+A sales associate applicant lives in another state and owns a vacation condo in Florida. For the purpose of mutual recognition rules, that person is considered
+A. a Florida resident if they spend at least 2 weeks per year in the condo
+B. a Florida resident if they hold a Florida driver license
+C. a nonresident unless they meet the statutory definition of Florida resident
+D. a resident of both states for licensing purposes
+
+Answer: C

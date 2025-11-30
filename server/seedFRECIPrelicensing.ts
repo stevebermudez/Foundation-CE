@@ -311,7 +311,7 @@ export async function seedFRECIPrelicensing() {
       },
     ];
 
-    // Add Unit 1 questions to the first unit quiz
+    // Unit 1 questions (fully detailed)
     let sequenceNum = 0;
     for (const q of unit1Questions) {
       await db.insert(examQuestions).values({
@@ -326,9 +326,246 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit1Questions.length} sample questions to Unit 1 Quiz`);
 
-    // Add placeholder questions for remaining units and final exam
-    // Unit 2-19: Add basic structure (can be expanded later)
-    for (let i = 1; i < units.length; i++) {
+    // Unit 2 questions (Real Estate License Law and Qualifications)
+    const unit2Questions = [
+      {
+        text: "The primary purpose of Florida real estate license law is to",
+        options: [
+          "A. increase the income of real estate licensees",
+          "B. protect the public by regulating real estate brokers and sales associates",
+          "C. create a standard form of real estate contract",
+          "D. regulate interest rates charged on real estate loans",
+        ],
+        correctAnswer: "B",
+        explanation: "The guiding purpose behind Florida's licensing system is consumer protection, not to benefit licensees.",
+      },
+      {
+        text: "Which state agency is responsible for licensing and regulating real estate professionals in Florida",
+        options: [
+          "A. Department of Financial Services",
+          "B. Department of Business and Professional Regulation",
+          "C. Department of State",
+          "D. Real Estate Recovery Fund",
+        ],
+        correctAnswer: "B",
+        explanation: "DBPR (Department of Business and Professional Regulation) is the umbrella agency responsible for licensing real estate professionals in Florida.",
+      },
+      {
+        text: "Which entity provides administrative and ministerial support services specifically for the Florida Real Estate Commission",
+        options: [
+          "A. Division of Professions",
+          "B. Division of Real Estate",
+          "C. Florida Supreme Court",
+          "D. Attorney General",
+        ],
+        correctAnswer: "B",
+        explanation: "The Division of Real Estate (DRE) is part of DBPR and provides administrative support, maintains records, and coordinates the examination process for FREC.",
+      },
+      {
+        text: "Which Florida statute chapter primarily contains the real estate license law",
+        options: [
+          "A. Chapter 20",
+          "B. Chapter 120",
+          "C. Chapter 455",
+          "D. Chapter 475",
+        ],
+        correctAnswer: "D",
+        explanation: "Chapter 475, Florida Statutes, is the primary real estate license law defining license types, disciplinary grounds, and recovery funds.",
+      },
+      {
+        text: "Which of the following is one of the basic qualifications for a Florida sales associate license",
+        options: [
+          "A. United States citizenship",
+          "B. Florida residency",
+          "C. High school diploma or equivalent",
+          "D. College degree in real estate",
+        ],
+        correctAnswer: "C",
+        explanation: "A high school diploma or equivalent is a basic qualification. Applicants must also be 18+, have a Social Security number, and be of good moral character.",
+      },
+      {
+        text: "A sales associate applicant was convicted of a misdemeanor 5 years ago and had adjudication withheld. On the license application, the applicant must",
+        options: [
+          "A. omit the information because adjudication was withheld",
+          "B. omit the information because it is older than 3 years",
+          "C. disclose the offense if asked, even if adjudication was withheld",
+          "D. disclose only felonies, not misdemeanors",
+        ],
+        correctAnswer: "C",
+        explanation: "Applicants must disclose all arrests, charges, or convictions, even if adjudication was withheld or the record was sealed or expunged.",
+      },
+      {
+        text: "Failure to disclose a prior criminal conviction on a license application",
+        options: [
+          "A. is acceptable if the conviction was sealed",
+          "B. may be grounds for denial of the application",
+          "C. has no effect if the applicant later passes the exam",
+          "D. is required under privacy laws",
+        ],
+        correctAnswer: "B",
+        explanation: "Failure to disclose is often worse than the underlying offense and may result in application denial.",
+      },
+      {
+        text: "Which statement correctly describes the education requirement for a sales associate applicant",
+        options: [
+          "A. The applicant must complete a 72 hour FREC Course II",
+          "B. The applicant must complete a pre license course unless an education exemption applies",
+          "C. The applicant needs only to pass the state exam",
+          "D. The applicant must complete 45 hours of post licensing education before taking the exam",
+        ],
+        correctAnswer: "B",
+        explanation: "Sales associates must complete an approved pre-license course (FREC I, 63 hours) before taking the state exam, except in cases of exemption.",
+      },
+      {
+        text: "A broker holds a broker license but chooses to work under another broker as an associate. This licensee is",
+        options: [
+          "A. a sales associate",
+          "B. an owner developer",
+          "C. a broker associate",
+          "D. a registered assistant",
+        ],
+        correctAnswer: "C",
+        explanation: "A broker associate has a broker license but chooses to work under another broker's supervision rather than operating independently.",
+      },
+      {
+        text: "Registration refers to",
+        options: [
+          "A. the legal authorization to practice real estate",
+          "B. placing the licensee's name and address on the records of the DBPR",
+          "C. automatic renewal of a license",
+          "D. the post licensing education process",
+        ],
+        correctAnswer: "B",
+        explanation: "Registration is placement on official records. Licensure is the legal authorization to practice. Both may be required, but licensure grants authority.",
+      },
+      {
+        text: "Which of the following is a requirement common to both broker and sales associate applicants",
+        options: [
+          "A. United States citizenship",
+          "B. Minimum of two years of college",
+          "C. Fingerprint based background check",
+          "D. At least two years of real estate experience",
+        ],
+        correctAnswer: "C",
+        explanation: "Both broker and sales associate applicants must undergo fingerprint-based background checks ordered by DBPR.",
+      },
+      {
+        text: "Mutual recognition agreements allow",
+        options: [
+          "A. Florida residents to bypass pre license education",
+          "B. nonresident licensees from certain states to obtain a Florida license without the full pre license course",
+          "C. foreign nationals to practice without a Social Security number",
+          "D. any out of state licensee to perform services in Florida without a Florida license",
+        ],
+        correctAnswer: "B",
+        explanation: "Mutual recognition is a specific agreement between Florida and certain states allowing nonresident licensees to obtain Florida licenses with reduced requirements.",
+      },
+      {
+        text: "Which activity is considered a real estate service that usually requires a license when performed for another and for compensation",
+        options: [
+          "A. Paying a mortgage payment for a relative",
+          "B. Giving a friend a free estimate of value without expectation of compensation",
+          "C. Advertising and negotiating the sale of property for a commission",
+          "D. Building a home as a licensed contractor",
+        ],
+        correctAnswer: "C",
+        explanation: "Advertising, buying, selling, renting, and managing real property for another and for compensation require a real estate license.",
+      },
+      {
+        text: "Which person is required to hold an active real estate license",
+        options: [
+          "A. A salaried employee of an owner who leases units in a single building and receives no bonuses based on rentals",
+          "B. An individual paid a fee to market and sell another person's home",
+          "C. An attorney at law who drafts a contract as part of legal representation",
+          "D. A person who sells their own property",
+        ],
+        correctAnswer: "B",
+        explanation: "A person paid to market and sell another's property is performing real estate services for compensation and must be licensed.",
+      },
+      {
+        text: "Which of the following is typically exempt from real estate licensure when performing real estate related tasks",
+        options: [
+          "A. A sales associate who works for two brokers at the same time",
+          "B. A property management firm that charges a commission to manage rentals",
+          "C. A partner in a partnership who sells partnership property and receives a share of profits in proportion to their interest",
+          "D. A person who finds tenants for a landlord in exchange for a fee per tenant",
+        ],
+        correctAnswer: "C",
+        explanation: "Partners acting within the scope of their partnership interest are typically exempt from licensure requirements.",
+      },
+      {
+        text: "A person who performs real estate services for another, for compensation, without a required license is",
+        options: [
+          "A. guilty of unlicensed activity",
+          "B. exempt if the services are occasional",
+          "C. permitted if they work under an owner",
+          "D. subject only to civil, not criminal, penalties",
+        ],
+        correctAnswer: "A",
+        explanation: "Unlicensed activity is a serious violation subject to criminal penalties, administrative fines, and civil liability.",
+      },
+      {
+        text: "The term \"owner developer\" refers to",
+        options: [
+          "A. a licensed sales associate who also holds a contractor license",
+          "B. an individual or entity that owns subdivisions or properties and employs licensees to sell them",
+          "C. any person who develops property and sells it through a broker",
+          "D. a government agency that owns and develops public property",
+        ],
+        correctAnswer: "B",
+        explanation: "An owner developer is an individual or entity that owns subdivisions or properties and may employ licensees to handle sales within certain limitations.",
+      },
+      {
+        text: "Which statement about post licensing and continuing education is correct",
+        options: [
+          "A. A sales associate must complete post licensing education before the first renewal",
+          "B. Continuing education is completed once, and then no further education is required",
+          "C. Post licensing and continuing education are optional",
+          "D. Only brokers are required to complete post licensing education",
+        ],
+        correctAnswer: "A",
+        explanation: "Post-licensing education must be completed before the first renewal, and continuing education is required for all subsequent renewals.",
+      },
+      {
+        text: "Which law primarily governs administrative procedure, such as rulemaking and hearings, that affect licensees",
+        options: [
+          "A. Chapter 20, Florida Statutes",
+          "B. Chapter 120, Florida Statutes",
+          "C. Chapter 475, Florida Statutes",
+          "D. Rule Chapter 61J2, Florida Administrative Code",
+        ],
+        correctAnswer: "B",
+        explanation: "Chapter 120, Florida Statutes, sets out administrative procedure for rulemaking and hearings affecting licensees.",
+      },
+      {
+        text: "A sales associate applicant lives in another state and owns a vacation condo in Florida. For the purpose of mutual recognition rules, that person is considered",
+        options: [
+          "A. a Florida resident if they spend at least 2 weeks per year in the condo",
+          "B. a Florida resident if they hold a Florida driver license",
+          "C. a nonresident unless they meet the statutory definition of Florida resident",
+          "D. a resident of both states for licensing purposes",
+        ],
+        correctAnswer: "C",
+        explanation: "Florida residency is determined by the statutory definition, not simply by owning property or spending time in the state.",
+      },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit2Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[1].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit2Questions.length} sample questions to Unit 2 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 3-19)
+    for (let i = 2; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -346,7 +583,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 2-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 3-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
