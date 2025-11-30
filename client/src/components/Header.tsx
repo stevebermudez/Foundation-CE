@@ -13,6 +13,11 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useTheme } from "./ThemeProvider";
 import logoImage from "@assets/IMG_6802_1764527356008.png";
 import {
@@ -41,6 +46,7 @@ export default function Header({ selectedProfession, onProfessionChange }: Heade
   const [location] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const navItems = [
     { label: "Browse Courses", href: "/courses", icon: BookOpen },
@@ -116,12 +122,35 @@ export default function Header({ selectedProfession, onProfessionChange }: Heade
               )}
             </Button>
 
-            <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
+                  <Bell className="h-4 w-4" />
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
+                    3
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80">
+                <div className="space-y-4">
+                  <div className="font-semibold">Notifications</div>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
+                      <p className="font-medium">New course available</p>
+                      <p className="text-xs text-muted-foreground">Advanced Real Estate Law just released</p>
+                    </div>
+                    <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
+                      <p className="font-medium">Certificate expiring soon</p>
+                      <p className="text-xs text-muted-foreground">Your Florida CE certificate expires in 30 days</p>
+                    </div>
+                    <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
+                      <p className="font-medium">Exam results ready</p>
+                      <p className="text-xs text-muted-foreground">You scored 92% on the Ethics exam</p>
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
