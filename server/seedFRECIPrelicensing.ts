@@ -1382,8 +1382,84 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit8Questions.length} questions to Unit 8 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 9-19)
-    for (let i = 8; i < units.length; i++) {
+    // Unit 9 - Title, Deeds and Ownership Restrictions (20 questions)
+    const unit9Questions = [
+      { text: "Alienation refers to", options: ["A. the right to exclude others", "B. the transfer of ownership", "C. the creation of a lien", "D. the recording of a survey"], correctAnswer: "B", explanation: "Alienation means the transfer of ownership." },
+      { text: "Voluntary alienation occurs through", options: ["A. foreclosure", "B. a deed or a will", "C. escheat", "D. adverse possession"], correctAnswer: "B", explanation: "Voluntary alienation occurs when the owner deliberately transfers title by deed or by will." },
+      { text: "Constructive notice is provided by", options: ["A. personal delivery of a document", "B. verbal disclosure", "C. recording documents in the public records", "D. mailing a letter"], correctAnswer: "C", explanation: "Constructive notice is notice given by the public records when documents are properly recorded." },
+      { text: "A deed must contain", options: ["A. the purchase price", "B. the signature of the grantee", "C. a granting clause", "D. a mortgage provision"], correctAnswer: "C", explanation: "A valid deed requires a granting clause but does not require purchase price or grantee signature." },
+      { text: "Which deed provides the most warranties", options: ["A. quitclaim deed", "B. special warranty deed", "C. bargain and sale deed", "D. general warranty deed"], correctAnswer: "D", explanation: "A general warranty deed provides the most complete warranties of title." },
+      { text: "A quitclaim deed is often used to", options: ["A. guarantee clear title", "B. remove a cloud on title", "C. give a lender more security", "D. transfer a mortgage"], correctAnswer: "B", explanation: "Quitclaim deeds are often used to clear clouds on title because they convey whatever interest exists." },
+      { text: "Title insurance protects the", options: ["A. seller only", "B. buyer and lender", "C. title examiner", "D. broker only"], correctAnswer: "B", explanation: "Title insurance protects both the buyer and the lender against losses from title defects." },
+      { text: "An easement is", options: ["A. a right to use another's land for a specific purpose", "B. a trespass by a structure", "C. a superior lien", "D. a government taking"], correctAnswer: "A", explanation: "An easement is a right to use another's land for a specific purpose." },
+      { text: "An encroachment refers to", options: ["A. a zoning violation", "B. property crossing a lot line without permission", "C. a specific lien", "D. a government regulation"], correctAnswer: "B", explanation: "An encroachment occurs when a structure or improvement trespasses on another's property." },
+      { text: "The government's power to take private property for public use is", options: ["A. police power", "B. escheat", "C. eminent domain", "D. taxation"], correctAnswer: "C", explanation: "Eminent domain is the right of government to take private property for public use with just compensation." },
+      { text: "A variance allows", options: ["A. a change to the zoning classification", "B. a deviation from specific zoning requirements", "C. the government to take property", "D. a private restriction to be removed"], correctAnswer: "B", explanation: "A variance permits deviation from specific zoning requirements when strict compliance creates hardship." },
+      { text: "Special assessments are", options: ["A. voluntary fees", "B. specific liens for improvements that benefit the property", "C. general liens on all assets", "D. zoning fines"], correctAnswer: "B", explanation: "Special assessments are specific liens for improvements that benefit the property." },
+      { text: "The highest priority lien in Florida is", options: ["A. first mortgage lien", "B. judgment lien", "C. real estate property tax lien", "D. vendor lien"], correctAnswer: "C", explanation: "Real estate property tax liens always take priority over all other liens regardless of recording date." },
+      { text: "Escheat occurs when", options: ["A. an owner donates land to a charity", "B. a property is abandoned", "C. a person dies without a will and without heirs", "D. a property is rezoned"], correctAnswer: "C", explanation: "Escheat occurs when a person dies without a will and without heirs, returning property to the state." },
+      { text: "A special warranty deed protects the grantee", options: ["A. against all title defects in history", "B. only against defects arising during the grantor's ownership", "C. against encroachments", "D. against zoning violations"], correctAnswer: "B", explanation: "A special warranty deed limits warranties to defects that occurred during the grantor's ownership." },
+      { text: "A deed restriction is", options: ["A. a government rule that must be followed", "B. a private limit placed on property use", "C. a new zoning requirement", "D. a mortgage term"], correctAnswer: "B", explanation: "Deed restrictions are private restrictions placed on property by previous owners or developers." },
+      { text: "A survey is most likely to uncover", options: ["A. a superior lien", "B. an easement appurtenant", "C. an encroachment", "D. unpaid taxes"], correctAnswer: "C", explanation: "A survey is most likely to uncover encroachments as it measures exact boundary lines." },
+      { text: "Title passes when a deed is", options: ["A. recorded only", "B. signed only", "C. delivered and accepted", "D. notarized"], correctAnswer: "C", explanation: "Title passes upon delivery and acceptance of a deed, not upon recording or notarization." },
+      { text: "A lien for unpaid property taxes is", options: ["A. junior to a first mortgage", "B. always the lowest priority lien", "C. a superior lien", "D. equal to judgment liens"], correctAnswer: "C", explanation: "Property tax liens are superior liens with the highest priority of all liens." },
+      { text: "Zoning is an example of", options: ["A. police power", "B. escheat", "C. private restriction", "D. eminent domain"], correctAnswer: "A", explanation: "Zoning is an example of police power, which is the authority to regulate property for public welfare." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit9Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[8].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit9Questions.length} questions to Unit 9 Quiz`);
+
+    // Unit 10 - Real Estate Contracts (20 questions)
+    const unit10Questions = [
+      { text: "Which of the following is required for a valid contract", options: ["A. earnest money", "B. written document", "C. competent parties", "D. notarization"], correctAnswer: "C", explanation: "Competent parties is an essential element of a valid contract." },
+      { text: "Consideration in a real estate contract refers to", options: ["A. the purchase price only", "B. something of legal value exchanged", "C. the broker's fee", "D. the appraisal value"], correctAnswer: "B", explanation: "Consideration is something of legal value that each party exchanges." },
+      { text: "A voidable contract is", options: ["A. illegal", "B. unenforceable due to the Statute of Frauds", "C. valid until one party chooses to cancel it", "D. missing an essential element"], correctAnswer: "C", explanation: "A voidable contract is valid but can be set aside by one of the parties." },
+      { text: "An executory contract is", options: ["A. fully performed", "B. signed but not delivered", "C. still in progress", "D. illegal"], correctAnswer: "C", explanation: "An executory contract is still in progress and has not been fully performed by all parties." },
+      { text: "A counteroffer", options: ["A. accepts the original offer", "B. rejects the original offer", "C. requires the offeror to perform", "D. has no legal impact"], correctAnswer: "B", explanation: "Any change to the offer is not acceptance but a counteroffer that rejects the original offer." },
+      { text: "The Statute of Frauds requires that", options: ["A. all agreements be written", "B. all real estate sales contracts be written to be enforceable", "C. leases under one year be written", "D. oral agreements be recorded"], correctAnswer: "B", explanation: "The Statute of Frauds requires contracts for the sale of real property to be in writing." },
+      { text: "Oral leases longer than one year are", options: ["A. void", "B. enforceable without limitations", "C. unenforceable under the Statute of Frauds", "D. valid only with earnest money"], correctAnswer: "C", explanation: "Leases for more than one year must be in writing to be enforceable under the Statute of Frauds." },
+      { text: "Specific performance is", options: ["A. a monetary award", "B. a court order requiring the breaching party to perform", "C. a form of rescission", "D. a type of assignment"], correctAnswer: "B", explanation: "Specific performance is a remedy where the court orders the breaching party to perform as agreed." },
+      { text: "Liquidated damages", options: ["A. are determined by a jury", "B. must be equal to ten percent of the purchase price", "C. are pre agreed damages written into the contract", "D. are never allowed in real estate contracts"], correctAnswer: "C", explanation: "Liquidated damages are damages agreed to in advance and written into the contract." },
+      { text: "A listing agreement must", options: ["A. renew automatically", "B. include a definite termination date", "C. be open ended", "D. be verbal"], correctAnswer: "B", explanation: "All listing agreements must contain a definite termination date and must be in writing." },
+      { text: "In an exclusive right of sale listing", options: ["A. the broker earns a commission only if the broker finds the buyer", "B. the owner may avoid paying a commission by finding the buyer", "C. the broker earns a commission regardless of who finds the buyer", "D. more than one broker may list the property"], correctAnswer: "C", explanation: "In an exclusive right of sale, the broker earns a commission regardless of who finds the buyer." },
+      { text: "A buyer brokerage agreement", options: ["A. is optional and may be oral", "B. must be written and must contain a termination date", "C. is prohibited from including compensation", "D. is not covered by the Statute of Frauds"], correctAnswer: "B", explanation: "Buyer brokerage agreements must be in writing and contain a definite termination date." },
+      { text: "Assignment transfers", options: ["A. title", "B. contract rights and obligations", "C. ownership of real property", "D. possession only"], correctAnswer: "B", explanation: "An assignment transfers contract rights and obligations from one party to another." },
+      { text: "Novation", options: ["A. cancels a contract without replacement", "B. substitutes a new contract that replaces the original", "C. transfers possession", "D. is a type of financing"], correctAnswer: "B", explanation: "Novation replaces the original contract with a new one and releases the original party." },
+      { text: "A void contract is", options: ["A. valid unless challenged", "B. missing an essential element", "C. enforceable only with witnesses", "D. the same as a voidable contract"], correctAnswer: "B", explanation: "A void contract is missing one or more required elements and has no legal effect." },
+      { text: "A bilateral contract contains", options: ["A. a promise for an act", "B. a promise for a promise", "C. an obligation only on one side", "D. no obligations"], correctAnswer: "B", explanation: "A bilateral contract contains promises from both sides." },
+      { text: "A listing agreement creates", options: ["A. an ownership interest", "B. an employment relationship", "C. a leasehold", "D. a mortgage"], correctAnswer: "B", explanation: "Listing agreements are employment contracts between property owners and brokers." },
+      { text: "Contract termination by impossibility occurs when", options: ["A. the parties disagree", "B. performance becomes legally or physically impossible", "C. one party wants to renegotiate", "D. the buyer finds a better property"], correctAnswer: "B", explanation: "A contract terminates through impossibility when performance becomes legally or physically impossible." },
+      { text: "A contract that appears valid but cannot be enforced in court due to legal defenses is", options: ["A. void", "B. voidable", "C. unenforceable", "D. executed"], correctAnswer: "C", explanation: "An unenforceable contract appears valid but cannot be enforced in court due to legal defenses." },
+      { text: "The Statute of Limitations for an action on a written contract in Florida is", options: ["A. two years", "B. three years", "C. five years", "D. seven years"], correctAnswer: "C", explanation: "In Florida, written contracts have a five year limitation period for lawsuits." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit10Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[9].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit10Questions.length} questions to Unit 10 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 11-19)
+    for (let i = 10; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1401,7 +1477,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 9-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 11-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
