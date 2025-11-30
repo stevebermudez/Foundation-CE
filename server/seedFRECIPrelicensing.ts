@@ -792,8 +792,246 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit3Questions.length} sample questions to Unit 3 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 4-19)
-    for (let i = 3; i < units.length; i++) {
+    // Unit 4 questions (Authorized Relationships, Duties and Disclosure)
+    const unit4Questions = [
+      {
+        text: "In Florida, unless a single agent or no brokerage relationship is established in writing in a residential sale, a licensee is presumed to be",
+        options: [
+          "A. a dual agent",
+          "B. a transaction broker",
+          "C. a single agent",
+          "D. a designated sales associate",
+        ],
+        correctAnswer: "B",
+        explanation: "Florida law presumes transaction brokerage unless a single agent or no brokerage relationship is established in writing.",
+      },
+      {
+        text: "Which brokerage relationship creates a fiduciary relationship with a principal",
+        options: [
+          "A. Transaction broker",
+          "B. Single agent",
+          "C. No brokerage relationship",
+          "D. Designated agency",
+        ],
+        correctAnswer: "B",
+        explanation: "A single agent relationship creates a fiduciary relationship with a principal, with full fiduciary duties.",
+      },
+      {
+        text: "Dual agency in Florida residential sales is",
+        options: [
+          "A. permitted only if disclosed",
+          "B. permitted if both parties consent in writing",
+          "C. prohibited",
+          "D. required in all listings",
+        ],
+        correctAnswer: "C",
+        explanation: "Dual agency is prohibited in Florida residential transactions.",
+      },
+      {
+        text: "Which duty is owed by a single agent but NOT by a transaction broker",
+        options: [
+          "A. Accounting for all funds",
+          "B. Dealing honestly and fairly",
+          "C. Loyalty",
+          "D. Disclosing known material facts",
+        ],
+        correctAnswer: "C",
+        explanation: "Loyalty is a fiduciary duty owed by single agents but not by transaction brokers.",
+      },
+      {
+        text: "In a no brokerage relationship with a residential seller, a licensee owes",
+        options: [
+          "A. loyalty and obedience",
+          "B. limited confidentiality",
+          "C. dealing honestly and fairly and accounting for all funds",
+          "D. no duties since there is no representation",
+        ],
+        correctAnswer: "C",
+        explanation: "Even with no brokerage relationship, limited duties include dealing honestly and fairly, and accounting for funds.",
+      },
+      {
+        text: "The Single Agent Notice must be given",
+        options: [
+          "A. at closing",
+          "B. before or at the time of entering into a listing or representation agreement or before showing property",
+          "C. after the first offer is presented",
+          "D. only if the customer requests it",
+        ],
+        correctAnswer: "B",
+        explanation: "The Single Agent Notice must be given in writing before or at the time of entering into an agreement or before showing property.",
+      },
+      {
+        text: "Limited confidentiality is a characteristic of which brokerage relationship",
+        options: [
+          "A. No brokerage relationship",
+          "B. Single agent",
+          "C. Transaction broker",
+          "D. Designated agency",
+        ],
+        correctAnswer: "C",
+        explanation: "Transaction brokers owe limited confidentiality, meaning they cannot disclose information that would harm negotiations.",
+      },
+      {
+        text: "The No Brokerage Relationship Notice is required in",
+        options: [
+          "A. all real estate transactions",
+          "B. all commercial transactions only",
+          "C. certain residential transactions when the licensee has no brokerage relationship with a buyer or seller",
+          "D. leases only",
+        ],
+        correctAnswer: "C",
+        explanation: "The No Brokerage Relationship Notice must be provided in writing before showing property in covered residential transactions.",
+      },
+      {
+        text: "Which statement about residential sales disclosure requirements is correct",
+        options: [
+          "A. They apply to all commercial transactions",
+          "B. They apply only when more than four residential units are involved",
+          "C. They apply to sales of four or fewer residential units, certain residential vacant land, and agricultural property of ten acres or less",
+          "D. They apply to leases of any length",
+        ],
+        correctAnswer: "C",
+        explanation: "Disclosure requirements apply to residential property of four or fewer units, unimproved residential property, and agricultural property of ten acres or less.",
+      },
+      {
+        text: "A transaction broker owes a buyer all of the following duties EXCEPT",
+        options: [
+          "A. loyalty",
+          "B. accounting for all funds",
+          "C. using skill, care, and diligence",
+          "D. disclosing known material defects",
+        ],
+        correctAnswer: "A",
+        explanation: "Loyalty is a fiduciary duty that transaction brokers do not owe to either party.",
+      },
+      {
+        text: "Which disclosure must be obtained before a single agent may change to a transaction broker relationship",
+        options: [
+          "A. No Brokerage Relationship Notice",
+          "B. Consent to Transition to Transaction Broker",
+          "C. Designated Agency Consent",
+          "D. Transaction Broker Notice for Residential Sales",
+        ],
+        correctAnswer: "B",
+        explanation: "The Consent to Transition to Transaction Broker must be signed in writing before changing from single agent to transaction broker.",
+      },
+      {
+        text: "A transaction broker is best described as",
+        options: [
+          "A. a fiduciary for both buyer and seller",
+          "B. a limited representative for one or more parties in a transaction",
+          "C. a government agent",
+          "D. a principal in the transaction",
+        ],
+        correctAnswer: "B",
+        explanation: "A transaction broker provides limited representation to one or more parties without fiduciary duties.",
+      },
+      {
+        text: "In which situation are relationship disclosures NOT required",
+        options: [
+          "A. Sale of a single family home",
+          "B. Sale of a duplex",
+          "C. Unanticipated casual conversations that do not involve confidential information",
+          "D. Sale of a four unit residential building",
+        ],
+        correctAnswer: "C",
+        explanation: "Relationship disclosures are not required in unanticipated casual conversations that do not involve confidential information.",
+      },
+      {
+        text: "A broker may designate sales associates to act as single agents for different customers in the same transaction when",
+        options: [
+          "A. the transaction is a residential sale of four or fewer units",
+          "B. both buyer and seller have assets of one million dollars or more and the transaction is nonresidential",
+          "C. the broker has written approval from FREC",
+          "D. both customers waive their rights to confidentiality",
+        ],
+        correctAnswer: "B",
+        explanation: "Designated sales associates are only permitted in nonresidential transactions where both parties have assets of one million dollars or more.",
+      },
+      {
+        text: "Designated sales associates must",
+        options: [
+          "A. follow the duties of a transaction broker",
+          "B. act as dual agents for both parties",
+          "C. follow all single agent duties including loyalty and confidentiality",
+          "D. provide no disclosures",
+        ],
+        correctAnswer: "C",
+        explanation: "Designated sales associates follow all single agent duties, including loyalty and confidentiality to their respective clients.",
+      },
+      {
+        text: "Which of the following is a duty that applies to ALL three authorized brokerage relationships in a residential transaction",
+        options: [
+          "A. Loyalty",
+          "B. Obedience",
+          "C. Limited confidentiality",
+          "D. Dealing honestly and fairly",
+        ],
+        correctAnswer: "D",
+        explanation: "Dealing honestly and fairly is a duty owed in all three authorized brokerage relationships.",
+      },
+      {
+        text: "The law that lists authorized brokerage relationships and required disclosures is found primarily in",
+        options: [
+          "A. Chapter 475.278, Florida Statutes",
+          "B. Chapter 455, Florida Statutes",
+          "C. Chapter 61J2, Florida Administrative Code",
+          "D. Chapter 713, Florida Statutes",
+        ],
+        correctAnswer: "A",
+        explanation: "Chapter 475.278, Florida Statutes, establishes authorized brokerage relationships and disclosure requirements.",
+      },
+      {
+        text: "A buyer tells a transaction broker the highest price they are willing to pay. The broker may disclose this information to the seller only",
+        options: [
+          "A. if the buyer gives written permission or disclosure is required by law",
+          "B. if it helps get the deal closed",
+          "C. if the seller is also a customer of the brokerage",
+          "D. under no circumstances",
+        ],
+        correctAnswer: "A",
+        explanation: "Limited confidentiality means a transaction broker cannot disclose negotiation information without written permission or legal requirement.",
+      },
+      {
+        text: "A licensee who has no brokerage relationship with a seller must still",
+        options: [
+          "A. provide loyalty and obedience",
+          "B. provide full disclosure of negotiation strategies",
+          "C. deal honestly and fairly and disclose known material defects",
+          "D. place the seller's interests above all others",
+        ],
+        correctAnswer: "C",
+        explanation: "Even with no brokerage relationship, licensees must deal honestly and fairly and disclose known material defects.",
+      },
+      {
+        text: "In a designated sales associate transaction, the broker must",
+        options: [
+          "A. keep confidential information from each side and not use it to the detriment of the other party",
+          "B. share all confidential information with both parties",
+          "C. act as a dual agent",
+          "D. personally represent the party with the higher offer",
+        ],
+        correctAnswer: "A",
+        explanation: "In a designated sales associate arrangement, the broker must keep confidential information from each side and not use it to harm either party.",
+      },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit4Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[3].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit4Questions.length} sample questions to Unit 4 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 5-19)
+    for (let i = 4; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -811,7 +1049,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 4-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 5-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {

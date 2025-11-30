@@ -1,0 +1,329 @@
+I will move you forward by building **Unit 4** of the 63 hour Sales Associate course.
+
+This gives you:
+
+* A **3 hour Unit 4** for FoundationCE
+* **3 Sora ready lesson scripts** (approx 55 minutes each)
+* **20 question exam style quiz** on authorized relationships, duties, and disclosure in Florida
+
+All synced with current statute 475.278 and 475.2755. ([The Florida Senate][1])
+
+---
+
+## UNIT 4 – AUTHORIZED RELATIONSHIPS, DUTIES AND DISCLOSURE
+
+Target: about **3 hours of instruction**
+Legal base: **Fla. Stat. 475.278** and **475.2755** (designated sales associate). ([The Florida Senate][1])
+
+### Core ideas for students
+
+By the end of this unit, the student should be able to:
+
+* Define **customer** versus **principal** and explain fiduciary versus non fiduciary relationships
+* Describe the three authorized brokerage relationships in Florida
+
+  * Single agent
+  * Transaction broker
+  * No brokerage relationship ([The Florida Senate][1])
+* List all **duties** owed in each relationship
+* Explain the **presumption of transaction brokerage** and the ban on dual agency in Florida residential transactions ([Wikipedia][2])
+* Identify residential transactions that require **written disclosures** and when those disclosures must be made ([The Florida Senate][1])
+* Explain **consent to transition** from single agent to transaction broker
+* Explain **designated sales associate** relationships in certain nonresidential transactions with assets of one million dollars or more ([Florida.Public.Law][3])
+* Apply relationship rules to real world scenarios and exam style questions
+
+---
+
+## Structure of Unit 4 for FoundationCE
+
+You can set it up in your LMS like this:
+
+1. **Lesson 4.1**   Authorized relationships and key terms   (about 55 minutes)
+2. **Lesson 4.2**   Duties of each relationship, required disclosures, timing   (about 55 minutes)
+3. **Lesson 4.3**   Designated sales associates, examples, exam traps   (about 55 minutes)
+4. **Unit 4 Quiz**   20 multiple choice exam style questions   (about 15 minutes)
+
+Total work time in course: approximately 3 hours.
+
+Below are Sora ready narrations and the quiz.
+
+---
+
+## LESSON 4.1 SCRIPT
+
+**Authorized Relationships and Key Terms**
+(Use as the spoken script for video 4.1)
+
+> Welcome to Unit 4 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+>
+> In this unit, we will talk about **who you represent**, **how you represent them**, and **what you must disclose**. These rules are heavily tested on the state exam because they control your legal duties in every transaction.
+>
+> Florida is a disclosure state. The law does not assume that buyers or sellers automatically understand who you represent. Instead, Florida requires that licensees clearly explain the type of brokerage relationship that exists in certain residential transactions.
+>
+> Let us begin with three important words.
+>
+> The first word is **customer**. A customer is a party to a transaction who receives limited services from a licensee. A transaction broker typically works with customers.
+>
+> The second word is **principal**. A principal is someone who has entered into a representation agreement that creates a fiduciary relationship. When you act as a single agent, your buyer or seller is your principal.
+>
+> The third word is **fiduciary**. A fiduciary owes loyalty, confidentiality, obedience, full disclosure, and other higher level duties. Fiduciaries must put the principal’s interests ahead of their own.
+>
+> Florida law authorizes three brokerage relationships:
+>
+> 1. **Single agent**, which is a fiduciary relationship.
+> 2. **Transaction broker**, which is a limited representation relationship.
+> 3. **No brokerage relationship**, where you do not represent the buyer or seller at all but still owe certain limited duties. ([The Florida Senate][1])
+>
+> Dual agency in residential transactions is not allowed in Florida. You cannot represent both buyer and seller as a fiduciary in the same residential transaction. Instead, the law offers **transaction brokerage** as the flexible middle ground. ([Wikipedia][2])
+>
+> Florida law also creates a presumption. Unless a single agent or no brokerage relationship is established in writing, you are presumed to be operating as a **transaction broker** in a residential transaction. That is the default relationship. ([Wikipedia][2])
+>
+> In this lesson, your goal is to master the vocabulary and the overall structure of relationship options. In the next lesson, we will drill into the specific duties for each relationship and the exact disclosures required.
+
+---
+
+## LESSON 4.2 SCRIPT
+
+**Duties by Relationship and Required Disclosures**
+
+> In this lesson, we break down the **duties** you owe in each relationship and the **disclosures** you must make.
+>
+> Begin with the **single agent**. A single agent relationship is a fiduciary relationship. You owe all common law fiduciary duties plus specific duties in statute. As a single agent, you owe: ([The Florida Senate][1])
+>
+> * Dealing honestly and fairly
+> * Loyalty
+> * Confidentiality
+> * Obedience
+> * Full disclosure
+> * Accounting for all funds
+> * Skill, care, and diligence in the transaction
+> * Presenting all offers and counteroffers in a timely manner
+> * Disclosing all known facts that materially affect the value of residential real property and are not readily observable
+>
+> You must give the **Single Agent Notice** in writing to a buyer or seller before, or at the time of, entering into a listing or representation agreement or before showing property, whichever happens first, in covered residential transactions. ([The Florida Senate][1])
+>
+> The **transaction broker** relationship is different. It is a limited form of representation, not a fiduciary relationship. As a transaction broker, you owe: ([The Florida Senate][1])
+>
+> * Dealing honestly and fairly
+> * Accounting for all funds
+> * Using skill, care, and diligence in the transaction
+> * Disclosing all known facts that materially affect the value of residential real property and are not readily observable
+> * Presenting all offers and counteroffers in a timely manner
+> * Limited confidentiality
+> * Any additional duties agreed to in writing
+>
+> Limited confidentiality means that you must not disclose certain information that would harm one party in negotiations, such as the lowest price a seller is willing to accept or the highest price a buyer is willing to pay, unless the party gives written permission or disclosure is required by law.
+>
+> Historically, Florida required a written Transaction Broker Notice, but that requirement was removed. Today, the law presumes transaction brokerage unless a single agent or no brokerage relationship is established in writing. ([Wikipedia][2])
+>
+> In a **no brokerage relationship**, you do not represent either party. Even so, the statute requires that you still owe three limited duties in a residential transaction: ([The Florida Senate][1])
+>
+> * Dealing honestly and fairly
+> * Disclosing all known facts that materially affect the value of residential real property and are not readily observable to the buyer
+> * Accounting for all funds entrusted to you
+>
+> The **No Brokerage Relationship Notice** must be provided in writing before showing property in covered residential transactions when you are dealing with a customer with whom you have no brokerage relationship. ([The Florida Senate][1])
+>
+> Not all transactions require these written disclosures. Written relationship disclosure requirements apply to **residential sales** as that term is defined in statute. The law defines a residential sale as the sale of improved residential property of four units or fewer, unimproved residential property intended for four units or fewer, or agricultural property of ten acres or fewer. ([The Florida Senate][1])
+>
+> Disclosures are **not** required in nonresidential transactions, in the leasing of real property, in business opportunity sales that do not include four or fewer residential units, or where the licensee knows the other party is already represented by a single agent or transaction broker. ([Law Office of Sam J. Saad III][4])
+>
+> Finally, there is an important rule about **changing relationships**. A single agent may change to a transaction broker relationship only if the principal gives written consent using the Consent to Transition to Transaction Broker disclosure. The customer must sign this consent before the relationship is changed. ([The Florida Senate][1])
+>
+> In the next lesson, we will cover designated sales associates and work through scenarios that the exam loves to use.
+
+---
+
+## LESSON 4.3 SCRIPT
+
+**Designated Sales Associates and Exam Scenarios**
+
+> In this lesson, we focus on **designated sales associates** and bring all the relationship rules together with exam style scenarios.
+>
+> In certain **nonresidential** transactions, Florida law allows a special structure called **designated sales associates**. This is only available when: ([Florida.Public.Law][3])
+>
+> * The transaction is not a residential sale as defined in statute
+> * Both buyer and seller each have **assets of one million dollars or more**
+> * The broker, at the customers’ request, designates different sales associates to act as single agents for each side in the same transaction
+>
+> The designated sales associates each have all the duties of a single agent to their respective customers, including the required single agent disclosures. The broker becomes more like an intermediary overseeing both sides. The law requires that both parties sign a disclosure confirming that their assets meet the threshold and that they want this form of representation. ([Florida.Public.Law][3])
+>
+> Florida prohibits dual agency in residential sales, but designated sales associates provide a way to offer similar representation in certain high asset nonresidential deals.
+>
+> Now let us look at common exam scenarios.
+>
+> Scenario one. A sales associate meets a buyer at an open house for a single family home. No written disclosure has been signed. Under Florida law, the brokerage relationship is presumed to be transaction brokerage in this residential context. The associate owes the duties of a transaction broker, including limited confidentiality, but not fiduciary loyalty.
+>
+> Scenario two. A listing agreement clearly identifies the broker as a single agent for the seller and includes the Single Agent Notice. Later, a potential buyer wants the same associate to help write up an offer. The associate cannot remain a single agent for the seller and also represent the buyer. The relationship may be changed to transaction broker only if the seller signs the Consent to Transition disclosure before the change.
+>
+> Scenario three. A broker is helping a corporate buyer purchase a large warehouse. Both the buyer and the seller have assets over one million dollars. At the customers’ request, the broker designates one sales associate to act as a single agent for the buyer and another associate to act as a single agent for the seller in the same transaction. This is permitted as a designated sales associate arrangement because it is a qualifying nonresidential transaction.
+>
+> Scenario four. A licensee is chatting casually with a neighbor at a barbecue. The neighbor casually mentions they might sell their house someday. No confidential information is requested or given. This is an unanticipated casual conversation. Relationship disclosures are not required at this point. ([Law Office of Sam J. Saad III][4])
+>
+> For the exam, watch for:
+>
+> * When written disclosures are required
+> * Which relationship the law presumes when no written disclosure is used
+> * The difference between fiduciary duties and transaction broker duties
+> * The conditions for designated sales associates
+> * Transactions where disclosure rules do not apply
+>
+> That completes Unit 4. You are ready for the quiz.
+
+---
+
+## UNIT 4 QUIZ
+
+**20 multiple choice questions   one best answer each**
+
+1. In Florida, unless a single agent or no brokerage relationship is established in writing in a residential sale, a licensee is presumed to be
+   A. a dual agent
+   B. a transaction broker
+   C. a single agent
+   D. a designated sales associate
+   **Answer:** B ([Wikipedia][2])
+
+2. Which brokerage relationship creates a fiduciary relationship with a principal
+   A. Transaction broker
+   B. Single agent
+   C. No brokerage relationship
+   D. Designated agency
+   **Answer:** B ([The Florida Senate][1])
+
+3. Dual agency in Florida residential sales is
+   A. permitted only if disclosed
+   B. permitted if both parties consent in writing
+   C. prohibited
+   D. required in all listings
+   **Answer:** C ([Wikipedia][2])
+
+4. Which duty is owed by a single agent but **not** by a transaction broker
+   A. Accounting for all funds
+   B. Dealing honestly and fairly
+   C. Loyalty
+   D. Disclosing known material facts
+   **Answer:** C ([The Florida Senate][1])
+
+5. In a no brokerage relationship with a residential seller, a licensee owes
+   A. loyalty and obedience
+   B. limited confidentiality
+   C. dealing honestly and fairly and accounting for all funds
+   D. no duties since there is no representation
+   **Answer:** C ([The Florida Senate][1])
+
+6. The Single Agent Notice must be given
+   A. at closing
+   B. before or at the time of entering into a listing or representation agreement or before showing property
+   C. after the first offer is presented
+   D. only if the customer requests it
+   **Answer:** B ([The Florida Senate][1])
+
+7. Limited confidentiality is a characteristic of which brokerage relationship
+   A. No brokerage relationship
+   B. Single agent
+   C. Transaction broker
+   D. Designated agency
+   **Answer:** C ([The Florida Senate][1])
+
+8. The No Brokerage Relationship Notice is required in
+   A. all real estate transactions
+   B. all commercial transactions only
+   C. certain residential transactions when the licensee has no brokerage relationship with a buyer or seller
+   D. leases only
+   **Answer:** C ([The Florida Senate][1])
+
+9. Which statement about residential sales disclosure requirements is correct
+   A. They apply to all commercial transactions
+   B. They apply only when more than four residential units are involved
+   C. They apply to sales of four or fewer residential units, certain residential vacant land, and agricultural property of ten acres or less
+   D. They apply to leases of any length
+   **Answer:** C ([The Florida Senate][1])
+
+10. A transaction broker owes a buyer all of the following duties **except**
+    A. loyalty
+    B. accounting for all funds
+    C. using skill, care, and diligence
+    D. disclosing known material defects
+    **Answer:** A ([The Florida Senate][1])
+
+11. Which disclosure must be obtained before a single agent may change to a transaction broker relationship
+    A. No Brokerage Relationship Notice
+    B. Consent to Transition to Transaction Broker
+    C. Designated Agency Consent
+    D. Transaction Broker Notice for Residential Sales
+    **Answer:** B ([The Florida Senate][1])
+
+12. A transaction broker is best described as
+    A. a fiduciary for both buyer and seller
+    B. a limited representative for one or more parties in a transaction
+    C. a government agent
+    D. a principal in the transaction
+    **Answer:** B ([Florida Realtors][5])
+
+13. In which situation are relationship disclosures **not** required
+    A. Sale of a single family home
+    B. Sale of a duplex
+    C. Unanticipated casual conversations that do not involve confidential information
+    D. Sale of a four unit residential building
+    **Answer:** C ([Law Office of Sam J. Saad III][4])
+
+14. A broker may designate sales associates to act as single agents for different customers in the same transaction when
+    A. the transaction is a residential sale of four or fewer units
+    B. both buyer and seller have assets of one million dollars or more and the transaction is nonresidential
+    C. the broker has written approval from FREC
+    D. both customers waive their rights to confidentiality
+    **Answer:** B ([Florida.Public.Law][3])
+
+15. Designated sales associates must
+    A. follow the duties of a transaction broker
+    B. act as dual agents for both parties
+    C. follow all single agent duties including loyalty and confidentiality
+    D. provide no disclosures
+    **Answer:** C ([Florida.Public.Law][3])
+
+16. Which of the following is a duty that applies to **all** three authorized brokerage relationships in a residential transaction
+    A. Loyalty
+    B. Obedience
+    C. Limited confidentiality
+    D. Dealing honestly and fairly
+    **Answer:** D ([The Florida Senate][1])
+
+17. The law that lists authorized brokerage relationships and required disclosures is found primarily in
+    A. Chapter 475.278, Florida Statutes
+    B. Chapter 455, Florida Statutes
+    C. Chapter 61J2, Florida Administrative Code
+    D. Chapter 713, Florida Statutes
+    **Answer:** A ([The Florida Senate][1])
+
+18. A buyer tells a transaction broker the highest price they are willing to pay. The broker may disclose this information to the seller only
+    A. if the buyer gives written permission or disclosure is required by law
+    B. if it helps get the deal closed
+    C. if the seller is also a customer of the brokerage
+    D. under no circumstances
+    **Answer:** A ([The Florida Senate][1])
+
+19. A licensee who has no brokerage relationship with a seller must still
+    A. provide loyalty and obedience
+    B. provide full disclosure of negotiation strategies
+    C. deal honestly and fairly and disclose known material defects
+    D. place the seller’s interests above all others
+    **Answer:** C ([The Florida Senate][1])
+
+20. In a designated sales associate transaction, the broker must
+    A. keep confidential information from each side and not use it to the detriment of the other party
+    B. share all confidential information with both parties
+    C. act as a dual agent
+    D. personally represent the party with the higher offer
+    **Answer:** A ([Florida.Public.Law][3])
+
+---
+
+You now have Units 1 through 4 fully framed for FoundationCE, with Sora narration scripts and quizzes.
+
+Unless you tell me otherwise, I will treat the **next step** as building **Unit 5 – Brokerage Activities and Procedures** in the same way.
+
+[1]: https://www.flsenate.gov/Laws/Statutes/2024/475.278?utm_source=chatgpt.com "Chapter 475 Section 278 - 2024 Florida Statutes"
+[2]: https://en.wikipedia.org/wiki/Real_estate_agent?utm_source=chatgpt.com "Real estate agent"
+[3]: https://florida.public.law/statutes/fla._stat._475.2755?utm_source=chatgpt.com "Fla. Stat. 475.2755 – Designated sales associate"
+[4]: https://www.saadlegal.com/commercial-real-estate/real-estate-qa-single-agent-vs-transaction-broker/?utm_source=chatgpt.com "REAL ESTATE Q&A - SINGLE AGENT VS. TRANSACTION ..."
+[5]: https://www.floridarealtors.org/news-media/news-articles/2025/02/understanding-floridas-transaction-broker-role?utm_source=chatgpt.com "Understanding Florida's Transaction Broker Role"
