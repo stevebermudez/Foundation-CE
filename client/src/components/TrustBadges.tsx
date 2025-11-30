@@ -19,12 +19,6 @@ const stats = [
     label: "Compliance Verified",
     color: "from-pink-500 to-pink-600",
   },
-  {
-    icon: Users,
-    value: "50K+",
-    label: "Active Learners",
-    color: "from-emerald-500 to-emerald-600",
-  },
 ];
 
 export default function TrustBadges() {
