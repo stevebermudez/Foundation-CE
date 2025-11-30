@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
@@ -16,8 +18,11 @@ import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
 
 function Router() {
+  const [selectedState, setSelectedState] = useState<"CA" | "FL">("CA");
+
   return (
     <div className="flex flex-col min-h-screen">
+      <Header selectedState={selectedState} onStateChange={setSelectedState} />
       <main className="flex-1">
         <Switch>
           <Route path="/" component={HomePage} />
