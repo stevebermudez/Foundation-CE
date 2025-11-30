@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -229,6 +229,14 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
     educationType: "all",
     realEstateType: "all",
   });
+
+  // Update filters when selectedState changes
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      states: [selectedState],
+    }));
+  }, [selectedState]);
 
   // Fetch courses from API with state filter
   const { data: dbCourses = [], isLoading } = useQuery({
