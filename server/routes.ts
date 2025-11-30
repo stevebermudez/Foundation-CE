@@ -158,5 +158,142 @@ export async function registerRoutes(
     res.json(enrollment);
   });
 
+  // License Management Routes
+  app.post("/api/licenses", async (req, res) => {
+    try {
+      const license = await storage.createUserLicense(req.body);
+      res.status(201).json(license);
+    } catch (err) {
+      console.error("Error creating license:", err);
+      res.status(500).json({ error: "Failed to create license" });
+    }
+  });
+
+  app.get("/api/licenses/:userId", async (req, res) => {
+    try {
+      const licenses = await storage.getUserLicenses(req.params.userId);
+      res.json(licenses);
+    } catch (err) {
+      console.error("Error fetching licenses:", err);
+      res.status(500).json({ error: "Failed to fetch licenses" });
+    }
+  });
+
+  app.patch("/api/licenses/:id", async (req, res) => {
+    try {
+      const license = await storage.updateUserLicense(req.params.id, req.body);
+      res.json(license);
+    } catch (err) {
+      console.error("Error updating license:", err);
+      res.status(500).json({ error: "Failed to update license" });
+    }
+  });
+
+  app.get("/api/licenses/expiring/:days", async (req, res) => {
+    try {
+      const days = parseInt(req.params.days, 10);
+      const expiring = await storage.getExpiringLicenses(days);
+      res.json(expiring);
+    } catch (err) {
+      console.error("Error fetching expiring licenses:", err);
+      res.status(500).json({ error: "Failed to fetch expiring licenses" });
+    }
+  });
+
+  // CE Review Routes
+  app.post("/api/ce-reviews", async (req, res) => {
+    try {
+      const review = await storage.createCEReview(req.body);
+      res.status(201).json(review);
+    } catch (err) {
+      console.error("Error creating CE review:", err);
+      res.status(500).json({ error: "Failed to create review" });
+    }
+  });
+
+  app.get("/api/ce-reviews/supervisor/:supervisorId", async (req, res) => {
+    try {
+      const reviews = await storage.getPendingCEReviews(req.params.supervisorId);
+      res.json(reviews);
+    } catch (err) {
+      console.error("Error fetching CE reviews:", err);
+      res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
+  app.patch("/api/ce-reviews/:id/approve", async (req, res) => {
+    try {
+      const review = await storage.approveCEReview(req.params.id, req.body.notes);
+      res.json(review);
+    } catch (err) {
+      console.error("Error approving CE review:", err);
+      res.status(500).json({ error: "Failed to approve review" });
+    }
+  });
+
+  app.patch("/api/ce-reviews/:id/reject", async (req, res) => {
+    try {
+      const review = await storage.rejectCEReview(req.params.id, req.body.notes);
+      res.json(review);
+    } catch (err) {
+      console.error("Error rejecting CE review:", err);
+      res.status(500).json({ error: "Failed to reject review" });
+    }
+  });
+
+  // Supervisor Routes
+  app.post("/api/supervisors", async (req, res) => {
+    try {
+      const supervisor = await storage.createSupervisor(req.body);
+      res.status(201).json(supervisor);
+    } catch (err) {
+      console.error("Error creating supervisor:", err);
+      res.status(500).json({ error: "Failed to create supervisor" });
+    }
+  });
+
+  app.get("/api/supervisors/:userId", async (req, res) => {
+    try {
+      const supervisor = await storage.getSupervisor(req.params.userId);
+      if (!supervisor) {
+        return res.status(404).json({ error: "Supervisor not found" });
+      }
+      res.json(supervisor);
+    } catch (err) {
+      console.error("Error fetching supervisor:", err);
+      res.status(500).json({ error: "Failed to fetch supervisor" });
+    }
+  });
+
+  // Account Type Routes
+  app.get("/api/account/type/:userId", async (req, res) => {
+    try {
+      const user = await storage.getUser(req.params.userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      
+      const supervisor = await storage.getSupervisor(req.params.userId);
+      const accountType = supervisor ? "supervisor" : "individual";
+      
+      res.json({ userId: user.id, accountType, user, supervisor });
+    } catch (err) {
+      console.error("Error fetching account type:", err);
+      res.status(500).json({ error: "Failed to fetch account type" });
+    }
+  });
+
+  app.get("/api/company/:id/members", async (req, res) => {
+    try {
+      const company = await storage.getCompanyAccount(req.params.id);
+      if (!company) return res.status(404).json({ error: "Company not found" });
+      
+      // Return company and its compliance info
+      const compliance = await storage.getCompanyCompliance(req.params.id);
+      res.json({ company, compliance });
+    } catch (err) {
+      console.error("Error fetching company members:", err);
+      res.status(500).json({ error: "Failed to fetch company members" });
+    }
+  });
+
   return httpServer;
 }

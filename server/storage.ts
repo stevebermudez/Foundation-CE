@@ -368,6 +368,116 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updated;
   }
+
+  async createUserLicense(license: Omit<UserLicense, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserLicense> {
+    const [created] = await db
+      .insert(userLicenses)
+      .values(license)
+      .returning();
+    return created;
+  }
+
+  async getUserLicenses(userId: string): Promise<UserLicense[]> {
+    return await db
+      .select()
+      .from(userLicenses)
+      .where(eq(userLicenses.userId, userId))
+      .orderBy(desc(userLicenses.createdAt));
+  }
+
+  async updateUserLicense(id: string, data: Partial<UserLicense>): Promise<UserLicense> {
+    const [updated] = await db
+      .update(userLicenses)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(userLicenses.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getExpiringLicenses(daysUntilExpiry: number): Promise<UserLicense[]> {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + daysUntilExpiry);
+    
+    return await db
+      .select()
+      .from(userLicenses)
+      .where(
+        and(
+          lt(userLicenses.expirationDate, futureDate),
+          gte(userLicenses.expirationDate, new Date()),
+          eq(userLicenses.status, "active")
+        )
+      )
+      .orderBy(userLicenses.expirationDate);
+  }
+
+  async createCEReview(review: Omit<CEReview, 'id' | 'createdAt' | 'updatedAt'>): Promise<CEReview> {
+    const [created] = await db
+      .insert(ceReviews)
+      .values(review)
+      .returning();
+    return created;
+  }
+
+  async getPendingCEReviews(supervisorId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(ceReviews)
+      .innerJoin(users, eq(ceReviews.userId, users.id))
+      .innerJoin(courses, eq(ceReviews.courseId, courses.id))
+      .innerJoin(enrollments, eq(ceReviews.enrollmentId, enrollments.id))
+      .where(
+        and(
+          eq(ceReviews.supervisorId, supervisorId),
+          eq(ceReviews.reviewStatus, "pending")
+        )
+      )
+      .orderBy(desc(ceReviews.createdAt));
+  }
+
+  async approveCEReview(id: string, notes?: string): Promise<CEReview> {
+    const [updated] = await db
+      .update(ceReviews)
+      .set({ 
+        reviewStatus: "approved", 
+        reviewNotes: notes,
+        reviewedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(ceReviews.id, id))
+      .returning();
+    return updated;
+  }
+
+  async rejectCEReview(id: string, notes: string): Promise<CEReview> {
+    const [updated] = await db
+      .update(ceReviews)
+      .set({ 
+        reviewStatus: "rejected", 
+        reviewNotes: notes,
+        reviewedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(ceReviews.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getSupervisor(userId: string): Promise<Supervisor | undefined> {
+    const [supervisor] = await db
+      .select()
+      .from(supervisors)
+      .where(eq(supervisors.userId, userId));
+    return supervisor;
+  }
+
+  async createSupervisor(supervisor: Omit<Supervisor, 'id' | 'createdAt' | 'updatedAt'>): Promise<Supervisor> {
+    const [created] = await db
+      .insert(supervisors)
+      .values(supervisor)
+      .returning();
+    return created;
+  }
 }
 
 export const storage = new DatabaseStorage();
