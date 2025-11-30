@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { GraduationCap, Mail, Phone, MapPin } from "lucide-react";
+import { GraduationCap, Mail, MapPin } from "lucide-react";
 import { SiFacebook, SiLinkedin, SiX } from "react-icons/si";
 
 export default function Footer() {
@@ -122,10 +122,6 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                1-800-PRO-CEED
-              </li>
               <li className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
                 support@foundationce.com
