@@ -102,19 +102,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]> {
-    let query = db.select().from(courses) as any;
-    
-    if (filters?.state) {
-      query = query.where(eq(courses.state, filters.state));
+    try {
+      let query = db.select().from(courses) as any;
+      
+      if (filters?.state) {
+        query = query.where(eq(courses.state, filters.state));
+      }
+      if (filters?.licenseType) {
+        query = query.where(eq(courses.licenseType, filters.licenseType));
+      }
+      if (filters?.requirementBucket) {
+        query = query.where(eq(courses.requirementBucket, filters.requirementBucket));
+      }
+      
+      const result = await query;
+      return result || [];
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+      return [];
     }
-    if (filters?.licenseType) {
-      query = query.where(eq(courses.licenseType, filters.licenseType));
-    }
-    if (filters?.requirementBucket) {
-      query = query.where(eq(courses.requirementBucket, filters.requirementBucket));
-    }
-    
-    return await query;
   }
 
   async getCourse(id: string): Promise<Course | undefined> {
