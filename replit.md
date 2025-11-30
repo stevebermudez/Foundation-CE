@@ -19,12 +19,21 @@ A full-stack real estate licensing education platform for salespersons and broke
 - **Styling**: Tailwind CSS + shadcn components
 
 ## Recent Changes
-- Created database initialization (server/db.ts)
-- Added company compliance tracking system with expiration dates
-- Implemented company accounts table with license info
-- Added compliance monitoring with dashboard component
-- Created API endpoints for compliance management (/api/company/*, /api/compliance/*)
-- Built real-time compliance status tracking (compliant, warning, critical, expired)
+- Created 45-hour CE course bundles for California (7 courses totaling 45 hours)
+- Bundle pricing: $45 total, $15 per individual course
+- Separate bundles for salespersons and brokers
+- Courses included:
+  - California Real Estate Law & Regulations (10h)
+  - Fair Housing & Discrimination Laws (3h)
+  - Real Estate Contracts & Transactions (8h)
+  - Trust Accounts & Financial Management (6h)
+  - Broker Responsibilities & Ethics (9h)
+  - Property Management & Landlord-Tenant Law (5h)
+  - Marketing & Advertising Compliance (4h)
+- Created CourseBundle component for enrollment UI
+- Created California courses page at /courses-ca
+- Added bundle enrollment API endpoints
+- Company compliance tracking with monitoring dashboard
 
 ## User Preferences
 - Full-stack JavaScript application
