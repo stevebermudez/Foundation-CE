@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import VideoPlayer from "@/components/VideoPlayer";
 import QuizComponent from "@/components/QuizComponent";
-import { ArrowLeft, Clock, Award, FileText } from "lucide-react";
+import { ArrowLeft, Clock, Award, FileText, Timer, TimerOff } from "lucide-react";
 import { Link } from "wouter";
 
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
@@ -89,6 +89,7 @@ export default function CourseViewPage() {
   const params = useParams<{ id: string }>();
   const [currentLesson, setCurrentLesson] = useState(mockLessons[2]);
   const [activeTab, setActiveTab] = useState("lessons");
+  const [testMode, setTestMode] = useState<"untimed" | "timed" | false>(false);
 
   // Fetch course data from API
   const { data: course, isLoading } = useQuery({

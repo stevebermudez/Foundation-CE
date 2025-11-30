@@ -118,8 +118,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCourse(id: string): Promise<Course | undefined> {
-    const [course] = await db.select().from(courses).where(eq(courses.id, id));
-    return course;
+    const result = await db.select().from(courses).where(eq(courses.id, id));
+    return result?.[0];
   }
 
   async getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined> {
