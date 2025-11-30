@@ -292,6 +292,23 @@ export const examAnswers = pgTable("exam_answers", {
   answeredAt: timestamp("answered_at").defaultNow(),
 });
 
+// User subscriptions (monthly/annual billing)
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  stripeSubscriptionId: varchar("stripe_subscription_id").unique(),
+  subscriptionType: varchar("subscription_type").notNull(), // "monthly" or "annual"
+  status: varchar("status").default("active"), // "active", "paused", "cancelled"
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelledAt: timestamp("cancelled_at"),
+  pricePerMonth: integer("price_per_month").notNull(), // in cents
+  annualPrice: integer("annual_price"), // annual pricing (in cents)
+  autoRenew: integer("auto_renew").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -312,3 +329,4 @@ export type PracticeExam = typeof practiceExams.$inferSelect;
 export type ExamQuestion = typeof examQuestions.$inferSelect;
 export type ExamAttempt = typeof examAttempts.$inferSelect;
 export type ExamAnswer = typeof examAnswers.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;

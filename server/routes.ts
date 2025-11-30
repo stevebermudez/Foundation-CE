@@ -328,6 +328,11 @@ export async function registerRoutes(
         userId,
         examId: req.params.examId,
         totalQuestions: exam.totalQuestions,
+        completedAt: null,
+        score: null,
+        correctAnswers: 0,
+        passed: null,
+        timeSpent: null,
       });
       res.status(201).json(attempt);
     } catch (err) {
@@ -380,6 +385,54 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Error fetching attempts:", err);
       res.status(500).json({ error: "Failed to fetch attempts" });
+    }
+  });
+
+  // Subscription Routes
+  app.get("/api/subscriptions/:userId", async (req, res) => {
+    try {
+      const subscription = await storage.getUserSubscription(req.params.userId);
+      res.json(subscription || { message: "No active subscription" });
+    } catch (err) {
+      console.error("Error fetching subscription:", err);
+      res.status(500).json({ error: "Failed to fetch subscription" });
+    }
+  });
+
+  app.post("/api/subscriptions", async (req, res) => {
+    try {
+      const { userId, subscriptionType, pricePerMonth, annualPrice } = req.body;
+      const subscription = await storage.createSubscription({
+        userId,
+        subscriptionType,
+        pricePerMonth,
+        annualPrice,
+        status: "active",
+      });
+      res.status(201).json(subscription);
+    } catch (err) {
+      console.error("Error creating subscription:", err);
+      res.status(500).json({ error: "Failed to create subscription" });
+    }
+  });
+
+  app.patch("/api/subscriptions/:id", async (req, res) => {
+    try {
+      const subscription = await storage.updateSubscription(req.params.id, req.body);
+      res.json(subscription);
+    } catch (err) {
+      console.error("Error updating subscription:", err);
+      res.status(500).json({ error: "Failed to update subscription" });
+    }
+  });
+
+  app.post("/api/subscriptions/:id/cancel", async (req, res) => {
+    try {
+      const subscription = await storage.cancelSubscription(req.params.id);
+      res.json(subscription);
+    } catch (err) {
+      console.error("Error cancelling subscription:", err);
+      res.status(500).json({ error: "Failed to cancel subscription" });
     }
   });
 

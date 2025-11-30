@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 
@@ -49,6 +49,10 @@ export interface IStorage {
   submitExamAnswer(answer: Omit<ExamAnswer, 'id' | 'answeredAt'>): Promise<ExamAnswer>;
   completeExamAttempt(attemptId: string, score: number, correctAnswers: number, passed: number, timeSpent: number): Promise<ExamAttempt>;
   getUserExamAttempts(userId: string, examId: string): Promise<ExamAttempt[]>;
+  getUserSubscription(userId: string): Promise<Subscription | undefined>;
+  createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>): Promise<Subscription>;
+  updateSubscription(id: string, data: Partial<Subscription>): Promise<Subscription>;
+  cancelSubscription(id: string): Promise<Subscription>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -550,6 +554,44 @@ export class DatabaseStorage implements IStorage {
       .from(examAttempts)
       .where(and(eq(examAttempts.userId, userId), eq(examAttempts.examId, examId)))
       .orderBy(desc(examAttempts.createdAt));
+  }
+
+  async getUserSubscription(userId: string): Promise<Subscription | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId));
+    return subscription;
+  }
+
+  async createSubscription(subscription: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>): Promise<Subscription> {
+    const [created] = await db
+      .insert(subscriptions)
+      .values(subscription)
+      .returning();
+    return created;
+  }
+
+  async updateSubscription(id: string, data: Partial<Subscription>): Promise<Subscription> {
+    const [updated] = await db
+      .update(subscriptions)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return updated;
+  }
+
+  async cancelSubscription(id: string): Promise<Subscription> {
+    const [updated] = await db
+      .update(subscriptions)
+      .set({ 
+        status: "cancelled",
+        cancelledAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return updated;
   }
 }
 
