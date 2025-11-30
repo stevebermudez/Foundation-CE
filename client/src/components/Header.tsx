@@ -14,7 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useTheme } from "./ThemeProvider";
-import logoImage from "@assets/generated_images/foundationce_modern_teal_gradient_logo_design.png";
+import logoImage from "@assets/generated_images/foundationce_navy_and_gold_professional_logo.png";
 import {
   GraduationCap,
   Menu,
