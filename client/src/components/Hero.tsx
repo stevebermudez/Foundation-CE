@@ -89,10 +89,6 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
           <div className="mt-10 flex items-center gap-6 text-white/70">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-400" />
-              <span className="text-sm">No credit card required</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-400" />
               <span className="text-sm">Start learning today</span>
             </div>
           </div>
