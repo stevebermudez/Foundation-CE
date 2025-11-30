@@ -14,6 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useTheme } from "./ThemeProvider";
+import logoImage from "@assets/generated_images/foundationce_modern_gradient_logo.png";
 import {
   GraduationCap,
   Menu,
@@ -55,13 +56,14 @@ export default function Header({ selectedState, onStateChange }: HeaderProps) {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
+            <Link href="/" className="flex items-center gap-2 hover-elevate rounded-md px-2 py-1">
+              <img src={logoImage} alt="FoundationCE Logo" className="h-8 w-8" />
+              <div className="hidden sm:flex flex-col">
+                <span className="font-bold text-sm text-gray-900 dark:text-white" data-testid="text-logo">
+                  FoundationCE
+                </span>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">Continuing Education</span>
               </div>
-              <span className="hidden font-semibold text-lg sm:inline-block" data-testid="text-logo">
-                FoundationCE
-              </span>
             </Link>
 
             <DropdownMenu>
