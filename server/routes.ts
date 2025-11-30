@@ -441,5 +441,122 @@ export async function registerRoutes(
     }
   });
 
+  // Email Campaign Routes
+  app.post("/api/email-campaigns", async (req, res) => {
+    try {
+      const { name, subject, htmlContent, plainTextContent, targetSegment, createdBy } = req.body;
+      const campaign = await storage.createEmailCampaign({
+        name,
+        subject,
+        htmlContent,
+        plainTextContent,
+        targetSegment,
+        createdBy,
+        status: "draft",
+      });
+      res.status(201).json(campaign);
+    } catch (err) {
+      console.error("Error creating email campaign:", err);
+      res.status(500).json({ error: "Failed to create campaign" });
+    }
+  });
+
+  app.get("/api/email-campaigns/:id", async (req, res) => {
+    try {
+      const campaign = await storage.getEmailCampaign(req.params.id);
+      if (!campaign) return res.status(404).json({ error: "Campaign not found" });
+      res.json(campaign);
+    } catch (err) {
+      console.error("Error fetching campaign:", err);
+      res.status(500).json({ error: "Failed to fetch campaign" });
+    }
+  });
+
+  app.patch("/api/email-campaigns/:id", async (req, res) => {
+    try {
+      const campaign = await storage.updateEmailCampaign(req.params.id, req.body);
+      res.json(campaign);
+    } catch (err) {
+      console.error("Error updating campaign:", err);
+      res.status(500).json({ error: "Failed to update campaign" });
+    }
+  });
+
+  app.post("/api/email-campaigns/:id/recipients", async (req, res) => {
+    try {
+      const { recipients } = req.body; // Array of { userId, email }
+      const added = await storage.addEmailRecipients(req.params.id, recipients);
+      res.status(201).json({ count: added.length, recipients: added });
+    } catch (err) {
+      console.error("Error adding recipients:", err);
+      res.status(500).json({ error: "Failed to add recipients" });
+    }
+  });
+
+  app.get("/api/email-campaigns/:id/recipients", async (req, res) => {
+    try {
+      const recipients = await storage.getEmailRecipients(req.params.id);
+      res.json(recipients);
+    } catch (err) {
+      console.error("Error fetching recipients:", err);
+      res.status(500).json({ error: "Failed to fetch recipients" });
+    }
+  });
+
+  app.post("/api/email-campaigns/:id/send", async (req, res) => {
+    try {
+      const { recipientId } = req.body;
+      // Integration point: Call email service (SendGrid, Mailgun, etc.)
+      const updated = await storage.markEmailSent(recipientId);
+      res.json({ message: "Email marked as sent", recipient: updated });
+    } catch (err) {
+      console.error("Error sending email:", err);
+      res.status(500).json({ error: "Failed to send email" });
+    }
+  });
+
+  app.get("/api/email-campaigns/:id/stats", async (req, res) => {
+    try {
+      const stats = await storage.getCampaignStats(req.params.id);
+      const openRate = stats.campaign.sentCount > 0 ? Math.round((stats.campaign.openCount / stats.campaign.sentCount) * 100) : 0;
+      const clickRate = stats.campaign.sentCount > 0 ? Math.round((stats.campaign.clickCount / stats.campaign.sentCount) * 100) : 0;
+      res.json({
+        ...stats,
+        metrics: {
+          openRate: `${openRate}%`,
+          clickRate: `${clickRate}%`,
+          recipients: stats.campaign.recipientCount,
+          sent: stats.campaign.sentCount,
+        }
+      });
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  // Email Tracking Routes
+  app.post("/api/email-tracking/open", async (req, res) => {
+    try {
+      const { recipientId, campaignId, userId, userAgent, ipAddress } = req.body;
+      await storage.trackEmailOpen(recipientId, campaignId, userId, userAgent, ipAddress);
+      res.json({ message: "Open tracked" });
+    } catch (err) {
+      console.error("Error tracking open:", err);
+      res.status(500).json({ error: "Failed to track open" });
+    }
+  });
+
+  app.post("/api/email-tracking/click", async (req, res) => {
+    try {
+      const { recipientId, campaignId, userId, linkUrl, userAgent, ipAddress } = req.body;
+      await storage.trackEmailClick(recipientId, campaignId, userId, linkUrl, userAgent, ipAddress);
+      res.json({ message: "Click tracked" });
+    } catch (err) {
+      console.error("Error tracking click:", err);
+      res.status(500).json({ error: "Failed to track click" });
+    }
+  });
+
   return httpServer;
 }

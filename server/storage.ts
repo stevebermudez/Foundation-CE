@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 
@@ -51,6 +51,15 @@ export interface IStorage {
   applyCoupon(userId: string, couponId: string, enrollmentId?: string, discountAmount?: number): Promise<CouponUsage>;
   getCompletedEnrollments(userId: string): Promise<(Enrollment & { course: Course })[]>;
   resetEnrollment(enrollmentId: string): Promise<Enrollment>;
+  createEmailCampaign(campaign: Omit<EmailCampaign, 'id' | 'createdAt' | 'updatedAt'>): Promise<EmailCampaign>;
+  getEmailCampaign(id: string): Promise<EmailCampaign | undefined>;
+  updateEmailCampaign(id: string, data: Partial<EmailCampaign>): Promise<EmailCampaign>;
+  addEmailRecipients(campaignId: string, recipients: Array<{ userId: string; email: string }>): Promise<EmailRecipient[]>;
+  getEmailRecipients(campaignId: string): Promise<EmailRecipient[]>;
+  markEmailSent(recipientId: string): Promise<EmailRecipient>;
+  trackEmailOpen(recipientId: string, campaignId: string, userId: string, userAgent?: string, ipAddress?: string): Promise<EmailTracking>;
+  trackEmailClick(recipientId: string, campaignId: string, userId: string, linkUrl: string, userAgent?: string, ipAddress?: string): Promise<EmailTracking>;
+  getCampaignStats(campaignId: string): Promise<{ campaign: EmailCampaign; recipients: EmailRecipient[]; tracking: EmailTracking[] }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -599,6 +608,142 @@ export class DatabaseStorage implements IStorage {
       .where(eq(enrollments.id, enrollmentId))
       .returning();
     return updated;
+  }
+
+  async createEmailCampaign(campaign: Omit<EmailCampaign, 'id' | 'createdAt' | 'updatedAt'>): Promise<EmailCampaign> {
+    const [created] = await db
+      .insert(emailCampaigns)
+      .values(campaign)
+      .returning();
+    return created;
+  }
+
+  async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> {
+    const [campaign] = await db
+      .select()
+      .from(emailCampaigns)
+      .where(eq(emailCampaigns.id, id));
+    return campaign;
+  }
+
+  async updateEmailCampaign(id: string, data: Partial<EmailCampaign>): Promise<EmailCampaign> {
+    const [updated] = await db
+      .update(emailCampaigns)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(emailCampaigns.id, id))
+      .returning();
+    return updated;
+  }
+
+  async addEmailRecipients(campaignId: string, recipients: Array<{ userId: string; email: string }>): Promise<EmailRecipient[]> {
+    const created = await db
+      .insert(emailRecipients)
+      .values(recipients.map(r => ({ campaignId, ...r })))
+      .returning();
+    
+    // Update recipient count in campaign
+    await db
+      .update(emailCampaigns)
+      .set({ recipientCount: sql`${emailCampaigns.recipientCount} + ${recipients.length}` })
+      .where(eq(emailCampaigns.id, campaignId));
+    
+    return created;
+  }
+
+  async getEmailRecipients(campaignId: string): Promise<EmailRecipient[]> {
+    return await db
+      .select()
+      .from(emailRecipients)
+      .where(eq(emailRecipients.campaignId, campaignId))
+      .orderBy(desc(emailRecipients.createdAt));
+  }
+
+  async markEmailSent(recipientId: string): Promise<EmailRecipient> {
+    const [updated] = await db
+      .update(emailRecipients)
+      .set({ status: "sent", sentAt: new Date() })
+      .where(eq(emailRecipients.id, recipientId))
+      .returning();
+    
+    // Update sent count in campaign
+    if (updated.campaignId) {
+      await db
+        .update(emailCampaigns)
+        .set({ sentCount: sql`${emailCampaigns.sentCount} + 1` })
+        .where(eq(emailCampaigns.id, updated.campaignId));
+    }
+    
+    return updated;
+  }
+
+  async trackEmailOpen(recipientId: string, campaignId: string, userId: string, userAgent?: string, ipAddress?: string): Promise<EmailTracking> {
+    const [tracking] = await db
+      .insert(emailTracking)
+      .values({
+        recipientId,
+        campaignId,
+        userId,
+        eventType: "open",
+        userAgent: userAgent || null,
+        ipAddress: ipAddress || null
+      })
+      .returning();
+    
+    // Mark recipient as opened and update campaign stats
+    await db
+      .update(emailRecipients)
+      .set({ openedAt: new Date() })
+      .where(eq(emailRecipients.id, recipientId));
+    
+    await db
+      .update(emailCampaigns)
+      .set({ openCount: sql`${emailCampaigns.openCount} + 1` })
+      .where(eq(emailCampaigns.id, campaignId));
+    
+    return tracking;
+  }
+
+  async trackEmailClick(recipientId: string, campaignId: string, userId: string, linkUrl: string, userAgent?: string, ipAddress?: string): Promise<EmailTracking> {
+    const [tracking] = await db
+      .insert(emailTracking)
+      .values({
+        recipientId,
+        campaignId,
+        userId,
+        eventType: "click",
+        linkUrl,
+        userAgent: userAgent || null,
+        ipAddress: ipAddress || null
+      })
+      .returning();
+    
+    // Mark recipient as clicked and update campaign stats
+    await db
+      .update(emailRecipients)
+      .set({ clickedAt: new Date() })
+      .where(eq(emailRecipients.id, recipientId));
+    
+    await db
+      .update(emailCampaigns)
+      .set({ clickCount: sql`${emailCampaigns.clickCount} + 1` })
+      .where(eq(emailCampaigns.id, campaignId));
+    
+    return tracking;
+  }
+
+  async getCampaignStats(campaignId: string): Promise<{ campaign: EmailCampaign; recipients: EmailRecipient[]; tracking: EmailTracking[] }> {
+    const campaign = await this.getEmailCampaign(campaignId);
+    const recipients = await this.getEmailRecipients(campaignId);
+    const tracking = await db
+      .select()
+      .from(emailTracking)
+      .where(eq(emailTracking.campaignId, campaignId));
+    
+    return {
+      campaign: campaign!,
+      recipients,
+      tracking
+    };
   }
 }
 

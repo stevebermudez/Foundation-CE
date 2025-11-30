@@ -302,6 +302,52 @@ export const couponUsage = pgTable("coupon_usage", {
   usedAt: timestamp("used_at").defaultNow(),
 });
 
+// Email campaigns/blasts
+export const emailCampaigns = pgTable("email_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  subject: varchar("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  plainTextContent: text("plain_text_content"),
+  status: varchar("status").default("draft"), // "draft", "scheduled", "sent", "sending"
+  targetSegment: varchar("target_segment"), // "all", "inactive", "completed", "no_subscription", JSON for custom
+  recipientCount: integer("recipient_count").default(0),
+  sentCount: integer("sent_count").default(0),
+  openCount: integer("open_count").default(0),
+  clickCount: integer("click_count").default(0),
+  scheduleDateTime: timestamp("schedule_date_time"),
+  sentAt: timestamp("sent_at"),
+  createdBy: varchar("created_by").notNull(), // admin user ID
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Email campaign recipients tracking
+export const emailRecipients = pgTable("email_recipients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  email: varchar("email").notNull(),
+  status: varchar("status").default("pending"), // "pending", "sent", "failed", "bounced"
+  sentAt: timestamp("sent_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Email tracking (individual opens/clicks with tracking pixel)
+export const emailTracking = pgTable("email_tracking", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  recipientId: varchar("recipient_id").notNull(),
+  campaignId: varchar("campaign_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  eventType: varchar("event_type").notNull(), // "open", "click"
+  linkUrl: varchar("link_url"), // for click events
+  userAgent: text("user_agent"),
+  ipAddress: varchar("ip_address"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -323,3 +369,6 @@ export type ExamAnswer = typeof examAnswers.$inferSelect;
 export type Subscription = typeof subscriptions.$inferSelect;
 export type Coupon = typeof coupons.$inferSelect;
 export type CouponUsage = typeof couponUsage.$inferSelect;
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+export type EmailRecipient = typeof emailRecipients.$inferSelect;
+export type EmailTracking = typeof emailTracking.$inferSelect;
