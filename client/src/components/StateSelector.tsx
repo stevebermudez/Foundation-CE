@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Building, Shield } from "lucide-react";
+import { useLocation } from "wouter";
 
 import caImage from "@assets/generated_images/california_luxury_real_estate.png";
 import flImage from "@assets/generated_images/florida_beachfront_properties.png";
@@ -32,6 +33,13 @@ const states = [
 ];
 
 export default function StateSelector({ onSelectState }: StateSelectorProps) {
+  const [, setLocation] = useLocation();
+
+  const handleSelectState = (state: "CA" | "FL") => {
+    onSelectState(state);
+    setLocation("/courses");
+  };
+
   return (
     <section className="py-16 px-4 bg-muted/30">
       <div className="mx-auto max-w-5xl">
@@ -48,8 +56,7 @@ export default function StateSelector({ onSelectState }: StateSelectorProps) {
           {states.map((state) => (
             <Card
               key={state.id}
-              className="overflow-hidden cursor-pointer hover-elevate group border-0 shadow-lg"
-              onClick={() => onSelectState(state.id)}
+              className="overflow-hidden hover-elevate group border-0 shadow-lg"
               data-testid={`card-state-${state.id}`}
             >
               <div className="relative h-48 overflow-hidden">
@@ -88,7 +95,11 @@ export default function StateSelector({ onSelectState }: StateSelectorProps) {
                   ))}
                 </div>
 
-                <Button className="w-full gap-2" data-testid={`button-select-${state.id}`}>
+                <Button 
+                  className="w-full gap-2" 
+                  onClick={() => handleSelectState(state.id)}
+                  data-testid={`button-select-${state.id}`}
+                >
                   Browse {state.name} Courses
                   <ChevronRight className="h-4 w-4" />
                 </Button>

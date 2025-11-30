@@ -13,6 +13,11 @@ interface HomePageProps {
 export default function HomePage({ selectedState, onStateChange }: HomePageProps) {
   const [, setLocation] = useLocation();
 
+  const handleStateSelect = (state: "CA" | "FL") => {
+    onStateChange(state);
+    setLocation("/courses");
+  };
+
   return (
     <div>
       <Hero
@@ -20,7 +25,7 @@ export default function HomePage({ selectedState, onStateChange }: HomePageProps
         onGetStarted={() => setLocation("/courses")}
       />
       <TrustBadges />
-      <StateSelector onSelectState={onStateChange} />
+      <StateSelector onSelectState={handleStateSelect} />
       <FeaturesSection />
       <section className="py-16 px-4 bg-muted/30">
         <div className="mx-auto max-w-7xl mb-8 text-center">
