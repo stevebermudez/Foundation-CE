@@ -1762,26 +1762,43 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit18Questions.length} questions to Unit 18 Quiz`);
 
-    // Add placeholder questions for remaining unit (Unit 19)
-    for (let i = 18; i < units.length; i++) {
-      for (let j = 0; j < 20; j++) {
-        await db.insert(examQuestions).values({
-          examId: unitExams[i].id,
-          questionText: `Unit ${units[i].number} Question ${j + 1}: [Content to be added for ${units[i].title}]`,
-          questionType: "multiple_choice",
-          correctAnswer: "A",
-          explanation: "This question requires detailed content from the course materials.",
-          options: JSON.stringify([
-            "A. Option 1",
-            "B. Option 2",
-            "C. Option 3",
-            "D. Option 4",
-          ]),
-          sequence: j,
-        });
-      }
+    // Unit 19 - Planning, Zoning, and Environmental Hazards (20 questions)
+    const unit19Questions = [
+      { text: "Police power includes", options: ["A. private deed restrictions", "B. zoning and building codes", "C. federal income taxation", "D. HOA rules"], correctAnswer: "B", explanation: "Police power includes zoning, building codes, subdivision regulations, and environmental protection." },
+      { text: "Comprehensive plans guide", options: ["A. mortgage underwriting", "B. long term community development", "C. private lease agreements", "D. advertising standards"], correctAnswer: "B", explanation: "Comprehensive plans guide long term development including land use patterns and utilities." },
+      { text: "Zoning classification that controls hazardous activities is", options: ["A. residential", "B. commercial", "C. industrial", "D. agricultural"], correctAnswer: "C", explanation: "Industrial zoning controls hazardous activities, noise, and truck routes." },
+      { text: "Residential zoning may regulate", options: ["A. mortgage interest", "B. number of permitted dwelling units", "C. federal taxes", "D. insurance"], correctAnswer: "B", explanation: "Residential zoning may regulate density, building height, lot size, setbacks, and dwelling units per acre." },
+      { text: "A nonconforming use", options: ["A. violates the law", "B. was legal when established", "C. may expand without restriction", "D. changes zoning classification"], correctAnswer: "B", explanation: "A nonconforming use existed before new zoning rules and is allowed to continue." },
+      { text: "A variance", options: ["A. changes the zoning district", "B. allows deviation from requirements due to hardship", "C. eliminates zoning", "D. applies only to agricultural property"], correctAnswer: "B", explanation: "A variance is permission to deviate from zoning requirements due to hardship." },
+      { text: "A special exception is", options: ["A. automatic zoning approval", "B. a conditional use allowed after review", "C. an illegal use", "D. a zoning violation"], correctAnswer: "B", explanation: "A special exception allows a use that is permitted only under certain conditions and after public review." },
+      { text: "The subdivision plat is recorded", options: ["A. before preliminary approval", "B. after final approval", "C. only after construction", "D. at closing"], correctAnswer: "B", explanation: "The final plat is recorded after approval of the preliminary plat." },
+      { text: "A certificate of occupancy is issued when", options: ["A. taxes are paid", "B. utilities are installed", "C. the structure complies with building codes", "D. the land is rezoned"], correctAnswer: "C", explanation: "A certificate of occupancy is issued when a structure meets code requirements." },
+      { text: "Asbestos is dangerous when", options: ["A. left undisturbed", "B. painted", "C. disturbed and airborne", "D. found in new homes"], correctAnswer: "C", explanation: "Asbestos is dangerous when disturbed and releases fibers that may cause health risks." },
+      { text: "Radon disclosure is", options: ["A. required in Florida", "B. prohibited by law", "C. optional", "D. required only for condos"], correctAnswer: "A", explanation: "Florida law requires that buyers receive a radon disclosure." },
+      { text: "Lead based paint disclosure is required for homes built before", options: ["A. nineteen ninety", "B. nineteen eighty five", "C. nineteen seventy eight", "D. two thousand"], correctAnswer: "C", explanation: "Lead based paint was banned after 1978; homes built before require federal disclosure." },
+      { text: "CERCLA created", options: ["A. HOAs", "B. Superfund cleanup liability", "C. zoning districts", "D. capital gains exclusions"], correctAnswer: "B", explanation: "CERCLA, the Comprehensive Environmental Response, Compensation, and Liability Act, created the Superfund program." },
+      { text: "Under CERCLA, liability can be", options: ["A. optional", "B. joint and several", "C. eliminated through transfer", "D. limited to tenants"], correctAnswer: "B", explanation: "CERCLA liability can be joint and several, meaning one party may be liable for entire cleanup." },
+      { text: "Flood insurance is required when", options: ["A. the lender prefers it", "B. the property is in a special flood hazard area and the loan is federally backed", "C. the buyer lives near a lake", "D. the seller requests it"], correctAnswer: "B", explanation: "Flood insurance is required for federally backed loans on properties in special flood hazard areas designated by FEMA." },
+      { text: "Wetlands", options: ["A. require permits for development", "B. are unregulated", "C. can be filled without permission", "D. are taxed differently"], correctAnswer: "A", explanation: "Wetlands are protected areas requiring special permits for development." },
+      { text: "Mold is caused by", options: ["A. dry air", "B. low humidity", "C. moisture conditions", "D. outdoor sunlight"], correctAnswer: "C", explanation: "Mold grows in moist environments and may create health concerns." },
+      { text: "A zoning buffer is used to", options: ["A. reduce property taxes", "B. separate incompatible land uses", "C. increase density", "D. calculate mortgage payments"], correctAnswer: "B", explanation: "A zoning buffer separates incompatible land uses." },
+      { text: "Special purpose zoning applies to", options: ["A. factories", "B. residential towers", "C. hospitals and schools", "D. retail stores"], correctAnswer: "C", explanation: "Special purpose zoning includes schools, hospitals, parks, and government buildings." },
+      { text: "Florida requires disclosure of", options: ["A. only structural defects", "B. known environmental defects", "C. only mold issues", "D. only financial issues"], correctAnswer: "B", explanation: "Florida requires disclosure of known environmental defects." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit19Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[18].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
     }
-    console.log(`Added placeholder questions for Unit 19 (20 questions)`);
+    console.log(`Added ${unit19Questions.length} questions to Unit 19 Quiz`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
