@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.jks
+*.p8
+*.p12
+*.key
+*.keystore
+*.xcworkspace/
+Pods/
+.eas/
