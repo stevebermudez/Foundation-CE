@@ -1,10 +1,8 @@
+import { useState } from "react";
 import Dashboard from "@/components/Dashboard";
 
-interface DashboardPageProps {
-  selectedState: "CA" | "FL";
-}
-
-export default function DashboardPage({ selectedState }: DashboardPageProps) {
-  // todo: replace with actual user data
+export default function DashboardPage() {
+  const [selectedState] = useState<"CA" | "FL">("CA");
+  
   return <Dashboard userName="Sarah" selectedState={selectedState} />;
 }

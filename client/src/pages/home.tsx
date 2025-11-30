@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Hero from "@/components/Hero";
 import StateSelector from "@/components/StateSelector";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -5,16 +6,12 @@ import TrustBadges from "@/components/TrustBadges";
 import CourseCatalog from "@/components/CourseCatalog";
 import { useLocation } from "wouter";
 
-interface HomePageProps {
-  selectedState: "CA" | "FL";
-  onStateChange: (state: "CA" | "FL") => void;
-}
-
-export default function HomePage({ selectedState, onStateChange }: HomePageProps) {
+export default function HomePage() {
+  const [selectedState, setSelectedState] = useState<"CA" | "FL">("CA");
   const [, setLocation] = useLocation();
 
   const handleStateSelect = (state: "CA" | "FL") => {
-    onStateChange(state);
+    setSelectedState(state);
     setLocation("/courses");
   };
 
