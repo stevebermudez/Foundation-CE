@@ -59,23 +59,26 @@ The platform now uses comprehensive course attributes to distinguish requirement
 Courses display with color-coded requirement buckets and detailed classification information via CourseDisplay component.
 
 ## Recent Changes
-- **Florida CE Courses Added**:
-  - 45-hour post-licensing for sales associates: $59.99
-  - 60-hour post-licensing for brokers: $69.99
-  - 14-hour renewal (every 2 years, both license types): $39.99
-  - Individual courses: $15 each
-  - Pages: /courses/fl for Florida, /courses/ca for California
 
-- **California CE Courses**:
-  - 45-hour renewal bundles: $45 total
-  - 7 courses totaling 45 hours
+### Florida Complete Catalog Buildout
+- **Post-Licensing Packages:**
+  - Sales Associate: 45 hours, $59.99
+  - Broker: 60 hours, $69.99
+- **CE Renewal Package:** 14 hours (biennial), $39.99
+  - 3 hours Core Law
+  - 3 hours Ethics & Business Practices
+  - 8 hours Specialty/Elective
+- **À la Carte Individual Courses:** $15 each
+  - 10 elective courses (3-8 hours each)
+  - Core Law (3h)
+  - Ethics (3h)
+- **Seed File:** `server/seedFloridaCatalog.ts` (ready-to-use)
+- **UI:** CourseDisplay component with color-coded requirement buckets
+- **Pages:** /courses/fl for Florida (color-coded display), /courses/ca for California
 
-- **Features Implemented**:
-  - CourseBundle component for enrollment UI
-  - State-based course filtering (CA, FL)
-  - Bundle and individual course pricing
-  - Company compliance tracking with expiration dates
-  - White-label organization support
+### Classification System
+- State, License Type, Requirement Cycle Type, Requirement Bucket, Delivery Method, Difficulty Level, SKU
+- Enables filtering and display of courses by requirement
 
 ## User Preferences
 - Full-stack JavaScript application
