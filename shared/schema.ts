@@ -97,6 +97,41 @@ export const organizationCourses = pgTable("organization_courses", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Company accounts for compliance tracking
+export const companyAccounts = pgTable("company_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  licenseNumber: varchar("license_number").unique(),
+  licenseType: varchar("license_type").notNull(), // "broker" or "salesperson"
+  state: varchar("state").notNull(),
+  adminEmail: varchar("admin_email"),
+  contactName: varchar("contact_name"),
+  contactPhone: varchar("contact_phone"),
+  employees: integer("employees").default(0),
+  status: varchar("status").default("active"), // "active", "inactive", "expired"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Company-level compliance tracking
+export const companyCompliance = pgTable("company_compliance", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  licenseType: varchar("license_type").notNull(), // "broker" or "salesperson"
+  requiredHours: integer("required_hours").default(45),
+  hoursCompleted: integer("hours_completed").default(0),
+  renewalDueDate: timestamp("renewal_due_date").notNull(),
+  expirationDate: timestamp("expiration_date").notNull(),
+  isCompliant: integer("is_compliant").default(0),
+  completedDate: timestamp("completed_date"),
+  renewalCycle: integer("renewal_cycle").default(4), // years between renewals
+  notes: text("notes"),
+  lastAuditDate: timestamp("last_audit_date"),
+  certificateUrl: varchar("certificate_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -105,3 +140,5 @@ export type ComplianceRequirement = typeof complianceRequirements.$inferSelect;
 export type Organization = typeof organizations.$inferSelect;
 export type UserOrganization = typeof userOrganizations.$inferSelect;
 export type OrganizationCourse = typeof organizationCourses.$inferSelect;
+export type CompanyAccount = typeof companyAccounts.$inferSelect;
+export type CompanyCompliance = typeof companyCompliance.$inferSelect;

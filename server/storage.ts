@@ -1,5 +1,5 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance } from "@shared/schema";
+import { eq, and, lt, gte } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -17,6 +17,13 @@ export interface IStorage {
   createOrganization(org: Omit<Organization, 'id' | 'createdAt' | 'updatedAt'>): Promise<Organization>;
   getUserOrganizations(userId: string): Promise<Organization[]>;
   getOrganizationCourses(organizationId: string): Promise<Course[]>;
+  getCompanyAccount(id: string): Promise<CompanyAccount | undefined>;
+  createCompanyAccount(account: Omit<CompanyAccount, 'id' | 'createdAt' | 'updatedAt'>): Promise<CompanyAccount>;
+  getCompanyCompliance(companyId: string): Promise<CompanyCompliance[]>;
+  createCompanyCompliance(compliance: Omit<CompanyCompliance, 'id' | 'createdAt' | 'updatedAt'>): Promise<CompanyCompliance>;
+  updateCompanyCompliance(id: string, data: Partial<CompanyCompliance>): Promise<CompanyCompliance>;
+  getExpiringCompliance(daysUntilExpiry: number): Promise<(CompanyCompliance & { company: CompanyAccount })[]>;
+  markComplianceComplete(id: string, hoursCompleted: number): Promise<CompanyCompliance>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -59,7 +66,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCourses(filters?: { type?: string; targetLicense?: string }): Promise<Course[]> {
-    let query = db.select().from(courses);
+    let query = db.select().from(courses) as any;
     
     if (filters?.type) {
       query = query.where(eq(courses.type, filters.type));
@@ -147,7 +154,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(organizations, eq(userOrganizations.organizationId, organizations.id))
       .where(eq(userOrganizations.userId, userId));
 
-    const orgIds = userOrgs.map((uo) => uo.id);
+    const orgIds = userOrgs.map((uo: any) => uo.id);
     if (orgIds.length === 0) return [];
 
     return await db
@@ -167,13 +174,88 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    const courseIds = orgCourses.map((oc) => oc.courseId);
+    const courseIds = orgCourses.map((oc: any) => oc.courseId);
     if (courseIds.length === 0) return [];
 
     return await db
       .select()
       .from(courses)
       .where(eq(courses.id, courseIds[0]));
+  }
+
+  async getCompanyAccount(id: string): Promise<CompanyAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(companyAccounts)
+      .where(eq(companyAccounts.id, id));
+    return account;
+  }
+
+  async createCompanyAccount(
+    account: Omit<CompanyAccount, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<CompanyAccount> {
+    const [created] = await db
+      .insert(companyAccounts)
+      .values(account)
+      .returning();
+    return created;
+  }
+
+  async getCompanyCompliance(companyId: string): Promise<CompanyCompliance[]> {
+    return await db
+      .select()
+      .from(companyCompliance)
+      .where(eq(companyCompliance.companyId, companyId));
+  }
+
+  async createCompanyCompliance(
+    compliance: Omit<CompanyCompliance, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<CompanyCompliance> {
+    const [created] = await db
+      .insert(companyCompliance)
+      .values(compliance)
+      .returning();
+    return created;
+  }
+
+  async updateCompanyCompliance(id: string, data: Partial<CompanyCompliance>): Promise<CompanyCompliance> {
+    const [updated] = await db
+      .update(companyCompliance)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(companyCompliance.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getExpiringCompliance(daysUntilExpiry: number): Promise<(CompanyCompliance & { company: CompanyAccount })[]> {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + daysUntilExpiry);
+
+    return await db
+      .select()
+      .from(companyCompliance)
+      .innerJoin(companyAccounts, eq(companyCompliance.companyId, companyAccounts.id))
+      .where(
+        and(
+          lt(companyCompliance.expirationDate, futureDate),
+          gte(companyCompliance.expirationDate, new Date()),
+          eq(companyCompliance.isCompliant, 0)
+        )
+      );
+  }
+
+  async markComplianceComplete(id: string, hoursCompleted: number): Promise<CompanyCompliance> {
+    const [updated] = await db
+      .update(companyCompliance)
+      .set({ 
+        hoursCompleted,
+        isCompliant: 1,
+        completedDate: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(companyCompliance.id, id))
+      .returning();
+    return updated;
   }
 }
 
