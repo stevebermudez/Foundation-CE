@@ -1,0 +1,241 @@
+Perfect. Here is Unit 18, a major Florida exam unit covering property taxes, federal taxes related to real estate, depreciation, capital gains, and tax benefits for homeowners and investors.
+
+This is a complete, fresh build, structured, accurate, and Sora ready.
+
+No em dashes.
+
+⸻
+
+UNIT 18   TAXES AND REAL ESTATE
+
+Target Duration: 3 hours
+Includes: three Sora ready narration scripts + twenty question exam style quiz
+
+⸻
+
+UNIT 18 LEARNING OBJECTIVES
+
+Students will be able to:
+	•	Understand ad valorem taxation and property assessment
+	•	Calculate assessed value, taxable value, and tax amounts
+	•	Apply Florida exemptions, including homestead
+	•	Explain the Save Our Homes cap
+	•	Understand federal income tax rules for homeowners and investors
+	•	Identify deductible and nondeductible expenses
+	•	Explain depreciation, cost recovery, and capital gains
+	•	Apply the adjusted basis formula
+	•	Understand 1031 tax deferred exchanges
+	•	Calculate straight line depreciation
+
+⸻
+
+UNIT 18 STRUCTURE
+	1.	Lesson 18.1   Property taxes, assessed value, exemptions, taxable value
+	2.	Lesson 18.2   Depreciation, basis, capital gains, federal taxation
+	3.	Lesson 18.3   1031 exchanges, Save Our Homes, non deductible items, examples
+	4.	Quiz   Twenty exam style questions
+
+⸻
+
+LESSON 18.1 SCRIPT
+
+Property Taxes, Assessed Value, Exemptions, Taxable Value
+
+Welcome to Unit 18 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+
+This unit explains property taxes, exemptions, federal tax rules, depreciation, capital gains, and tax deferred exchanges. These topics appear regularly on the Florida exam.
+
+Florida real estate taxes are ad valorem taxes. The term ad valorem means based on value.
+
+The county property appraiser determines assessed value. Market value is an estimate of what the property would sell for. Assessed value is market value minus any assessment limitations and adjustments.
+
+Florida offers several exemptions. The homestead exemption is the most important. A Florida resident who owns and occupies a property as a primary residence may receive up to fifty thousand dollars of exemption. The first twenty five thousand applies to all property taxes. The second twenty five thousand applies only to non school taxes.
+
+Additional exemptions may apply to widows, widowers, individuals who are blind, disabled veterans, and seniors who qualify under income guidelines.
+
+After exemptions are applied, the result is taxable value.
+
+Property taxes are calculated by multiplying taxable value by the millage rate. Millage is expressed as dollars per thousand dollars of taxable value.
+
+For example, if taxable value is one hundred thousand dollars and the millage rate is twenty mills, taxes equal two thousand dollars.
+
+Later in this unit we study the Save Our Homes cap which limits annual increases in assessed value.
+
+In the next lesson, we examine federal tax rules affecting real estate.
+
+⸻
+
+LESSON 18.2 SCRIPT
+
+Depreciation, Basis, Capital Gains, Federal Taxation
+
+In this lesson, we study federal income tax rules for homeowners and real estate investors.
+
+Homeowners may deduct mortgage interest and property taxes on a primary residence. They cannot deduct repairs or improvements.
+
+Investors may deduct operating expenses, mortgage interest, property taxes, insurance, repairs, maintenance, management fees, and depreciation.
+
+Depreciation is cost recovery for income producing property. Land cannot be depreciated, but improvements can be. Residential rental property is depreciated over twenty seven and a half years using straight line depreciation.
+
+To calculate annual depreciation, divide the depreciable basis by twenty seven and a half. Depreciable basis equals purchase price minus land value plus improvements.
+
+When property is sold, the owner may incur capital gains tax. Capital gain equals selling price minus adjusted basis.
+
+Adjusted basis equals original cost plus improvements minus depreciation taken.
+
+Homeowners may exclude up to two hundred fifty thousand dollars of capital gains if single, or five hundred thousand dollars if married filing jointly, if they owned and occupied the home for two of the previous five years.
+
+In the next lesson, we cover 1031 exchanges, Save Our Homes, and common exam pitfalls.
+
+⸻
+
+LESSON 18.3 SCRIPT
+
+1031 Exchange, Save Our Homes, Non Deductible Items, Examples
+
+In this final lesson for Unit 18, we examine tax deferred exchanges, Save Our Homes, and items that are not deductible.
+
+A 1031 exchange allows investors to defer capital gains tax by exchanging one investment property for another. The properties must be like kind, and strict time limits apply for identification and closing. Tax is deferred, not forgiven.
+
+Florida’s Save Our Homes amendment limits annual increases in assessed value for homesteaded property to the lesser of three percent or the change in the Consumer Price Index. This protects homeowners from large tax increases.
+
+Certain expenses are not deductible for homeowners or investors. Examples include principal payments, personal expenses, and improvements made to a primary residence.
+
+For exam purposes, remember these rules:
+homeowners deduct interest and property taxes only,
+investors deduct a wide range of expenses including depreciation,
+land cannot be depreciated,
+1031 exchanges defer but do not eliminate tax,
+capital gain equals selling price minus adjusted basis.
+
+This completes Unit 18. You are now ready for the quiz.
+
+⸻
+
+UNIT 18 QUIZ
+
+Twenty exam style questions
+	1.	Ad valorem means
+A. age based
+B. value based
+C. location based
+D. income based
+Answer: B
+	2.	Assessed value is
+A. the same as market value
+B. market value minus adjustments
+C. always lower than taxable value
+D. determined by the federal government
+Answer: B
+	3.	The Florida homestead exemption can be up to
+A. ten thousand dollars
+B. twenty five thousand dollars
+C. fifty thousand dollars
+D. one hundred thousand dollars
+Answer: C
+	4.	The second twenty five thousand dollars of homestead exemption
+A. applies only to school taxes
+B. applies to non school taxes
+C. applies to federal income tax
+D. applies only when selling
+Answer: B
+	5.	Millage is expressed as
+A. cents per dollar
+B. dollars per hundred
+C. dollars per thousand dollars of value
+D. percentage of purchase price
+Answer: C
+	6.	Property taxes equal
+A. assessed value times land value
+B. taxable value times millage rate
+C. market value times two mills
+D. loan amount times mill rate
+Answer: B
+	7.	Homeowners may deduct
+A. repairs
+B. improvements
+C. depreciation
+D. mortgage interest and property taxes
+Answer: D
+	8.	Investors may deduct
+A. principal payments
+B. depreciation
+C. personal expenses
+D. homeowner association fines
+Answer: B
+	9.	Land
+A. can be depreciated
+B. cannot be depreciated
+C. is depreciated over forty years
+D. is expensed
+Answer: B
+	10.	Residential rental property is depreciated over
+A. fifteen years
+B. twenty seven and a half years
+C. thirty nine years
+D. five years
+Answer: B
+	11.	Capital gain equals
+A. selling price minus closing costs
+B. selling price minus loan balance
+C. selling price minus adjusted basis
+D. selling price minus depreciation
+Answer: C
+	12.	Adjusted basis equals
+A. purchase price plus improvements minus depreciation
+B. loan amount minus taxes
+C. market value minus land
+D. cash flow minus debt service
+Answer: A
+	13.	Homeowners may exclude capital gains up to
+A. fifty thousand dollars
+B. one hundred thousand dollars
+C. two hundred fifty thousand or five hundred thousand if married
+D. unlimited amount
+Answer: C
+	14.	A 1031 exchange
+A. eliminates tax permanently
+B. defers tax on investment property
+C. applies to primary residences
+D. cannot involve real estate
+Answer: B
+	15.	Save Our Homes limits annual assessed value increases to
+A. ten percent
+B. five percent
+C. three percent or the increase in CPI
+D. the millage rate
+Answer: C
+	16.	Property taxes in Florida are
+A. paid monthly
+B. paid in arrears
+C. paid in advance
+D. paid by tenants
+Answer: B
+	17.	The taxable value of a homesteaded property equals
+A. market value minus land
+B. assessed value minus exemptions
+C. selling price minus mortgage
+D. market value minus closing costs
+Answer: B
+	18.	Depreciable basis equals
+A. loan amount minus land
+B. purchase price minus land plus improvements
+C. property taxes minus depreciation
+D. loan interest plus principal
+Answer: B
+	19.	An item that is not deductible on a primary residence is
+A. mortgage interest
+B. property taxes
+C. repairs
+D. points on a new loan
+Answer: C
+	20.	The purpose of depreciation is
+A. to reduce property taxes
+B. to recover the cost of improvements over time
+C. to calculate market value
+D. to determine millage
+Answer: B
+
+⸻
+
+If you want to continue, say next step, and I will build Unit 19   Planning, Zoning, and Environmental Hazards with full Sora narration and quiz.

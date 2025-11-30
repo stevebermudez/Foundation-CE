@@ -1724,8 +1724,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit17Questions.length} questions to Unit 17 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 18-19)
-    for (let i = 17; i < units.length; i++) {
+    // Unit 18 - Taxes and Real Estate (20 questions)
+    const unit18Questions = [
+      { text: "Ad valorem means", options: ["A. age based", "B. value based", "C. location based", "D. income based"], correctAnswer: "B", explanation: "Ad valorem means based on value." },
+      { text: "Assessed value is", options: ["A. the same as market value", "B. market value minus adjustments", "C. always lower than taxable value", "D. determined by the federal government"], correctAnswer: "B", explanation: "Assessed value is market value minus any assessment limitations and adjustments." },
+      { text: "The Florida homestead exemption can be up to", options: ["A. ten thousand dollars", "B. twenty five thousand dollars", "C. fifty thousand dollars", "D. one hundred thousand dollars"], correctAnswer: "C", explanation: "The Florida homestead exemption can be up to fifty thousand dollars." },
+      { text: "The second twenty five thousand dollars of homestead exemption", options: ["A. applies only to school taxes", "B. applies to non school taxes", "C. applies to federal income tax", "D. applies only when selling"], correctAnswer: "B", explanation: "The second twenty five thousand dollars applies only to non school taxes." },
+      { text: "Millage is expressed as", options: ["A. cents per dollar", "B. dollars per hundred", "C. dollars per thousand dollars of value", "D. percentage of purchase price"], correctAnswer: "C", explanation: "Millage is expressed as dollars per thousand dollars of taxable value." },
+      { text: "Property taxes equal", options: ["A. assessed value times land value", "B. taxable value times millage rate", "C. market value times two mills", "D. loan amount times mill rate"], correctAnswer: "B", explanation: "Property taxes are calculated by multiplying taxable value by the millage rate." },
+      { text: "Homeowners may deduct", options: ["A. repairs", "B. improvements", "C. depreciation", "D. mortgage interest and property taxes"], correctAnswer: "D", explanation: "Homeowners may deduct mortgage interest and property taxes on a primary residence." },
+      { text: "Investors may deduct", options: ["A. principal payments", "B. depreciation", "C. personal expenses", "D. homeowner association fines"], correctAnswer: "B", explanation: "Investors may deduct operating expenses including depreciation." },
+      { text: "Land", options: ["A. can be depreciated", "B. cannot be depreciated", "C. is depreciated over forty years", "D. is expensed"], correctAnswer: "B", explanation: "Land cannot be depreciated, but improvements can be." },
+      { text: "Residential rental property is depreciated over", options: ["A. fifteen years", "B. twenty seven and a half years", "C. thirty nine years", "D. five years"], correctAnswer: "B", explanation: "Residential rental property is depreciated over twenty seven and a half years." },
+      { text: "Capital gain equals", options: ["A. selling price minus closing costs", "B. selling price minus loan balance", "C. selling price minus adjusted basis", "D. selling price minus depreciation"], correctAnswer: "C", explanation: "Capital gain equals selling price minus adjusted basis." },
+      { text: "Adjusted basis equals", options: ["A. purchase price plus improvements minus depreciation", "B. loan amount minus taxes", "C. market value minus land", "D. cash flow minus debt service"], correctAnswer: "A", explanation: "Adjusted basis equals original cost plus improvements minus depreciation taken." },
+      { text: "Homeowners may exclude capital gains up to", options: ["A. fifty thousand dollars", "B. one hundred thousand dollars", "C. two hundred fifty thousand or five hundred thousand if married", "D. unlimited amount"], correctAnswer: "C", explanation: "Homeowners may exclude up to two hundred fifty thousand or five hundred thousand if married for qualifying primary residences." },
+      { text: "A 1031 exchange", options: ["A. eliminates tax permanently", "B. defers tax on investment property", "C. applies to primary residences", "D. cannot involve real estate"], correctAnswer: "B", explanation: "A 1031 exchange allows investors to defer capital gains tax by exchanging investment property." },
+      { text: "Save Our Homes limits annual assessed value increases to", options: ["A. ten percent", "B. five percent", "C. three percent or the increase in CPI", "D. the millage rate"], correctAnswer: "C", explanation: "Save Our Homes limits increases to the lesser of three percent or the change in the Consumer Price Index." },
+      { text: "Property taxes in Florida are", options: ["A. paid monthly", "B. paid in arrears", "C. paid in advance", "D. paid by tenants"], correctAnswer: "B", explanation: "Florida property taxes are paid in arrears." },
+      { text: "The taxable value of a homesteaded property equals", options: ["A. market value minus land", "B. assessed value minus exemptions", "C. selling price minus mortgage", "D. market value minus closing costs"], correctAnswer: "B", explanation: "Taxable value equals assessed value minus exemptions." },
+      { text: "Depreciable basis equals", options: ["A. loan amount minus land", "B. purchase price minus land plus improvements", "C. property taxes minus depreciation", "D. loan interest plus principal"], correctAnswer: "B", explanation: "Depreciable basis equals purchase price minus land value plus improvements." },
+      { text: "An item that is not deductible on a primary residence is", options: ["A. mortgage interest", "B. property taxes", "C. repairs", "D. points on a new loan"], correctAnswer: "C", explanation: "Homeowners cannot deduct repairs or improvements on a primary residence." },
+      { text: "The purpose of depreciation is", options: ["A. to reduce property taxes", "B. to recover the cost of improvements over time", "C. to calculate market value", "D. to determine millage"], correctAnswer: "B", explanation: "Depreciation is cost recovery for income producing property over time." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit18Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[17].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit18Questions.length} questions to Unit 18 Quiz`);
+
+    // Add placeholder questions for remaining unit (Unit 19)
+    for (let i = 18; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1743,7 +1781,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 18-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Unit 19 (20 questions)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
