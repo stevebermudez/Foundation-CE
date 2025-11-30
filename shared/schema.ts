@@ -197,6 +197,48 @@ export const sirconReports = pgTable("sircon_reports", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User license tracking
+export const userLicenses = pgTable("user_licenses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  licenseNumber: varchar("license_number").notNull(),
+  licenseType: varchar("license_type").notNull(), // "salesperson", "broker"
+  state: varchar("state").notNull(), // "CA", "FL"
+  issueDate: timestamp("issue_date").notNull(),
+  expirationDate: timestamp("expiration_date").notNull(),
+  renewalDueDate: timestamp("renewal_due_date"),
+  status: varchar("status").default("active"), // "active", "expired", "pending_renewal"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// CE review table (supervisors reviewing agent CE completions)
+export const ceReviews = pgTable("ce_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  supervisorId: varchar("supervisor_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  reviewStatus: varchar("review_status").default("pending"), // "pending", "approved", "rejected"
+  reviewNotes: text("review_notes"),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Supervisor role assignments
+export const supervisors = pgTable("supervisors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  companyId: varchar("company_id"),
+  role: varchar("role").default("supervisor"), // "supervisor", "admin"
+  canReviewCE: integer("can_review_ce").default(1),
+  canTrackLicenses: integer("can_track_licenses").default(1),
+  canApproveRenewals: integer("can_approve_renewals").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -210,3 +252,6 @@ export type CompanyCompliance = typeof companyCompliance.$inferSelect;
 export type CourseBundle = typeof courseBundles.$inferSelect;
 export type BundleEnrollment = typeof bundleEnrollments.$inferSelect;
 export type SirconReport = typeof sirconReports.$inferSelect;
+export type UserLicense = typeof userLicenses.$inferSelect;
+export type CEReview = typeof ceReviews.$inferSelect;
+export type Supervisor = typeof supervisors.$inferSelect;

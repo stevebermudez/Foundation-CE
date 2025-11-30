@@ -1,5 +1,5 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, sirconReports, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment, type SirconReport } from "@shared/schema";
-import { eq, and, lt, gte } from "drizzle-orm";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor } from "@shared/schema";
+import { eq, and, lt, gte, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 
 export interface IStorage {
@@ -32,6 +32,16 @@ export interface IStorage {
   createSirconReport(report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<SirconReport>;
   getSirconReport(enrollmentId: string): Promise<SirconReport | undefined>;
   updateSirconReport(id: string, data: Partial<SirconReport>): Promise<SirconReport>;
+  createUserLicense(license: Omit<UserLicense, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserLicense>;
+  getUserLicenses(userId: string): Promise<UserLicense[]>;
+  updateUserLicense(id: string, data: Partial<UserLicense>): Promise<UserLicense>;
+  getExpiringLicenses(daysUntilExpiry: number): Promise<UserLicense[]>;
+  createCEReview(review: Omit<CEReview, 'id' | 'createdAt' | 'updatedAt'>): Promise<CEReview>;
+  getPendingCEReviews(supervisorId: string): Promise<(CEReview & { user: User; course: Course; enrollment: Enrollment })[]>;
+  approveCEReview(id: string, notes?: string): Promise<CEReview>;
+  rejectCEReview(id: string, notes: string): Promise<CEReview>;
+  getSupervisor(userId: string): Promise<Supervisor | undefined>;
+  createSupervisor(supervisor: Omit<Supervisor, 'id' | 'createdAt' | 'updatedAt'>): Promise<Supervisor>;
 }
 
 export class DatabaseStorage implements IStorage {
