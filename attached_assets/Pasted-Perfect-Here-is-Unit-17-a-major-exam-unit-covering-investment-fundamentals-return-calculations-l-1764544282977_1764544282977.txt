@@ -1,0 +1,257 @@
+Perfect. Here is Unit 17, a major exam unit covering investment fundamentals, return calculations, leverage, and business brokerage basics.
+
+This is a complete, fresh build, fully structured and Sora ready.
+
+No em dashes.
+
+⸻
+
+UNIT 17   REAL ESTATE INVESTMENTS AND BUSINESS BROKERAGE
+
+Target Duration: 3 hours
+Includes: three Sora ready narration scripts + twenty question exam style quiz
+
+⸻
+
+UNIT 17 LEARNING OBJECTIVES
+
+Students will be able to:
+	•	Identify advantages and disadvantages of real estate investment
+	•	Understand risk, liquidity, leverage, and rate of return
+	•	Calculate investment ratios including IRV, NOI, cap rate
+	•	Compute cash flow, cash on cash return, and equity buildup
+	•	Understand business brokerage and how it differs from real estate brokerage
+	•	Explain goodwill, going concern value, and balance sheet components
+	•	Distinguish asset sale versus stock sale concepts
+	•	Understand the role of financial statements in brokerage
+	•	Apply investment analysis formulas used on the exam
+
+⸻
+
+UNIT 17 STRUCTURE
+	1.	Lesson 17.1   Investment fundamentals, risk, leverage, return basics
+	2.	Lesson 17.2   Cash flow, cap rate, IRV, cash on cash, equity buildup
+	3.	Lesson 17.3   Business brokerage, financial statements, goodwill, going concern
+	4.	Quiz   Twenty exam style questions
+
+⸻
+
+LESSON 17.1 SCRIPT
+
+Investment Fundamentals, Risk, Leverage, Return
+
+Welcome to Unit 17 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+
+In this unit we explore real estate as an investment and the basic tools used to evaluate investment performance. Investors choose real estate for income, appreciation, tax benefits, leverage, and long term stability.
+
+Real estate investment offers several advantages. Leverage allows investors to control large assets with limited capital by borrowing money. Appreciation increases value over time. Income provides cash flow. Tax benefits may include depreciation and interest deductions.
+
+Real estate also has disadvantages. It is not highly liquid. It carries the risk of vacancies, market swings, and unexpected expenses.
+
+Risk is the chance that the actual return will differ from the expected return. Higher risk often accompanies higher potential reward.
+
+Return is the benefit received from an investment. Investors analyze both cash flow return and overall return including appreciation and equity buildup.
+
+Leverage magnifies gains, but it also magnifies losses. High leverage increases risk because debt payments must be made even when income declines.
+
+In the next lesson, we calculate returns using formulas that appear frequently on the licensing exam.
+
+⸻
+
+LESSON 17.2 SCRIPT
+
+Cash Flow, Cap Rate, IRV, Cash on Cash, Equity Buildup
+
+In this lesson we apply investment math. These formulas are critical for exam success.
+
+Begin with net operating income. Net operating income equals effective gross income minus operating expenses. Operating expenses include taxes, insurance, maintenance, and management. Debt service is not included.
+
+Cash flow equals net operating income minus debt service.
+
+The capitalization rate method values income properties using the IRV formula.
+
+I stands for net operating income.
+
+R stands for capitalization rate.
+
+V stands for value.
+
+The formula is I divided by R equals V.
+
+To find value, divide net operating income by the cap rate.
+
+To find net operating income, multiply value by the cap rate.
+
+To find cap rate, divide net operating income by value.
+
+Cash on cash return measures annual cash flow divided by initial cash invested. It shows the investor’s return on actual dollars invested.
+
+Equity buildup occurs when loan principal is reduced over time. As the mortgage is paid down, the investor’s equity increases.
+
+Appreciation adds to overall return as the property increases in value.
+
+Investors evaluate these components to determine whether a property is acceptable.
+
+In the next lesson, we study business brokerage concepts.
+
+⸻
+
+LESSON 17.3 SCRIPT
+
+Business Brokerage, Financial Statements, Goodwill, Going Concern
+
+In this final lesson for Unit 17, we explore business brokerage and the tools used to analyze business value.
+
+Business brokerage involves the sale of an ongoing enterprise. Unlike real property brokerage, business brokerage deals with intangible assets, goodwill, and operational performance.
+
+A business is considered a going concern when it continues operations with measurable cash flow, inventory, equipment, contracts, and customer relationships.
+
+Goodwill represents the intangible value of a business, including reputation, brand awareness, and customer loyalty. Goodwill may increase purchase price beyond the value of assets.
+
+Business brokers analyze financial statements such as the income statement, balance sheet, and cash flow statement.
+
+The balance sheet lists assets, liabilities, and equity.
+
+The income statement shows revenue, expenses, and net profit.
+
+The cash flow statement tracks inflows and outflows of cash.
+
+Business sales may be structured as asset sales or stock sales.
+
+In an asset sale, the buyer purchases equipment, inventory, and other assets without purchasing corporate stock.
+
+In a stock sale, the buyer purchases ownership of the corporation itself, including liabilities.
+
+Florida requires a real estate license for business brokerage because it often involves the transfer of real property leases or owned real estate.
+
+This concludes Unit 17. You are now ready for the Unit 17 quiz.
+
+⸻
+
+UNIT 17 QUIZ
+
+Twenty exam style questions
+	1.	Leverage allows investors to
+A. avoid debt
+B. control large assets with limited capital
+C. eliminate all risk
+D. reduce appreciation
+Answer: B
+	2.	A major disadvantage of real estate investment is
+A. high liquidity
+B. low leverage
+C. lack of liquidity
+D. automatic returns
+Answer: C
+	3.	Risk refers to
+A. guaranteed income
+B. the chance actual return differs from expected return
+C. depreciation expense
+D. tax liability
+Answer: B
+	4.	Net operating income equals
+A. rent minus mortgage
+B. effective gross income minus operating expenses
+C. gross income minus capital expenses
+D. cash flow minus taxes
+Answer: B
+	5.	Cash flow equals
+A. mortgage payments minus taxes
+B. net operating income minus debt service
+C. income minus depreciation
+D. revenue minus goodwill
+Answer: B
+	6.	The IRV formula is
+A. income times rate equals value
+B. income divided by rate equals value
+C. value divided by income equals rate
+D. rate divided by value equals income
+Answer: B
+	7.	A cap rate equals
+A. debt service divided by income
+B. interest rate
+C. net operating income divided by value
+D. value divided by rent
+Answer: C
+	8.	To find net operating income using IRV
+A. multiply value by cap rate
+B. divide value by cap rate
+C. multiply cash flow by debt service
+D. divide rent by taxes
+Answer: A
+	9.	Cash on cash return measures
+A. annual cash flow divided by initial cash invested
+B. net operating income divided by value
+C. closing costs divided by rent
+D. debt service divided by gross income
+Answer: A
+	10.	Equity buildup comes from
+A. rent increases only
+B. loan principal reduction
+C. higher taxes
+D. depreciation
+Answer: B
+	11.	Appreciation refers to
+A. decrease in property value
+B. increase in property value
+C. tax assessor changes
+D. insurance claims
+Answer: B
+	12.	Business brokerage involves
+A. only land sales
+B. ongoing enterprises and intangible assets
+C. tenant placement
+D. mortgage underwriting
+Answer: B
+	13.	Goodwill represents
+A. equipment value
+B. inventory
+C. intangible value such as reputation
+D. tax liability
+Answer: C
+	14.	A going concern is a business that
+A. is closed
+B. has no customers
+C. continues operating with measurable cash flow
+D. is insolvent
+Answer: C
+	15.	The balance sheet lists
+A. revenue and expenses
+B. assets, liabilities, and equity
+C. income and depreciation
+D. cash inflows only
+Answer: B
+	16.	The income statement shows
+A. assets and liabilities
+B. cash reserves
+C. revenue and expenses
+D. depreciation only
+Answer: C
+	17.	In an asset sale, the buyer purchases
+A. corporate stock
+B. liabilities only
+C. equipment, inventory, and other assets
+D. only leases
+Answer: C
+	18.	In a stock sale, the buyer purchases
+A. assets only
+B. ownership of the corporation including liabilities
+C. inventory only
+D. goodwill only
+Answer: B
+	19.	Florida requires a real estate license for business brokerage because
+A. businesses are intangible
+B. business sales often involve real property or leases
+C. the IRS requires it
+D. lenders require it
+Answer: B
+	20.	The primary purpose of investment analysis is
+A. determine property taxes
+B. estimate financial performance and risk
+C. reduce insurance premiums
+D. prepare loan documents
+Answer: B
+
+⸻
+
+If you want to continue, say next step, and I will build Unit 18   Taxes and Real Estate with full Sora narration and quiz.

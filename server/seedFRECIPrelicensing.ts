@@ -1686,8 +1686,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit16Questions.length} questions to Unit 16 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 17-19)
-    for (let i = 16; i < units.length; i++) {
+    // Unit 17 - Real Estate Investments and Business Brokerage (20 questions)
+    const unit17Questions = [
+      { text: "Leverage allows investors to", options: ["A. avoid debt", "B. control large assets with limited capital", "C. eliminate all risk", "D. reduce appreciation"], correctAnswer: "B", explanation: "Leverage allows investors to control large assets with limited capital by borrowing money." },
+      { text: "A major disadvantage of real estate investment is", options: ["A. high liquidity", "B. low leverage", "C. lack of liquidity", "D. automatic returns"], correctAnswer: "C", explanation: "Real estate is not highly liquid, making it difficult to convert to cash quickly." },
+      { text: "Risk refers to", options: ["A. guaranteed income", "B. the chance actual return differs from expected return", "C. depreciation expense", "D. tax liability"], correctAnswer: "B", explanation: "Risk is the chance that the actual return will differ from the expected return." },
+      { text: "Net operating income equals", options: ["A. rent minus mortgage", "B. effective gross income minus operating expenses", "C. gross income minus capital expenses", "D. cash flow minus taxes"], correctAnswer: "B", explanation: "Net operating income equals effective gross income minus operating expenses." },
+      { text: "Cash flow equals", options: ["A. mortgage payments minus taxes", "B. net operating income minus debt service", "C. income minus depreciation", "D. revenue minus goodwill"], correctAnswer: "B", explanation: "Cash flow equals net operating income minus debt service." },
+      { text: "The IRV formula is", options: ["A. income times rate equals value", "B. income divided by rate equals value", "C. value divided by income equals rate", "D. rate divided by value equals income"], correctAnswer: "B", explanation: "The IRV formula is income divided by rate equals value." },
+      { text: "A cap rate equals", options: ["A. debt service divided by income", "B. interest rate", "C. net operating income divided by value", "D. value divided by rent"], correctAnswer: "C", explanation: "Cap rate equals net operating income divided by value." },
+      { text: "To find net operating income using IRV", options: ["A. multiply value by cap rate", "B. divide value by cap rate", "C. multiply cash flow by debt service", "D. divide rent by taxes"], correctAnswer: "A", explanation: "To find NOI, multiply value by cap rate." },
+      { text: "Cash on cash return measures", options: ["A. annual cash flow divided by initial cash invested", "B. net operating income divided by value", "C. closing costs divided by rent", "D. debt service divided by gross income"], correctAnswer: "A", explanation: "Cash on cash return measures annual cash flow divided by initial cash invested." },
+      { text: "Equity buildup comes from", options: ["A. rent increases only", "B. loan principal reduction", "C. higher taxes", "D. depreciation"], correctAnswer: "B", explanation: "Equity buildup occurs when loan principal is reduced over time." },
+      { text: "Appreciation refers to", options: ["A. decrease in property value", "B. increase in property value", "C. tax assessor changes", "D. insurance claims"], correctAnswer: "B", explanation: "Appreciation is the increase in property value over time." },
+      { text: "Business brokerage involves", options: ["A. only land sales", "B. ongoing enterprises and intangible assets", "C. tenant placement", "D. mortgage underwriting"], correctAnswer: "B", explanation: "Business brokerage involves the sale of an ongoing enterprise including intangible assets." },
+      { text: "Goodwill represents", options: ["A. equipment value", "B. inventory", "C. intangible value such as reputation", "D. tax liability"], correctAnswer: "C", explanation: "Goodwill represents the intangible value of a business, including reputation and customer loyalty." },
+      { text: "A going concern is a business that", options: ["A. is closed", "B. has no customers", "C. continues operating with measurable cash flow", "D. is insolvent"], correctAnswer: "C", explanation: "A business is a going concern when it continues operations with measurable cash flow." },
+      { text: "The balance sheet lists", options: ["A. revenue and expenses", "B. assets, liabilities, and equity", "C. income and depreciation", "D. cash inflows only"], correctAnswer: "B", explanation: "The balance sheet lists assets, liabilities, and equity." },
+      { text: "The income statement shows", options: ["A. assets and liabilities", "B. cash reserves", "C. revenue and expenses", "D. depreciation only"], correctAnswer: "C", explanation: "The income statement shows revenue, expenses, and net profit." },
+      { text: "In an asset sale, the buyer purchases", options: ["A. corporate stock", "B. liabilities only", "C. equipment, inventory, and other assets", "D. only leases"], correctAnswer: "C", explanation: "In an asset sale, the buyer purchases equipment, inventory, and other assets without purchasing stock." },
+      { text: "In a stock sale, the buyer purchases", options: ["A. assets only", "B. ownership of the corporation including liabilities", "C. inventory only", "D. goodwill only"], correctAnswer: "B", explanation: "In a stock sale, the buyer purchases ownership of the corporation itself, including liabilities." },
+      { text: "Florida requires a real estate license for business brokerage because", options: ["A. businesses are intangible", "B. business sales often involve real property or leases", "C. the IRS requires it", "D. lenders require it"], correctAnswer: "B", explanation: "Florida requires a license because business brokerage often involves the transfer of real property or leases." },
+      { text: "The primary purpose of investment analysis is", options: ["A. determine property taxes", "B. estimate financial performance and risk", "C. reduce insurance premiums", "D. prepare loan documents"], correctAnswer: "B", explanation: "Investment analysis estimates financial performance and evaluates risk." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit17Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[16].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit17Questions.length} questions to Unit 17 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 18-19)
+    for (let i = 17; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1705,7 +1743,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 17-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 18-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
