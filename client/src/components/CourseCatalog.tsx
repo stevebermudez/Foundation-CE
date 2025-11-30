@@ -61,7 +61,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "3h 30m",
     lessons: 12,
-    price: 40,
+    price: 15,
     enrolled: true,
     progress: 65,
   },
@@ -80,7 +80,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "3h 15m",
     lessons: 10,
-    price: 40,
+    price: 15,
   },
   {
     id: "3",
@@ -97,7 +97,7 @@ const mockCourses: Course[] = [
     untimedOption: false,
     duration: "6h 45m",
     lessons: 18,
-    price: 40,
+    price: 15,
   },
   {
     id: "4",
@@ -113,7 +113,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "4h 45m",
     lessons: 15,
-    price: 40,
+    price: 15,
   },
   {
     id: "5",
@@ -129,7 +129,7 @@ const mockCourses: Course[] = [
     untimedOption: false,
     duration: "24h 30m",
     lessons: 48,
-    price: 40,
+    price: 15,
   },
   {
     id: "6",
@@ -146,7 +146,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "3h 20m",
     lessons: 11,
-    price: 40,
+    price: 15,
     enrolled: true,
     progress: 100,
     completed: true,
@@ -166,7 +166,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "3h 10m",
     lessons: 9,
-    price: 40,
+    price: 15,
   },
   {
     id: "8",
@@ -182,7 +182,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "8h 30m",
     lessons: 24,
-    price: 40,
+    price: 15,
   },
   {
     id: "9",
@@ -199,7 +199,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "6h 15m",
     lessons: 18,
-    price: 40,
+    price: 15,
     enrolled: true,
     progress: 30,
   },
@@ -218,7 +218,7 @@ const mockCourses: Course[] = [
     untimedOption: true,
     duration: "4h 30m",
     lessons: 14,
-    price: 40,
+    price: 15,
   },
   {
     id: "11",
@@ -235,7 +235,7 @@ const mockCourses: Course[] = [
     untimedOption: false,
     duration: "9h 30m",
     lessons: 28,
-    price: 40,
+    price: 15,
   },
 ];
 
