@@ -1,0 +1,321 @@
+Perfect. Moving forward with **Unit 9** of the 63 hour Florida Sales Associate Pre-Licensing Course.
+
+You will receive:
+
+* A complete **3 hour instructional unit**
+* **Three Sora-ready lesson scripts**
+* **Twenty question exam-style quiz**
+* Clean FoundationCE structure
+* All language consistent with Florida law and exam standards
+* No em dashes
+
+---
+
+# **UNIT 9   TITLE, DEEDS AND OWNERSHIP RESTRICTIONS**
+
+Target duration: **3 hours**
+
+This unit covers:
+
+* Methods of transferring title
+* Types of deeds
+* Essential elements of a valid deed
+* Voluntary and involuntary alienation
+* Constructive and actual notice
+* Title insurance
+* Restrictions on ownership including zoning, easements, encroachments
+* Government powers including police power, eminent domain, taxation, escheat
+* Private restrictions including HOA rules, liens, deed restrictions
+
+---
+
+# **UNIT 9 LEARNING OBJECTIVES**
+
+By the end of Unit 9, the student should be able to:
+
+* Explain voluntary and involuntary alienation
+* Describe actual notice and constructive notice
+* Identify the essential elements of a deed
+* Compare general warranty deed, special warranty deed, bargain and sale deed, quitclaim deed
+* Distinguish between title opinion and title insurance
+* Explain government powers over real property
+* Identify encumbrances including easements, restrictions, liens, and encroachments
+* Recognize superior and junior liens
+* Apply exam level scenarios involving clouded title, easements, and deed clauses
+
+---
+
+# **UNIT 9 STRUCTURE**
+
+1. **Lesson 9.1**   Alienation, notice, deeds, essential elements
+2. **Lesson 9.2**   Types of deeds, title insurance, encumbrances
+3. **Lesson 9.3**   Government powers, zoning, easements, liens, restrictions
+4. **Unit 9 Quiz**   20 questions
+
+Below are the full Sora scripts.
+
+---
+
+# **LESSON 9.1 SCRIPT**
+
+**Alienation, Notice, Deeds, Essential Elements**
+
+> Welcome to Unit 9 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+>
+> This unit explains how ownership moves from one person to another, what makes a deed valid, and how title is protected. These issues are essential for the Florida exam and for basic practice.
+>
+> Let us begin with the term **alienation**. Alienation means the transfer of ownership. Alienation can be voluntary or involuntary.
+>
+> **Voluntary alienation** occurs when the owner deliberately transfers title, usually by deed or by will. A deed transfers ownership during the owner’s lifetime. A will transfers ownership at death.
+>
+> **Involuntary alienation** occurs without the owner’s intent. Examples include foreclosure, eminent domain, adverse possession, and escheat.
+>
+> Title to real property is conveyed by a deed. A deed is a written instrument that transfers ownership from the grantor to the grantee. For a deed to be valid, certain elements are required. The essential elements of a valid deed include:
+>
+> * Competent grantor
+> * Identifiable grantee
+> * Consideration
+> * Granting clause
+> * Legal description
+> * Signature of the grantor
+> * Delivery and acceptance
+>
+> The grantor must be legally competent. The grantee does not need to be competent, but must be an identifiable person or legal entity.
+>
+> A deed does not need to be witnessed by a notary to be valid between the parties, although recording usually requires proper acknowledgment. A deed does not need to be dated. A deed does not need to include the purchase price.
+>
+> Now let us talk about notice. There are two types of notice in real estate.
+>
+> **Actual notice** is direct knowledge. If a person reads a deed or sees an easement recorded and understands it, that is actual notice.
+>
+> **Constructive notice** is notice given by the public records. When a document is properly recorded, the law treats everyone as though they have knowledge of it. Constructive notice is sometimes called legal notice.
+>
+> Recording a deed gives constructive notice. Constructive notice protects the buyer against hidden claims and is critical for establishing priority.
+>
+> In the next lesson, we compare the types of deeds and title protections.
+
+---
+
+# **LESSON 9.2 SCRIPT**
+
+**Types of Deeds, Title Insurance, Encumbrances**
+
+> In this lesson, we compare the most common types of deeds and explore title protection.
+>
+> Deeds vary based on the warranties they provide. The exam loves deed comparisons, so let us cover them clearly.
+>
+> The **general warranty deed** provides the most complete warranties of title. It guarantees that the grantor owns the property, has the right to convey it, and will defend the title against lawful claims from the entire chain of title. This is the highest level of protection for the buyer.
+>
+> The **special warranty deed** limits the warranties to the time the grantor owned the property. It does not warrant against defects that occurred prior to the grantor’s ownership. This deed is common in commercial transactions.
+>
+> The **bargain and sale deed** contains a granting clause but no warranties of title. It implies that the grantor has ownership but does not guarantee against title defects.
+>
+> The **quitclaim deed** provides the least protection. It conveys whatever interest the grantor may have, if any, without warranties. Quitclaim deeds are often used to clear clouds on title.
+>
+> Title is often insured through **title insurance**. Title insurance protects the buyer and lender against losses due to defects in the title that existed before the policy date. The lender’s title insurance protects the lender up to the mortgage amount. The owner’s title policy protects the buyer up to the purchase price.
+>
+> Now let us talk about **encumbrances**. Encumbrances are claims, restrictions, or limitations on property that reduce its value or restrict its use but do not necessarily prevent transfer. Encumbrances include:
+>
+> * Easements
+> * Restrictions
+> * Encroachments
+> * Liens
+>
+> An **easement** is a right to use another’s land for a specific purpose. Common easements include utility easements, ingress and egress easements, and shared driveways. Easements may be created by express grant, necessity, prescription, or implication.
+>
+> An **encroachment** occurs when a structure or improvement trespasses on another’s property. A fence built over the boundary line is an encroachment. Encroachments are often discovered by surveys and can create title problems.
+>
+> Deed restrictions are private restrictions placed on property by previous owners or developers. These restrictions run with the land and may limit uses, architectural designs, or other activities.
+>
+> In the final lesson, we will study government powers and liens.
+
+---
+
+# **LESSON 9.3 SCRIPT**
+
+**Government Powers, Zoning, Easements, Liens, Restrictions**
+
+> In this lesson, we wrap up Unit 9 by examining how government and private parties can restrict property rights. These restrictions frequently appear on the state exam.
+>
+> Government powers over real property fall into four categories:
+>
+> 1. Police power
+> 2. Eminent domain
+> 3. Taxation
+> 4. Escheat
+>
+> **Police power** is the authority of government to regulate property to protect public health, safety, and welfare. Zoning laws, building codes, and environmental regulations are examples of police power.
+>
+> **Eminent domain** is the right of the government to take private property for public use. When property is taken, the government must provide just compensation. Eminent domain actions occur through a process called condemnation.
+>
+> **Taxation** allows government to impose property taxes and special assessments. Failure to pay property taxes can result in a tax certificate and potentially a tax deed sale.
+>
+> **Escheat** occurs when a person dies without a will and without heirs. The property returns to the state.
+>
+> Now let us talk about zoning and land use. Zoning divides land into districts with permitted uses. Zoning categories typically include residential, commercial, industrial, and agricultural uses.
+>
+> A property owner may request a **variance** to deviate from specific zoning requirements if strict compliance would create unnecessary hardship. A **special exception** allows a use that is permitted under the zoning code but requires additional approval, such as a church in a residential area.
+>
+> Let us finish with liens. A **lien** is a claim against property for the payment of a debt. Liens may be voluntary or involuntary. They may be specific to the property or general against all assets.
+>
+> **Superior liens** are paid first in the event of forced sale. The primary superior liens in Florida are:
+>
+> * Real estate property tax liens
+> * Special assessment liens
+> * Federal estate tax liens
+>
+> All other liens are generally junior liens, including mortgage liens, judgment liens, vendor liens, and construction liens.
+>
+> The exam will ask you about lien priority. Property tax liens always take priority over all other liens regardless of recording date.
+>
+> With these concepts in place, you are ready for the Unit 9 quiz.
+
+---
+
+# **UNIT 9 QUIZ**
+
+20 multiple choice questions
+
+1. Alienation refers to
+   A. the right to exclude others
+   B. the transfer of ownership
+   C. the creation of a lien
+   D. the recording of a survey
+   **Answer: B**
+
+2. Voluntary alienation occurs through
+   A. foreclosure
+   B. a deed or a will
+   C. escheat
+   D. adverse possession
+   **Answer: B**
+
+3. Constructive notice is provided by
+   A. personal delivery of a document
+   B. verbal disclosure
+   C. recording documents in the public records
+   D. mailing a letter
+   **Answer: C**
+
+4. A deed must contain
+   A. the purchase price
+   B. the signature of the grantee
+   C. a granting clause
+   D. a mortgage provision
+   **Answer: C**
+
+5. Which deed provides the most warranties
+   A. quitclaim deed
+   B. special warranty deed
+   C. bargain and sale deed
+   D. general warranty deed
+   **Answer: D**
+
+6. A quitclaim deed is often used to
+   A. guarantee clear title
+   B. remove a cloud on title
+   C. give a lender more security
+   D. transfer a mortgage
+   **Answer: B**
+
+7. Title insurance protects the
+   A. seller only
+   B. buyer and lender
+   C. title examiner
+   D. broker only
+   **Answer: B**
+
+8. An easement is
+   A. a right to use another’s land for a specific purpose
+   B. a trespass by a structure
+   C. a superior lien
+   D. a government taking
+   **Answer: A**
+
+9. An encroachment refers to
+   A. a zoning violation
+   B. property crossing a lot line without permission
+   C. a specific lien
+   D. a government regulation
+   **Answer: B**
+
+10. The government’s power to take private property for public use is
+    A. police power
+    B. escheat
+    C. eminent domain
+    D. taxation
+    **Answer: C**
+
+11. A variance allows
+    A. a change to the zoning classification
+    B. a deviation from specific zoning requirements
+    C. the government to take property
+    D. a private restriction to be removed
+    **Answer: B**
+
+12. Special assessments are
+    A. voluntary fees
+    B. specific liens for improvements that benefit the property
+    C. general liens on all assets
+    D. zoning fines
+    **Answer: B**
+
+13. The highest priority lien in Florida is
+    A. first mortgage lien
+    B. judgment lien
+    C. real estate property tax lien
+    D. vendor lien
+    **Answer: C**
+
+14. Escheat occurs when
+    A. an owner donates land to a charity
+    B. a property is abandoned
+    C. a person dies without a will and without heirs
+    D. a property is rezoned
+    **Answer: C**
+
+15. A special warranty deed protects the grantee
+    A. against all title defects in history
+    B. only against defects arising during the grantor’s ownership
+    C. against encroachments
+    D. against zoning violations
+    **Answer: B**
+
+16. A deed restriction is
+    A. a government rule that must be followed
+    B. a private limit placed on property use
+    C. a new zoning requirement
+    D. a mortgage term
+    **Answer: B**
+
+17. A survey is most likely to uncover
+    A. a superior lien
+    B. an easement appurtenant
+    C. an encroachment
+    D. unpaid taxes
+    **Answer: C**
+
+18. Title passes when a deed is
+    A. recorded only
+    B. signed only
+    C. delivered and accepted
+    D. notarized
+    **Answer: C**
+
+19. A lien for unpaid property taxes is
+    A. junior to a first mortgage
+    B. always the lowest priority lien
+    C. a superior lien
+    D. equal to judgment liens
+    **Answer: C**
+
+20. Zoning is an example of
+    A. police power
+    B. escheat
+    C. private restriction
+    D. eminent domain
+    **Answer: A**
+
+---
+
+If you want to continue, say **next step**, and I will build **Unit 10   Real Estate Contracts** with full Sora scripts and exam-style quiz.
