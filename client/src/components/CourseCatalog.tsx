@@ -360,8 +360,23 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
     }
   }, [filteredCourses, sortBy]);
 
-  const handleEnroll = (courseId: string) => {
-    console.log("Enrolling in course:", courseId);
+  const handleEnroll = async (courseId: string) => {
+    try {
+      const email = prompt("Enter your email address:");
+      if (!email) return;
+
+      const response = await fetch("/api/checkout/course", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId, email }),
+      });
+
+      if (!response.ok) throw new Error("Checkout failed");
+      const { url } = await response.json();
+      if (url) window.location.href = url;
+    } catch (err) {
+      console.error("Checkout error:", err);
+    }
   };
 
   const handleContinue = (courseId: string) => {

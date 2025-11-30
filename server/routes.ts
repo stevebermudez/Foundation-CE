@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import { getUncachableStripeClient } from "./stripeClient";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -68,6 +69,53 @@ export async function registerRoutes(
     const course = await storage.getCourse(req.params.id);
     if (!course) return res.status(404).json({ error: "Course not found" });
     res.json(course);
+  });
+
+  // Checkout - Create Stripe checkout session for a course
+  app.post("/api/checkout/course", async (req, res) => {
+    try {
+      const { courseId, email } = req.body;
+      if (!courseId || !email) {
+        return res.status(400).json({ error: "courseId and email required" });
+      }
+
+      const course = await storage.getCourse(courseId);
+      if (!course) return res.status(404).json({ error: "Course not found" });
+
+      const successUrl = `${req.headers.origin || process.env.CLIENT_URL || "http://localhost:5000"}/checkout/success?courseId=${courseId}`;
+      const cancelUrl = `${req.headers.origin || process.env.CLIENT_URL || "http://localhost:5000"}/checkout/cancel`;
+
+      const stripe = await getUncachableStripeClient();
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: course.title,
+                description: course.description,
+              },
+              unit_amount: course.price || 1500,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        customer_email: email,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        metadata: {
+          courseId,
+          email,
+        },
+      });
+
+      res.json({ url: session.url, sessionId: session.id });
+    } catch (err) {
+      console.error("Checkout error:", err);
+      res.status(500).json({ error: "Failed to create checkout session" });
+    }
   });
 
   // Course Bundle Routes
