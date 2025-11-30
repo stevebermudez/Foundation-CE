@@ -60,10 +60,54 @@ export async function registerRoutes(
   // Course Routes
   app.get("/api/courses", async (req, res) => {
     const courses = await storage.getCourses({
-      type: req.query.type as string,
-      targetLicense: req.query.license as string,
+      state: req.query.state as string,
+      licenseType: req.query.licenseType as string,
     });
     res.json(courses);
+  });
+
+  // Course Completion & Sircon Reporting
+  app.post("/api/enrollments/:id/complete", async (req, res) => {
+    try {
+      const { userId, licenseNumber, licenseType } = req.body;
+      const enrollment = await storage.updateEnrollmentHours(
+        req.params.id,
+        req.body.hoursCompleted || 0
+      );
+      
+      // Trigger Sircon reporting if it's an insurance course
+      const course = await storage.getCourse(enrollment.courseId);
+      if (course?.productType === "Insurance" && licenseNumber) {
+        const sirconStatus = await storage.createSirconReport({
+          enrollmentId: enrollment.id,
+          userId,
+          courseId: course.id,
+          courseTitle: course.title,
+          completionDate: new Date(),
+          ceHours: course.hoursRequired || 0,
+          state: course.state,
+          licenseNumber,
+          licenseType: (licenseType as any) || "property",
+          status: "pending",
+        });
+        return res.status(201).json({ enrollment, sirconStatus });
+      }
+      res.json(enrollment);
+    } catch (err) {
+      console.error("Error completing enrollment:", err);
+      res.status(500).json({ error: "Failed to complete enrollment" });
+    }
+  });
+
+  // Get Sircon reporting status
+  app.get("/api/sircon/status/:enrollmentId", async (req, res) => {
+    try {
+      const status = await storage.getSirconReport(req.params.enrollmentId);
+      res.json(status);
+    } catch (err) {
+      console.error("Error fetching Sircon status:", err);
+      res.status(500).json({ error: "Failed to fetch status" });
+    }
   });
 
   app.get("/api/courses/:id", async (req, res) => {

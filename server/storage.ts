@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, companyAccounts, companyCompliance, courseBundles, bundleCourses, bundleEnrollments, sirconReports, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CompanyAccount, type CompanyCompliance, type CourseBundle, type BundleEnrollment, type SirconReport } from "@shared/schema";
 import { eq, and, lt, gte } from "drizzle-orm";
 import { db } from "./db";
 
@@ -29,6 +29,9 @@ export interface IStorage {
   getBundleCourses(bundleId: string): Promise<Course[]>;
   createBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment>;
   getBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment | undefined>;
+  createSirconReport(report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<SirconReport>;
+  getSirconReport(enrollmentId: string): Promise<SirconReport | undefined>;
+  updateSirconReport(id: string, data: Partial<SirconReport>): Promise<SirconReport>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -235,11 +238,11 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async getExpiringCompliance(daysUntilExpiry: number): Promise<(CompanyCompliance & { company: CompanyAccount })[]> {
+  async getExpiringCompliance(daysUntilExpiry: number): Promise<any[]> {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + daysUntilExpiry);
 
-    return await db
+    const results = await db
       .select()
       .from(companyCompliance)
       .innerJoin(companyAccounts, eq(companyCompliance.companyId, companyAccounts.id))
@@ -250,6 +253,11 @@ export class DatabaseStorage implements IStorage {
           eq(companyCompliance.isCompliant, 0)
         )
       );
+    
+    return results.map((row: any) => ({
+      ...row.company_compliance,
+      company: row.company_accounts
+    }));
   }
 
   async markComplianceComplete(id: string, hoursCompleted: number): Promise<CompanyCompliance> {
@@ -322,6 +330,33 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return enrollment;
+  }
+
+  async createSirconReport(
+    report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<SirconReport> {
+    const [created] = await db
+      .insert(sirconReports)
+      .values(report)
+      .returning();
+    return created;
+  }
+
+  async getSirconReport(enrollmentId: string): Promise<SirconReport | undefined> {
+    const [report] = await db
+      .select()
+      .from(sirconReports)
+      .where(eq(sirconReports.enrollmentId, enrollmentId));
+    return report;
+  }
+
+  async updateSirconReport(id: string, data: Partial<SirconReport>): Promise<SirconReport> {
+    const [updated] = await db
+      .update(sirconReports)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(sirconReports.id, id))
+      .returning();
+    return updated;
   }
 }
 

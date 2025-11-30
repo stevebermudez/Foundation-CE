@@ -176,6 +176,27 @@ export const bundleEnrollments = pgTable("bundle_enrollments", {
   certificateUrl: varchar("certificate_url"),
 });
 
+// Sircon reporting for insurance CE completions
+export const sirconReports = pgTable("sircon_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  courseTitle: varchar("course_title").notNull(),
+  completionDate: timestamp("completion_date").notNull(),
+  ceHours: integer("ce_hours").notNull(),
+  state: varchar("state").notNull(),
+  licenseNumber: varchar("license_number").notNull(),
+  licenseType: varchar("license_type").notNull(),
+  status: varchar("status").default("pending"), // "pending", "submitted", "accepted", "rejected"
+  confirmationNumber: varchar("confirmation_number"),
+  errorMessage: text("error_message"),
+  submittedAt: timestamp("submitted_at"),
+  confirmedAt: timestamp("confirmed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -188,3 +209,4 @@ export type CompanyAccount = typeof companyAccounts.$inferSelect;
 export type CompanyCompliance = typeof companyCompliance.$inferSelect;
 export type CourseBundle = typeof courseBundles.$inferSelect;
 export type BundleEnrollment = typeof bundleEnrollments.$inferSelect;
+export type SirconReport = typeof sirconReports.$inferSelect;
