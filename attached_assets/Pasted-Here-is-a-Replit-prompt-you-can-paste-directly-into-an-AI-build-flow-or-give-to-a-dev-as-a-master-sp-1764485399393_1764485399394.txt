@@ -1,0 +1,279 @@
+Here is a Replit prompt you can paste directly into an AI build flow or give to a dev as a master spec.
+
+⸻
+
+Prompt to Replit: Build a multi state CE platform (NMLS, Real Estate, Insurance)
+
+You are a senior product architect and full stack engineer.
+Design and scaffold a production ready SaaS web platform that delivers online Continuing Education (CE) for:
+	•	NMLS mortgage originators in all 50 US states
+	•	Real estate brokers and salespersons in all 50 US states
+	•	Property and casualty, life and health, and related insurance licensees in all 50 US states
+
+The platform must support: state specific rules, course timing, exams, completion certificates, and compliance reporting.
+
+Build the first version of this system with clean, well organized code, strong typing, and clear separation of concerns.
+
+⸻
+
+1. Tech stack
+
+Pick a modern, popular stack that works well on Replit and is easy to maintain:
+	•	Backend: TypeScript + Node + Express or NestJS
+	•	Database: PostgreSQL with a migration tool (Prisma or similar ORM)
+	•	Frontend: React + TypeScript (you can use Next.js-style routing or a simple Vite React app)
+	•	Auth: JSON Web Tokens (JWT) or session based auth via cookies
+	•	Styling: A simple component library (for example Tailwind CSS or Chakra UI) to move fast
+	•	Testing: Jest or Vitest for unit tests; basic test coverage for core flows
+
+Initialize the project, wire up the backend and frontend, and include a .env.example file for configuration.
+
+⸻
+
+2. Core user roles
+
+Implement RBAC (role based access control) with at least these roles:
+	1.	Student / Licensee
+	•	Registers, manages profile, and selects license type and home state
+	•	Enrolls in courses and tracks progress
+	•	Takes exams and receives certificates
+	2.	Instructor / Content Author
+	•	Creates and manages course content, quizzes, and exams
+	•	Sees course level analytics (enrollment, completion, pass rate)
+	3.	Compliance Admin
+	•	Configures state specific rules (credit hours, mandatory categories, expirations)
+	•	Generates reports by state, license type, and date range
+	•	Reviews audit logs
+	4.	Platform Super Admin
+	•	Manages users, roles, states, license mappings
+	•	Manages billing settings and system wide configuration
+
+Implement an accounts table plus roles table and a simple user_roles join table. Create an auth middleware that checks role permissions for protected routes.
+
+⸻
+
+3. High level domain model
+
+Design the database schema to support all three verticals while sharing common primitives.
+
+Key tables and relationships (you can refine as you implement):
+	•	users
+	•	roles and user_roles
+	•	states (US states and territories)
+	•	license_verticals
+	•	Examples: NMLS, REAL_ESTATE, INSURANCE
+	•	license_types
+	•	Example row: NMLS individual, CA Real Estate Broker, FL P&C Producer
+	•	Fields: id, vertical_id, state_id (nullable for national), code, name
+	•	state_ce_rules
+	•	Per state and per license vertical/type
+	•	Fields: license_type_id, renewal_period_years, total_hours_required, required_categories (JSON), exam_required (bool), min_exam_questions, min_passing_score_percent, flags for specific rules like course timing
+	•	courses
+	•	Generic course table, not tied to one state
+	•	Fields: id, title, description, vertical_id, default_hours, delivery_mode (ONLINE_SELF_PACED, WEBINAR, CLASSROOM), difficulty, is_active
+	•	course_state_approvals
+	•	Links a course to a state and license type with approval metadata
+	•	Fields: course_id, state_id, license_type_id, regulator_approval_id, approval_status, approval_start, approval_end
+	•	modules and lessons
+	•	Course content broken into modules and lessons
+	•	Each lesson has type (VIDEO, READING, QUIZ) and estimated minutes
+	•	exams and exam_questions and exam_choices
+	•	Support multiple choice exams with single correct answer
+	•	Track versions to allow future updates without breaking history
+	•	enrollments
+	•	Link user_id to course_id, plus license_type_id and state_id context
+	•	Fields: progress percentage, started_at, completed_at
+	•	lesson_progress
+	•	Track time spent and completion per lesson for compliance timing
+	•	exam_attempts
+	•	Track exam attempts per user per course
+	•	Fields: user_id, exam_id, score_percent, passed, started_at, completed_at, attempt_number
+	•	certificates
+	•	Issued after successful completion
+	•	Fields: id, user_id, course_id, license_type_id, state_id, certificate_number, issue_date, credits_earned_hours, reporting_status
+	•	payments and orders
+	•	Support purchase of individual courses and bundles
+	•	Structure these so payment integration (Stripe or similar) can be added later
+	•	audit_logs
+	•	Record key compliance relevant actions (logins, course completion, exam passes, certificate generation, admin changes)
+
+Create Prisma models or SQL migrations that define these tables and set up foreign keys and indexes.
+
+⸻
+
+4. Key flows to implement
+
+Implement the following end to end flows in this first version:
+
+4.1 User onboarding and license profile
+	•	User signs up with email and password
+	•	User verifies email (simple stub logic is fine at first)
+	•	User selects:
+	•	Primary vertical: NMLS, Real Estate, Insurance
+	•	Primary state of license
+	•	License type(s) from license_types (multi select)
+	•	The system stores a user_license_profile linking user to their license types and states
+	•	Dashboard shows:
+	•	Required hours for each license type (based on state_ce_rules)
+	•	Hours already earned (from certificates)
+	•	Remaining hours and upcoming renewal date (use simple rule renewal_period_years for now)
+
+4.2 Course catalog and enrollment
+	•	Public or logged in catalog page
+	•	Filter by:
+	•	Vertical
+	•	State
+	•	License type
+	•	Category (for example ethics, law, elective)
+	•	Show course cards with:
+	•	Title, hours, price, delivery mode
+	•	States where it is approved, with badges
+	•	User can:
+	•	Click into course detail page
+	•	Add to cart and checkout (stub payment success at first)
+	•	Once paid, an enrollment record is created
+
+4.3 Course delivery and timing
+For self paced online courses:
+	•	Lesson player that:
+	•	Loads content from lessons (text, video URL, reading material)
+	•	Tracks time spent per lesson via periodic pings to the backend
+	•	Marks a lesson as complete only if minimum time for that lesson is met
+	•	Prevents skipping ahead if state rules require sequential completion
+	•	Handle state rules such as:
+	•	Minimum active time for credit
+	•	No exam access until all lessons complete
+	•	Force passing exam before issuing certificate
+
+4.4 Exam and scoring
+	•	Load exam defined for the course, randomized question order
+	•	Enforce:
+	•	Single answer multiple choice
+	•	Minimum number of questions from state_ce_rules or from exam settings
+	•	Passing score (for example 70 percent)
+	•	After exam:
+	•	Store exam_attempt
+	•	If passed, mark course completed and trigger certificate issuance
+	•	Optionally show missed questions, but hide correct answers if required by compliance (you can stub this as a configuration flag)
+
+4.5 Certificate generation and tracking
+	•	Generate a unique certificate number (for example STATE-VERTICAL-COURSEID-SEQ)
+	•	Store certificate metadata in certificates table
+	•	Provide a downloadable PDF stub or at least a styled HTML view that can be printed or saved
+	•	Show certificates in user dashboard with filters by date, state, vertical
+
+Include a basic template with:
+	•	Student name
+	•	Course title and ID
+	•	State and license type
+	•	Credits and completion date
+	•	Provider name and placeholder for regulator approval ID
+
+⸻
+
+5. Compliance and state configuration
+
+Build a simple Compliance Admin interface for:
+	•	Managing states and core info (name, abbreviation)
+	•	Managing license_verticals and license_types
+	•	Managing state_ce_rules:
+	•	Total hours required
+	•	Required categories with hours (store as JSON for now)
+	•	Exam requirements and passing score
+	•	Any special flags like:
+	•	require_timer
+	•	lock_content_sequence
+	•	max_exam_attempts
+	•	Managing course_state_approvals:
+	•	Assign a course to a state and license type
+	•	Set approval id and effective dates
+
+Provide at least:
+	•	List view with paging and filters
+	•	Create and edit forms
+	•	Basic validation
+
+⸻
+
+6. Multi vertical design
+
+Design the system so the same course engine and exam engine are shared across NMLS, real estate, and insurance, but with configuration driven differences:
+	•	Use vertical_id and license_type_id everywhere to scope business rules
+	•	Make sure each course can belong to one vertical, but can have many state approvals for many license types
+	•	Ensure that rules for one vertical do not affect others (NMLS vs Real Estate vs Insurance)
+
+Leave hooks to eventually plug into external reporting APIs such as NMLS or state insurance departments by having:
+	•	reporting_status on certificates
+	•	reported_at timestamp fields
+	•	A service layer or placeholder module where future API calls can be integrated
+
+⸻
+
+7. Admin and instructor tools
+
+Create a simple internal dashboard for:
+
+Instructors
+	•	Create and edit courses
+	•	Add and reorder modules and lessons
+	•	Attach exams to courses
+	•	Preview the course as a student
+
+Platform Super Admin
+	•	Manage users and roles (assign Instructor, Compliance Admin, etc.)
+	•	View high level metrics:
+	•	Active students
+	•	Completions per day
+	•	Revenue per day (based on payments)
+
+Add at least one seeded admin user and one demo instructor in the seed script.
+
+⸻
+
+8. Non functional requirements
+	•	Use environment variables for secrets and database connection strings
+	•	Provide a single command to run backend and frontend
+	•	Implement at least minimal error handling with structured JSON error responses
+	•	Logging: console logs for now with clear messages at key events (enrollment created, exam passed, certificate issued)
+	•	Add at least a few unit tests:
+	•	Course enrollment logic
+	•	Exam scoring function
+	•	Certificate number generation
+
+Document in a README.md:
+	•	How to set up the project locally on Replit
+	•	How to run migrations
+	•	How to start backend and frontend
+	•	Overview of the main domain entities
+
+⸻
+
+9. Seed data
+
+Create a seed script that populates:
+	•	All 50 states
+	•	Three verticals: NMLS, REAL_ESTATE, INSURANCE
+	•	A handful of license types for each vertical and a few key states (for example CA, FL, TX, NY)
+	•	Basic state CE rules for at least a couple of combinations so the dashboards show meaningful data
+	•	One example course for each vertical, plus state approvals, modules, lessons, exam, and sample questions
+
+⸻
+
+Deliverables from this prompt:
+	1.	Full project scaffold with backend and frontend wired together
+	2.	Database schema and migration scripts
+	3.	Auth implementation with roles
+	4.	Core flows implemented:
+	•	Registration and license profile
+	•	Course catalog and enrollment
+	•	Lesson player with time tracking
+	•	Exam engine and scoring
+	•	Certificate issuance and display
+	5.	Simple Admin and Instructor dashboards
+	6.	Seed data for demo and testing
+
+Focus on clear architecture and extensibility so additional verticals, states, and complex regulatory rules can be added later without a rewrite.
+
+⸻
+
+You can hand that straight to Replit or a dev team and say: “Build this.” If you want, I can also generate a second prompt that focuses only on the backend API, or only on the frontend UX, so you can drive the build in phases.
