@@ -53,8 +53,8 @@ export default function Header({ selectedProfession, onProfessionChange }: Heade
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="flex h-16 items-center justify-between gap-2">
+      <div className="mx-auto max-w-7xl px-2">
+        <div className="flex h-16 items-center justify-between gap-1">
           <div className="flex items-center gap-1 flex-shrink-0 mr-auto">
             <Link href="/" className="flex items-center gap-1 hover-elevate rounded-md px-1 py-1 -ml-1">
               <img src={logoImage} alt="FoundationCE Logo" className="h-10 w-10" />
@@ -86,17 +86,17 @@ export default function Header({ selectedProfession, onProfessionChange }: Heade
             </DropdownMenu>
           </div>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <Button
                   variant={isActive(item.href) ? "secondary" : "ghost"}
                   size="sm"
-                  className="gap-2"
+                  className="gap-1"
                   data-testid={`nav-${item.label.toLowerCase().replace(" ", "-")}`}
                 >
                   <item.icon className="h-4 w-4" />
-                  {item.label}
+                  <span className="hidden xl:inline">{item.label}</span>
                 </Button>
               </Link>
             ))}
