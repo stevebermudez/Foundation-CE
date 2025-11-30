@@ -236,11 +236,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCourseBundle(id: string): Promise<CourseBundle | undefined> {
-    const [bundle] = await db
-      .select()
-      .from(courseBundles)
-      .where(eq(courseBundles.id, id));
-    return bundle;
+    try {
+      const [bundle] = await db
+        .select()
+        .from(courseBundles)
+        .where(eq(courseBundles.id, id));
+      return bundle;
+    } catch (error) {
+      return undefined;
+    }
   }
 
   async getBundleCourses(bundleId: string): Promise<Course[]> {
