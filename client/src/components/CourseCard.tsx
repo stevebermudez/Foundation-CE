@@ -12,7 +12,9 @@ export interface Course {
   category: string;
   ceHours: number;
   state: "CA" | "FL";
-  profession: "real_estate" | "insurance";
+  profession: "real_estate" | "insurance" | "nmls";
+  educationType: "ce" | "pre_license";
+  realEstateType?: "salesperson" | "broker";
   timedOption: boolean;
   untimedOption: boolean;
   duration: string;
@@ -30,7 +32,14 @@ interface CourseCardProps {
 
 export default function CourseCard({ course, onEnroll, onContinue }: CourseCardProps) {
   const getProfessionLabel = () => {
-    return course.profession === "real_estate" ? "Real Estate" : "Insurance";
+    if (course.profession === "real_estate") {
+      return course.realEstateType === "broker" ? "Broker" : "Salesperson";
+    }
+    return course.profession === "insurance" ? "Insurance" : "NMLS";
+  };
+
+  const getEducationTypeLabel = () => {
+    return course.educationType === "ce" ? "CE" : "Pre-License";
   };
 
   const getStateLabel = () => {
@@ -48,6 +57,9 @@ export default function CourseCard({ course, onEnroll, onContinue }: CourseCardP
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           <Badge variant="secondary" className="bg-background/90 backdrop-blur text-xs">
             {course.state}
+          </Badge>
+          <Badge variant="secondary" className="bg-background/90 backdrop-blur text-xs">
+            {getEducationTypeLabel()}
           </Badge>
           <Badge variant="secondary" className="bg-background/90 backdrop-blur text-xs">
             {getProfessionLabel()}

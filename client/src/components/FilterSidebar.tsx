@@ -18,6 +18,8 @@ export interface FilterState {
   categories: string[];
   testingMode: string;
   ceHours: string;
+  educationType: string;
+  realEstateType: string;
 }
 
 interface FilterSidebarProps {
@@ -35,6 +37,17 @@ const stateOptions = [
 const professionOptions = [
   { value: "real_estate", label: "Real Estate" },
   { value: "insurance", label: "Insurance" },
+  { value: "nmls", label: "NMLS" },
+];
+
+const educationTypeOptions = [
+  { value: "ce", label: "Continuing Education" },
+  { value: "pre_license", label: "Pre-License" },
+];
+
+const realEstateTypeOptions = [
+  { value: "salesperson", label: "Salesperson" },
+  { value: "broker", label: "Broker" },
 ];
 
 const categoryOptions = [
@@ -68,7 +81,7 @@ export default function FilterSidebar({
   isMobile = false,
 }: FilterSidebarProps) {
   const handleCheckboxChange = (
-    key: "states" | "professions" | "categories",
+    key: "states" | "professions" | "categories" | "realEstateType",
     value: string,
     checked: boolean
   ) => {
@@ -78,7 +91,7 @@ export default function FilterSidebar({
     onFiltersChange({ ...filters, [key]: newValues });
   };
 
-  const handleRadioChange = (key: "testingMode" | "ceHours", value: string) => {
+  const handleRadioChange = (key: "testingMode" | "ceHours" | "educationType" | "realEstateType", value: string) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
@@ -89,6 +102,8 @@ export default function FilterSidebar({
       categories: [],
       testingMode: "all",
       ceHours: "all",
+      educationType: "all",
+      realEstateType: "all",
     });
   };
 
@@ -97,7 +112,9 @@ export default function FilterSidebar({
     filters.professions.length +
     filters.categories.length +
     (filters.testingMode !== "all" ? 1 : 0) +
-    (filters.ceHours !== "all" ? 1 : 0);
+    (filters.ceHours !== "all" ? 1 : 0) +
+    (filters.educationType !== "all" ? 1 : 0) +
+    (filters.realEstateType !== "all" ? 1 : 0);
 
   return (
     <div className="flex flex-col h-full">
@@ -139,7 +156,7 @@ export default function FilterSidebar({
       <Separator className="mb-4" />
 
       <div className="flex-1 overflow-y-auto">
-        <Accordion type="multiple" defaultValue={["state", "profession", "testing"]} className="w-full">
+        <Accordion type="multiple" defaultValue={["state", "profession", "education", "testing"]} className="w-full">
           <AccordionItem value="state">
             <AccordionTrigger className="text-sm font-medium">State</AccordionTrigger>
             <AccordionContent>
@@ -191,6 +208,72 @@ export default function FilterSidebar({
               </div>
             </AccordionContent>
           </AccordionItem>
+
+          <AccordionItem value="education">
+            <AccordionTrigger className="text-sm font-medium">Education Type</AccordionTrigger>
+            <AccordionContent>
+              <RadioGroup
+                value={filters.educationType}
+                onValueChange={(value) => handleRadioChange("educationType", value)}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="education-all" data-testid="radio-education-all" />
+                  <Label htmlFor="education-all" className="text-sm font-normal cursor-pointer">
+                    All Types
+                  </Label>
+                </div>
+                {educationTypeOptions.map((option) => (
+                  <div key={option.value} className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value={option.value}
+                      id={`education-${option.value}`}
+                      data-testid={`radio-education-${option.value}`}
+                    />
+                    <Label
+                      htmlFor={`education-${option.value}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {option.label}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </AccordionContent>
+          </AccordionItem>
+
+          {filters.professions.includes("real_estate") && (
+            <AccordionItem value="realestate-type">
+              <AccordionTrigger className="text-sm font-medium">Real Estate Type</AccordionTrigger>
+              <AccordionContent>
+                <RadioGroup
+                  value={filters.realEstateType}
+                  onValueChange={(value) => handleRadioChange("realEstateType", value)}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="realestste-all" data-testid="radio-realestste-all" />
+                    <Label htmlFor="realestste-all" className="text-sm font-normal cursor-pointer">
+                      All Types
+                    </Label>
+                  </div>
+                  {realEstateTypeOptions.map((option) => (
+                    <div key={option.value} className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value={option.value}
+                        id={`realestste-${option.value}`}
+                        data-testid={`radio-realestste-${option.value}`}
+                      />
+                      <Label
+                        htmlFor={`realestste-${option.value}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {option.label}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </AccordionContent>
+            </AccordionItem>
+          )}
 
           <AccordionItem value="testing">
             <AccordionTrigger className="text-sm font-medium">Testing Mode</AccordionTrigger>
