@@ -3,11 +3,21 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { getUncachableStripeClient } from "./stripeClient";
+import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Seed FREC I course if not already present
+  try {
+    const existingCourse = await storage.getCourses({ state: "FL", licenseType: "Sales Associate" });
+    if (!existingCourse || existingCourse.length === 0) {
+      await seedFRECIPrelicensing();
+    }
+  } catch (err) {
+    console.log("FREC I course already seeded or seeding skipped");
+  }
   // Course Routes
   app.get("/api/courses", async (req, res) => {
     const courses = await storage.getCourses({
