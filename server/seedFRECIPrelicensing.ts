@@ -1496,8 +1496,46 @@ export async function seedFRECIPrelicensing() {
     }
     console.log(`Added ${unit11Questions.length} questions to Unit 11 Quiz`);
 
-    // Add placeholder questions for remaining units (Units 12-19)
-    for (let i = 11; i < units.length; i++) {
+    // Unit 12 - The Real Estate Market and Analysis (20 questions)
+    const unit12Questions = [
+      { text: "Value exists when a property has", options: ["A. scarcity only", "B. utility only", "C. scarcity, utility, demand, and transferability", "D. zoning approval only"], correctAnswer: "C", explanation: "All four characteristics are required: scarcity, utility, demand, and transferability." },
+      { text: "Cost refers to", options: ["A. the amount paid in the market", "B. the worth to typical buyers", "C. the expense required to create the property", "D. the appraised value"], correctAnswer: "C", explanation: "Cost is the total production expense required to create a property." },
+      { text: "When supply increases and demand remains stable", options: ["A. prices rise", "B. prices fall", "C. prices stay the same", "D. supply becomes irrelevant"], correctAnswer: "B", explanation: "When supply increases and demand remains stable, prices fall." },
+      { text: "Market equilibrium occurs when", options: ["A. supply and demand are balanced", "B. prices fall", "C. prices rise", "D. only buyers control the market"], correctAnswer: "A", explanation: "Market equilibrium occurs when supply and demand are balanced." },
+      { text: "Substitution means that", options: ["A. buyers prefer older homes", "B. value is maximized by unique properties", "C. buyers will not pay more for a property than the price of a comparable substitute", "D. appraisers ignore comparables"], correctAnswer: "C", explanation: "Buyers will not pay more for a property than the cost of acquiring a similar substitute." },
+      { text: "Highest and best use must be", options: ["A. physically possible", "B. legally permissible", "C. financially feasible", "D. all of the above"], correctAnswer: "D", explanation: "Highest and best use must be physically possible, legally permissible, and financially feasible." },
+      { text: "Conformity suggests that", options: ["A. value is created when property differs from the neighborhood", "B. value is created when property is similar to surrounding properties", "C. zoning is irrelevant", "D. the largest home always has the lowest value"], correctAnswer: "B", explanation: "Value is created when property is similar in style and quality to surrounding properties." },
+      { text: "Progression means that", options: ["A. a superior property loses value", "B. a smaller property may gain value when near larger or higher quality properties", "C. improvements always increase value", "D. land value decreases naturally"], correctAnswer: "B", explanation: "Progression means a smaller property may increase in value near higher quality properties." },
+      { text: "Contribution means", options: ["A. each improvement adds equal value", "B. value of an improvement is measured by what it adds to the property", "C. the tax assessor sets value", "D. the builder determines value"], correctAnswer: "B", explanation: "Contribution measures the value of an improvement by what it adds to property value." },
+      { text: "Economic forces affecting value include", options: ["A. zoning", "B. climate", "C. employment and income", "D. physical dimensions"], correctAnswer: "C", explanation: "Economic forces include employment levels, income, inflation, and interest rates." },
+      { text: "Physical forces affecting value include", options: ["A. interest rates", "B. taxes", "C. climate and topography", "D. wage growth"], correctAnswer: "C", explanation: "Physical forces include climate, topography, environment, and natural resources." },
+      { text: "Government forces affecting value include", options: ["A. household size", "B. population trends", "C. zoning and building codes", "D. competition"], correctAnswer: "C", explanation: "Government forces include zoning, taxes, building codes, and land use regulations." },
+      { text: "Social forces include", options: ["A. inflation", "B. interest rates", "C. population trends", "D. construction costs"], correctAnswer: "C", explanation: "Social forces include population trends, household size, migration patterns, and lifestyle preferences." },
+      { text: "Market cycles typically follow which sequence", options: ["A. decline, fall, expansion", "B. peak, expansion, recovery, decline", "C. expansion, peak, contraction, recovery", "D. recovery, decline, contraction, expansion"], correctAnswer: "C", explanation: "Market cycles move through expansion, peak, contraction, and recovery phases." },
+      { text: "Residential demand is influenced most by", options: ["A. vacancy rates", "B. traffic counts", "C. household income and employment", "D. zoning for industrial use"], correctAnswer: "C", explanation: "Residential demand is influenced by population growth, employment, and wage levels." },
+      { text: "Commercial demand is influenced most by", options: ["A. school quality", "B. weather", "C. traffic counts and visibility", "D. number of bedrooms"], correctAnswer: "C", explanation: "Commercial demand focuses on traffic counts, access, visibility, and parking." },
+      { text: "Housing starts measure", options: ["A. land availability", "B. new construction activity", "C. consumer confidence only", "D. mortgage underwriting"], correctAnswer: "B", explanation: "Housing starts measure the number of new construction projects." },
+      { text: "Absorption rate measures", options: ["A. mortgage rates", "B. spending habits", "C. how quickly properties are sold or leased", "D. number of builders"], correctAnswer: "C", explanation: "Absorption rate measures the speed at which available properties are sold or leased." },
+      { text: "High vacancy rates indicate", options: ["A. oversupply", "B. strong demand", "C. equilibrium", "D. high prices"], correctAnswer: "A", explanation: "High vacancy rates signal oversupply in the market." },
+      { text: "Consumer confidence affects real estate by", options: ["A. determining zoning", "B. influencing population size", "C. increasing or decreasing spending and investment", "D. setting interest rates"], correctAnswer: "C", explanation: "Consumer confidence increases or decreases spending and investment in real estate." },
+    ];
+
+    sequenceNum = 0;
+    for (const q of unit12Questions) {
+      await db.insert(examQuestions).values({
+        examId: unitExams[11].id,
+        questionText: q.text,
+        questionType: "multiple_choice",
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        options: JSON.stringify(q.options),
+        sequence: sequenceNum++,
+      });
+    }
+    console.log(`Added ${unit12Questions.length} questions to Unit 12 Quiz`);
+
+    // Add placeholder questions for remaining units (Units 13-19)
+    for (let i = 12; i < units.length; i++) {
       for (let j = 0; j < 20; j++) {
         await db.insert(examQuestions).values({
           examId: unitExams[i].id,
@@ -1515,7 +1553,7 @@ export async function seedFRECIPrelicensing() {
         });
       }
     }
-    console.log(`Added placeholder questions for Units 12-19 (20 questions each)`);
+    console.log(`Added placeholder questions for Units 13-19 (20 questions each)`);
 
     // Add 100 sample questions to final exam
     for (let i = 0; i < 100; i++) {
