@@ -56,7 +56,7 @@ export default function Header({ selectedState, onStateChange }: HeaderProps) {
       <div className="mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-1">
-            <Link href="/" className="flex items-center gap-3 hover-elevate rounded-md px-2 py-1">
+            <Link href="/" className="flex items-center gap-1 hover-elevate rounded-md px-1 py-1 -ml-1">
               <img src={logoImage} alt="FoundationCE Logo" className="h-10 w-10" />
               <span 
                 className="font-black text-sm text-blue-600 whitespace-nowrap" 
