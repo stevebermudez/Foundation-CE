@@ -273,56 +273,74 @@ export default function CourseCatalog({ selectedState }: CourseCatalogProps) {
   };
 
   const filteredCourses = useMemo(() => {
-    return courses.filter((course) => {
+    console.log('[CourseCatalog] Filtering with state:', selectedState, 'profession:', selectedProfession);
+    console.log('[CourseCatalog] Filter object:', { states: filters.states, professions: filters.professions, educationType: filters.educationType });
+    const result = courses.filter((course) => {
+      let included = true;
+      
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch =
           course.title.toLowerCase().includes(query) ||
           course.description.toLowerCase().includes(query) ||
           course.category.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
+        if (!matchesSearch) {
+          console.log(`  [${course.title}] removed: search query doesn't match`);
+          return false;
+        }
       }
 
       if (filters.states.length > 0 && !filters.states.includes(course.state)) {
+        console.log(`  [${course.title}] removed: state ${course.state} not in ${JSON.stringify(filters.states)}`);
         return false;
       }
 
       if (filters.professions.length > 0 && !filters.professions.includes(course.profession)) {
+        console.log(`  [${course.title}] removed: profession ${course.profession} not in ${JSON.stringify(filters.professions)}`);
         return false;
       }
 
       if (filters.categories.length > 0) {
         const categoryKey = course.category.toLowerCase().replace(/ /g, "_");
         if (!filters.categories.includes(categoryKey)) {
+          console.log(`  [${course.title}] removed: category ${categoryKey} not in ${JSON.stringify(filters.categories)}`);
           return false;
         }
       }
 
       if (filters.educationType !== "all" && course.educationType !== filters.educationType) {
+        console.log(`  [${course.title}] removed: educationType ${course.educationType} !== ${filters.educationType}`);
         return false;
       }
 
       if (filters.realEstateType !== "all" && course.profession === "real_estate") {
         if (course.realEstateType !== filters.realEstateType) {
+          console.log(`  [${course.title}] removed: realEstateType ${course.realEstateType} !== ${filters.realEstateType}`);
           return false;
         }
       }
 
       if (filters.ceHours !== "all") {
         if (filters.ceHours === "1-3" && (course.ceHours < 1 || course.ceHours > 3)) {
+          console.log(`  [${course.title}] removed: ceHours ${course.ceHours} not in 1-3`);
           return false;
         }
         if (filters.ceHours === "4-8" && (course.ceHours < 4 || course.ceHours > 8)) {
+          console.log(`  [${course.title}] removed: ceHours ${course.ceHours} not in 4-8`);
           return false;
         }
         if (filters.ceHours === "9+" && course.ceHours < 9) {
+          console.log(`  [${course.title}] removed: ceHours ${course.ceHours} < 9`);
           return false;
         }
       }
 
+      console.log(`  [${course.title}] INCLUDED`);
       return true;
     });
-  }, [searchQuery, filters]);
+    console.log(`[CourseCatalog] Filtered: ${result.length} courses remaining`);
+    return result;
+  }, [searchQuery, filters, selectedState, selectedProfession]);
 
   const sortedCourses = useMemo(() => {
     const courses = [...filteredCourses];

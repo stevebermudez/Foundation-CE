@@ -1,0 +1,309 @@
+Perfect. Moving forward with **Unit 7** of the 63 hour Florida Sales Associate Pre-Licensing Course.
+
+This unit is one of the heavier content blocks because it bridges **federal law, state law, discrimination rules, fair housing, advertising rules, antitrust, landlord tenant, and more**. I will build it exactly like the prior units:
+
+* About **3 hours of instruction**
+* **3 full Sora-ready scripts**
+* **20-question exam-style quiz**
+* Clean structure for FoundationCE
+
+No em dashes.
+
+---
+
+# **UNIT 7 — FEDERAL AND STATE LAWS PERTAINING TO REAL ESTATE**
+
+**Target duration:** 3 hours
+
+This unit covers:
+
+* Civil Rights Act laws
+* Fair Housing Act
+* ADA
+* RESPA
+* ECOA
+* Sherman Antitrust
+* Florida Landlord Tenant Act
+* Telephone solicitation rules
+* CAN-SPAM
+* Florida telemarketing regulations
+
+---
+
+# **UNIT 7 LEARNING OBJECTIVES**
+
+By the end of Unit 7, the student will be able to:
+
+* Identify protected classes under key federal fair housing laws
+* Distinguish prohibited actions in advertising, steering, and blockbusting
+* Apply ADA obligations to real estate
+* Explain RESPA rules, kickback prohibitions, closing disclosures, and affiliated business arrangements
+* Recognize antitrust violations such as price fixing and market allocation
+* Understand Florida Landlord Tenant rules including deposits, notices, and maintenance obligations
+* Apply do not call, email solicitation, and text marketing rules
+* Spot exam traps involving exemptions, senior housing rules, familial status, and disability accommodations
+
+---
+
+# **UNIT 7 STRUCTURE**
+
+1. **Lesson 7.1**   Fair Housing, Civil Rights Acts, ADA
+2. **Lesson 7.2**   RESPA, ECOA, Sherman Antitrust
+3. **Lesson 7.3**   Florida Landlord Tenant Law, Telephone Solicitation, CAN-SPAM, Scenarios
+4. **Unit 7 Quiz**   20 questions
+
+Below are full Sora-ready scripts written for clear narration.
+
+---
+
+# **LESSON 7.1 SCRIPT**
+
+**Fair Housing, Civil Rights Acts, ADA**
+
+> Welcome to Unit 7 of the FoundationCE Florida Sales Associate Pre Licensing Course.
+>
+> This lesson focuses on fair housing laws, civil rights protections, and disability accommodation rules. These laws exist to ensure equal access to housing and prevent discrimination in every part of a transaction.
+>
+> Let us begin with the Civil Rights Act of 1866. This law prohibits discrimination in real estate based on race. It applies to all real estate, without exception, and has no exemptions of any kind. If a question on the exam asks which law covers race with no exemptions, the answer is always the Civil Rights Act of 1866.
+>
+> Next is the Civil Rights Act of 1968, better known as the Fair Housing Act. The Fair Housing Act forbids discrimination in housing based on race, color, religion, sex, national origin, disability, and familial status. Familial status refers to households with children under age eighteen or pregnant individuals.
+>
+> The Fair Housing Act prohibits several actions. These include refusing to rent or sell, quoting different terms or prices based on protected class, false representation of availability, discriminatory advertising, and discriminatory financing.
+>
+> Steering, blockbusting, and redlining are also prohibited. Steering is guiding buyers to or away from certain neighborhoods based on protected class. Blockbusting is encouraging owners to sell because protected classes are moving in. Redlining is the refusal of loans or insurance based on the characteristics of the neighborhood rather than the borrower.
+>
+> There are limited exemptions to the Fair Housing Act. These include owner occupied buildings with no more than four units, housing operated by private clubs and religious organizations under certain conditions, and certain senior housing when legally qualified. Senior housing must meet federal age requirements and cannot use discrimination outside the permitted age criteria.
+>
+> Next let us cover disability law. Disability is a protected class under the Fair Housing Act and also under the Americans with Disabilities Act. The ADA applies mainly to public accommodations such as sales offices, leasing offices, model homes that contain a public area, and short term lodging operated like a hotel.
+>
+> Under the Fair Housing Act, housing providers must allow reasonable accommodations and reasonable modifications for persons with disabilities. A reasonable accommodation is a change in rules or policies, such as allowing a service animal in a no pet building. A reasonable modification is a physical change to the property, such as adding grab bars or a ramp.
+>
+> The exam often tests which law applies to which situation. Focus on these questions:
+>
+> * Does the scenario involve public accommodations? This points to the ADA.
+> * Does the scenario involve housing discrimination? This points to the Fair Housing Act.
+> * Is race involved with no exceptions? This points to the Civil Rights Act of 1866.
+>
+> In the next lesson, we move into RESPA, ECOA, and antitrust.
+
+---
+
+# **LESSON 7.2 SCRIPT**
+
+**RESPA, ECOA, Sherman Antitrust**
+
+> In this lesson, we shift to transaction based federal laws including RESPA, ECOA, and antitrust laws that govern competitive practices.
+>
+> The Real Estate Settlement Procedures Act, known as RESPA, regulates settlement procedures for most residential mortgage loans. The purpose is to prevent kickbacks, referral fees, unearned fees, and inflated closing costs.
+>
+> RESPA applies to federally related mortgage loans, which cover most loans through lenders, banks, credit unions, and mortgage companies.
+>
+> RESPA prohibits referral fees and kickbacks. For example, a real estate licensee may not receive a fee for sending business to a title company or lender. A lender may not pay a real estate broker for referring customers. Payment is allowed only for actual services performed, not for referrals.
+>
+> Affiliated business arrangements are permitted if proper disclosure is given. For example, a broker who owns part of a title company may recommend that company only if the broker provides written disclosure and does not require the buyer to use the affiliate.
+>
+> RESPA also requires the delivery of a Loan Estimate and a Closing Disclosure with specific timing requirements.
+>
+> Next is the Equal Credit Opportunity Act. ECOA prohibits discrimination in credit transactions on the basis of race, color, religion, national origin, sex, marital status, age, receipt of public assistance, or exercise of consumer protection rights. Lenders cannot ask certain questions unless required by law. They cannot discourage applicants based on prohibited factors.
+>
+> Now let us cover the Sherman Antitrust Act. Antitrust laws protect competition and prohibit agreements that restrain trade. In real estate, the most common prohibited actions are:
+>
+> * Price fixing
+> * Market allocation
+> * Group boycotts
+> * Tie in arrangements
+>
+> Price fixing occurs when brokers agree to charge the same commission. Market allocation occurs when brokers agree not to compete in certain geographic areas. Group boycotts occur when businesses agree not to deal with another company or person.
+>
+> A common exam trap is the statement that commission rates are set by law or by local associations. That is false. Commissions are always negotiable.
+>
+> Tie in arrangements are conditions where a consumer must purchase one service in order to obtain another. Many tie in arrangements are illegal.
+>
+> The penalties for antitrust violations are severe and can include criminal fines and imprisonment.
+>
+> In the next lesson, we will cover state based laws including Florida residential landlord and tenant law and communication solicitation rules.
+
+---
+
+# **LESSON 7.3 SCRIPT**
+
+**Florida Landlord Tenant Laws, Telephone Solicitation, CAN SPAM, Scenarios**
+
+> In this final lesson for Unit 7, we cover state level consumer laws and wrap up with exam scenarios.
+>
+> The Florida Residential Landlord and Tenant Act governs the relationship between landlords and tenants in residential property. This law defines the rights and obligations of both parties, including maintenance duties, access rules, and deposit handling.
+>
+> A landlord must maintain the property in compliance with building, housing, and health codes. The landlord must make repairs necessary to keep the property habitable.
+>
+> Security deposits must be handled according to strict rules. The landlord must notify the tenant in writing where the deposit is held, whether it is in an interest bearing or non interest bearing account, and the conditions under which deductions may be made. If the landlord intends to impose a claim on the deposit, written notice must be provided within the time required by law.
+>
+> Tenants must maintain the unit, keep it clean, and use fixtures and appliances in a reasonable manner. Tenants must not destroy or damage the property and must allow reasonable access for repairs with proper notice.
+>
+> Now let us cover solicitation rules. The federal Telephone Consumer Protection Act prohibits marketing calls to numbers on the national do not call registry unless there is an established business relationship or written permission. It also limits the times of day when marketing calls may be made.
+>
+> Florida has its own state do not call list with even stricter penalties. Real estate licensees must comply with both. Violations can result in significant fines per call.
+>
+> The CAN SPAM Act regulates commercial email. Emails must include a valid physical address of the sender, a clear subject line, a clear opt out link, and must not use deceptive headers or subject lines.
+>
+> Text message marketing is regulated as well. Texts sent for marketing purposes typically require prior express written consent.
+>
+> For the exam, watch for:
+>
+> * A tenant deposit dispute without proper notice
+> * A prohibited solicitation to a do not call number
+> * Missing disclosures in commercial email
+> * Steering or discriminatory statements in advertising
+>
+> Now you are ready for the Unit 7 quiz.
+
+---
+
+# **UNIT 7 QUIZ**
+
+**20 multiple choice questions with answers**
+
+1. The Civil Rights Act of 1866 prohibits discrimination based on
+   A. race only
+   B. race and religion
+   C. race and sex
+   D. all protected classes
+   **Answer: A**
+
+2. Familial status under the Fair Housing Act includes
+   A. married couples only
+   B. households with a child under eighteen
+   C. senior citizens only
+   D. individuals living alone
+   **Answer: B**
+
+3. Steering occurs when a licensee
+   A. encourages owners to sell based on protected class
+   B. directs buyers to or away from neighborhoods based on protected class
+   C. refuses to finance a loan
+   D. charges higher commissions
+   **Answer: B**
+
+4. Blockbusting involves
+   A. urging owners to sell because protected classes are moving in
+   B. refusing to negotiate with buyers
+   C. refusing to maintain a rental unit
+   D. soliciting rentals in senior housing
+   **Answer: A**
+
+5. The Fair Housing Act protects all except
+   A. race
+   B. sex
+   C. marital status
+   D. disability
+   **Answer: C**
+
+6. The ADA applies primarily to
+   A. private residences only
+   B. public accommodations such as sales and leasing offices
+   C. all property with four or fewer units
+   D. any home over ten years old
+   **Answer: B**
+
+7. RESPA prohibits
+   A. paying referral fees for sending customers to a lender
+   B. collecting rent
+   C. showing property without disclosure
+   D. paying advertising costs
+   **Answer: A**
+
+8. A violation of RESPA can occur if a broker
+   A. receives a fee for actual title services performed
+   B. receives a referral fee for sending business to a mortgage company
+   C. provides a Loan Estimate
+   D. charges a commission
+   **Answer: B**
+
+9. ECOA prohibits discrimination based on
+   A. political affiliation
+   B. marital status
+   C. hobbies
+   D. rental history
+   **Answer: B**
+
+10. Under antitrust law, price fixing occurs when
+    A. a broker charges a high commission
+    B. two brokers agree to charge the same commission rate
+    C. sellers agree to all accept offers at the same price
+    D. buyers negotiate together
+    **Answer: B**
+
+11. Market allocation occurs when brokers
+    A. advertise their listings together
+    B. participate in a multiple offer situation
+    C. agree to avoid competing in certain areas
+    D. use the same photographer
+    **Answer: C**
+
+12. The Florida Residential Landlord Tenant Act requires landlords to
+    A. allow tenants to make any modifications they want without permission
+    B. maintain the property according to building and health codes
+    C. guarantee appreciation of the property
+    D. serve as the tenant’s agent
+    **Answer: B**
+
+13. A tenant must
+    A. remodel the unit
+    B. keep the unit clean and sanitary
+    C. make all repairs
+    D. pay the landlord’s taxes
+    **Answer: B**
+
+14. A landlord who intends to impose a claim on a security deposit must
+    A. notify the tenant in writing within the required time
+    B. deduct the amount without notice
+    C. send an email only
+    D. place the deposit in a personal account
+    **Answer: A**
+
+15. Calls to a number on the national do not call list are allowed only when
+    A. the caller uses a blocked number
+    B. there is an established business relationship
+    C. the call is made on a holiday
+    D. the caller is a new licensee
+    **Answer: B**
+
+16. CAN SPAM requires that commercial emails include
+    A. a social security number
+    B. a physical mailing address
+    C. a list of all listings
+    D. a phone number
+    **Answer: B**
+
+17. A licensee sends a promotional text message to a consumer without permission. This is
+    A. permissible
+    B. a violation of solicitation laws
+    C. acceptable if the consumer does not complain
+    D. acceptable if sent before noon
+    **Answer: B**
+
+18. Redlining refers to
+    A. guiding buyers to certain schools
+    B. refusing insurance or loans based on neighborhood characteristics
+    C. fixing prices
+    D. senior housing requirements
+    **Answer: B**
+
+19. A senior housing exemption applies only when
+    A. children under eighteen are allowed
+    B. the housing meets federal age specific requirements
+    C. the landlord chooses
+    D. the tenant requests it
+    **Answer: B**
+
+20. A consumer received a deceptive subject line in an email advertisement from a licensee. This violates
+    A. RESPA
+    B. ECOA
+    C. CAN SPAM
+    D. the ADA
+    **Answer: C**
+
+---
+
+You now have Units 1 through 7 completed.
+
+If you want me to continue seamlessly, say **next step** and I will build **Unit 8: Property Rights, Estates, Tenancies and Condominiums**, with full narration and quizzes.
