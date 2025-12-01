@@ -1069,5 +1069,42 @@ export async function registerRoutes(
     }
   });
 
+  // LMS Data Export Routes (for plug-and-play LMS integration)
+  app.get("/api/export/course/:courseId", isAdmin, async (req, res) => {
+    try {
+      const data = await storage.exportCourseData(req.params.courseId);
+      res.json(data);
+    } catch (err) {
+      console.error("Error exporting course data:", err);
+      res.status(500).json({ error: "Failed to export course data" });
+    }
+  });
+
+  app.get("/api/export/user/:userId/enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      // Users can export their own data, admins can export anyone's
+      const isAdmin = await storage.isAdmin(user.id);
+      if (user.id !== req.params.userId && !isAdmin) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      const data = await storage.exportUserEnrollmentData(req.params.userId);
+      res.json(data);
+    } catch (err) {
+      console.error("Error exporting enrollment data:", err);
+      res.status(500).json({ error: "Failed to export enrollment data" });
+    }
+  });
+
+  app.get("/api/export/enrollment/:enrollmentId/progress", isAuthenticated, async (req, res) => {
+    try {
+      const data = await storage.exportProgressData(req.params.enrollmentId);
+      res.json(data);
+    } catch (err) {
+      console.error("Error exporting progress data:", err);
+      res.status(500).json({ error: "Failed to export progress data" });
+    }
+  });
+
   return httpServer;
 }

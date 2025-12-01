@@ -90,6 +90,9 @@ export interface IStorage {
   updateVideo(videoId: string, data: Partial<Video>): Promise<Video>;
   deleteVideo(videoId: string): Promise<void>;
   attachVideoToLesson(lessonId: string, videoId: string): Promise<Lesson>;
+  exportCourseData(courseId: string): Promise<any>;
+  exportUserEnrollmentData(userId: string, courseId?: string): Promise<any>;
+  exportProgressData(enrollmentId: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1040,6 +1043,50 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date()
     }).where(eq(lessons.id, lessonId)).returning();
     return updated;
+  }
+
+  async exportCourseData(courseId: string): Promise<any> {
+    const course = await this.getCourse(courseId);
+    const unitList = await this.getUnits(courseId);
+    const unitsWithLessons = await Promise.all(unitList.map(async (unit) => ({
+      ...unit,
+      lessons: await this.getLessons(unit.id),
+      videos: await this.getUnitVideos(unit.id)
+    })));
+    const courseVideos = await this.getVideos(courseId);
+    return {
+      course,
+      units: unitsWithLessons,
+      videos: courseVideos,
+      exportedAt: new Date().toISOString(),
+      formatVersion: "1.0"
+    };
+  }
+
+  async exportUserEnrollmentData(userId: string, courseId?: string): Promise<any> {
+    const enrollmentList = await db.select().from(enrollments).where(
+      courseId ? and(eq(enrollments.userId, userId), eq(enrollments.courseId, courseId)) : eq(enrollments.userId, userId)
+    );
+    return {
+      userId,
+      enrollments: enrollmentList,
+      exportedAt: new Date().toISOString(),
+      formatVersion: "1.0"
+    };
+  }
+
+  async exportProgressData(enrollmentId: string): Promise<any> {
+    const enrollment = await db.select().from(enrollments).where(eq(enrollments.id, enrollmentId)).then(r => r[0]);
+    const progressList = await db.select().from(lessonProgress).where(eq(lessonProgress.enrollmentId, enrollmentId));
+    const cert = await this.getCertificate(enrollmentId);
+    return {
+      enrollmentId,
+      enrollment,
+      lessonProgress: progressList,
+      certificate: cert,
+      exportedAt: new Date().toISOString(),
+      formatVersion: "1.0"
+    };
   }
 }
 

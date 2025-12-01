@@ -121,3 +121,26 @@ Courses display with color-coded requirement buckets and detailed classification
 - Frontend manages UI state with React Query
 - Authentication: Replit Auth with social login support
 - No "Choose Account Type" landing page - users go straight to individual setup
+
+## LMS Integration & Plug-and-Play Capability
+
+### Design for Future LMS Migration
+The platform is architected for seamless integration with 3rd-party LMS systems via standardized data export/import:
+
+**Data Export APIs (all with version="1.0" format):**
+- `GET /api/export/course/:courseId` - Full course structure (units, lessons, videos)
+- `GET /api/export/user/:userId/enrollments` - User enrollment history
+- `GET /api/export/enrollment/:enrollmentId/progress` - Detailed progress tracking and certificates
+
+**Plug-and-Play Architecture:**
+1. **Layered Storage Interface** - All data operations via `IStorage` interface (server/storage.ts) - swap implementations without changing routes
+2. **Standardized Data Format** - All exports include `formatVersion` and `exportedAt` for compatibility tracking
+3. **RESTful API Design** - All endpoints follow REST conventions, easily consumable by external systems
+4. **Authentication Abstraction** - OAuth/auth logic separated in `oauthAuth.ts` - adaptable to 3rd-party auth systems
+5. **Database Agnostic** - Uses Drizzle ORM with PostgreSQL - can migrate to other databases by updating drizzle.config.ts
+
+**Migration Path to Moodle/Canvas/Docebo:**
+- Export course structure via `/api/export/course/:courseId` → SCORM package converter
+- Export user progress via `/api/export/enrollment/:enrollmentId/progress` → LTI 1.3 grade sync
+- Maintain dual operation during transition period
+- All video assets remain accessible via `GET /api/videos/:videoId` endpoints
