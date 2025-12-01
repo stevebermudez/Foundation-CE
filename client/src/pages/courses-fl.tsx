@@ -3,11 +3,12 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, DollarSign } from "lucide-react";
+import type { SelectCourse } from "@shared/schema";
 
 export default function FloridaCourses() {
   const [, setLocation] = useLocation();
   
-  const { data: allCourses = [] } = useQuery({
+  const { data: allCourses = [] } = useQuery<SelectCourse[]>({
     queryKey: ["/api/courses"],
     initialData: [],
   });
