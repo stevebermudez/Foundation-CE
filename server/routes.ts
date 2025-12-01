@@ -1641,37 +1641,5 @@ segment1.ts
   return httpServer;
 }
 
-  // Website Pages Management Routes
-  app.post("/api/admin/pages/:slug", isAdmin, async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { blocks } = req.body;
-      
-      const page = {
-        id: slug,
-        slug,
-        title: slug.charAt(0).toUpperCase() + slug.slice(1),
-        blocks: blocks || [],
-        updatedAt: new Date().toISOString(),
-      };
-      
-      // Store in memory or database
-      await storage.savePage?.(slug, page);
-      res.json(page);
-    } catch (err) {
-      console.error("Error saving page:", err);
-      res.status(500).json({ error: "Failed to save page" });
-    }
-  });
 
-  app.get("/api/admin/pages/:slug", isAdmin, async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const page = await storage.getPage?.(slug);
-      if (!page) return res.status(404).json({ error: "Page not found" });
-      res.json(page);
-    } catch (err) {
-      console.error("Error fetching page:", err);
-      res.status(500).json({ error: "Failed to fetch page" });
-    }
-  });
+  // Website Pages Management Routes
