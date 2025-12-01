@@ -33,6 +33,7 @@ import {
   Bell,
   LogOut,
   Settings,
+  Mail,
 } from "lucide-react";
 
 export default function Header() {
@@ -76,6 +77,8 @@ export default function Header() {
     { label: "Courses", href: "/courses/fl", icon: BookOpen },
     { label: "My Courses", href: "/dashboard", icon: GraduationCap },
     { label: "Compliance", href: "/compliance", icon: ClipboardCheck },
+    { label: "About", href: "/about", icon: FileText },
+    { label: "Contact", href: "/contact", icon: Mail },
   ];
 
   const isActive = (path: string) => location === path;

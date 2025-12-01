@@ -1638,8 +1638,24 @@ segment1.ts
     }
   });
 
+  // Contact Form Submission
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { name, email, subject, message } = req.body;
+      
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      // Log contact message (in production, send email here)
+      console.log("Contact form submission:", { name, email, subject, message, timestamp: new Date().toISOString() });
+      
+      res.json({ success: true, message: "Your message has been received" });
+    } catch (err) {
+      console.error("Contact form error:", err);
+      res.status(500).json({ error: "Failed to submit contact form" });
+    }
+  });
+
   return httpServer;
 }
-
-
-  // Website Pages Management Routes
