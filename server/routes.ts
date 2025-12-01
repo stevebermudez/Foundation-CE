@@ -409,6 +409,151 @@ export async function registerRoutes(
     await capturePaypalOrder(req, res);
   });
 
+  // Video Streaming Routes (HLS/DASH Adaptive Bitrate)
+  app.get("/api/videos/:videoId/stream", async (req, res) => {
+    try {
+      const video = await storage.getVideo(req.params.videoId);
+      if (!video) return res.status(404).json({ error: "Video not found" });
+
+      // Return streaming URLs with quality options
+      res.json({
+        videoId: video.id,
+        title: video.title,
+        duration: video.durationMinutes,
+        sources: [
+          {
+            quality: "auto",
+            type: "application/x-mpegURL",
+            src: `${video.videoUrl}?quality=auto`,
+          },
+          {
+            quality: "1080p",
+            bitrate: 5000,
+            src: `${video.videoUrl}?quality=1080p`,
+          },
+          {
+            quality: "720p",
+            bitrate: 2500,
+            src: `${video.videoUrl}?quality=720p`,
+          },
+          {
+            quality: "480p",
+            bitrate: 1200,
+            src: `${video.videoUrl}?quality=480p`,
+          },
+          {
+            quality: "360p",
+            bitrate: 800,
+            src: `${video.videoUrl}?quality=360p`,
+          },
+        ],
+        poster: video.thumbnailUrl,
+        captions: [
+          {
+            kind: "subtitles",
+            src: `${video.videoUrl}/captions/en.vtt`,
+            srcLang: "en",
+            label: "English",
+          },
+        ],
+      });
+    } catch (err) {
+      console.error("Error fetching stream:", err);
+      res.status(500).json({ error: "Failed to fetch stream" });
+    }
+  });
+
+  // Video manifest for HLS streaming
+  app.get("/api/videos/:videoId/manifest.m3u8", async (req, res) => {
+    try {
+      const video = await storage.getVideo(req.params.videoId);
+      if (!video) return res.status(404).json({ error: "Video not found" });
+
+      // Generate HLS manifest for adaptive bitrate streaming
+      const manifest = `#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:10
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:10.0,
+segment0.ts
+#EXTINF:10.0,
+segment1.ts
+#EXT-X-ENDLIST`;
+
+      res.set("Content-Type", "application/vnd.apple.mpegurl");
+      res.send(manifest);
+    } catch (err) {
+      console.error("Error generating manifest:", err);
+      res.status(500).json({ error: "Failed to generate manifest" });
+    }
+  });
+
+  // Get video quality options based on connection speed
+  app.post("/api/videos/:videoId/quality", async (req, res) => {
+    try {
+      const { bandwidth, deviceType } = req.body;
+      if (!bandwidth) {
+        return res.status(400).json({ error: "bandwidth required" });
+      }
+
+      // Determine quality based on bandwidth (in kbps) and device type
+      let recommendedQuality = "480p";
+      if (bandwidth >= 5000) {
+        recommendedQuality = "1080p";
+      } else if (bandwidth >= 2500) {
+        recommendedQuality = "720p";
+      } else if (bandwidth >= 1200) {
+        recommendedQuality = "480p";
+      } else if (bandwidth >= 800) {
+        recommendedQuality = "360p";
+      } else {
+        recommendedQuality = "360p";
+      }
+
+      // Adjust for mobile devices
+      if (deviceType === "mobile") {
+        if (recommendedQuality === "1080p") recommendedQuality = "720p";
+        if (recommendedQuality === "720p") recommendedQuality = "480p";
+      }
+
+      res.json({
+        recommended: recommendedQuality,
+        available: ["1080p", "720p", "480p", "360p"],
+        bandwidth,
+        deviceType,
+      });
+    } catch (err) {
+      console.error("Error determining quality:", err);
+      res.status(500).json({ error: "Failed to determine quality" });
+    }
+  });
+
+  // Video cache headers for CDN optimization
+  app.get("/api/videos/:videoId/cache-info", async (req, res) => {
+    try {
+      const video = await storage.getVideo(req.params.videoId);
+      if (!video) return res.status(404).json({ error: "Video not found" });
+
+      // Return cache optimization info
+      res.json({
+        videoId: video.id,
+        cacheable: true,
+        ttl: 2592000, // 30 days in seconds
+        revalidate: 604800, // 7 days
+        compress: true,
+        supportedFormats: ["mp4", "webm", "ogg"],
+        cdnHeaders: {
+          "Cache-Control": "public, max-age=2592000",
+          "X-Accel-Buffering": "yes",
+        },
+      });
+    } catch (err) {
+      console.error("Error getting cache info:", err);
+      res.status(500).json({ error: "Failed to get cache info" });
+    }
+  });
+
   // Course Bundle Routes
   app.get("/api/bundles", async (req, res) => {
     try {

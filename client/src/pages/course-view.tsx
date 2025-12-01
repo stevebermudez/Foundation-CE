@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import VideoPlayer from "@/components/VideoPlayer";
+import StreamingVideoPlayer from "@/components/StreamingVideoPlayer";
 import QuizComponent from "@/components/QuizComponent";
 import { ArrowLeft, Clock, Award, FileText, Timer, TimerOff, CheckCircle2, Circle, BookOpen, Zap } from "lucide-react";
 import { Link } from "wouter";
@@ -327,10 +327,12 @@ export default function CourseViewPage() {
           </TabsContent>
 
           <TabsContent value="lessons">
-            <VideoPlayer
+            <StreamingVideoPlayer
               courseTitle={courseTitle}
               currentLesson={currentLesson}
               lessons={mockLessons}
+              videoUrl="https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4"
+              hlsUrl="https://test-streams.mux.dev/x36xhzz/x3lis7z91.m3u8"
               onLessonSelect={(id) => {
                 const lesson = mockLessons.find(l => l.id === id);
                 if (lesson) setCurrentLesson(lesson);
