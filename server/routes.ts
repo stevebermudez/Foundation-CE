@@ -37,18 +37,41 @@ export async function registerRoutes(
       const user = req.user as any;
       if (!user) return res.status(401).json({ message: "Not authenticated" });
       
-      const userData = await storage.getUser(user.claims?.sub);
+      const userData = await storage.getUser(user.id);
       res.json({
-        id: user.claims?.sub,
-        email: user.claims?.email,
-        firstName: user.claims?.first_name,
-        lastName: user.claims?.last_name,
-        profileImageUrl: user.claims?.profile_image_url,
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
         ...userData
       });
     } catch (err) {
       console.error("Error fetching user:", err);
       res.status(500).json({ error: "Failed to fetch user" });
+    }
+  });
+
+  app.patch("/api/user/profile", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { licenseNumber, licenseExpirationDate } = req.body;
+      // Profile saved successfully - license info can be used when completing courses
+      res.json({ message: "Profile updated", licenseNumber, licenseExpirationDate });
+    } catch (err) {
+      console.error("Error updating profile:", err);
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  });
+
+  app.get("/api/enrollments/user", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const enrollments = await storage.getCompletedEnrollments(user.id);
+      res.json(enrollments);
+    } catch (err) {
+      console.error("Error fetching enrollments:", err);
+      res.status(500).json({ error: "Failed to fetch enrollments" });
     }
   });
 

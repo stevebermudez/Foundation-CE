@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -6,11 +7,26 @@ export default function AccountSetupPage() {
   const [licenseNumber, setLicenseNumber] = useState("");
   const [expirationDate, setExpirationDate] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [, setLocation] = useLocation();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (licenseNumber && expirationDate) {
-      setSubmitted(true);
-      // TODO: Save to backend
+      try {
+        const response = await fetch("/api/user/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ licenseNumber, licenseExpirationDate: expirationDate }),
+        });
+        if (response.ok) {
+          setSubmitted(true);
+        } else {
+          setError("Failed to save profile. Please try again.");
+        }
+      } catch (err) {
+        setError("Error saving profile. Please try again.");
+        console.error(err);
+      }
     }
   };
 
@@ -24,7 +40,7 @@ export default function AccountSetupPage() {
             <p className="text-slate-600 dark:text-slate-300 mb-6">
               Your account is ready. Start exploring CE courses now.
             </p>
-            <Button className="w-full" onClick={() => window.location.href = "/"}>
+            <Button className="w-full" onClick={() => setLocation("/dashboard")}>
               Go to Dashboard
             </Button>
           </Card>
@@ -43,6 +59,11 @@ export default function AccountSetupPage() {
 
         <Card className="p-8">
           <div className="space-y-6">
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
+                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 License Number

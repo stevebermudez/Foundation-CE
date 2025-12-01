@@ -18,53 +18,39 @@ import {
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
 import flRealEstate from "@assets/generated_images/florida_beachfront_properties.png";
 
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 interface DashboardProps {
   userName: string;
   selectedState: "CA" | "FL";
 }
 
-// todo: remove mock functionality
-const mockEnrolledCourses = [
-  {
-    id: "1",
-    title: "California Real Estate Ethics and Professional Conduct",
-    thumbnail: caRealEstate,
-    progress: 65,
-    ceHours: 3,
-    lastAccessed: "2 hours ago",
-    nextDeadline: "Dec 31, 2025",
-  },
-  {
-    id: "7",
-    title: "California Property Management Essentials",
-    thumbnail: caRealEstate,
-    progress: 30,
-    ceHours: 6,
-    lastAccessed: "Yesterday",
-    nextDeadline: "Dec 31, 2025",
-  },
-];
-
-const mockCompletedCourses = [
-  {
-    id: "4",
-    title: "Agency Relationships and Disclosures",
-    thumbnail: flRealEstate,
-    completedDate: "Nov 15, 2025",
-    ceHours: 3,
-    certificateId: "CERT-2025-001",
-  },
-];
-
-const mockStats = {
-  enrolledCourses: 2,
-  completedCourses: 1,
-  totalCeHours: 3,
-  requiredCeHours: 45,
-  upcomingDeadline: "Dec 31, 2025",
-};
-
 export default function Dashboard({ userName, selectedState }: DashboardProps) {
+  const [completedCourses, setCompletedCourses] = useState<any[]>([]);
+
+  const { data: enrollments = [] } = useQuery({
+    queryKey: ["/api/enrollments/user"],
+    enabled: true,
+  });
+
+  useEffect(() => {
+    if (enrollments && Array.isArray(enrollments)) {
+      const completed = enrollments.filter((e: any) => e.completed);
+      setCompletedCourses(completed);
+    }
+  }, [enrollments]);
+
+  const mockEnrolledCourses = []; // Placeholder for in-progress courses
+  const totalCeHours = completedCourses.reduce((sum: number, course: any) => sum + (course.course?.hoursRequired || 0), 0);
+  const mockStats = {
+    enrolledCourses: 0,
+    completedCourses: completedCourses.length,
+    totalCeHours: totalCeHours,
+    requiredCeHours: 63,
+    upcomingDeadline: "Dec 31, 2025",
+  };
+  
   const ceProgress = (mockStats.totalCeHours / mockStats.requiredCeHours) * 100;
 
   return (
@@ -150,29 +136,34 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
               </TabsList>
 
               <TabsContent value="in-progress" className="space-y-4">
-                {mockEnrolledCourses.map((course) => (
-                  <Card key={course.id} className="overflow-hidden">
-                    <div className="flex flex-col sm:flex-row">
-                      <div className="sm:w-40 h-32 sm:h-auto shrink-0">
-                        <img
-                          src={course.thumbnail}
-                          alt={course.title}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <CardContent className="flex-1 p-4">
-                        <div className="flex flex-col h-full">
-                          <div className="flex-1">
-                            <h3 className="font-semibold mb-2 line-clamp-2" data-testid={`text-course-title-${course.id}`}>
-                              {course.title}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-3">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5" />
-                                {course.lastAccessed}
-                              </span>
-                              <Badge variant="secondary" className="text-xs">
-                                {course.ceHours} CE Hours
+                {mockEnrolledCourses.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No courses in progress. Visit the Courses page to enroll.</p>
+                  </Card>
+                ) : (
+                  mockEnrolledCourses.map((course: any) => (
+                    <Card key={course.id} className="overflow-hidden">
+                      <div className="flex flex-col sm:flex-row">
+                        <div className="sm:w-40 h-32 sm:h-auto shrink-0">
+                          <img
+                            src={course.thumbnail}
+                            alt={course.title}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <CardContent className="flex-1 p-4">
+                          <div className="flex flex-col h-full">
+                            <div className="flex-1">
+                              <h3 className="font-semibold mb-2 line-clamp-2" data-testid={`text-course-title-${course.id}`}>
+                                {course.title}
+                              </h3>
+                              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-3">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {course.lastAccessed}
+                                </span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {course.ceHours} CE Hours
                               </Badge>
                             </div>
                           </div>
