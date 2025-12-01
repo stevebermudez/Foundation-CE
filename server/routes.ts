@@ -37,15 +37,25 @@ export async function registerRoutes(
       const user = req.user as any;
       if (!user) return res.status(401).json({ message: "Not authenticated" });
       
-      const userData = await storage.getUser(user.id);
-      res.json({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl,
-        ...userData
-      });
+      try {
+        const userData = await storage.getUser(user.id);
+        res.json({
+          id: user.id,
+          email: userData?.email || user.email,
+          firstName: userData?.firstName || user.firstName,
+          lastName: userData?.lastName || user.lastName,
+          profileImageUrl: userData?.profileImageUrl || user.profileImageUrl,
+        });
+      } catch (dbErr) {
+        console.error("Error querying database:", dbErr);
+        res.json({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+        });
+      }
     } catch (err) {
       console.error("Error fetching user:", err);
       res.status(500).json({ error: "Failed to fetch user" });
