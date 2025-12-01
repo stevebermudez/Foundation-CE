@@ -71,6 +71,8 @@ export interface IStorage {
   getEnrollmentProgress(enrollmentId: string): Promise<{ completed: number; total: number; percentage: number }>;
   createCertificate(enrollmentId: string, userId: string, courseId: string): Promise<Certificate>;
   getCertificate(enrollmentId: string): Promise<Certificate | undefined>;
+  isAdmin(userId: string): Promise<boolean>;
+  adminOverrideEnrollment(enrollmentId: string, hoursCompleted: number, completed: boolean): Promise<Enrollment>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -884,6 +886,21 @@ export class DatabaseStorage implements IStorage {
   async getCertificate(enrollmentId: string): Promise<Certificate | undefined> {
     const [cert] = await db.select().from(certificates).where(eq(certificates.enrollmentId, enrollmentId));
     return cert;
+  }
+
+  async isAdmin(userId: string): Promise<boolean> {
+    const admin = await db.select().from(supervisors).where(eq(supervisors.userId, userId)).limit(1);
+    return admin.length > 0 && admin[0].role === "admin";
+  }
+
+  async adminOverrideEnrollment(enrollmentId: string, hoursCompleted: number, completed: boolean): Promise<Enrollment> {
+    const [updated] = await db.update(enrollments).set({
+      hoursCompleted,
+      completed: completed ? 1 : 0,
+      completedAt: completed ? new Date() : null,
+      progress: 100
+    }).where(eq(enrollments.id, enrollmentId)).returning();
+    return updated;
   }
 }
 

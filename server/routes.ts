@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { getUncachableStripeClient } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
-import { isAuthenticated } from "./oauthAuth";
+import { isAuthenticated, isAdmin } from "./oauthAuth";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -785,6 +785,37 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Error tracking click:", err);
       res.status(500).json({ error: "Failed to track click" });
+    }
+  });
+
+  // Admin Override Routes
+  app.patch("/api/admin/enrollments/:id/override", isAdmin, async (req, res) => {
+    try {
+      const { hoursCompleted, completed, generateCertificate } = req.body;
+      const enrollmentId = req.params.id;
+
+      if (typeof hoursCompleted !== "number" || typeof completed !== "boolean") {
+        return res.status(400).json({ error: "hoursCompleted and completed fields required" });
+      }
+
+      const enrollment = await storage.adminOverrideEnrollment(enrollmentId, hoursCompleted, completed);
+      
+      if (completed && generateCertificate) {
+        const cert = await storage.createCertificate(enrollmentId, enrollment.userId, enrollment.courseId);
+        return res.json({ 
+          message: "Enrollment overridden and certificate generated",
+          enrollment,
+          certificate: cert
+        });
+      }
+
+      res.json({ 
+        message: "Enrollment overridden successfully",
+        enrollment
+      });
+    } catch (err) {
+      console.error("Error overriding enrollment:", err);
+      res.status(500).json({ error: "Failed to override enrollment" });
     }
   });
 
