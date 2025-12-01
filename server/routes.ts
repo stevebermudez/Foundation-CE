@@ -909,5 +909,68 @@ export async function registerRoutes(
     }
   });
 
+  // Data Override Routes - Admin Only
+  app.patch("/api/admin/enrollments/:enrollmentId/data", isAdmin, async (req, res) => {
+    try {
+      const { progress, hoursCompleted, completed } = req.body;
+      const enrollment = await storage.adminOverrideEnrollmentData(req.params.enrollmentId, {
+        progress: typeof progress === "number" ? progress : undefined,
+        hoursCompleted: typeof hoursCompleted === "number" ? hoursCompleted : undefined,
+        completed: typeof completed === "boolean" ? (completed ? 1 : 0) : undefined,
+        completedAt: completed && typeof completed === "boolean" ? new Date() : undefined
+      });
+      res.json({ message: "Enrollment data overridden", enrollment });
+    } catch (err) {
+      console.error("Error overriding enrollment data:", err);
+      res.status(500).json({ error: "Failed to override enrollment data" });
+    }
+  });
+
+  app.patch("/api/admin/lesson-progress/:progressId/data", isAdmin, async (req, res) => {
+    try {
+      const { completed, timeSpentMinutes } = req.body;
+      const progress = await storage.adminOverrideLessonProgress(req.params.progressId, {
+        completed: typeof completed === "boolean" ? (completed ? 1 : 0) : undefined,
+        timeSpentMinutes: typeof timeSpentMinutes === "number" ? timeSpentMinutes : undefined,
+        completedAt: completed && typeof completed === "boolean" ? new Date() : undefined
+      });
+      res.json({ message: "Lesson progress overridden", progress });
+    } catch (err) {
+      console.error("Error overriding lesson progress:", err);
+      res.status(500).json({ error: "Failed to override lesson progress" });
+    }
+  });
+
+  app.patch("/api/admin/exam-attempts/:attemptId/score", isAdmin, async (req, res) => {
+    try {
+      const { score } = req.body;
+      if (typeof score !== "number" || score < 0 || score > 100) {
+        return res.status(400).json({ error: "Score must be a number between 0 and 100" });
+      }
+      const passed = score >= 70;
+      const attempt = await storage.adminOverrideExamAttempt(req.params.attemptId, score, passed);
+      res.json({ message: "Exam score overridden", attempt, passed: passed ? "PASS" : "FAIL" });
+    } catch (err) {
+      console.error("Error overriding exam score:", err);
+      res.status(500).json({ error: "Failed to override exam score" });
+    }
+  });
+
+  app.patch("/api/admin/users/:userId/data", isAdmin, async (req, res) => {
+    try {
+      const { firstName, lastName, email, profileImageUrl } = req.body;
+      const user = await storage.adminOverrideUserData(req.params.userId, {
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        email: email || undefined,
+        profileImageUrl: profileImageUrl || undefined
+      });
+      res.json({ message: "User data overridden", user });
+    } catch (err) {
+      console.error("Error overriding user data:", err);
+      res.status(500).json({ error: "Failed to override user data" });
+    }
+  });
+
   return httpServer;
 }

@@ -79,6 +79,10 @@ export interface IStorage {
   createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number): Promise<Lesson>;
   updateLesson(lessonId: string, data: Partial<Lesson>): Promise<Lesson>;
   deleteLesson(lessonId: string): Promise<void>;
+  adminOverrideEnrollmentData(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment>;
+  adminOverrideLessonProgress(lessonProgressId: string, data: Partial<LessonProgress>): Promise<LessonProgress>;
+  adminOverrideExamAttempt(attemptId: string, score: number, passed: boolean): Promise<ExamAttempt>;
+  adminOverrideUserData(userId: string, data: Partial<User>): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -948,6 +952,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteLesson(lessonId: string): Promise<void> {
     await db.delete(lessons).where(eq(lessons.id, lessonId));
+  }
+
+  async adminOverrideEnrollmentData(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment> {
+    const [updated] = await db.update(enrollments).set({
+      ...data,
+      updatedAt: new Date()
+    }).where(eq(enrollments.id, enrollmentId)).returning();
+    return updated;
+  }
+
+  async adminOverrideLessonProgress(lessonProgressId: string, data: Partial<LessonProgress>): Promise<LessonProgress> {
+    const [updated] = await db.update(lessonProgress).set({
+      ...data,
+      updatedAt: new Date()
+    }).where(eq(lessonProgress.id, lessonProgressId)).returning();
+    return updated;
+  }
+
+  async adminOverrideExamAttempt(attemptId: string, score: number, passed: boolean): Promise<ExamAttempt> {
+    const [updated] = await db.update(examAttempts).set({
+      score,
+      passed: passed ? 1 : 0,
+      completedAt: new Date()
+    }).where(eq(examAttempts.id, attemptId)).returning();
+    return updated;
+  }
+
+  async adminOverrideUserData(userId: string, data: Partial<User>): Promise<User> {
+    const [updated] = await db.update(users).set({
+      ...data,
+      updatedAt: new Date()
+    }).where(eq(users.id, userId)).returning();
+    return updated;
   }
 }
 
