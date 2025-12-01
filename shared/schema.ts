@@ -470,6 +470,10 @@ export type EmailRecipient = typeof emailRecipients.$inferSelect;
 export type EmailTracking = typeof emailTracking.$inferSelect;
 export type ChatSession = typeof chatSessions.$inferSelect;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+export type Unit = typeof units.$inferSelect;
+export type Lesson = typeof lessons.$inferSelect;
+export type LessonProgress = typeof lessonProgress.$inferSelect;
+export type Certificate = typeof certificates.$inferSelect;
 
 // Chat Zod schemas
 export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({

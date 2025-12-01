@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, certificates, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type Certificate } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -64,6 +64,13 @@ export interface IStorage {
   trackEmailOpen(recipientId: string, campaignId: string, userId: string, userAgent?: string, ipAddress?: string): Promise<EmailTracking>;
   trackEmailClick(recipientId: string, campaignId: string, userId: string, linkUrl: string, userAgent?: string, ipAddress?: string): Promise<EmailTracking>;
   getCampaignStats(campaignId: string): Promise<{ campaign: EmailCampaign; recipients: EmailRecipient[]; tracking: EmailTracking[] }>;
+  getUnits(courseId: string): Promise<Unit[]>;
+  getLessons(unitId: string): Promise<Lesson[]>;
+  saveLessonProgress(enrollmentId: string, userId: string, lessonId: string, timeSpentMinutes: number, completed: boolean): Promise<LessonProgress>;
+  getLessonProgress(enrollmentId: string, lessonId: string): Promise<LessonProgress | undefined>;
+  getEnrollmentProgress(enrollmentId: string): Promise<{ completed: number; total: number; percentage: number }>;
+  createCertificate(enrollmentId: string, userId: string, courseId: string): Promise<Certificate>;
+  getCertificate(enrollmentId: string): Promise<Certificate | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -794,6 +801,89 @@ export class DatabaseStorage implements IStorage {
       recipients,
       tracking
     };
+  }
+
+  async getUnits(courseId: string): Promise<Unit[]> {
+    return await db.select().from(units).where(eq(units.courseId, courseId)).orderBy(units.unitNumber);
+  }
+
+  async getLessons(unitId: string): Promise<Lesson[]> {
+    return await db.select().from(lessons).where(eq(lessons.unitId, unitId)).orderBy(lessons.lessonNumber);
+  }
+
+  async saveLessonProgress(enrollmentId: string, userId: string, lessonId: string, timeSpentMinutes: number, completed: boolean): Promise<LessonProgress> {
+    const existing = await db.select().from(lessonProgress).where(and(eq(lessonProgress.enrollmentId, enrollmentId), eq(lessonProgress.lessonId, lessonId)));
+    
+    if (existing.length > 0) {
+      const [updated] = await db.update(lessonProgress).set({
+        completed: completed ? 1 : 0,
+        timeSpentMinutes,
+        completedAt: completed ? new Date() : null,
+        lastAccessedAt: new Date(),
+        updatedAt: new Date()
+      }).where(eq(lessonProgress.id, existing[0].id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(lessonProgress).values({
+        enrollmentId,
+        userId,
+        lessonId,
+        completed: completed ? 1 : 0,
+        timeSpentMinutes,
+        completedAt: completed ? new Date() : null
+      }).returning();
+      return created;
+    }
+  }
+
+  async getLessonProgress(enrollmentId: string, lessonId: string): Promise<LessonProgress | undefined> {
+    const [progress] = await db.select().from(lessonProgress).where(and(eq(lessonProgress.enrollmentId, enrollmentId), eq(lessonProgress.lessonId, lessonId)));
+    return progress;
+  }
+
+  async getEnrollmentProgress(enrollmentId: string): Promise<{ completed: number; total: number; percentage: number }> {
+    const enrollment = await db.select().from(enrollments).where(eq(enrollments.id, enrollmentId));
+    if (!enrollment.length) return { completed: 0, total: 0, percentage: 0 };
+    
+    const courseId = enrollment[0].courseId;
+    const allUnits = await this.getUnits(courseId);
+    
+    let totalLessons = 0;
+    let completedLessons = 0;
+    
+    for (const unit of allUnits) {
+      const unitLessons = await this.getLessons(unit.id);
+      totalLessons += unitLessons.length;
+      
+      for (const lesson of unitLessons) {
+        const progress = await this.getLessonProgress(enrollmentId, lesson.id);
+        if (progress?.completed === 1) completedLessons++;
+      }
+    }
+    
+    return {
+      completed: completedLessons,
+      total: totalLessons,
+      percentage: totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+    };
+  }
+
+  async createCertificate(enrollmentId: string, userId: string, courseId: string): Promise<Certificate> {
+    const certNumber = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const [cert] = await db.insert(certificates).values({
+      enrollmentId,
+      userId,
+      courseId,
+      certificateNumber: certNumber,
+      issuedDate: new Date(),
+      expirationDate: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000) // 2 years
+    }).returning();
+    return cert;
+  }
+
+  async getCertificate(enrollmentId: string): Promise<Certificate | undefined> {
+    const [cert] = await db.select().from(certificates).where(eq(certificates.enrollmentId, enrollmentId));
+    return cert;
   }
 }
 
