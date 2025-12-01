@@ -1152,5 +1152,30 @@ export async function registerRoutes(
     }
   });
 
+  // Course Content Export Routes
+  app.get("/api/export/course/:courseId/content.json", isAdmin, async (req, res) => {
+    try {
+      const jsonContent = await storage.exportCourseContentJSON(req.params.courseId);
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", `attachment; filename="course-content-${req.params.courseId}.json"`);
+      res.send(jsonContent);
+    } catch (err) {
+      console.error("Error exporting course content as JSON:", err);
+      res.status(500).json({ error: "Failed to export course content" });
+    }
+  });
+
+  app.get("/api/export/course/:courseId/content.csv", isAdmin, async (req, res) => {
+    try {
+      const csvContent = await storage.exportCourseContentCSV(req.params.courseId);
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="course-content-${req.params.courseId}.csv"`);
+      res.send(csvContent);
+    } catch (err) {
+      console.error("Error exporting course content as CSV:", err);
+      res.status(500).json({ error: "Failed to export course content" });
+    }
+  });
+
   return httpServer;
 }

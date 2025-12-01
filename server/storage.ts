@@ -94,6 +94,8 @@ export interface IStorage {
   exportUserEnrollmentData(userId: string, courseId?: string): Promise<any>;
   exportProgressData(enrollmentId: string): Promise<any>;
   exportRealEstateExpressFormat(enrollmentId: string): Promise<any>;
+  exportCourseContentJSON(courseId: string): Promise<string>;
+  exportCourseContentCSV(courseId: string): Promise<string>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1099,10 +1101,9 @@ export class DatabaseStorage implements IStorage {
     const progressList = await db.select().from(lessonProgress).where(eq(lessonProgress.enrollmentId, enrollmentId));
     const cert = await this.getCertificate(enrollmentId);
     
-    const completedHours = progressList.filter(p => p.completed).length * 3; // Assuming 3 hours per lesson
+    const completedHours = progressList.filter(p => p.completed).length * 3;
     
     return {
-      // Real Estate Express compatible format
       studentId: user?.id || "",
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
@@ -1122,6 +1123,83 @@ export class DatabaseStorage implements IStorage {
       formatVersion: "ree-1.0",
       systemId: "foundationCE"
     };
+  }
+
+  async exportCourseContentJSON(courseId: string): Promise<string> {
+    const course = await this.getCourse(courseId);
+    const unitList = await this.getUnits(courseId);
+    
+    const unitsWithContent = await Promise.all(unitList.map(async (unit) => {
+      const lessonList = await this.getLessons(unit.id);
+      const videos = await this.getUnitVideos(unit.id);
+      
+      const lessonsWithVideos = lessonList.map(lesson => ({
+        id: lesson.id,
+        lessonNumber: lesson.lessonNumber,
+        title: lesson.title,
+        videoId: lesson.videoId,
+        videoUrl: lesson.videoUrl,
+        durationMinutes: lesson.durationMinutes,
+        createdAt: lesson.createdAt
+      }));
+      
+      return {
+        id: unit.id,
+        unitNumber: unit.unitNumber,
+        title: unit.title,
+        description: unit.description,
+        hoursRequired: unit.hoursRequired,
+        lessons: lessonsWithVideos,
+        unitVideos: videos
+      };
+    }));
+    
+    const courseVideos = await this.getVideos(courseId);
+    
+    const exportData = {
+      course: {
+        id: course?.id,
+        name: course?.name,
+        sku: course?.sku,
+        description: course?.description,
+        hoursRequired: course?.hoursRequired,
+        price: course?.price,
+        state: course?.state,
+        productType: course?.productType,
+        requirementCycleType: course?.requirementCycleType
+      },
+      units: unitsWithContent,
+      courseVideos,
+      exportedAt: new Date().toISOString(),
+      formatVersion: "1.0"
+    };
+    
+    return JSON.stringify(exportData, null, 2);
+  }
+
+  async exportCourseContentCSV(courseId: string): Promise<string> {
+    const course = await this.getCourse(courseId);
+    const unitList = await this.getUnits(courseId);
+    
+    let csv = "Unit Number,Unit Title,Unit Hours,Lesson Number,Lesson Title,Video URL,Duration (minutes)\n";
+    
+    for (const unit of unitList) {
+      const lessons = await this.getLessons(unit.id);
+      
+      if (lessons.length === 0) {
+        csv += `${unit.unitNumber},"${unit.title}",${unit.hoursRequired},,,,\n`;
+      } else {
+        lessons.forEach((lesson, index) => {
+          if (index === 0) {
+            csv += `${unit.unitNumber},"${unit.title}",${unit.hoursRequired},${lesson.lessonNumber},"${lesson.title}","${lesson.videoUrl || ''}",${lesson.durationMinutes || ''}\n`;
+          } else {
+            csv += `,,,,${lesson.lessonNumber},"${lesson.title}","${lesson.videoUrl || ''}",${lesson.durationMinutes || ''}\n`;
+          }
+        });
+      }
+    }
+    
+    return csv;
   }
 }
 
