@@ -107,7 +107,8 @@ export default function ContactPage() {
                   Address
                 </h3>
                 <p className="text-center text-slate-600 dark:text-slate-400">
-                  Miami, Florida, USA
+                  10 E Yanonali Street #134<br />
+                  Santa Barbara, CA 93101
                 </p>
               </CardContent>
             </Card>
