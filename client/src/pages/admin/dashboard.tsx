@@ -7,8 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminCoursesPage from "./courses";
-import AdminUnitsLessonsPage from "./units-lessons";
-import AdminExamsPage from "./exams";
 import {
   BarChart3,
   Users,
@@ -216,6 +214,9 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="enrollments" data-testid="tab-admin-enrollments">
               Enrollments
             </TabsTrigger>
+            <TabsTrigger value="content" data-testid="tab-admin-content">
+              Content Builder
+            </TabsTrigger>
             <TabsTrigger value="settings" data-testid="tab-admin-settings">
               Settings
             </TabsTrigger>
@@ -309,7 +310,17 @@ export default function AdminDashboardPage() {
             <AdminCoursesPage />
           </TabsContent>
 
-          {/* Units & Exams would go in dedicated pages - for now show in dashboard */}
+          {/* Content Builder Tab */}
+          <TabsContent value="content">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Content builder for creating course materials with text, images, and videos</p>
+                  <p className="text-sm mt-2">Select a course to build its content</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Enrollments Tab */}
           <TabsContent value="enrollments">

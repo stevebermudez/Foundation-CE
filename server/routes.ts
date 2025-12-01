@@ -1606,6 +1606,3 @@ segment1.ts
 
   return httpServer;
 }
-
-  // Course Management Admin Routes
-  app.post("/api/admin/courses", isAdmin, async (req, res) => {
