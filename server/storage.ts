@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, certificates, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type Certificate } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, certificates, videos, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type Certificate, type Video } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -83,6 +83,12 @@ export interface IStorage {
   adminOverrideLessonProgress(lessonProgressId: string, data: Partial<LessonProgress>): Promise<LessonProgress>;
   adminOverrideExamAttempt(attemptId: string, score: number, passed: boolean): Promise<ExamAttempt>;
   adminOverrideUserData(userId: string, data: Partial<User>): Promise<User>;
+  getVideos(courseId: string): Promise<Video[]>;
+  getVideo(videoId: string): Promise<Video | undefined>;
+  createVideo(courseId: string, uploadedBy: string, title: string, videoUrl: string, thumbnailUrl?: string, description?: string, durationMinutes?: number): Promise<Video>;
+  updateVideo(videoId: string, data: Partial<Video>): Promise<Video>;
+  deleteVideo(videoId: string): Promise<void>;
+  attachVideoToLesson(lessonId: string, videoId: string): Promise<Lesson>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -984,6 +990,49 @@ export class DatabaseStorage implements IStorage {
       ...data,
       updatedAt: new Date()
     }).where(eq(users.id, userId)).returning();
+    return updated;
+  }
+
+  async getVideos(courseId: string): Promise<Video[]> {
+    return await db.select().from(videos).where(eq(videos.courseId, courseId)).orderBy(videos.createdAt);
+  }
+
+  async getVideo(videoId: string): Promise<Video | undefined> {
+    const [video] = await db.select().from(videos).where(eq(videos.id, videoId));
+    return video;
+  }
+
+  async createVideo(courseId: string, uploadedBy: string, title: string, videoUrl: string, thumbnailUrl?: string, description?: string, durationMinutes?: number): Promise<Video> {
+    const [video] = await db.insert(videos).values({
+      courseId,
+      uploadedBy,
+      title,
+      videoUrl,
+      thumbnailUrl: thumbnailUrl || null,
+      description: description || null,
+      durationMinutes: durationMinutes || null
+    }).returning();
+    return video;
+  }
+
+  async updateVideo(videoId: string, data: Partial<Video>): Promise<Video> {
+    const [updated] = await db.update(videos).set({
+      ...data,
+      updatedAt: new Date()
+    }).where(eq(videos.id, videoId)).returning();
+    return updated;
+  }
+
+  async deleteVideo(videoId: string): Promise<void> {
+    await db.delete(lessons).where(eq(lessons.videoId, videoId));
+    await db.delete(videos).where(eq(videos.id, videoId));
+  }
+
+  async attachVideoToLesson(lessonId: string, videoId: string): Promise<Lesson> {
+    const [updated] = await db.update(lessons).set({
+      videoId,
+      updatedAt: new Date()
+    }).where(eq(lessons.id, lessonId)).returning();
     return updated;
   }
 }

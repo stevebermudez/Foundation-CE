@@ -972,5 +972,76 @@ export async function registerRoutes(
     }
   });
 
+  // Video Management Routes
+  app.get("/api/courses/:courseId/videos", async (req, res) => {
+    try {
+      const videoList = await storage.getVideos(req.params.courseId);
+      res.json(videoList);
+    } catch (err) {
+      console.error("Error fetching videos:", err);
+      res.status(500).json({ error: "Failed to fetch videos" });
+    }
+  });
+
+  app.post("/api/courses/:courseId/videos", isAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { title, videoUrl, thumbnailUrl, description, durationMinutes } = req.body;
+      if (!title || !videoUrl) {
+        return res.status(400).json({ error: "title and videoUrl required" });
+      }
+      const video = await storage.createVideo(req.params.courseId, user.id, title, videoUrl, thumbnailUrl, description, durationMinutes);
+      res.status(201).json(video);
+    } catch (err) {
+      console.error("Error creating video:", err);
+      res.status(500).json({ error: "Failed to create video" });
+    }
+  });
+
+  app.get("/api/videos/:videoId", async (req, res) => {
+    try {
+      const video = await storage.getVideo(req.params.videoId);
+      if (!video) return res.status(404).json({ error: "Video not found" });
+      res.json(video);
+    } catch (err) {
+      console.error("Error fetching video:", err);
+      res.status(500).json({ error: "Failed to fetch video" });
+    }
+  });
+
+  app.patch("/api/videos/:videoId", isAdmin, async (req, res) => {
+    try {
+      const video = await storage.updateVideo(req.params.videoId, req.body);
+      res.json({ message: "Video updated", video });
+    } catch (err) {
+      console.error("Error updating video:", err);
+      res.status(500).json({ error: "Failed to update video" });
+    }
+  });
+
+  app.delete("/api/videos/:videoId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteVideo(req.params.videoId);
+      res.json({ message: "Video deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting video:", err);
+      res.status(500).json({ error: "Failed to delete video" });
+    }
+  });
+
+  app.patch("/api/lessons/:lessonId/video", isAdmin, async (req, res) => {
+    try {
+      const { videoId } = req.body;
+      if (!videoId) {
+        return res.status(400).json({ error: "videoId required" });
+      }
+      const lesson = await storage.attachVideoToLesson(req.params.lessonId, videoId);
+      res.json({ message: "Video attached to lesson", lesson });
+    } catch (err) {
+      console.error("Error attaching video:", err);
+      res.status(500).json({ error: "Failed to attach video" });
+    }
+  });
+
   return httpServer;
 }

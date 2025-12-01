@@ -397,16 +397,32 @@ export const units = pgTable("units", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Videos (reusable video assets)
+export const videos = pgTable("videos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id").notNull(),
+  title: varchar("title").notNull(),
+  videoUrl: varchar("video_url").notNull(),
+  thumbnailUrl: varchar("thumbnail_url"),
+  description: text("description"),
+  durationMinutes: integer("duration_minutes"),
+  uploadedBy: varchar("uploaded_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Lessons within units (3 lessons per unit)
 export const lessons = pgTable("lessons", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   unitId: varchar("unit_id").notNull(),
+  videoId: varchar("video_id"),
   lessonNumber: integer("lesson_number").notNull(),
   title: varchar("title").notNull(),
   videoUrl: varchar("video_url"),
   durationMinutes: integer("duration_minutes").default(15),
   sequence: integer("sequence").default(0),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Track user progress on lessons
@@ -474,6 +490,7 @@ export type Unit = typeof units.$inferSelect;
 export type Lesson = typeof lessons.$inferSelect;
 export type LessonProgress = typeof lessonProgress.$inferSelect;
 export type Certificate = typeof certificates.$inferSelect;
+export type Video = typeof videos.$inferSelect;
 
 // Chat Zod schemas
 export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({
@@ -508,3 +525,14 @@ export type InsertLesson = z.infer<typeof insertLessonSchema>;
 
 export const updateLessonSchema = insertLessonSchema.partial();
 export type UpdateLesson = z.infer<typeof updateLessonSchema>;
+
+// Video Zod schemas
+export const insertVideoSchema = createInsertSchema(videos).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVideo = z.infer<typeof insertVideoSchema>;
+
+export const updateVideoSchema = insertVideoSchema.partial();
+export type UpdateVideo = z.infer<typeof updateVideoSchema>;
