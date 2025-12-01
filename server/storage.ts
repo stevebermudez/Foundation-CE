@@ -18,6 +18,8 @@ export interface IStorage {
   createPracticeExam?(data: any): Promise<PracticeExam>;
   createExamQuestion?(data: any): Promise<ExamQuestion>;
   getPracticeExams?(courseId: string): Promise<PracticeExam[]>;
+  savePage?(slug: string, page: any): Promise<any>;
+  getPage?(slug: string): Promise<any>;
   getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined>;
   createComplianceRequirement(requirement: Omit<ComplianceRequirement, 'id' | 'updatedAt'>): Promise<ComplianceRequirement>;
   updateEnrollmentHours(enrollmentId: string, hoursCompleted: number): Promise<Enrollment>;
@@ -1414,6 +1416,20 @@ export class DatabaseStorage implements IStorage {
     
     return csv;
   }
+
+  async savePage(slug: string, page: any): Promise<any> {
+    // Store pages in memory for now - can be extended to database
+    if (!this.pages) this.pages = {};
+    this.pages[slug] = page;
+    return page;
+  }
+
+  async getPage(slug: string): Promise<any> {
+    if (!this.pages) this.pages = {};
+    return this.pages[slug] || null;
+  }
+
+  private pages: Record<string, any> = {};
 }
 
 export const storage = new DatabaseStorage();

@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminCoursesPage from "./courses";
+import PagesManagerPage from "./pages-manager";
 import {
   BarChart3,
   Users,
@@ -217,6 +218,9 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="content" data-testid="tab-admin-content">
               Content Builder
             </TabsTrigger>
+            <TabsTrigger value="pages" data-testid="tab-admin-pages">
+              Website Pages
+            </TabsTrigger>
             <TabsTrigger value="settings" data-testid="tab-admin-settings">
               Settings
             </TabsTrigger>
@@ -320,6 +324,11 @@ export default function AdminDashboardPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Website Pages Tab */}
+          <TabsContent value="pages">
+            <PagesManagerPage />
           </TabsContent>
 
           {/* Enrollments Tab */}
