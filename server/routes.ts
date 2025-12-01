@@ -1177,5 +1177,17 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/export/course/:courseId/content.docx", isAdmin, async (req, res) => {
+    try {
+      const docxBuffer = await storage.exportCourseContentDocx(req.params.courseId);
+      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+      res.setHeader("Content-Disposition", `attachment; filename="course-content-${req.params.courseId}.docx"`);
+      res.send(docxBuffer);
+    } catch (err) {
+      console.error("Error exporting course content as DOCX:", err);
+      res.status(500).json({ error: "Failed to export course content" });
+    }
+  });
+
   return httpServer;
 }

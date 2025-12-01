@@ -96,6 +96,7 @@ export interface IStorage {
   exportRealEstateExpressFormat(enrollmentId: string): Promise<any>;
   exportCourseContentJSON(courseId: string): Promise<string>;
   exportCourseContentCSV(courseId: string): Promise<string>;
+  exportCourseContentDocx(courseId: string): Promise<Buffer>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1200,6 +1201,135 @@ export class DatabaseStorage implements IStorage {
     }
     
     return csv;
+  }
+
+  async exportCourseContentDocx(courseId: string): Promise<Buffer> {
+    const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, BorderStyle } = await import("docx");
+    
+    const course = await this.getCourse(courseId);
+    const unitList = await this.getUnits(courseId);
+    
+    const sections: any[] = [];
+    
+    // Title
+    sections.push(
+      new Paragraph({
+        text: course?.name || "Course Content",
+        heading: HeadingLevel.HEADING_1,
+        spacing: { after: 200 }
+      })
+    );
+    
+    // Course Info
+    if (course?.description) {
+      sections.push(
+        new Paragraph({
+          text: course.description,
+          spacing: { after: 200 }
+        })
+      );
+    }
+    
+    sections.push(
+      new Paragraph({
+        text: `Course Code: ${course?.sku || "N/A"} | Total Hours: ${course?.hoursRequired || 0}`,
+        spacing: { after: 400 }
+      })
+    );
+    
+    // Units and Lessons
+    for (const unit of unitList) {
+      sections.push(
+        new Paragraph({
+          text: `Unit ${unit.unitNumber}: ${unit.title}`,
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 200, after: 100 }
+        })
+      );
+      
+      if (unit.description) {
+        sections.push(
+          new Paragraph({
+            text: unit.description,
+            spacing: { after: 100 }
+          })
+        );
+      }
+      
+      sections.push(
+        new Paragraph({
+          text: `Required Hours: ${unit.hoursRequired || 3}`,
+          spacing: { after: 200 }
+        })
+      );
+      
+      const lessons = await this.getLessons(unit.id);
+      
+      if (lessons.length > 0) {
+        const rows = [
+          new TableRow({
+            children: [
+              new TableCell({
+                children: [new Paragraph({ text: "Lesson", bold: true })],
+                shading: { fill: "D3D3D3" }
+              }),
+              new TableCell({
+                children: [new Paragraph({ text: "Title", bold: true })],
+                shading: { fill: "D3D3D3" }
+              }),
+              new TableCell({
+                children: [new Paragraph({ text: "Duration (min)", bold: true })],
+                shading: { fill: "D3D3D3" }
+              }),
+              new TableCell({
+                children: [new Paragraph({ text: "Video URL", bold: true })],
+                shading: { fill: "D3D3D3" }
+              })
+            ]
+          })
+        ];
+        
+        lessons.forEach(lesson => {
+          rows.push(
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ text: lesson.lessonNumber.toString() })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ text: lesson.title })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ text: (lesson.durationMinutes || "").toString() })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ text: lesson.videoUrl || "N/A" })]
+                })
+              ]
+            })
+          );
+        });
+        
+        sections.push(
+          new Table({
+            rows,
+            width: { size: 100, type: "pct" }
+          })
+        );
+      }
+      
+      sections.push(new Paragraph({ text: "", spacing: { after: 300 } }));
+    }
+    
+    const doc = new Document({
+      sections: [
+        {
+          children: sections
+        }
+      ]
+    });
+    
+    return await Packer.toBuffer(doc);
   }
 }
 
