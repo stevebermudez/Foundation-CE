@@ -39,6 +39,9 @@ export const courses = pgTable("courses", {
   sku: varchar("sku").notNull(), // course code (unique per product type + state)
   renewalApplicable: integer("renewal_applicable").default(1), // true for renewal, false for prelicense
   renewalPeriodYears: integer("renewal_period_years"), // 2 for FL, 4 for CA
+  providerNumber: varchar("provider_number"), // DBPR provider/school number
+  courseOfferingNumber: varchar("course_offering_number"), // DBPR course offering number
+  instructorName: varchar("instructor_name"), // Course instructor (for regulatory reports)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -172,8 +175,13 @@ export const dbprReports = pgTable("dbpr_reports", {
   courseTitle: varchar("course_title").notNull(),
   completionDate: timestamp("completion_date").notNull(),
   ceHours: integer("ce_hours").notNull(),
-  licenseNumber: varchar("license_number").notNull(),
+  licenseNumber: varchar("license_number"),
+  ssnLast4: varchar("ssn_last4"),
   licenseType: varchar("license_type").notNull(),
+  studentName: varchar("student_name").notNull(),
+  providerNumber: varchar("provider_number"),
+  courseOfferingNumber: varchar("course_offering_number"),
+  instructorName: varchar("instructor_name"),
   status: varchar("status").default("pending"), // "pending", "submitted", "accepted", "rejected"
   confirmationNumber: varchar("confirmation_number"),
   errorMessage: text("error_message"),

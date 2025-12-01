@@ -42,13 +42,15 @@ export async function registerRoutes(
   // Course Completion & Regulatory Reporting
   app.post("/api/enrollments/:id/complete", async (req, res) => {
     try {
-      const { userId, licenseNumber, licenseType } = req.body;
+      const { userId, licenseNumber, ssnLast4, licenseType, firstName, lastName } = req.body;
       const enrollment = await storage.updateEnrollmentHours(
         req.params.id,
         req.body.hoursCompleted || 0
       );
       
       const course = await storage.getCourse(enrollment.courseId);
+      const user = await storage.getUser(userId);
+      const studentName = firstName && lastName ? `${firstName} ${lastName}` : user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Unknown";
       
       // Trigger Sircon reporting if it's an insurance course
       if (course?.productType === "Insurance" && licenseNumber) {
@@ -72,7 +74,7 @@ export async function registerRoutes(
       }
       
       // Trigger DBPR reporting if it's a Florida real estate course
-      if (course?.productType === "RealEstate" && course?.state === "FL" && licenseNumber) {
+      if (course?.productType === "RealEstate" && course?.state === "FL") {
         const dbprStatus = await storage.createDBPRReport({
           enrollmentId: enrollment.id,
           userId,
@@ -80,9 +82,13 @@ export async function registerRoutes(
           courseTitle: course.title,
           completionDate: new Date(),
           ceHours: course.hoursRequired || 0,
-          state: course.state,
-          licenseNumber,
+          licenseNumber: licenseNumber || null,
+          ssnLast4: ssnLast4 || null,
           licenseType: (licenseType as any) || "salesperson",
+          studentName,
+          providerNumber: course.providerNumber || null,
+          courseOfferingNumber: course.courseOfferingNumber || null,
+          instructorName: course.instructorName || null,
           status: "pending",
           confirmationNumber: null,
           errorMessage: null,
