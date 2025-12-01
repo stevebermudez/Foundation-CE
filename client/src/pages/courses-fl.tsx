@@ -14,6 +14,26 @@ export default function FloridaCourses() {
 
   const freci = allCourses.find(c => c.sku === "FL-RE-PL-SA-FRECI-63");
 
+  const handleEnroll = async (courseId: string) => {
+    try {
+      const email = prompt("Enter your email address:");
+      if (!email) return;
+
+      const response = await fetch("/api/checkout/course", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId, email }),
+      });
+
+      if (!response.ok) throw new Error("Checkout failed");
+      const { url } = await response.json();
+      if (url) window.location.href = url;
+    } catch (err) {
+      console.error("Checkout error:", err);
+      alert("Failed to start checkout. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
       {/* Hero Section */}
@@ -90,13 +110,23 @@ export default function FloridaCourses() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <Button 
                     size="lg"
+                    onClick={() => handleEnroll(freci.id)}
+                    className="flex-1 h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700"
+                    data-testid="button-buy-course-fl"
+                  >
+                    Buy Now - ${(freci.price / 100).toFixed(2)}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    size="lg"
                     onClick={() => setLocation(`/course/${freci.id}`)}
+                    className="flex-1 h-14 text-lg font-semibold"
                     data-testid="button-start-course"
                   >
-                    Start Course
+                    Preview Course
                   </Button>
                 </div>
               </CardContent>
