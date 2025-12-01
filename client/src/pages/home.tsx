@@ -50,8 +50,8 @@ export default function HomePage() {
       <section className="py-24 px-4 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">
         <div className="mx-auto max-w-4xl">
           <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-              Florida Sales Associate <span className="whitespace-nowrap">Pre-licensing</span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 whitespace-nowrap overflow-hidden text-ellipsis">
+              Florida Sales Associate Pre-licensing
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               {freci?.description || "Complete 63-hour pre-licensing course for Florida real estate sales associates. Includes 60 hours of instruction across 19 units covering real estate law, practices, contracts, mortgages, and state regulations. Final 3-hour cumulative exam."}
