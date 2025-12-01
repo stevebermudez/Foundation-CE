@@ -8,6 +8,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
+import AboutPage from "@/pages/about";
+import ContactPage from "@/pages/contact";
 import CoursesFLPage from "@/pages/courses-fl";
 import CourseViewPage from "@/pages/course-view";
 import AccountSetupPage from "@/pages/account-setup";
@@ -25,6 +27,8 @@ function Router() {
       <main className="flex-1">
         <Switch>
           <Route path="/" component={HomePage} />
+          <Route path="/about" component={AboutPage} />
+          <Route path="/contact" component={ContactPage} />
           <Route path="/courses/fl" component={CoursesFLPage} />
           <Route path="/course/:id" component={CourseViewPage} />
           <Route path="/login" component={LoginPage} />
