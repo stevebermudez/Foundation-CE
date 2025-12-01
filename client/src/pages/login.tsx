@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogIn } from "lucide-react";
-import { SiGoogle, SiFacebook, SiMicrosoft } from "react-icons/si";
+import { LogIn, Globe } from "lucide-react";
+import { SiGoogle, SiFacebook } from "react-icons/si";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -54,15 +54,14 @@ export default function LoginPage() {
               </Button>
             </a>
 
-            <a href="/api/microsoft/login">
-              <Button
-                className="w-full h-12 text-base gap-2 bg-[#0078D4] hover:bg-[#006AB8] text-white"
-                data-testid="button-login-microsoft"
-              >
-                <SiMicrosoft className="h-5 w-5" />
-                Sign In with Microsoft
-              </Button>
-            </a>
+            <Button
+              disabled
+              className="w-full h-12 text-base gap-2 bg-gray-400 text-white cursor-not-allowed opacity-50"
+              data-testid="button-login-microsoft"
+            >
+              <Globe className="h-5 w-5" />
+              Sign In with Microsoft (Coming Soon)
+            </Button>
 
             <div className="pt-4">
               <p className="text-xs text-muted-foreground text-center">
