@@ -972,7 +972,7 @@ export async function registerRoutes(
     }
   });
 
-  // Video Management Routes
+  // Video Management Routes - Course Level
   app.get("/api/courses/:courseId/videos", async (req, res) => {
     try {
       const videoList = await storage.getVideos(req.params.courseId);
@@ -995,6 +995,32 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Error creating video:", err);
       res.status(500).json({ error: "Failed to create video" });
+    }
+  });
+
+  // Video Management Routes - Unit Level
+  app.get("/api/units/:unitId/videos", async (req, res) => {
+    try {
+      const videoList = await storage.getUnitVideos(req.params.unitId);
+      res.json(videoList);
+    } catch (err) {
+      console.error("Error fetching unit videos:", err);
+      res.status(500).json({ error: "Failed to fetch unit videos" });
+    }
+  });
+
+  app.post("/api/units/:unitId/videos", isAdmin, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { courseId, title, videoUrl, thumbnailUrl, description, durationMinutes } = req.body;
+      if (!courseId || !title || !videoUrl) {
+        return res.status(400).json({ error: "courseId, title and videoUrl required" });
+      }
+      const video = await storage.createVideo(courseId, user.id, title, videoUrl, thumbnailUrl, description, durationMinutes, req.params.unitId);
+      res.status(201).json(video);
+    } catch (err) {
+      console.error("Error creating unit video:", err);
+      res.status(500).json({ error: "Failed to create unit video" });
     }
   });
 

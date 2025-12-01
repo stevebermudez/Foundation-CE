@@ -397,10 +397,11 @@ export const units = pgTable("units", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Videos (reusable video assets)
+// Videos (reusable video assets - can be at course or unit level)
 export const videos = pgTable("videos", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   courseId: varchar("course_id").notNull(),
+  unitId: varchar("unit_id"),
   title: varchar("title").notNull(),
   videoUrl: varchar("video_url").notNull(),
   thumbnailUrl: varchar("thumbnail_url"),

@@ -84,8 +84,9 @@ export interface IStorage {
   adminOverrideExamAttempt(attemptId: string, score: number, passed: boolean): Promise<ExamAttempt>;
   adminOverrideUserData(userId: string, data: Partial<User>): Promise<User>;
   getVideos(courseId: string): Promise<Video[]>;
+  getUnitVideos(unitId: string): Promise<Video[]>;
   getVideo(videoId: string): Promise<Video | undefined>;
-  createVideo(courseId: string, uploadedBy: string, title: string, videoUrl: string, thumbnailUrl?: string, description?: string, durationMinutes?: number): Promise<Video>;
+  createVideo(courseId: string, uploadedBy: string, title: string, videoUrl: string, thumbnailUrl?: string, description?: string, durationMinutes?: number, unitId?: string): Promise<Video>;
   updateVideo(videoId: string, data: Partial<Video>): Promise<Video>;
   deleteVideo(videoId: string): Promise<void>;
   attachVideoToLesson(lessonId: string, videoId: string): Promise<Lesson>;
@@ -997,14 +998,19 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(videos).where(eq(videos.courseId, courseId)).orderBy(videos.createdAt);
   }
 
+  async getUnitVideos(unitId: string): Promise<Video[]> {
+    return await db.select().from(videos).where(eq(videos.unitId, unitId)).orderBy(videos.createdAt);
+  }
+
   async getVideo(videoId: string): Promise<Video | undefined> {
     const [video] = await db.select().from(videos).where(eq(videos.id, videoId));
     return video;
   }
 
-  async createVideo(courseId: string, uploadedBy: string, title: string, videoUrl: string, thumbnailUrl?: string, description?: string, durationMinutes?: number): Promise<Video> {
+  async createVideo(courseId: string, uploadedBy: string, title: string, videoUrl: string, thumbnailUrl?: string, description?: string, durationMinutes?: number, unitId?: string): Promise<Video> {
     const [video] = await db.insert(videos).values({
       courseId,
+      unitId: unitId || null,
       uploadedBy,
       title,
       videoUrl,
