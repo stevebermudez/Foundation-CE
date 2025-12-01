@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ContactPage() {
@@ -75,7 +75,7 @@ export default function ContactPage() {
       {/* Contact Section */}
       <section className="py-20 px-4">
         <div className="mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
+          <div className="grid md:grid-cols-2 gap-8 mb-12 max-w-2xl mx-auto">
             {/* Contact Info Cards */}
             <Card className="border-0 shadow-lg">
               <CardContent className="pt-8">
@@ -88,22 +88,6 @@ export default function ContactPage() {
                 <p className="text-center text-slate-600 dark:text-slate-400">
                   <a href="mailto:support@foundationce.com" className="hover:text-blue-600 dark:hover:text-blue-400" data-testid="link-email-contact">
                     support@foundationce.com
-                  </a>
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="pt-8">
-                <div className="flex items-center justify-center mb-4">
-                  <Phone className="w-12 h-12 text-purple-600 dark:text-purple-400" />
-                </div>
-                <h3 className="text-lg font-bold text-center mb-2 text-slate-900 dark:text-white">
-                  Phone
-                </h3>
-                <p className="text-center text-slate-600 dark:text-slate-400">
-                  <a href="tel:+18883334455" className="hover:text-blue-600 dark:hover:text-blue-400" data-testid="link-phone-contact">
-                    (888) 333-4455
                   </a>
                 </p>
               </CardContent>
