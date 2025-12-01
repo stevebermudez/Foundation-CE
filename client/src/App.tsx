@@ -15,6 +15,8 @@ import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
 import LoginPage from "@/pages/login";
 import SignupPage from "@/pages/signup";
+import AdminLoginPage from "@/pages/admin/login";
+import AdminDashboardPage from "@/pages/admin/dashboard";
 
 function Router() {
   return (
@@ -30,6 +32,8 @@ function Router() {
           <Route path="/account-setup" component={AccountSetupPage} />
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/compliance" component={() => <CompliancePage />} />
+          <Route path="/admin/login" component={AdminLoginPage} />
+          <Route path="/admin/dashboard" component={AdminDashboardPage} />
           <Route component={NotFound} />
         </Switch>
       </main>

@@ -1493,5 +1493,71 @@ segment1.ts
     }
   });
 
+  // Admin endpoints
+  app.get("/api/auth/is-admin", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.json({ isAdmin: false });
+      }
+      const user = req.user as any;
+      const isAdminUser = await storage.isAdmin(user.id);
+      res.json({ isAdmin: isAdminUser });
+    } catch (err) {
+      console.error("Error checking admin status:", err);
+      res.json({ isAdmin: false });
+    }
+  });
+
+  app.get("/api/admin/stats", isAdmin, async (req, res) => {
+    try {
+      const allUsers = await storage.getUsers?.() || [];
+      const allCourses = await storage.getCourses?.() || [];
+      const allEnrollments = await storage.getEnrollments?.() || [];
+      
+      res.json({
+        totalUsers: allUsers.length || 0,
+        totalCourses: allCourses.length || 0,
+        totalEnrollments: allEnrollments.length || 0,
+        completionRate: allEnrollments.length > 0 
+          ? Math.round((allEnrollments.filter((e: any) => e.completed).length / allEnrollments.length) * 100)
+          : 0,
+      });
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  app.get("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const allUsers = await storage.getUsers?.() || [];
+      res.json(allUsers.slice(0, 100));
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.get("/api/admin/enrollments", isAdmin, async (req, res) => {
+    try {
+      const allEnrollments = await storage.getEnrollments?.() || [];
+      res.json(allEnrollments.slice(0, 100));
+    } catch (err) {
+      console.error("Error fetching enrollments:", err);
+      res.status(500).json({ error: "Failed to fetch enrollments" });
+    }
+  });
+
+  app.get("/api/auth/user", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userData = await storage.getUser(user.id);
+      res.json(userData);
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      res.status(500).json({ error: "Failed to fetch user" });
+    }
+  });
+
   return httpServer;
 }
