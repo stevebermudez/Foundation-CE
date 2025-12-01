@@ -385,6 +385,57 @@ export const chatSessions = pgTable("chat_sessions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Course units (19 units in FREC I)
+export const units = pgTable("units", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id").notNull(),
+  unitNumber: integer("unit_number").notNull(), // 1-19
+  title: varchar("title").notNull(),
+  description: text("description"),
+  hoursRequired: integer("hours_required").default(3),
+  sequence: integer("sequence").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Lessons within units (3 lessons per unit)
+export const lessons = pgTable("lessons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  unitId: varchar("unit_id").notNull(),
+  lessonNumber: integer("lesson_number").notNull(),
+  title: varchar("title").notNull(),
+  videoUrl: varchar("video_url"),
+  durationMinutes: integer("duration_minutes").default(15),
+  sequence: integer("sequence").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Track user progress on lessons
+export const lessonProgress = pgTable("lesson_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull(),
+  lessonId: varchar("lesson_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  completed: integer("completed").default(0),
+  timeSpentMinutes: integer("time_spent_minutes").default(0),
+  completedAt: timestamp("completed_at"),
+  lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Certificates
+export const certificates = pgTable("certificates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  certificateNumber: varchar("certificate_number").unique().notNull(),
+  issuedDate: timestamp("issued_date").defaultNow(),
+  expirationDate: timestamp("expiration_date"),
+  certificatePdfUrl: varchar("certificate_pdf_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const chatMessages = pgTable("chat_messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   sessionId: varchar("session_id").notNull(),
