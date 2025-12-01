@@ -131,7 +131,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   In Progress ({mockEnrolledCourses.length})
                 </TabsTrigger>
                 <TabsTrigger value="completed" data-testid="tab-completed">
-                  Completed ({mockCompletedCourses.length})
+                  Completed ({completedCourses.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -164,62 +164,58 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                                 </span>
                                 <Badge variant="secondary" className="text-xs">
                                   {course.ceHours} CE Hours
-                              </Badge>
+                                </Badge>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-sm text-muted-foreground">Progress</span>
+                                <span className="text-sm font-medium">{course.progress}%</span>
+                              </div>
+                              <Progress value={course.progress} className="h-2 mb-3" />
+                              <Button size="sm" className="gap-1" data-testid={`button-continue-${course.id}`}>
+                                Continue
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-
-                          <div>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-sm text-muted-foreground">Progress</span>
-                              <span className="text-sm font-medium">{course.progress}%</span>
-                            </div>
-                            <Progress value={course.progress} className="h-2 mb-3" />
-                            <Button size="sm" className="gap-1" data-testid={`button-continue-${course.id}`}>
-                              Continue
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </div>
-                  </Card>
-                ))}
+                        </CardContent>
+                      </div>
+                    </Card>
+                  ))
+                )}
               </TabsContent>
 
               <TabsContent value="completed" className="space-y-4">
-                {mockCompletedCourses.map((course) => (
-                  <Card key={course.id} className="overflow-hidden">
-                    <div className="flex flex-col sm:flex-row">
-                      <div className="sm:w-40 h-32 sm:h-auto shrink-0 relative">
-                        <img
-                          src={course.thumbnail}
-                          alt={course.title}
-                          className="h-full w-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                          <CheckCircle className="h-10 w-10 text-green-500" />
-                        </div>
-                      </div>
-                      <CardContent className="flex-1 p-4">
+                {completedCourses.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No completed courses yet.</p>
+                  </Card>
+                ) : (
+                  completedCourses.map((enrollment: any) => (
+                    <Card key={enrollment.id} className="overflow-hidden">
+                      <CardContent className="p-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div>
-                            <h3 className="font-semibold mb-2">{course.title}</h3>
+                            <h3 className="font-semibold mb-2">{enrollment.course?.title}</h3>
                             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                              <span>Completed: {course.completedDate}</span>
+                              <span>Completed: {enrollment.completedAt ? new Date(enrollment.completedAt).toLocaleDateString() : 'Recent'}</span>
                               <Badge variant="secondary" className="text-xs">
-                                {course.ceHours} CE Hours
+                                {enrollment.course?.hoursRequired} hours
                               </Badge>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2 shrink-0" data-testid={`button-download-cert-${course.id}`}>
-                            <Download className="h-4 w-4" />
-                            Certificate
-                          </Button>
+                          {enrollment.certificateUrl && (
+                            <Button variant="outline" size="sm" className="gap-2 shrink-0" data-testid={`button-download-cert-${enrollment.id}`}>
+                              <Download className="h-4 w-4" />
+                              Certificate
+                            </Button>
+                          )}
                         </div>
                       </CardContent>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))
+                )}
               </TabsContent>
             </Tabs>
           </div>
