@@ -93,6 +93,7 @@ export interface IStorage {
   exportCourseData(courseId: string): Promise<any>;
   exportUserEnrollmentData(userId: string, courseId?: string): Promise<any>;
   exportProgressData(enrollmentId: string): Promise<any>;
+  exportRealEstateExpressFormat(enrollmentId: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1086,6 +1087,40 @@ export class DatabaseStorage implements IStorage {
       certificate: cert,
       exportedAt: new Date().toISOString(),
       formatVersion: "1.0"
+    };
+  }
+
+  async exportRealEstateExpressFormat(enrollmentId: string): Promise<any> {
+    const enrollment = await db.select().from(enrollments).where(eq(enrollments.id, enrollmentId)).then(r => r[0]);
+    if (!enrollment) throw new Error("Enrollment not found");
+    
+    const user = await this.getUser(enrollment.userId);
+    const course = await this.getCourse(enrollment.courseId);
+    const progressList = await db.select().from(lessonProgress).where(eq(lessonProgress.enrollmentId, enrollmentId));
+    const cert = await this.getCertificate(enrollmentId);
+    
+    const completedHours = progressList.filter(p => p.completed).length * 3; // Assuming 3 hours per lesson
+    
+    return {
+      // Real Estate Express compatible format
+      studentId: user?.id || "",
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+      licenseNumber: user?.licenseNumber || "",
+      courseCode: course?.sku || "",
+      courseName: course?.name || "",
+      completionStatus: enrollment.completed ? "completed" : "in_progress",
+      completionDate: cert?.issuedDate || null,
+      certificateNumber: cert?.certificateNumber || null,
+      hoursCompleted: completedHours,
+      hoursRequired: course?.hoursRequired || 0,
+      lessonsCompleted: progressList.filter(p => p.completed).length,
+      totalLessons: progressList.length,
+      progressPercentage: enrollment.progress || 0,
+      exportedAt: new Date().toISOString(),
+      formatVersion: "ree-1.0",
+      systemId: "foundationCE"
     };
   }
 }

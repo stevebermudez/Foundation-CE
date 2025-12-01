@@ -144,3 +144,25 @@ The platform is architected for seamless integration with 3rd-party LMS systems 
 - Export user progress via `/api/export/enrollment/:enrollmentId/progress` → LTI 1.3 grade sync
 - Maintain dual operation during transition period
 - All video assets remain accessible via `GET /api/videos/:videoId` endpoints
+
+### Real Estate Express Integration
+Real Estate Express specific endpoints for seamless data exchange:
+
+**Export to Real Estate Express:**
+- `GET /api/export/enrollment/:enrollmentId/ree` - Export enrollment data in Real Estate Express format
+  - Includes student ID, name, email, license number
+  - Course code (SKU), name, hours completed/required
+  - Completion status, certificate number, progress percentage
+  - Format version: "ree-1.0"
+
+**Import from Real Estate Express:**
+- `POST /api/import/ree/enrollment` - Import enrollment completion data from Real Estate Express
+  - Required: studentEmail, courseCode
+  - Optional: hoursCompleted, completed (boolean)
+  - Automatically updates enrollment status and marks complete if applicable
+
+**Use Cases:**
+- Pull student enrollments from Real Estate Express and sync to FoundationCE
+- Push completion data back to Real Estate Express after certificate generation
+- Dual operation with both platforms during transition
+- White-label support: each organization can maintain their own Real Estate Express account while using FoundationCE for delivery

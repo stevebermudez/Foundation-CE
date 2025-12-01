@@ -1106,5 +1106,51 @@ export async function registerRoutes(
     }
   });
 
+  // Real Estate Express LMS Integration
+  app.get("/api/export/enrollment/:enrollmentId/ree", isAuthenticated, async (req, res) => {
+    try {
+      const data = await storage.exportRealEstateExpressFormat(req.params.enrollmentId);
+      res.json(data);
+    } catch (err) {
+      console.error("Error exporting Real Estate Express data:", err);
+      res.status(500).json({ error: "Failed to export Real Estate Express format" });
+    }
+  });
+
+  app.post("/api/import/ree/enrollment", isAdmin, async (req, res) => {
+    try {
+      const { studentEmail, courseCode, hoursCompleted, completed } = req.body;
+      if (!studentEmail || !courseCode) {
+        return res.status(400).json({ error: "studentEmail and courseCode required" });
+      }
+      
+      const user = await storage.getUserByEmail(studentEmail);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const courseList = await db.select().from(courses).where(eq(courses.sku, courseCode));
+      if (courseList.length === 0) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      const enrollment = await storage.getEnrollment(user.id, courseList[0].id);
+      if (!enrollment) {
+        return res.status(404).json({ error: "Enrollment not found" });
+      }
+      
+      const updated = await storage.adminOverrideEnrollmentData(enrollment.id, {
+        hoursCompleted: hoursCompleted ? Number(hoursCompleted) : undefined,
+        completed: completed ? 1 : 0,
+        completedAt: completed ? new Date() : undefined
+      });
+      
+      res.json({ message: "Enrollment imported from Real Estate Express", enrollment: updated });
+    } catch (err) {
+      console.error("Error importing Real Estate Express data:", err);
+      res.status(500).json({ error: "Failed to import Real Estate Express enrollment" });
+    }
+  });
+
   return httpServer;
 }
