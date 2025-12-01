@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminCoursesPage from "./courses";
+import AdminUnitsLessonsPage from "./units-lessons";
+import AdminExamsPage from "./exams";
 import {
   BarChart3,
   Users,
@@ -306,6 +308,8 @@ export default function AdminDashboardPage() {
           <TabsContent value="courses">
             <AdminCoursesPage />
           </TabsContent>
+
+          {/* Units & Exams would go in dedicated pages - for now show in dashboard */}
 
           {/* Enrollments Tab */}
           <TabsContent value="enrollments">

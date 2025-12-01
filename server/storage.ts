@@ -15,6 +15,9 @@ export interface IStorage {
   deleteCourse?(courseId: string): Promise<void>;
   getUsers?(): Promise<User[]>;
   getEnrollments?(): Promise<Enrollment[]>;
+  createPracticeExam?(data: any): Promise<PracticeExam>;
+  createExamQuestion?(data: any): Promise<ExamQuestion>;
+  getPracticeExams?(courseId: string): Promise<PracticeExam[]>;
   getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined>;
   createComplianceRequirement(requirement: Omit<ComplianceRequirement, 'id' | 'updatedAt'>): Promise<ComplianceRequirement>;
   updateEnrollmentHours(enrollmentId: string, hoursCompleted: number): Promise<Enrollment>;
