@@ -74,6 +74,10 @@ export async function setupAuth(app: Express) {
       passport.authenticate("google", { failureRedirect: "/login" }),
       (req, res) => res.redirect("/dashboard")
     );
+  } else {
+    app.get("/api/google/login", (req, res) => {
+      res.status(500).json({ error: "Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET." });
+    });
   }
 
   // Facebook OAuth
@@ -103,6 +107,10 @@ export async function setupAuth(app: Express) {
       passport.authenticate("facebook", { failureRedirect: "/login" }),
       (req, res) => res.redirect("/dashboard")
     );
+  } else {
+    app.get("/api/facebook/login", (req, res) => {
+      res.status(500).json({ error: "Facebook OAuth not configured. Please set FACEBOOK_APP_ID and FACEBOOK_APP_SECRET." });
+    });
   }
 
   // Microsoft OAuth - Coming soon, requires additional setup
