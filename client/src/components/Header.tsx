@@ -60,6 +60,18 @@ export default function Header() {
     checkAuth();
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      window.location.href = "/api/logout";
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
+  const handleProfileClick = () => {
+    setLocation("/account-setup");
+  };
+
   const navItems = [
     { label: "Courses", href: "/courses/fl", icon: BookOpen },
     { label: "My Courses", href: "/dashboard", icon: GraduationCap },
@@ -114,57 +126,67 @@ export default function Header() {
               )}
             </Button>
 
-            <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
-                  <Bell className="h-4 w-4" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
-                    3
-                  </span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-80">
-                <div className="space-y-4">
-                  <div className="font-semibold">Notifications</div>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
-                      <p className="font-medium">New course available</p>
-                      <p className="text-xs text-muted-foreground">Advanced Real Estate Law just released</p>
+            {user ? (
+              <>
+                <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
+                      <Bell className="h-4 w-4" />
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
+                        3
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80">
+                    <div className="space-y-4">
+                      <div className="font-semibold">Notifications</div>
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
+                          <p className="font-medium">New course available</p>
+                          <p className="text-xs text-muted-foreground">Advanced Real Estate Law just released</p>
+                        </div>
+                        <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
+                          <p className="font-medium">Certificate expiring soon</p>
+                          <p className="text-xs text-muted-foreground">Your Florida CE certificate expires in 30 days</p>
+                        </div>
+                        <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
+                          <p className="font-medium">Exam results ready</p>
+                          <p className="text-xs text-muted-foreground">You scored 92% on the Ethics exam</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
-                      <p className="font-medium">Certificate expiring soon</p>
-                      <p className="text-xs text-muted-foreground">Your Florida CE certificate expires in 30 days</p>
-                    </div>
-                    <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
-                      <p className="font-medium">Exam results ready</p>
-                      <p className="text-xs text-muted-foreground">You scored 92% on the Ethics exam</p>
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+                  </PopoverContent>
+                </Popover>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" data-testid="button-user-menu">
-                  <User className="h-4 w-4" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" data-testid="button-user-menu">
+                      <User className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleProfileClick} data-testid="menu-item-profile">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleProfileClick} data-testid="menu-item-settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout} data-testid="menu-item-logout">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <Link href="/login">
+                <Button variant="default" size="sm" data-testid="button-login">
+                  Sign In
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem data-testid="menu-item-profile">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem data-testid="menu-item-settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem data-testid="menu-item-logout">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </Link>
+            )}
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild className="md:hidden">

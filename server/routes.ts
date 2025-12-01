@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { getUncachableStripeClient } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
+import { isAuthenticated } from "./replitAuth";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -30,6 +31,27 @@ export async function registerRoutes(
   } catch (err: any) {
     console.error("Error with FREC I seeding:", err);
   }
+  // Auth Routes
+  app.get("/api/user", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user) return res.status(401).json({ message: "Not authenticated" });
+      
+      const userData = await storage.getUser(user.claims?.sub);
+      res.json({
+        id: user.claims?.sub,
+        email: user.claims?.email,
+        firstName: user.claims?.first_name,
+        lastName: user.claims?.last_name,
+        profileImageUrl: user.claims?.profile_image_url,
+        ...userData
+      });
+    } catch (err) {
+      console.error("Error fetching user:", err);
+      res.status(500).json({ error: "Failed to fetch user" });
+    }
+  });
+
   // Course Routes
   app.get("/api/courses", async (req, res) => {
     const courses = await storage.getCourses({
