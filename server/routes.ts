@@ -1189,5 +1189,55 @@ export async function registerRoutes(
     }
   });
 
+  // All Users Data Export
+  app.get("/api/export/users/data.json", isAdmin, async (req, res) => {
+    try {
+      const jsonContent = await storage.exportAllUsersData();
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", `attachment; filename="users-data-${new Date().toISOString().split('T')[0]}.json"`);
+      res.send(jsonContent);
+    } catch (err) {
+      console.error("Error exporting users data:", err);
+      res.status(500).json({ error: "Failed to export users data" });
+    }
+  });
+
+  app.get("/api/export/users/data.csv", isAdmin, async (req, res) => {
+    try {
+      const csvContent = await storage.exportAllUsersDataCSV();
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="users-data-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (err) {
+      console.error("Error exporting users data as CSV:", err);
+      res.status(500).json({ error: "Failed to export users data" });
+    }
+  });
+
+  // Email Campaign Data Export
+  app.get("/api/export/campaigns/data.json", isAdmin, async (req, res) => {
+    try {
+      const jsonContent = await storage.exportEmailCampaignData();
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("Content-Disposition", `attachment; filename="campaigns-data-${new Date().toISOString().split('T')[0]}.json"`);
+      res.send(jsonContent);
+    } catch (err) {
+      console.error("Error exporting campaign data:", err);
+      res.status(500).json({ error: "Failed to export campaign data" });
+    }
+  });
+
+  app.get("/api/export/campaigns/data.csv", isAdmin, async (req, res) => {
+    try {
+      const csvContent = await storage.exportEmailCampaignDataCSV();
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="campaigns-data-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send(csvContent);
+    } catch (err) {
+      console.error("Error exporting campaign data as CSV:", err);
+      res.status(500).json({ error: "Failed to export campaign data" });
+    }
+  });
+
   return httpServer;
 }

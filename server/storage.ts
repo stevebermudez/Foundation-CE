@@ -97,6 +97,10 @@ export interface IStorage {
   exportCourseContentJSON(courseId: string): Promise<string>;
   exportCourseContentCSV(courseId: string): Promise<string>;
   exportCourseContentDocx(courseId: string): Promise<Buffer>;
+  exportAllUsersData(): Promise<string>;
+  exportAllUsersDataCSV(): Promise<string>;
+  exportEmailCampaignData(): Promise<string>;
+  exportEmailCampaignDataCSV(): Promise<string>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1330,6 +1334,77 @@ export class DatabaseStorage implements IStorage {
     });
     
     return await Packer.toBuffer(doc);
+  }
+
+  async exportAllUsersData(): Promise<string> {
+    const userList = await db.select().from(users);
+    const enrichedUsers = await Promise.all(userList.map(async (user) => {
+      const enrollmentList = await db.select().from(enrollments).where(eq(enrollments.userId, user.id));
+      return {
+        ...user,
+        enrollments: enrollmentList
+      };
+    }));
+    
+    return JSON.stringify({
+      totalUsers: userList.length,
+      users: enrichedUsers,
+      exportedAt: new Date().toISOString(),
+      formatVersion: "1.0"
+    }, null, 2);
+  }
+
+  async exportAllUsersDataCSV(): Promise<string> {
+    const userList = await db.select().from(users);
+    let csv = "User ID,Email,First Name,Last Name,License Number,Total Enrollments,Created At\n";
+    
+    for (const user of userList) {
+      const enrollmentCount = await db.select().from(enrollments).where(eq(enrollments.userId, user.id)).then(r => r.length);
+      csv += `"${user.id}","${user.email || ''}","${user.firstName || ''}","${user.lastName || ''}","${user.licenseNumber || ''}",${enrollmentCount},"${user.createdAt || ''}"\n`;
+    }
+    
+    return csv;
+  }
+
+  async exportEmailCampaignData(): Promise<string> {
+    const campaignList = await db.select().from(emailCampaigns);
+    const enrichedCampaigns = await Promise.all(campaignList.map(async (campaign) => {
+      const recipients = await this.getEmailRecipients(campaign.id);
+      const stats = await this.getCampaignStats(campaign.id);
+      return {
+        campaign,
+        recipients: recipients.length,
+        uniqueOpens: stats.tracking.filter((t: any) => t.action === 'open').length,
+        uniqueClicks: stats.tracking.filter((t: any) => t.action === 'click').length,
+        openRate: recipients.length > 0 ? ((stats.tracking.filter((t: any) => t.action === 'open').length / recipients.length) * 100).toFixed(2) : "0",
+        clickRate: recipients.length > 0 ? ((stats.tracking.filter((t: any) => t.action === 'click').length / recipients.length) * 100).toFixed(2) : "0"
+      };
+    }));
+    
+    return JSON.stringify({
+      totalCampaigns: campaignList.length,
+      campaigns: enrichedCampaigns,
+      exportedAt: new Date().toISOString(),
+      formatVersion: "1.0"
+    }, null, 2);
+  }
+
+  async exportEmailCampaignDataCSV(): Promise<string> {
+    const campaignList = await db.select().from(emailCampaigns);
+    let csv = "Campaign ID,Campaign Name,Total Recipients,Unique Opens,Unique Clicks,Open Rate %,Click Rate %,Created At\n";
+    
+    for (const campaign of campaignList) {
+      const stats = await this.getCampaignStats(campaign.id);
+      const recipients = stats.recipients.length;
+      const opens = stats.tracking.filter((t: any) => t.action === 'open').length;
+      const clicks = stats.tracking.filter((t: any) => t.action === 'click').length;
+      const openRate = recipients > 0 ? ((opens / recipients) * 100).toFixed(2) : "0";
+      const clickRate = recipients > 0 ? ((clicks / recipients) * 100).toFixed(2) : "0";
+      
+      csv += `"${campaign.id}","${campaign.name || ''}",${recipients},${opens},${clicks},${openRate},${clickRate},"${campaign.createdAt || ''}"\n`;
+    }
+    
+    return csv;
   }
 }
 
