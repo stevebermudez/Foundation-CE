@@ -488,3 +488,23 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+
+// Unit Zod schemas
+export const insertUnitSchema = createInsertSchema(units).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertUnit = z.infer<typeof insertUnitSchema>;
+
+export const updateUnitSchema = insertUnitSchema.partial();
+export type UpdateUnit = z.infer<typeof updateUnitSchema>;
+
+// Lesson Zod schemas
+export const insertLessonSchema = createInsertSchema(lessons).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertLesson = z.infer<typeof insertLessonSchema>;
+
+export const updateLessonSchema = insertLessonSchema.partial();
+export type UpdateLesson = z.infer<typeof updateLessonSchema>;

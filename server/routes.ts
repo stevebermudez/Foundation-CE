@@ -819,5 +819,95 @@ export async function registerRoutes(
     }
   });
 
+  // Unit Management Routes
+  app.get("/api/courses/:courseId/units", async (req, res) => {
+    try {
+      const units = await storage.getUnits(req.params.courseId);
+      res.json(units);
+    } catch (err) {
+      console.error("Error fetching units:", err);
+      res.status(500).json({ error: "Failed to fetch units" });
+    }
+  });
+
+  app.post("/api/courses/:courseId/units", isAdmin, async (req, res) => {
+    try {
+      const { unitNumber, title, description, hoursRequired } = req.body;
+      if (!unitNumber || !title) {
+        return res.status(400).json({ error: "unitNumber and title required" });
+      }
+      const unit = await storage.createUnit(req.params.courseId, unitNumber, title, description, hoursRequired);
+      res.status(201).json(unit);
+    } catch (err) {
+      console.error("Error creating unit:", err);
+      res.status(500).json({ error: "Failed to create unit" });
+    }
+  });
+
+  app.patch("/api/units/:unitId", isAdmin, async (req, res) => {
+    try {
+      const unit = await storage.updateUnit(req.params.unitId, req.body);
+      res.json(unit);
+    } catch (err) {
+      console.error("Error updating unit:", err);
+      res.status(500).json({ error: "Failed to update unit" });
+    }
+  });
+
+  app.delete("/api/units/:unitId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteUnit(req.params.unitId);
+      res.json({ message: "Unit deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting unit:", err);
+      res.status(500).json({ error: "Failed to delete unit" });
+    }
+  });
+
+  // Lesson Management Routes
+  app.get("/api/units/:unitId/lessons", async (req, res) => {
+    try {
+      const lessons = await storage.getLessons(req.params.unitId);
+      res.json(lessons);
+    } catch (err) {
+      console.error("Error fetching lessons:", err);
+      res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
+
+  app.post("/api/units/:unitId/lessons", isAdmin, async (req, res) => {
+    try {
+      const { lessonNumber, title, videoUrl, durationMinutes } = req.body;
+      if (!lessonNumber || !title) {
+        return res.status(400).json({ error: "lessonNumber and title required" });
+      }
+      const lesson = await storage.createLesson(req.params.unitId, lessonNumber, title, videoUrl, durationMinutes);
+      res.status(201).json(lesson);
+    } catch (err) {
+      console.error("Error creating lesson:", err);
+      res.status(500).json({ error: "Failed to create lesson" });
+    }
+  });
+
+  app.patch("/api/lessons/:lessonId", isAdmin, async (req, res) => {
+    try {
+      const lesson = await storage.updateLesson(req.params.lessonId, req.body);
+      res.json(lesson);
+    } catch (err) {
+      console.error("Error updating lesson:", err);
+      res.status(500).json({ error: "Failed to update lesson" });
+    }
+  });
+
+  app.delete("/api/lessons/:lessonId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteLesson(req.params.lessonId);
+      res.json({ message: "Lesson deleted successfully" });
+    } catch (err) {
+      console.error("Error deleting lesson:", err);
+      res.status(500).json({ error: "Failed to delete lesson" });
+    }
+  });
+
   return httpServer;
 }

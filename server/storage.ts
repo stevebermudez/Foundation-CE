@@ -73,6 +73,12 @@ export interface IStorage {
   getCertificate(enrollmentId: string): Promise<Certificate | undefined>;
   isAdmin(userId: string): Promise<boolean>;
   adminOverrideEnrollment(enrollmentId: string, hoursCompleted: number, completed: boolean): Promise<Enrollment>;
+  createUnit(courseId: string, unitNumber: number, title: string, description?: string, hoursRequired?: number): Promise<Unit>;
+  updateUnit(unitId: string, data: Partial<Unit>): Promise<Unit>;
+  deleteUnit(unitId: string): Promise<void>;
+  createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number): Promise<Lesson>;
+  updateLesson(lessonId: string, data: Partial<Lesson>): Promise<Lesson>;
+  deleteLesson(lessonId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -901,6 +907,47 @@ export class DatabaseStorage implements IStorage {
       progress: 100
     }).where(eq(enrollments.id, enrollmentId)).returning();
     return updated;
+  }
+
+  async createUnit(courseId: string, unitNumber: number, title: string, description?: string, hoursRequired?: number): Promise<Unit> {
+    const [unit] = await db.insert(units).values({
+      courseId,
+      unitNumber,
+      title,
+      description: description || null,
+      hoursRequired: hoursRequired || 3
+    }).returning();
+    return unit;
+  }
+
+  async updateUnit(unitId: string, data: Partial<Unit>): Promise<Unit> {
+    const [updated] = await db.update(units).set(data).where(eq(units.id, unitId)).returning();
+    return updated;
+  }
+
+  async deleteUnit(unitId: string): Promise<void> {
+    await db.delete(lessons).where(eq(lessons.unitId, unitId));
+    await db.delete(units).where(eq(units.id, unitId));
+  }
+
+  async createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number): Promise<Lesson> {
+    const [lesson] = await db.insert(lessons).values({
+      unitId,
+      lessonNumber,
+      title,
+      videoUrl: videoUrl || null,
+      durationMinutes: durationMinutes || 15
+    }).returning();
+    return lesson;
+  }
+
+  async updateLesson(lessonId: string, data: Partial<Lesson>): Promise<Lesson> {
+    const [updated] = await db.update(lessons).set(data).where(eq(lessons.id, lessonId)).returning();
+    return updated;
+  }
+
+  async deleteLesson(lessonId: string): Promise<void> {
+    await db.delete(lessons).where(eq(lessons.id, lessonId));
   }
 }
 
