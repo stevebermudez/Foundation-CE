@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getUncachableStripeClient } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
+import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -393,6 +394,19 @@ export async function registerRoutes(
       console.error("Webhook error:", err);
       res.status(500).json({ error: "Webhook processing failed" });
     }
+  });
+
+  // PayPal Blueprint Routes (DO NOT MODIFY)
+  app.get("/paypal/setup", async (req, res) => {
+    await loadPaypalDefault(req, res);
+  });
+
+  app.post("/paypal/order", async (req, res) => {
+    await createPaypalOrder(req, res);
+  });
+
+  app.post("/paypal/order/:orderID/capture", async (req, res) => {
+    await capturePaypalOrder(req, res);
   });
 
   // Course Bundle Routes
