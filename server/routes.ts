@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { getUncachableStripeClient } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
-import { isAuthenticated } from "./replitAuth";
+import { isAuthenticated } from "./oauthAuth";
 
 export async function registerRoutes(
   httpServer: Server,
