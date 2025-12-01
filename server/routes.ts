@@ -269,7 +269,7 @@ export async function registerRoutes(
 
       const stripe = await getUncachableStripeClient();
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
+        payment_method_types: ["card", "apple_pay", "google_pay"],
         line_items: [
           {
             price_data: {
@@ -297,6 +297,101 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Checkout error:", err);
       res.status(500).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  // Create Payment Intent for direct payment (supports Apple Pay, Google Pay, Cards)
+  app.post("/api/payment/create-intent", async (req, res) => {
+    try {
+      const { courseId, email, amount } = req.body;
+      if (!courseId || !email || !amount) {
+        return res.status(400).json({ error: "courseId, email, and amount required" });
+      }
+
+      const course = await storage.getCourse(courseId);
+      if (!course) return res.status(404).json({ error: "Course not found" });
+
+      const stripe = await getUncachableStripeClient();
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100),
+        currency: "usd",
+        payment_method_types: ["card", "apple_pay", "google_pay"],
+        metadata: {
+          courseId,
+          email,
+        },
+        description: `Payment for ${course.title}`,
+      });
+
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        intentId: paymentIntent.id,
+        publishableKey: await getStripePublishableKey(),
+      });
+    } catch (err) {
+      console.error("Payment intent creation error:", err);
+      res.status(500).json({ error: "Failed to create payment intent" });
+    }
+  });
+
+  // Confirm Payment Intent (for Apple Pay/Google Pay completion)
+  app.post("/api/payment/confirm-intent", async (req, res) => {
+    try {
+      const { intentId, paymentMethodId } = req.body;
+      if (!intentId) {
+        return res.status(400).json({ error: "intentId required" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const paymentIntent = await stripe.paymentIntents.confirm(intentId, {
+        payment_method: paymentMethodId,
+      });
+
+      res.json({
+        status: paymentIntent.status,
+        intentId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret,
+      });
+    } catch (err) {
+      console.error("Payment confirmation error:", err);
+      res.status(500).json({ error: "Failed to confirm payment" });
+    }
+  });
+
+  // Webhook for payment completion (Apple Pay/Google Pay)
+  app.post("/api/payment/webhook", async (req, res) => {
+    try {
+      const { intentId, status, courseId, email } = req.body;
+      if (!intentId || !status || !courseId || !email) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      if (status === "succeeded") {
+        const user = await storage.getUserByEmail(email);
+        if (!user) {
+          const newUser = await storage.upsertUser({
+            id: `user-${Date.now()}`,
+            email,
+            firstName: "",
+            lastName: "",
+          });
+        }
+
+        const existingUser = await storage.getUserByEmail(email);
+        const enrollment = await storage.createEnrollment(existingUser!.id, courseId, {
+          progress: 0,
+          completed: 0,
+          hoursCompleted: 0,
+          completedAt: null,
+        });
+
+        res.json({ success: true, enrollment });
+      } else {
+        res.status(400).json({ error: "Payment did not succeed" });
+      }
+    } catch (err) {
+      console.error("Webhook error:", err);
+      res.status(500).json({ error: "Webhook processing failed" });
     }
   });
 
