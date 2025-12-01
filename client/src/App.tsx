@@ -13,6 +13,7 @@ import CourseViewPage from "@/pages/course-view";
 import AccountSetupPage from "@/pages/account-setup";
 import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
+import LoginPage from "@/pages/login";
 
 function Router() {
   return (
@@ -23,6 +24,7 @@ function Router() {
           <Route path="/" component={HomePage} />
           <Route path="/courses/fl" component={CoursesFLPage} />
           <Route path="/course/:id" component={CourseViewPage} />
+          <Route path="/login" component={LoginPage} />
           <Route path="/account-setup" component={AccountSetupPage} />
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/compliance" component={() => <CompliancePage />} />
