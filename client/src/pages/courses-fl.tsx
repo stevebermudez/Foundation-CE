@@ -68,73 +68,75 @@ export default function FloridaCourses() {
       </div>
 
       {/* Course Details */}
-      {freci && (
-        <section className="py-16 px-4">
-          <div className="mx-auto max-w-7xl">
-            <Card className="border-2 border-blue-200 shadow-lg hover-elevate">
-              <CardHeader>
-                <div className="flex items-start justify-between">
+      <section className="py-16 px-4">
+        <div className="mx-auto max-w-7xl">
+          <Card className="border-2 border-blue-200 shadow-lg hover-elevate">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-2xl">
+                    {freci?.title || "Florida Sales Associate Prelicensing (FREC I)"}
+                  </CardTitle>
+                  <CardDescription className="mt-2 text-base">
+                    {freci?.description || "Complete 63-hour pre-licensing course for Florida real estate sales associates"}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid sm:grid-cols-4 gap-6 mb-6">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-blue-600" />
                   <div>
-                    <CardTitle className="text-2xl">{freci.title}</CardTitle>
-                    <CardDescription className="mt-2 text-base">{freci.description}</CardDescription>
+                    <p className="text-sm text-muted-foreground">Duration</p>
+                    <p className="font-semibold">{freci?.hoursRequired || 63} Hours</p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid sm:grid-cols-4 gap-6 mb-6">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Duration</p>
-                      <p className="font-semibold">{freci.hoursRequired} Hours</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Units</p>
-                      <p className="font-semibold">19 Units</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 text-blue-600">✓</div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Practice Exams</p>
-                      <p className="font-semibold">380 Questions</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Price</p>
-                      <p className="font-semibold">${(freci.price / 100).toFixed(2)}</p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <BookOpen className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Units</p>
+                    <p className="font-semibold">19 Units</p>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Button 
-                    size="lg"
-                    onClick={() => handleEnroll(freci.id)}
-                    className="flex-1 h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700"
-                    data-testid="button-buy-course-fl"
-                  >
-                    Buy Now - ${(freci.price / 100).toFixed(2)}
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    size="lg"
-                    onClick={() => setLocation(`/course/${freci.id}`)}
-                    className="flex-1 h-14 text-lg font-semibold"
-                    data-testid="button-start-course"
-                  >
-                    Preview Course
-                  </Button>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 text-blue-600">✓</div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Practice Exams</p>
+                    <p className="font-semibold">380 Questions</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-      )}
+                <div className="flex items-center gap-3">
+                  <DollarSign className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Price</p>
+                    <p className="font-semibold">${((freci?.price || 5999) / 100).toFixed(2)}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  size="lg"
+                  onClick={() => freci && handleEnroll(freci.id)}
+                  className="flex-1 h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700"
+                  data-testid="button-buy-course-fl"
+                >
+                  Buy Now - ${((freci?.price || 5999) / 100).toFixed(2)}
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  onClick={() => freci && setLocation(`/course/${freci.id}`)}
+                  className="flex-1 h-14 text-lg font-semibold"
+                  data-testid="button-start-course"
+                >
+                  Preview Course
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 }
