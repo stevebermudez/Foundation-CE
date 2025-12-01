@@ -39,14 +39,14 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight tracking-tight">
-            CE & Prelicensing,
+            CE & Pre-licensing,
             <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Simplified
             </span>
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-white/85 mb-6 sm:mb-8 leading-relaxed max-w-2xl">
-            Florida real estate prelicensing and continuing education with video lessons and instant certificates.
+            Florida real estate pre-licensing and continuing education with video lessons and instant certificates.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">

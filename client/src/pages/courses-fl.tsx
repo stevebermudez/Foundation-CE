@@ -41,8 +41,8 @@ export default function FloridaCourses() {
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-16 px-4 mb-12">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-4xl">
-            <h1 className="text-5xl font-bold mb-4">Florida Sales Associate Prelicensing</h1>
-            <p className="text-xl text-white/90 mb-6">Complete your 63-hour prelicensing requirement and get licensed in Florida real estate</p>
+            <h1 className="text-5xl font-bold mb-4">Florida Sales Associate Pre-licensing</h1>
+            <p className="text-xl text-white/90 mb-6">Complete your 63-hour pre-licensing requirement and get licensed in Florida real estate</p>
             <div className="grid sm:grid-cols-3 gap-4">
               <Card className="bg-white/10 backdrop-blur border-white/20">
                 <CardContent className="pt-6">
@@ -75,7 +75,7 @@ export default function FloridaCourses() {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-2xl">
-                    {freci?.title || "Florida Sales Associate Prelicensing (FREC I)"}
+                    {freci?.title || "Florida Sales Associate Pre-licensing (FREC I)"}
                   </CardTitle>
                   <CardDescription className="mt-2 text-base">
                     {freci?.description || "Complete 63-hour pre-licensing course for Florida real estate sales associates"}

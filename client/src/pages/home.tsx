@@ -52,7 +52,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-4xl">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-                Florida Sales Associate Prelicensing
+                Florida Sales Associate Pre-licensing
               </h2>
               <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
                 {freci.description}
