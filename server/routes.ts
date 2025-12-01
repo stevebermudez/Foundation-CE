@@ -90,8 +90,8 @@ export async function registerRoutes(
     try {
       const { email, password, firstName, lastName } = req.body;
       
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email and password required" });
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ error: "All fields are required" });
       }
 
       const existingUser = await storage.getUserByEmail(email);
@@ -102,17 +102,16 @@ export async function registerRoutes(
       const crypto = await import("crypto");
       const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
       
-      const user = await storage.upsertUser({
-        id: `email:${email}`,
+      const newUser = await storage.upsertUser({
         email,
         passwordHash,
-        firstName: firstName || "",
-        lastName: lastName || "",
+        firstName,
+        lastName,
       });
 
-      req.login({ id: user.id }, (err) => {
+      req.login({ id: newUser.id }, (err) => {
         if (err) return res.status(500).json({ error: "Login failed" });
-        res.json({ message: "Signup successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
+        res.json({ message: "Signup successful", user: { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName } });
       });
     } catch (err) {
       console.error("Signup error:", err);

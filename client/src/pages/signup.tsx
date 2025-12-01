@@ -27,8 +27,8 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password) {
-      toast({ title: "Error", description: "Email and password required", variant: "destructive" });
+    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+      toast({ title: "Error", description: "All fields are required", variant: "destructive" });
       return;
     }
 
@@ -82,7 +82,7 @@ export default function SignupPage() {
           <CardContent>
             <form onSubmit={handleSignup} className="space-y-4">
               <div>
-                <Label htmlFor="firstName">First Name (Optional)</Label>
+                <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
                   name="firstName"
@@ -91,11 +91,12 @@ export default function SignupPage() {
                   value={formData.firstName}
                   onChange={handleChange}
                   data-testid="input-first-name"
+                  required
                 />
               </div>
 
               <div>
-                <Label htmlFor="lastName">Last Name (Optional)</Label>
+                <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
                   name="lastName"
@@ -104,6 +105,7 @@ export default function SignupPage() {
                   value={formData.lastName}
                   onChange={handleChange}
                   data-testid="input-last-name"
+                  required
                 />
               </div>
 
