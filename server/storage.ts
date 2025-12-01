@@ -10,6 +10,11 @@ export interface IStorage {
   createEnrollment(userId: string, courseId: string): Promise<Enrollment>;
   getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
+  createCourse?(courseData: any): Promise<Course>;
+  updateCourse?(courseId: string, data: Partial<Course>): Promise<Course | undefined>;
+  deleteCourse?(courseId: string): Promise<void>;
+  getUsers?(): Promise<User[]>;
+  getEnrollments?(): Promise<Enrollment[]>;
   getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined>;
   createComplianceRequirement(requirement: Omit<ComplianceRequirement, 'id' | 'updatedAt'>): Promise<ComplianceRequirement>;
   updateEnrollmentHours(enrollmentId: string, hoursCompleted: number): Promise<Enrollment>;

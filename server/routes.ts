@@ -1559,5 +1559,53 @@ segment1.ts
     }
   });
 
+  // Course Management Admin Routes
+  app.post("/api/admin/courses", isAdmin, async (req, res) => {
+    try {
+      const courseData = req.body;
+      const course = await storage.createCourse?.(courseData);
+      res.status(201).json(course);
+    } catch (err) {
+      console.error("Error creating course:", err);
+      res.status(500).json({ error: "Failed to create course" });
+    }
+  });
+
+  app.get("/api/admin/courses", isAdmin, async (req, res) => {
+    try {
+      const allCourses = await storage.getCourses?.() || [];
+      res.json(allCourses.slice(0, 500));
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+      res.status(500).json({ error: "Failed to fetch courses" });
+    }
+  });
+
+  app.patch("/api/admin/courses/:courseId", isAdmin, async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const course = await storage.updateCourse?.(courseId, req.body);
+      if (!course) return res.status(404).json({ error: "Course not found" });
+      res.json(course);
+    } catch (err) {
+      console.error("Error updating course:", err);
+      res.status(500).json({ error: "Failed to update course" });
+    }
+  });
+
+  app.delete("/api/admin/courses/:courseId", isAdmin, async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      await storage.deleteCourse?.(courseId);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting course:", err);
+      res.status(500).json({ error: "Failed to delete course" });
+    }
+  });
+
   return httpServer;
 }
+
+  // Course Management Admin Routes
+  app.post("/api/admin/courses", isAdmin, async (req, res) => {

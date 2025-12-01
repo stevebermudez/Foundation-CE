@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import AdminCoursesPage from "./courses";
 import {
   BarChart3,
   Users,
@@ -204,11 +205,11 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="overview" data-testid="tab-admin-overview">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="users" data-testid="tab-admin-users">
-              Users
-            </TabsTrigger>
             <TabsTrigger value="courses" data-testid="tab-admin-courses">
               Courses
+            </TabsTrigger>
+            <TabsTrigger value="users" data-testid="tab-admin-users">
+              Users
             </TabsTrigger>
             <TabsTrigger value="enrollments" data-testid="tab-admin-enrollments">
               Enrollments
@@ -303,27 +304,7 @@ export default function AdminDashboardPage() {
 
           {/* Courses Tab */}
           <TabsContent value="courses">
-            <Card data-testid="card-courses-list">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Course Management</CardTitle>
-                  <Button size="sm" data-testid="button-create-new-course">Create Course</Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {courses.slice(0, 5).map((course: any, idx: number) => (
-                    <div key={course.id || idx} className="p-4 border rounded-lg flex items-center justify-between hover:bg-muted/50" data-testid={`course-row-${idx}`}>
-                      <div>
-                        <p className="font-semibold">{course.title}</p>
-                        <p className="text-sm text-muted-foreground">{course.hoursRequired} hours • {course.state}</p>
-                      </div>
-                      <Button size="sm" variant="outline">Edit</Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <AdminCoursesPage />
           </TabsContent>
 
           {/* Enrollments Tab */}
