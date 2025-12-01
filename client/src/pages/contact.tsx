@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, MapPin, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ContactPage() {
+  usePageMeta({
+    title: "Contact Us - Get Help with Your CE Requirements",
+    description: "Contact FoundationCE with questions about our real estate pre-licensing and continuing education courses. Reach our team at support@foundationce.com.",
+  });
   const [formData, setFormData] = useState({
     name: "",
     email: "",

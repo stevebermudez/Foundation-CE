@@ -1,7 +1,12 @@
+import { usePageMeta } from "@/hooks/use-page-meta";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Lightbulb, Users, Target } from "lucide-react";
 
 export default function AboutPage() {
+  usePageMeta({
+    title: "About FoundationCE - Modern Real Estate Education",
+    description: "Founded by tenured real estate brokers who reimagined continuing education with modern technology, engaging content, and professional-grade learning experience.",
+  });
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-950 dark:to-slate-900">
       {/* Hero Section */}

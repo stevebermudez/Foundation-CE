@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { usePageMeta } from "@/hooks/use-page-meta";
 import Hero from "@/components/Hero";
 import FeaturesSection from "@/components/FeaturesSection";
 import TrustBadges from "@/components/TrustBadges";
@@ -10,6 +11,12 @@ import type { SelectCourse } from "@shared/schema";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
+
+  usePageMeta({
+    title: "Florida Real Estate Pre-licensing & CE Courses",
+    description: "Complete your Florida real estate pre-licensing (FREC I) and continuing education requirements with FoundationCE. 63-hour course with practice exams and instant certificate.",
+    ogDescription: "Professional continuing education for real estate professionals. State-approved courses in California and Florida with modern learning experience.",
+  });
 
   const { data: allCourses = [] } = useQuery<SelectCourse[]>({
     queryKey: ["/api/courses"],
