@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -25,6 +25,9 @@ export interface IStorage {
   createSirconReport(report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<SirconReport>;
   getSirconReport(enrollmentId: string): Promise<SirconReport | undefined>;
   updateSirconReport(id: string, data: Partial<SirconReport>): Promise<SirconReport>;
+  createDBPRReport(report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<SirconReport>;
+  getDBPRReport(enrollmentId: string): Promise<SirconReport | undefined>;
+  updateDBPRReport(id: string, data: Partial<SirconReport>): Promise<SirconReport>;
   createUserLicense(license: Omit<UserLicense, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserLicense>;
   getUserLicenses(userId: string): Promise<UserLicense[]>;
   updateUserLicense(id: string, data: Partial<UserLicense>): Promise<UserLicense>;
@@ -318,6 +321,33 @@ export class DatabaseStorage implements IStorage {
       .update(sirconReports)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(sirconReports.id, id))
+      .returning();
+    return updated;
+  }
+
+  async createDBPRReport(
+    report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<SirconReport> {
+    const [created] = await db
+      .insert(dbprReports)
+      .values(report)
+      .returning();
+    return created;
+  }
+
+  async getDBPRReport(enrollmentId: string): Promise<SirconReport | undefined> {
+    const [report] = await db
+      .select()
+      .from(dbprReports)
+      .where(eq(dbprReports.enrollmentId, enrollmentId));
+    return report;
+  }
+
+  async updateDBPRReport(id: string, data: Partial<SirconReport>): Promise<SirconReport> {
+    const [updated] = await db
+      .update(dbprReports)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(dbprReports.id, id))
       .returning();
     return updated;
   }

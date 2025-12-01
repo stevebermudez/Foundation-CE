@@ -39,7 +39,7 @@ export async function registerRoutes(
     res.json(courses);
   });
 
-  // Course Completion & Sircon Reporting
+  // Course Completion & Regulatory Reporting
   app.post("/api/enrollments/:id/complete", async (req, res) => {
     try {
       const { userId, licenseNumber, licenseType } = req.body;
@@ -48,8 +48,9 @@ export async function registerRoutes(
         req.body.hoursCompleted || 0
       );
       
-      // Trigger Sircon reporting if it's an insurance course
       const course = await storage.getCourse(enrollment.courseId);
+      
+      // Trigger Sircon reporting if it's an insurance course
       if (course?.productType === "Insurance" && licenseNumber) {
         const sirconStatus = await storage.createSirconReport({
           enrollmentId: enrollment.id,
@@ -69,6 +70,28 @@ export async function registerRoutes(
         });
         return res.status(201).json({ enrollment, sirconStatus });
       }
+      
+      // Trigger DBPR reporting if it's a Florida real estate course
+      if (course?.productType === "RealEstate" && course?.state === "FL" && licenseNumber) {
+        const dbprStatus = await storage.createDBPRReport({
+          enrollmentId: enrollment.id,
+          userId,
+          courseId: course.id,
+          courseTitle: course.title,
+          completionDate: new Date(),
+          ceHours: course.hoursRequired || 0,
+          state: course.state,
+          licenseNumber,
+          licenseType: (licenseType as any) || "salesperson",
+          status: "pending",
+          confirmationNumber: null,
+          errorMessage: null,
+          submittedAt: null,
+          confirmedAt: null,
+        });
+        return res.status(201).json({ enrollment, dbprStatus });
+      }
+      
       res.json(enrollment);
     } catch (err) {
       console.error("Error completing enrollment:", err);
@@ -83,6 +106,17 @@ export async function registerRoutes(
       res.json(status);
     } catch (err) {
       console.error("Error fetching Sircon status:", err);
+      res.status(500).json({ error: "Failed to fetch status" });
+    }
+  });
+
+  // Get DBPR reporting status
+  app.get("/api/dbpr/status/:enrollmentId", async (req, res) => {
+    try {
+      const status = await storage.getDBPRReport(req.params.enrollmentId);
+      res.json(status);
+    } catch (err) {
+      console.error("Error fetching DBPR status:", err);
       res.status(500).json({ error: "Failed to fetch status" });
     }
   });

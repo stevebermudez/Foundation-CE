@@ -163,6 +163,26 @@ export const sirconReports = pgTable("sircon_reports", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// DBPR reporting for Florida real estate course completions
+export const dbprReports = pgTable("dbpr_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  courseTitle: varchar("course_title").notNull(),
+  completionDate: timestamp("completion_date").notNull(),
+  ceHours: integer("ce_hours").notNull(),
+  licenseNumber: varchar("license_number").notNull(),
+  licenseType: varchar("license_type").notNull(),
+  status: varchar("status").default("pending"), // "pending", "submitted", "accepted", "rejected"
+  confirmationNumber: varchar("confirmation_number"),
+  errorMessage: text("error_message"),
+  submittedAt: timestamp("submitted_at"),
+  confirmedAt: timestamp("confirmed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // User license tracking
 export const userLicenses = pgTable("user_licenses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
