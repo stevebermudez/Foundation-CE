@@ -5,9 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import VideoPlayer from "@/components/VideoPlayer";
 import QuizComponent from "@/components/QuizComponent";
-import { ArrowLeft, Clock, Award, FileText, Timer, TimerOff } from "lucide-react";
+import { ArrowLeft, Clock, Award, FileText, Timer, TimerOff, CheckCircle2, Circle, BookOpen, Zap } from "lucide-react";
 import { Link } from "wouter";
 
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
@@ -88,7 +90,7 @@ const mockQuestions = [
 export default function CourseViewPage() {
   const params = useParams<{ id: string }>();
   const [currentLesson, setCurrentLesson] = useState(mockLessons[2]);
-  const [activeTab, setActiveTab] = useState("lessons");
+  const [activeTab, setActiveTab] = useState("overview");
   const [testMode, setTestMode] = useState<"untimed" | "timed" | false>(false);
 
   // Fetch course data from API
@@ -97,6 +99,39 @@ export default function CourseViewPage() {
     queryFn: async () => {
       const res = await fetch(`/api/courses/${params.id}`);
       if (!res.ok) throw new Error("Course not found");
+      return res.json();
+    },
+    enabled: !!params.id,
+  });
+
+  // Fetch units and lessons
+  const { data: units = [] } = useQuery({
+    queryKey: ["/api/courses", params.id, "units"],
+    queryFn: async () => {
+      const res = await fetch(`/api/units?courseId=${params.id}`);
+      if (!res.ok) throw new Error("Units not found");
+      return res.json();
+    },
+    enabled: !!params.id,
+  });
+
+  // Fetch enrollment data
+  const { data: enrollment } = useQuery({
+    queryKey: ["/api/enrollments", params.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/enrollments/course/${params.id}`);
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: !!params.id,
+  });
+
+  // Fetch practice exams
+  const { data: exams = [] } = useQuery({
+    queryKey: ["/api/exams", params.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/exams?courseId=${params.id}`);
+      if (!res.ok) return [];
       return res.json();
     },
     enabled: !!params.id,
@@ -170,6 +205,9 @@ export default function CourseViewPage() {
       <div className="mx-auto max-w-7xl px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
+            <TabsTrigger value="overview" data-testid="tab-overview">
+              Overview
+            </TabsTrigger>
             <TabsTrigger value="lessons" data-testid="tab-lessons">
               Video Lessons
             </TabsTrigger>
@@ -180,6 +218,113 @@ export default function CourseViewPage() {
               Assessment
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="overview">
+            <div className="space-y-6">
+              {/* Course Overview Card */}
+              <Card data-testid="card-course-overview">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Course Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">{course?.description}</p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground">Hours Required</p>
+                      <p className="text-2xl font-bold">{course?.hoursRequired}</p>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground">Price</p>
+                      <p className="text-2xl font-bold">${((course?.price || 0) / 100).toFixed(2)}</p>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground">License Type</p>
+                      <p className="text-lg font-semibold">{course?.licenseType}</p>
+                    </div>
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-sm text-muted-foreground">State</p>
+                      <p className="text-lg font-semibold">{course?.state}</p>
+                    </div>
+                  </div>
+
+                  {enrollment && (
+                    <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="font-semibold">Enrollment Progress</p>
+                        <Badge variant="secondary">{Math.round((enrollment.hoursCompleted / course?.hoursRequired) * 100)}%</Badge>
+                      </div>
+                      <Progress value={(enrollment.hoursCompleted / course?.hoursRequired) * 100} className="h-2" />
+                      <p className="text-sm text-muted-foreground mt-2">{enrollment.hoursCompleted} of {course?.hoursRequired} hours completed</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Course Structure */}
+              {units.length > 0 && (
+                <Card data-testid="card-course-structure">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="h-5 w-5" />
+                      Course Structure ({units.length} Units)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {units.map((unit: any, idx: number) => (
+                        <div key={unit.id || idx} className="p-3 border rounded-lg hover-elevate cursor-pointer" data-testid={`unit-${idx}`}>
+                          <div className="flex items-start gap-3">
+                            <div className="mt-1 text-muted-foreground">Unit {unit.unitNumber || idx + 1}</div>
+                            <div className="flex-1">
+                              <p className="font-semibold">{unit.title}</p>
+                              {unit.description && <p className="text-sm text-muted-foreground">{unit.description}</p>}
+                              <div className="flex gap-2 mt-2 text-xs">
+                                {unit.hoursRequired && (
+                                  <span className="text-muted-foreground flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {unit.hoursRequired}h
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Practice Exams */}
+              {exams.length > 0 && (
+                <Card data-testid="card-practice-exams">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Award className="h-5 w-5" />
+                      Practice Exams ({exams.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {exams.map((exam: any, idx: number) => (
+                        <div key={exam.id || idx} className="p-3 border rounded-lg flex items-center justify-between hover-elevate cursor-pointer" data-testid={`exam-${idx}`}>
+                          <div>
+                            <p className="font-medium">{exam.title}</p>
+                            <p className="text-sm text-muted-foreground">{exam.totalQuestions} questions • {exam.passingScore}% pass required</p>
+                          </div>
+                          <Button variant="outline" size="sm">Take Exam</Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
 
           <TabsContent value="lessons">
             <VideoPlayer
