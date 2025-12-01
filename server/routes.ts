@@ -85,6 +85,72 @@ export async function registerRoutes(
     }
   });
 
+  // Email/Password Signup
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password required" });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+
+      const crypto = await import("crypto");
+      const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
+      
+      const user = await storage.upsertUser({
+        id: `email:${email}`,
+        email,
+        passwordHash,
+        firstName: firstName || "",
+        lastName: lastName || "",
+      });
+
+      req.login({ id: user.id }, (err) => {
+        if (err) return res.status(500).json({ error: "Login failed" });
+        res.json({ message: "Signup successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
+      });
+    } catch (err) {
+      console.error("Signup error:", err);
+      res.status(500).json({ error: "Signup failed" });
+    }
+  });
+
+  // Email/Password Login
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.passwordHash) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+
+      const crypto = await import("crypto");
+      const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
+      
+      if (passwordHash !== user.passwordHash) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+
+      req.login({ id: user.id }, (err) => {
+        if (err) return res.status(500).json({ error: "Login failed" });
+        res.json({ message: "Login successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
+      });
+    } catch (err) {
+      console.error("Login error:", err);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
   // Course Routes
   app.get("/api/courses", async (req, res) => {
     const courses = await storage.getCourses({

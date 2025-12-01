@@ -14,6 +14,7 @@ import AccountSetupPage from "@/pages/account-setup";
 import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
 import LoginPage from "@/pages/login";
+import SignupPage from "@/pages/signup";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/courses/fl" component={CoursesFLPage} />
           <Route path="/course/:id" component={CourseViewPage} />
           <Route path="/login" component={LoginPage} />
+          <Route path="/signup" component={SignupPage} />
           <Route path="/account-setup" component={AccountSetupPage} />
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/compliance" component={() => <CompliancePage />} />
