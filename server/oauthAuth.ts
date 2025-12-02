@@ -1,8 +1,6 @@
 import passport from "passport";
 // @ts-ignore
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-// @ts-ignore
-import { Strategy as FacebookStrategy } from "passport-facebook";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
@@ -77,39 +75,6 @@ export async function setupAuth(app: Express) {
   } else {
     app.get("/api/google/login", (req, res) => {
       res.status(500).json({ error: "Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET." });
-    });
-  }
-
-  // Facebook OAuth
-  if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    passport.use(
-      new FacebookStrategy(
-        {
-          clientID: process.env.FACEBOOK_APP_ID,
-          clientSecret: process.env.FACEBOOK_APP_SECRET,
-          callbackURL: "/api/facebook/callback",
-          profileFields: ["id", "displayName", "photos", "email", "name"],
-        },
-        async (accessToken: any, refreshToken: any, profile: any, done: any) => {
-          try {
-            const userId = await upsertUser(profile);
-            return done(null, { id: userId });
-          } catch (err) {
-            return done(err);
-          }
-        }
-      )
-    );
-
-    app.get("/api/facebook/login", passport.authenticate("facebook", { scope: ["email"] }));
-    app.get(
-      "/api/facebook/callback",
-      passport.authenticate("facebook", { failureRedirect: "/login" }),
-      (req, res) => res.redirect("/dashboard")
-    );
-  } else {
-    app.get("/api/facebook/login", (req, res) => {
-      res.status(500).json({ error: "Facebook OAuth not configured. Please set FACEBOOK_APP_ID and FACEBOOK_APP_SECRET." });
     });
   }
 

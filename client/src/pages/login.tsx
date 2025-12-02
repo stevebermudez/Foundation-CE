@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LogIn, Globe } from "lucide-react";
-import { SiGoogle, SiFacebook } from "react-icons/si";
+import { SiGoogle } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
@@ -85,16 +85,6 @@ export default function LoginPage() {
                   >
                     <SiGoogle className="h-5 w-5" />
                     Sign In with Google
-                  </Button>
-                </a>
-
-                <a href="/api/facebook/login">
-                  <Button
-                    className="w-full h-12 text-base gap-2 bg-[#1877F2] hover:bg-[#165fe5] text-white"
-                    data-testid="button-login-facebook"
-                  >
-                    <SiFacebook className="h-5 w-5" />
-                    Sign In with Facebook
                   </Button>
                 </a>
 
