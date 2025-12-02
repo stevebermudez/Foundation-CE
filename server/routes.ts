@@ -141,13 +141,16 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      req.login({ id: user.id }, (err) => {
-        if (err) return res.status(500).json({ error: "Login failed" });
+      req.login(user, (err) => {
+        if (err) {
+          console.error("Session error:", err);
+          return res.status(500).json({ error: "Login failed", details: err.message });
+        }
         res.json({ message: "Login successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
       });
     } catch (err) {
       console.error("Login error:", err);
-      res.status(500).json({ error: "Login failed" });
+      res.status(500).json({ error: "Login failed", details: (err as Error).message });
     }
   });
 
