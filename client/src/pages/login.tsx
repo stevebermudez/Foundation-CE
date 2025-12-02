@@ -4,8 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogIn, Globe, Apple } from "lucide-react";
+import { LogIn, Apple, Separator } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 
@@ -70,102 +69,89 @@ export default function LoginPage() {
               Sign in to access your Florida prelicensing courses
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="social" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="social" data-testid="tab-social">Social</TabsTrigger>
-                <TabsTrigger value="email" data-testid="tab-email">Email</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="social" className="space-y-4">
-                <a href="/api/google/login">
-                  <Button
-                    className="w-full h-12 text-base gap-2 bg-white text-slate-900 border border-border hover:bg-slate-50"
-                    data-testid="button-login-google"
-                  >
-                    <SiGoogle className="h-5 w-5" />
-                    Sign In with Google
-                  </Button>
-                </a>
-
-                <form action="/api/apple/login" method="POST" className="w-full">
-                  <Button
-                    type="submit"
-                    className="w-full h-12 text-base gap-2 bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                    data-testid="button-login-apple"
-                  >
-                    <Apple className="h-5 w-5" />
-                    Sign In with Apple
-                  </Button>
-                </form>
-
+          <CardContent className="space-y-6">
+            {/* Social Login */}
+            <div className="space-y-3">
+              <a href="/api/google/login" className="w-full block">
                 <Button
-                  disabled
-                  className="w-full h-12 text-base gap-2 bg-gray-400 text-white cursor-not-allowed opacity-50"
-                  data-testid="button-login-microsoft"
+                  className="w-full h-12 text-base gap-2 bg-white text-slate-900 border border-border hover:bg-slate-50"
+                  data-testid="button-login-google"
                 >
-                  <Globe className="h-5 w-5" />
-                  Sign In with Microsoft (Coming Soon)
+                  <SiGoogle className="h-5 w-5" />
+                  Sign In with Google
                 </Button>
+              </a>
 
-                <div className="pt-4">
-                  <p className="text-xs text-muted-foreground text-center">
-                    Don't have an account?{" "}
-                    <a href="/signup" className="text-blue-600 hover:underline font-semibold" data-testid="link-signup">
-                      Sign up
-                    </a>
-                  </p>
-                </div>
-              </TabsContent>
+              <form action="/api/apple/login" method="POST" className="w-full">
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base gap-2 bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                  data-testid="button-login-apple"
+                >
+                  <Apple className="h-5 w-5" />
+                  Sign In with Apple
+                </Button>
+              </form>
+            </div>
 
-              <TabsContent value="email" className="space-y-4">
-                <form onSubmit={handleEmailLogin} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      data-testid="input-email-login"
-                    />
-                  </div>
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+              </div>
+            </div>
 
-                  <div>
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      data-testid="input-password-login"
-                    />
-                  </div>
+            {/* Email/Password Login */}
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  data-testid="input-email-login"
+                />
+              </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full h-12 text-base"
-                    disabled={loading}
-                    data-testid="button-login-email"
-                  >
-                    {loading ? "Signing in..." : "Sign In"}
-                  </Button>
-                </form>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  data-testid="input-password-login"
+                />
+              </div>
 
-                <div className="pt-4">
-                  <p className="text-xs text-muted-foreground text-center">
-                    Don't have an account?{" "}
-                    <a href="/signup" className="text-blue-600 hover:underline font-semibold" data-testid="link-signup-email">
-                      Sign up
-                    </a>
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
+              <Button
+                type="submit"
+                className="w-full h-12 text-base"
+                disabled={loading}
+                data-testid="button-login-email"
+              >
+                {loading ? "Signing in..." : "Sign In with Email"}
+              </Button>
+            </form>
 
-            <div className="pt-4">
+            {/* Signup Link */}
+            <div className="pt-2">
+              <p className="text-xs text-muted-foreground text-center">
+                Don't have an account?{" "}
+                <a href="/signup" className="text-blue-600 hover:underline font-semibold" data-testid="link-signup">
+                  Sign up
+                </a>
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="pt-4 border-t border-border">
               <p className="text-xs text-muted-foreground text-center">
                 By signing in, you agree to our terms of service and privacy policy.
               </p>

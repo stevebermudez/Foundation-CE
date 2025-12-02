@@ -100,8 +100,8 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Email already registered" });
       }
 
-      const crypto = await import("crypto");
-      const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
+      const bcrypt = await import("bcrypt");
+      const passwordHash = await bcrypt.default.hash(password, 10);
       
       const newUser = await storage.upsertUser({
         email,
@@ -134,10 +134,10 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      const crypto = await import("crypto");
-      const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
+      const bcrypt = await import("bcrypt");
+      const passwordMatch = await bcrypt.default.compare(password, user.passwordHash);
       
-      if (passwordHash !== user.passwordHash) {
+      if (!passwordMatch) {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
