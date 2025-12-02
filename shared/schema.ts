@@ -19,6 +19,8 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
   passwordHash: varchar("password_hash"), // for email/password auth
+  passwordResetToken: varchar("password_reset_token"), // for password reset
+  passwordResetTokenExpires: timestamp("password_reset_token_expires"), // expiration time for reset token
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),

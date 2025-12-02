@@ -1664,5 +1664,151 @@ segment1.ts
     }
   });
 
+  // Password Reset - Request Token
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(200).json({ message: "If email exists, reset link sent" });
+      }
+
+      const crypto = await import("crypto");
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const tokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000);
+
+      const bcrypt = await import("bcrypt");
+      const hashedToken = await bcrypt.default.hash(resetToken, 10);
+
+      const db = (await import("./db")).db;
+      const { users } = (await import("@shared/schema"));
+      const { eq } = (await import("drizzle-orm"));
+
+      await db.update(users)
+        .set({ passwordResetToken: hashedToken, passwordResetTokenExpires: tokenExpires })
+        .where(eq(users.id, user.id));
+
+      const resetLink = `https://${process.env.REPL_ID}.id.replit.dev/reset-password?token=${resetToken}`;
+      console.log("Reset link:", resetLink);
+      res.json({ message: "If email exists, reset link sent" });
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      res.status(500).json({ error: "Failed to process request" });
+    }
+  });
+
+  // Password Reset - Reset Password
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      if (!token || !password) {
+        return res.status(400).json({ error: "Token and password required" });
+      }
+
+      const db = (await import("./db")).db;
+      const { users } = (await import("@shared/schema"));
+      const { eq, and, gt } = (await import("drizzle-orm"));
+      const bcrypt = await import("bcrypt");
+
+      const user = await db.select().from(users).where(
+        and(
+          eq(users.passwordResetToken, token),
+          gt(users.passwordResetTokenExpires, new Date())
+        )
+      ).limit(1).then(results => results[0]);
+
+      if (!user) {
+        return res.status(400).json({ error: "Invalid or expired reset token" });
+      }
+
+      const passwordHash = await bcrypt.default.hash(password, 10);
+      await db.update(users)
+        .set({ passwordHash, passwordResetToken: null, passwordResetTokenExpires: null })
+        .where(eq(users.id, user.id));
+
+      res.json({ message: "Password reset successful" });
+    } catch (err) {
+      console.error("Reset password error:", err);
+      res.status(500).json({ error: "Failed to reset password" });
+    }
+  });
+
   return httpServer;
 }
+
+  // Password Reset - Request Token
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(200).json({ message: "If email exists, reset link sent" });
+      }
+
+      const crypto = await import("crypto");
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const tokenExpires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+      const bcrypt = await import("bcrypt");
+      const hashedToken = await bcrypt.default.hash(resetToken, 10);
+
+      const db = (await import("./db")).db;
+      const { users } = (await import("@shared/schema"));
+      const { eq } = (await import("drizzle-orm"));
+
+      await db.update(users)
+        .set({ passwordResetToken: hashedToken, passwordResetTokenExpires: tokenExpires })
+        .where(eq(users.id, user.id));
+
+      const resetLink = `https://${process.env.REPL_ID}.id.replit.dev/reset-password?token=${resetToken}`;
+      console.log("Reset link:", resetLink);
+      res.json({ message: "If email exists, reset link sent" });
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      res.status(500).json({ error: "Failed to process request" });
+    }
+  });
+
+  // Password Reset - Reset Password
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      if (!token || !password) {
+        return res.status(400).json({ error: "Token and password required" });
+      }
+
+      const db = (await import("./db")).db;
+      const { users } = (await import("@shared/schema"));
+      const { eq, and, gt } = (await import("drizzle-orm"));
+      const bcrypt = await import("bcrypt");
+
+      const user = await db.select().from(users).where(
+        and(
+          eq(users.passwordResetToken, token),
+          gt(users.passwordResetTokenExpires, new Date())
+        )
+      ).limit(1).then(results => results[0]);
+
+      if (!user) {
+        return res.status(400).json({ error: "Invalid or expired reset token" });
+      }
+
+      const passwordHash = await bcrypt.default.hash(password, 10);
+      await db.update(users)
+        .set({ passwordHash, passwordResetToken: null, passwordResetTokenExpires: null })
+        .where(eq(users.id, user.id));
+
+      res.json({ message: "Password reset successful" });
+    } catch (err) {
+      console.error("Reset password error:", err);
+      res.status(500).json({ error: "Failed to reset password" });
+    }
+  });

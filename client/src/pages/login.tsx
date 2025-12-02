@@ -140,12 +140,17 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Signup Link */}
-            <div className="pt-2">
+            {/* Signup & Forgot Password Links */}
+            <div className="pt-2 space-y-2">
               <p className="text-xs text-muted-foreground text-center">
                 Don't have an account?{" "}
                 <a href="/signup" className="text-blue-600 hover:underline font-semibold" data-testid="link-signup">
                   Sign up
+                </a>
+              </p>
+              <p className="text-xs text-muted-foreground text-center">
+                <a href="/forgot-password" className="text-blue-600 hover:underline font-semibold" data-testid="link-forgot-password">
+                  Forgot your password?
                 </a>
               </p>
             </div>
