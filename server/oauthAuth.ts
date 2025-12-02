@@ -62,12 +62,18 @@ export async function setupAuth(app: Express) {
   // Google OAuth
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.log("✅ Setting up Google OAuth Strategy");
+    const callbackURL = process.env.REPL_ID 
+      ? `https://${process.env.REPL_ID}.id.replit.dev/api/google/callback`
+      : "http://localhost:5000/api/google/callback";
+    console.log("📍 Google OAuth Callback URL:", callbackURL);
+    console.log("🔐 Google Client ID (last 30 chars):", process.env.GOOGLE_CLIENT_ID.slice(-30));
+    
     passport.use(
       new GoogleStrategy(
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "/api/google/callback",
+          callbackURL: callbackURL,
         },
         async (accessToken: any, refreshToken: any, profile: any, done: any) => {
           try {
