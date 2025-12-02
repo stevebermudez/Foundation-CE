@@ -63,7 +63,7 @@ export async function setupAuth(app: Express) {
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.log("✅ Setting up Google OAuth Strategy");
     const callbackURL = process.env.REPL_SLUG
-      ? `https://${process.env.REPL_SLUG}.replit.dev/api/google/callback`
+      ? `https://${process.env.REPL_SLUG}.replit.app/api/google/callback`
       : process.env.REPL_ID
       ? `https://${process.env.REPL_ID}.id.replit.dev/api/google/callback`
       : "http://localhost:5000/api/google/callback";
