@@ -110,10 +110,19 @@ export async function registerRoutes(
         lastName,
       });
 
-      req.login({ id: newUser.id }, (err) => {
-        if (err) return res.status(500).json({ error: "Login failed" });
+      // Create session with promisified req.login
+      try {
+        await new Promise<void>((resolve, reject) => {
+          req.login(newUser, (err: any) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
         res.json({ message: "Signup successful", user: { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName } });
-      });
+      } catch (sessionErr) {
+        console.error("Signup session error:", sessionErr);
+        return res.status(500).json({ error: "Login failed", details: (sessionErr as Error).message });
+      }
     } catch (err) {
       console.error("Signup error:", err);
       res.status(500).json({ error: "Signup failed" });
@@ -129,42 +138,31 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Email and password required" });
       }
 
-      // Query database - wrap in try/catch to catch DB errors
-      let user;
-      try {
-        user = await storage.getUserByEmail(email);
-      } catch (dbErr) {
-        console.error("🔐 DB ERROR getting user:", dbErr);
-        return res.status(500).json({ error: "Database error", details: (dbErr as Error).message });
-      }
-
+      // Query database
+      const user = await storage.getUserByEmail(email);
       if (!user || !user.passwordHash) {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
       // Compare password with bcrypt
-      try {
-        const bcrypt = await import("bcrypt");
-        const passwordMatch = await bcrypt.default.compare(password, user.passwordHash);
-        
-        if (!passwordMatch) {
-          return res.status(401).json({ error: "Invalid email or password" });
-        }
-      } catch (cryptoErr) {
-        console.error("🔐 CRYPTO ERROR:", cryptoErr);
-        return res.status(500).json({ error: "Crypto error", details: (cryptoErr as Error).message });
+      const bcrypt = await import("bcrypt");
+      const passwordMatch = await bcrypt.default.compare(password, user.passwordHash);
+      
+      if (!passwordMatch) {
+        return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      // Create session
-      req.login(user, (err) => {
-        if (err) {
-          console.error("🔐 SESSION ERROR:", err);
-          return res.status(500).json({ error: "Session error", details: err.message });
-        }
-        res.json({ message: "Login successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
+      // Create session using promisified req.login
+      await new Promise<void>((resolve, reject) => {
+        req.login(user, (err: any) => {
+          if (err) reject(err);
+          else resolve();
+        });
       });
+
+      res.json({ message: "Login successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
     } catch (err) {
-      console.error("🔐 UNEXPECTED ERROR:", err);
+      console.error("🔐 LOGIN ERROR:", err);
       res.status(500).json({ error: "Login failed", details: (err as Error).message });
     }
   });
