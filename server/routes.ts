@@ -6,24 +6,29 @@ import { getStripeClient, getStripeStatus } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
-import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
+import {
+  createPaypalOrder,
+  capturePaypalOrder,
+  loadPaypalDefault,
+} from "./paypal";
+import { v4 as uuidv4 } from "uuid";
 
 export async function registerRoutes(
   httpServer: Server,
-  app: Express
+  app: Express,
 ): Promise<Server> {
   // Seed FREC I course on startup if not already present
   try {
     const db = (await import("./db")).db;
-    const { courses } = (await import("@shared/schema"));
-    const { eq } = (await import("drizzle-orm"));
-    
+    const { courses } = await import("@shared/schema");
+    const { eq } = await import("drizzle-orm");
+
     const existing = await db
       .select()
       .from(courses)
       .where(eq(courses.sku, "FL-RE-PL-SA-FRECI-63"))
       .limit(1);
-    
+
     if (existing.length === 0) {
       await seedFRECIPrelicensing();
       console.log("✓ FREC I course seeded successfully");
@@ -36,14 +41,16 @@ export async function registerRoutes(
   // Auth Routes - JWT or Passport
   const authMiddleware = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    const token = authHeader?.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
 
     if (token) {
       try {
         const jwtLib = await import("jsonwebtoken");
         const decoded = jwtLib.default.verify(
           token,
-          process.env.SESSION_SECRET || "fallback-secret"
+          process.env.SESSION_SECRET || "fallback-secret",
         ) as { id: string; email: string };
         req.user = decoded;
         return next();
@@ -75,7 +82,11 @@ export async function registerRoutes(
     try {
       const user = req.user as any;
       const { licenseNumber, licenseExpirationDate } = req.body;
-      res.json({ message: "Profile updated", licenseNumber, licenseExpirationDate });
+      res.json({
+        message: "Profile updated",
+        licenseNumber,
+        licenseExpirationDate,
+      });
     } catch (err) {
       console.error("Error updating profile:", err);
       res.status(500).json({ error: "Failed to update profile" });
@@ -97,7 +108,7 @@ export async function registerRoutes(
   app.post("/api/auth/signup", async (req, res) => {
     try {
       const { email, password, firstName, lastName } = req.body;
-      
+
       if (!email || !password || !firstName || !lastName) {
         return res.status(400).json({ error: "All fields are required" });
       }
@@ -109,11 +120,10 @@ export async function registerRoutes(
 
       const bcrypt = await import("bcrypt");
       const passwordHash = await bcrypt.default.hash(password, 10);
-      
-      // Generate UUID for new user
-      const { v4: uuidv4 } = await import("uuid");
-      const userId = uuidv4();
-      
+
+      // Generate UUID for new user using built-in crypto
+      const { randomUUID } = await import("crypto");
+      const userId = randomUUID();
       const newUser = await storage.upsertUser({
         id: userId,
         email,
@@ -127,21 +137,28 @@ export async function registerRoutes(
       const token = jwt.default.sign(
         { id: newUser.id, email: newUser.email },
         process.env.SESSION_SECRET || "fallback-secret",
-        { expiresIn: "7d" }
+        { expiresIn: "7d" },
       );
 
-      res.json({ 
-        message: "Signup successful", 
+      res.json({
+        message: "Signup successful",
         token,
-        user: { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName } 
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+        },
       });
     } catch (err) {
       console.error("Signup error details:", {
         message: (err as Error).message,
         stack: (err as Error).stack,
-        name: (err as Error).name
+        name: (err as Error).name,
       });
-      res.status(500).json({ error: "Signup failed", details: (err as Error).message });
+      res
+        .status(500)
+        .json({ error: "Signup failed", details: (err as Error).message });
     }
   });
 
@@ -149,7 +166,7 @@ export async function registerRoutes(
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      
+
       if (!email || !password) {
         return res.status(400).json({ error: "Email and password required" });
       }
@@ -160,8 +177,11 @@ export async function registerRoutes(
       }
 
       const bcrypt = await import("bcrypt");
-      const passwordMatch = await bcrypt.default.compare(password, user.passwordHash);
-      
+      const passwordMatch = await bcrypt.default.compare(
+        password,
+        user.passwordHash,
+      );
+
       if (!passwordMatch) {
         return res.status(401).json({ error: "Invalid email or password" });
       }
@@ -171,13 +191,18 @@ export async function registerRoutes(
       const token = jwt.default.sign(
         { id: user.id, email: user.email },
         process.env.SESSION_SECRET || "fallback-secret",
-        { expiresIn: "7d" }
+        { expiresIn: "7d" },
       );
 
-      res.json({ 
-        message: "Login successful", 
+      res.json({
+        message: "Login successful",
         token,
-        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } 
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
       });
     } catch (err) {
       console.error("Login error:", err);
@@ -197,16 +222,28 @@ export async function registerRoutes(
   // Course Completion & Regulatory Reporting
   app.post("/api/enrollments/:id/complete", async (req, res) => {
     try {
-      const { userId, licenseNumber, ssnLast4, licenseType, firstName, lastName } = req.body;
+      const {
+        userId,
+        licenseNumber,
+        ssnLast4,
+        licenseType,
+        firstName,
+        lastName,
+      } = req.body;
       const enrollment = await storage.updateEnrollmentHours(
         req.params.id,
-        req.body.hoursCompleted || 0
+        req.body.hoursCompleted || 0,
       );
-      
+
       const course = await storage.getCourse(enrollment.courseId);
       const user = await storage.getUser(userId);
-      const studentName = firstName && lastName ? `${firstName} ${lastName}` : user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Unknown";
-      
+      const studentName =
+        firstName && lastName
+          ? `${firstName} ${lastName}`
+          : user?.firstName && user?.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : "Unknown";
+
       // Trigger Sircon reporting if it's an insurance course
       if (course?.productType === "Insurance" && licenseNumber) {
         const sirconStatus = await storage.createSirconReport({
@@ -227,7 +264,7 @@ export async function registerRoutes(
         });
         return res.status(201).json({ enrollment, sirconStatus });
       }
-      
+
       // Trigger DBPR reporting if it's a Florida real estate course
       if (course?.productType === "RealEstate" && course?.state === "FL") {
         const dbprStatus = await storage.createDBPRReport({
@@ -252,7 +289,7 @@ export async function registerRoutes(
         });
         return res.status(201).json({ enrollment, dbprStatus });
       }
-      
+
       res.json(enrollment);
     } catch (err) {
       console.error("Error completing enrollment:", err);
@@ -347,7 +384,9 @@ export async function registerRoutes(
     try {
       const { courseId, email, amount } = req.body;
       if (!courseId || !email || !amount) {
-        return res.status(400).json({ error: "courseId, email, and amount required" });
+        return res
+          .status(400)
+          .json({ error: "courseId, email, and amount required" });
       }
 
       const course = await storage.getCourse(courseId);
@@ -420,12 +459,16 @@ export async function registerRoutes(
         }
 
         const existingUser = await storage.getUserByEmail(email);
-        const enrollment = await storage.createEnrollment(existingUser!.id, courseId, {
-          progress: 0,
-          completed: 0,
-          hoursCompleted: 0,
-          completedAt: null,
-        });
+        const enrollment = await storage.createEnrollment(
+          existingUser!.id,
+          courseId,
+          {
+            progress: 0,
+            completed: 0,
+            hoursCompleted: 0,
+            completedAt: null,
+          },
+        );
 
         res.json({ success: true, enrollment });
       } else {
@@ -618,14 +661,17 @@ segment1.ts
 
   app.post("/api/bundles/:id/enroll", async (req, res) => {
     const { userId } = req.body;
-    const enrollment = await storage.createBundleEnrollment(userId, req.params.id);
+    const enrollment = await storage.createBundleEnrollment(
+      userId,
+      req.params.id,
+    );
     res.status(201).json(enrollment);
   });
 
   app.get("/api/bundles/:id/enrollment/:userId", async (req, res) => {
     const enrollment = await storage.getBundleEnrollment(
       req.params.userId,
-      req.params.id
+      req.params.id,
     );
     if (!enrollment) {
       return res.status(404).json({ error: "Enrollment not found" });
@@ -688,7 +734,9 @@ segment1.ts
 
   app.get("/api/ce-reviews/supervisor/:supervisorId", async (req, res) => {
     try {
-      const reviews = await storage.getPendingCEReviews(req.params.supervisorId);
+      const reviews = await storage.getPendingCEReviews(
+        req.params.supervisorId,
+      );
       res.json(reviews);
     } catch (err) {
       console.error("Error fetching CE reviews:", err);
@@ -698,7 +746,10 @@ segment1.ts
 
   app.patch("/api/ce-reviews/:id/approve", async (req, res) => {
     try {
-      const review = await storage.approveCEReview(req.params.id, req.body.notes);
+      const review = await storage.approveCEReview(
+        req.params.id,
+        req.body.notes,
+      );
       res.json(review);
     } catch (err) {
       console.error("Error approving CE review:", err);
@@ -708,7 +759,10 @@ segment1.ts
 
   app.patch("/api/ce-reviews/:id/reject", async (req, res) => {
     try {
-      const review = await storage.rejectCEReview(req.params.id, req.body.notes);
+      const review = await storage.rejectCEReview(
+        req.params.id,
+        req.body.notes,
+      );
       res.json(review);
     } catch (err) {
       console.error("Error rejecting CE review:", err);
@@ -745,10 +799,10 @@ segment1.ts
     try {
       const user = await storage.getUser(req.params.userId);
       if (!user) return res.status(404).json({ error: "User not found" });
-      
+
       const supervisor = await storage.getSupervisor(req.params.userId);
       const accountType = supervisor ? "supervisor" : "individual";
-      
+
       res.json({ userId: user.id, accountType, user, supervisor });
     } catch (err) {
       console.error("Error fetching account type:", err);
@@ -760,7 +814,7 @@ segment1.ts
     try {
       const company = await storage.getCompanyAccount(req.params.id);
       if (!company) return res.status(404).json({ error: "Company not found" });
-      
+
       // Return company and its compliance info
       const compliance = await storage.getCompanyCompliance(req.params.id);
       res.json({ company, compliance });
@@ -844,7 +898,7 @@ segment1.ts
         score,
         correctAnswers,
         passed,
-        timeSpent
+        timeSpent,
       );
       res.json(completed);
     } catch (err) {
@@ -855,7 +909,10 @@ segment1.ts
 
   app.get("/api/exams/:examId/attempts/:userId", async (req, res) => {
     try {
-      const attempts = await storage.getUserExamAttempts(req.params.userId, req.params.examId);
+      const attempts = await storage.getUserExamAttempts(
+        req.params.userId,
+        req.params.examId,
+      );
       res.json(attempts);
     } catch (err) {
       console.error("Error fetching attempts:", err);
@@ -893,7 +950,10 @@ segment1.ts
 
   app.patch("/api/subscriptions/:id", async (req, res) => {
     try {
-      const subscription = await storage.updateSubscription(req.params.id, req.body);
+      const subscription = await storage.updateSubscription(
+        req.params.id,
+        req.body,
+      );
       res.json(subscription);
     } catch (err) {
       console.error("Error updating subscription:", err);
@@ -926,7 +986,12 @@ segment1.ts
   app.post("/api/coupons/apply", async (req, res) => {
     try {
       const { userId, couponId, enrollmentId, discountAmount } = req.body;
-      const usage = await storage.applyCoupon(userId, couponId, enrollmentId, discountAmount);
+      const usage = await storage.applyCoupon(
+        userId,
+        couponId,
+        enrollmentId,
+        discountAmount,
+      );
       res.status(201).json(usage);
     } catch (err) {
       console.error("Error applying coupon:", err);
@@ -948,7 +1013,9 @@ segment1.ts
   // Completed Courses & Redo Routes
   app.get("/api/enrollments/completed/:userId", async (req, res) => {
     try {
-      const completed = await storage.getCompletedEnrollments(req.params.userId);
+      const completed = await storage.getCompletedEnrollments(
+        req.params.userId,
+      );
       res.json(completed);
     } catch (err) {
       console.error("Error fetching completed enrollments:", err);
@@ -969,7 +1036,14 @@ segment1.ts
   // Email Campaign Routes
   app.post("/api/email-campaigns", async (req, res) => {
     try {
-      const { name, subject, htmlContent, plainTextContent, targetSegment, createdBy } = req.body;
+      const {
+        name,
+        subject,
+        htmlContent,
+        plainTextContent,
+        targetSegment,
+        createdBy,
+      } = req.body;
       const campaign = await storage.createEmailCampaign({
         name,
         subject,
@@ -989,7 +1063,8 @@ segment1.ts
   app.get("/api/email-campaigns/:id", async (req, res) => {
     try {
       const campaign = await storage.getEmailCampaign(req.params.id);
-      if (!campaign) return res.status(404).json({ error: "Campaign not found" });
+      if (!campaign)
+        return res.status(404).json({ error: "Campaign not found" });
       res.json(campaign);
     } catch (err) {
       console.error("Error fetching campaign:", err);
@@ -999,7 +1074,10 @@ segment1.ts
 
   app.patch("/api/email-campaigns/:id", async (req, res) => {
     try {
-      const campaign = await storage.updateEmailCampaign(req.params.id, req.body);
+      const campaign = await storage.updateEmailCampaign(
+        req.params.id,
+        req.body,
+      );
       res.json(campaign);
     } catch (err) {
       console.error("Error updating campaign:", err);
@@ -1043,8 +1121,18 @@ segment1.ts
   app.get("/api/email-campaigns/:id/stats", async (req, res) => {
     try {
       const stats = await storage.getCampaignStats(req.params.id);
-      const openRate = stats.campaign.sentCount > 0 ? Math.round((stats.campaign.openCount / stats.campaign.sentCount) * 100) : 0;
-      const clickRate = stats.campaign.sentCount > 0 ? Math.round((stats.campaign.clickCount / stats.campaign.sentCount) * 100) : 0;
+      const openRate =
+        stats.campaign.sentCount > 0
+          ? Math.round(
+              (stats.campaign.openCount / stats.campaign.sentCount) * 100,
+            )
+          : 0;
+      const clickRate =
+        stats.campaign.sentCount > 0
+          ? Math.round(
+              (stats.campaign.clickCount / stats.campaign.sentCount) * 100,
+            )
+          : 0;
       res.json({
         ...stats,
         metrics: {
@@ -1052,7 +1140,7 @@ segment1.ts
           clickRate: `${clickRate}%`,
           recipients: stats.campaign.recipientCount,
           sent: stats.campaign.sentCount,
-        }
+        },
       });
     } catch (err) {
       console.error("Error fetching stats:", err);
@@ -1063,8 +1151,15 @@ segment1.ts
   // Email Tracking Routes
   app.post("/api/email-tracking/open", async (req, res) => {
     try {
-      const { recipientId, campaignId, userId, userAgent, ipAddress } = req.body;
-      await storage.trackEmailOpen(recipientId, campaignId, userId, userAgent, ipAddress);
+      const { recipientId, campaignId, userId, userAgent, ipAddress } =
+        req.body;
+      await storage.trackEmailOpen(
+        recipientId,
+        campaignId,
+        userId,
+        userAgent,
+        ipAddress,
+      );
       res.json({ message: "Open tracked" });
     } catch (err) {
       console.error("Error tracking open:", err);
@@ -1074,8 +1169,16 @@ segment1.ts
 
   app.post("/api/email-tracking/click", async (req, res) => {
     try {
-      const { recipientId, campaignId, userId, linkUrl, userAgent, ipAddress } = req.body;
-      await storage.trackEmailClick(recipientId, campaignId, userId, linkUrl, userAgent, ipAddress);
+      const { recipientId, campaignId, userId, linkUrl, userAgent, ipAddress } =
+        req.body;
+      await storage.trackEmailClick(
+        recipientId,
+        campaignId,
+        userId,
+        linkUrl,
+        userAgent,
+        ipAddress,
+      );
       res.json({ message: "Click tracked" });
     } catch (err) {
       console.error("Error tracking click:", err);
@@ -1084,35 +1187,52 @@ segment1.ts
   });
 
   // Admin Override Routes
-  app.patch("/api/admin/enrollments/:id/override", isAdmin, async (req, res) => {
-    try {
-      const { hoursCompleted, completed, generateCertificate } = req.body;
-      const enrollmentId = req.params.id;
+  app.patch(
+    "/api/admin/enrollments/:id/override",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { hoursCompleted, completed, generateCertificate } = req.body;
+        const enrollmentId = req.params.id;
 
-      if (typeof hoursCompleted !== "number" || typeof completed !== "boolean") {
-        return res.status(400).json({ error: "hoursCompleted and completed fields required" });
-      }
+        if (
+          typeof hoursCompleted !== "number" ||
+          typeof completed !== "boolean"
+        ) {
+          return res
+            .status(400)
+            .json({ error: "hoursCompleted and completed fields required" });
+        }
 
-      const enrollment = await storage.adminOverrideEnrollment(enrollmentId, hoursCompleted, completed);
-      
-      if (completed && generateCertificate) {
-        const cert = await storage.createCertificate(enrollmentId, enrollment.userId, enrollment.courseId);
-        return res.json({ 
-          message: "Enrollment overridden and certificate generated",
+        const enrollment = await storage.adminOverrideEnrollment(
+          enrollmentId,
+          hoursCompleted,
+          completed,
+        );
+
+        if (completed && generateCertificate) {
+          const cert = await storage.createCertificate(
+            enrollmentId,
+            enrollment.userId,
+            enrollment.courseId,
+          );
+          return res.json({
+            message: "Enrollment overridden and certificate generated",
+            enrollment,
+            certificate: cert,
+          });
+        }
+
+        res.json({
+          message: "Enrollment overridden successfully",
           enrollment,
-          certificate: cert
         });
+      } catch (err) {
+        console.error("Error overriding enrollment:", err);
+        res.status(500).json({ error: "Failed to override enrollment" });
       }
-
-      res.json({ 
-        message: "Enrollment overridden successfully",
-        enrollment
-      });
-    } catch (err) {
-      console.error("Error overriding enrollment:", err);
-      res.status(500).json({ error: "Failed to override enrollment" });
-    }
-  });
+    },
+  );
 
   // Unit Management Routes
   app.get("/api/courses/:courseId/units", async (req, res) => {
@@ -1131,7 +1251,13 @@ segment1.ts
       if (!unitNumber || !title) {
         return res.status(400).json({ error: "unitNumber and title required" });
       }
-      const unit = await storage.createUnit(req.params.courseId, unitNumber, title, description, hoursRequired);
+      const unit = await storage.createUnit(
+        req.params.courseId,
+        unitNumber,
+        title,
+        description,
+        hoursRequired,
+      );
       res.status(201).json(unit);
     } catch (err) {
       console.error("Error creating unit:", err);
@@ -1174,9 +1300,17 @@ segment1.ts
     try {
       const { lessonNumber, title, videoUrl, durationMinutes } = req.body;
       if (!lessonNumber || !title) {
-        return res.status(400).json({ error: "lessonNumber and title required" });
+        return res
+          .status(400)
+          .json({ error: "lessonNumber and title required" });
       }
-      const lesson = await storage.createLesson(req.params.unitId, lessonNumber, title, videoUrl, durationMinutes);
+      const lesson = await storage.createLesson(
+        req.params.unitId,
+        lessonNumber,
+        title,
+        videoUrl,
+        durationMinutes,
+      );
       res.status(201).json(lesson);
     } catch (err) {
       console.error("Error creating lesson:", err);
@@ -1205,51 +1339,91 @@ segment1.ts
   });
 
   // Data Override Routes - Admin Only
-  app.patch("/api/admin/enrollments/:enrollmentId/data", isAdmin, async (req, res) => {
-    try {
-      const { progress, hoursCompleted, completed } = req.body;
-      const enrollment = await storage.adminOverrideEnrollmentData(req.params.enrollmentId, {
-        progress: typeof progress === "number" ? progress : undefined,
-        hoursCompleted: typeof hoursCompleted === "number" ? hoursCompleted : undefined,
-        completed: typeof completed === "boolean" ? (completed ? 1 : 0) : undefined,
-        completedAt: completed && typeof completed === "boolean" ? new Date() : undefined
-      });
-      res.json({ message: "Enrollment data overridden", enrollment });
-    } catch (err) {
-      console.error("Error overriding enrollment data:", err);
-      res.status(500).json({ error: "Failed to override enrollment data" });
-    }
-  });
-
-  app.patch("/api/admin/lesson-progress/:progressId/data", isAdmin, async (req, res) => {
-    try {
-      const { completed, timeSpentMinutes } = req.body;
-      const progress = await storage.adminOverrideLessonProgress(req.params.progressId, {
-        completed: typeof completed === "boolean" ? (completed ? 1 : 0) : undefined,
-        timeSpentMinutes: typeof timeSpentMinutes === "number" ? timeSpentMinutes : undefined,
-        completedAt: completed && typeof completed === "boolean" ? new Date() : undefined
-      });
-      res.json({ message: "Lesson progress overridden", progress });
-    } catch (err) {
-      console.error("Error overriding lesson progress:", err);
-      res.status(500).json({ error: "Failed to override lesson progress" });
-    }
-  });
-
-  app.patch("/api/admin/exam-attempts/:attemptId/score", isAdmin, async (req, res) => {
-    try {
-      const { score } = req.body;
-      if (typeof score !== "number" || score < 0 || score > 100) {
-        return res.status(400).json({ error: "Score must be a number between 0 and 100" });
+  app.patch(
+    "/api/admin/enrollments/:enrollmentId/data",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { progress, hoursCompleted, completed } = req.body;
+        const enrollment = await storage.adminOverrideEnrollmentData(
+          req.params.enrollmentId,
+          {
+            progress: typeof progress === "number" ? progress : undefined,
+            hoursCompleted:
+              typeof hoursCompleted === "number" ? hoursCompleted : undefined,
+            completed:
+              typeof completed === "boolean" ? (completed ? 1 : 0) : undefined,
+            completedAt:
+              completed && typeof completed === "boolean"
+                ? new Date()
+                : undefined,
+          },
+        );
+        res.json({ message: "Enrollment data overridden", enrollment });
+      } catch (err) {
+        console.error("Error overriding enrollment data:", err);
+        res.status(500).json({ error: "Failed to override enrollment data" });
       }
-      const passed = score >= 70;
-      const attempt = await storage.adminOverrideExamAttempt(req.params.attemptId, score, passed);
-      res.json({ message: "Exam score overridden", attempt, passed: passed ? "PASS" : "FAIL" });
-    } catch (err) {
-      console.error("Error overriding exam score:", err);
-      res.status(500).json({ error: "Failed to override exam score" });
-    }
-  });
+    },
+  );
+
+  app.patch(
+    "/api/admin/lesson-progress/:progressId/data",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { completed, timeSpentMinutes } = req.body;
+        const progress = await storage.adminOverrideLessonProgress(
+          req.params.progressId,
+          {
+            completed:
+              typeof completed === "boolean" ? (completed ? 1 : 0) : undefined,
+            timeSpentMinutes:
+              typeof timeSpentMinutes === "number"
+                ? timeSpentMinutes
+                : undefined,
+            completedAt:
+              completed && typeof completed === "boolean"
+                ? new Date()
+                : undefined,
+          },
+        );
+        res.json({ message: "Lesson progress overridden", progress });
+      } catch (err) {
+        console.error("Error overriding lesson progress:", err);
+        res.status(500).json({ error: "Failed to override lesson progress" });
+      }
+    },
+  );
+
+  app.patch(
+    "/api/admin/exam-attempts/:attemptId/score",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { score } = req.body;
+        if (typeof score !== "number" || score < 0 || score > 100) {
+          return res
+            .status(400)
+            .json({ error: "Score must be a number between 0 and 100" });
+        }
+        const passed = score >= 70;
+        const attempt = await storage.adminOverrideExamAttempt(
+          req.params.attemptId,
+          score,
+          passed,
+        );
+        res.json({
+          message: "Exam score overridden",
+          attempt,
+          passed: passed ? "PASS" : "FAIL",
+        });
+      } catch (err) {
+        console.error("Error overriding exam score:", err);
+        res.status(500).json({ error: "Failed to override exam score" });
+      }
+    },
+  );
 
   app.patch("/api/admin/users/:userId/data", isAdmin, async (req, res) => {
     try {
@@ -1258,7 +1432,7 @@ segment1.ts
         firstName: firstName || undefined,
         lastName: lastName || undefined,
         email: email || undefined,
-        profileImageUrl: profileImageUrl || undefined
+        profileImageUrl: profileImageUrl || undefined,
       });
       res.json({ message: "User data overridden", user });
     } catch (err) {
@@ -1281,11 +1455,20 @@ segment1.ts
   app.post("/api/courses/:courseId/videos", isAdmin, async (req, res) => {
     try {
       const user = req.user as any;
-      const { title, videoUrl, thumbnailUrl, description, durationMinutes } = req.body;
+      const { title, videoUrl, thumbnailUrl, description, durationMinutes } =
+        req.body;
       if (!title || !videoUrl) {
         return res.status(400).json({ error: "title and videoUrl required" });
       }
-      const video = await storage.createVideo(req.params.courseId, user.id, title, videoUrl, thumbnailUrl, description, durationMinutes);
+      const video = await storage.createVideo(
+        req.params.courseId,
+        user.id,
+        title,
+        videoUrl,
+        thumbnailUrl,
+        description,
+        durationMinutes,
+      );
       res.status(201).json(video);
     } catch (err) {
       console.error("Error creating video:", err);
@@ -1307,11 +1490,29 @@ segment1.ts
   app.post("/api/units/:unitId/videos", isAdmin, async (req, res) => {
     try {
       const user = req.user as any;
-      const { courseId, title, videoUrl, thumbnailUrl, description, durationMinutes } = req.body;
+      const {
+        courseId,
+        title,
+        videoUrl,
+        thumbnailUrl,
+        description,
+        durationMinutes,
+      } = req.body;
       if (!courseId || !title || !videoUrl) {
-        return res.status(400).json({ error: "courseId, title and videoUrl required" });
+        return res
+          .status(400)
+          .json({ error: "courseId, title and videoUrl required" });
       }
-      const video = await storage.createVideo(courseId, user.id, title, videoUrl, thumbnailUrl, description, durationMinutes, req.params.unitId);
+      const video = await storage.createVideo(
+        courseId,
+        user.id,
+        title,
+        videoUrl,
+        thumbnailUrl,
+        description,
+        durationMinutes,
+        req.params.unitId,
+      );
       res.status(201).json(video);
     } catch (err) {
       console.error("Error creating unit video:", err);
@@ -1356,7 +1557,10 @@ segment1.ts
       if (!videoId) {
         return res.status(400).json({ error: "videoId required" });
       }
-      const lesson = await storage.attachVideoToLesson(req.params.lessonId, videoId);
+      const lesson = await storage.attachVideoToLesson(
+        req.params.lessonId,
+        videoId,
+      );
       res.json({ message: "Video attached to lesson", lesson });
     } catch (err) {
       console.error("Error attaching video:", err);
@@ -1375,121 +1579,180 @@ segment1.ts
     }
   });
 
-  app.get("/api/export/user/:userId/enrollments", isAuthenticated, async (req, res) => {
-    try {
-      const user = req.user as any;
-      // Users can export their own data, admins can export anyone's
-      const isAdmin = await storage.isAdmin(user.id);
-      if (user.id !== req.params.userId && !isAdmin) {
-        return res.status(403).json({ error: "Unauthorized" });
+  app.get(
+    "/api/export/user/:userId/enrollments",
+    isAuthenticated,
+    async (req, res) => {
+      try {
+        const user = req.user as any;
+        // Users can export their own data, admins can export anyone's
+        const isAdmin = await storage.isAdmin(user.id);
+        if (user.id !== req.params.userId && !isAdmin) {
+          return res.status(403).json({ error: "Unauthorized" });
+        }
+        const data = await storage.exportUserEnrollmentData(req.params.userId);
+        res.json(data);
+      } catch (err) {
+        console.error("Error exporting enrollment data:", err);
+        res.status(500).json({ error: "Failed to export enrollment data" });
       }
-      const data = await storage.exportUserEnrollmentData(req.params.userId);
-      res.json(data);
-    } catch (err) {
-      console.error("Error exporting enrollment data:", err);
-      res.status(500).json({ error: "Failed to export enrollment data" });
-    }
-  });
+    },
+  );
 
-  app.get("/api/export/enrollment/:enrollmentId/progress", isAuthenticated, async (req, res) => {
-    try {
-      const data = await storage.exportProgressData(req.params.enrollmentId);
-      res.json(data);
-    } catch (err) {
-      console.error("Error exporting progress data:", err);
-      res.status(500).json({ error: "Failed to export progress data" });
-    }
-  });
+  app.get(
+    "/api/export/enrollment/:enrollmentId/progress",
+    isAuthenticated,
+    async (req, res) => {
+      try {
+        const data = await storage.exportProgressData(req.params.enrollmentId);
+        res.json(data);
+      } catch (err) {
+        console.error("Error exporting progress data:", err);
+        res.status(500).json({ error: "Failed to export progress data" });
+      }
+    },
+  );
 
   // Real Estate Express LMS Integration
-  app.get("/api/export/enrollment/:enrollmentId/ree", isAuthenticated, async (req, res) => {
-    try {
-      const data = await storage.exportRealEstateExpressFormat(req.params.enrollmentId);
-      res.json(data);
-    } catch (err) {
-      console.error("Error exporting Real Estate Express data:", err);
-      res.status(500).json({ error: "Failed to export Real Estate Express format" });
-    }
-  });
+  app.get(
+    "/api/export/enrollment/:enrollmentId/ree",
+    isAuthenticated,
+    async (req, res) => {
+      try {
+        const data = await storage.exportRealEstateExpressFormat(
+          req.params.enrollmentId,
+        );
+        res.json(data);
+      } catch (err) {
+        console.error("Error exporting Real Estate Express data:", err);
+        res
+          .status(500)
+          .json({ error: "Failed to export Real Estate Express format" });
+      }
+    },
+  );
 
   app.post("/api/import/ree/enrollment", isAdmin, async (req, res) => {
     try {
       const { studentEmail, courseCode, hoursCompleted, completed } = req.body;
       if (!studentEmail || !courseCode) {
-        return res.status(400).json({ error: "studentEmail and courseCode required" });
+        return res
+          .status(400)
+          .json({ error: "studentEmail and courseCode required" });
       }
-      
+
       const user = await storage.getUserByEmail(studentEmail);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      
-      const courseList = await db.select().from(courses).where(eq(courses.sku, courseCode));
+
+      const courseList = await db
+        .select()
+        .from(courses)
+        .where(eq(courses.sku, courseCode));
       if (courseList.length === 0) {
         return res.status(404).json({ error: "Course not found" });
       }
-      
+
       const enrollment = await storage.getEnrollment(user.id, courseList[0].id);
       if (!enrollment) {
         return res.status(404).json({ error: "Enrollment not found" });
       }
-      
+
       const updated = await storage.adminOverrideEnrollmentData(enrollment.id, {
         hoursCompleted: hoursCompleted ? Number(hoursCompleted) : undefined,
         completed: completed ? 1 : 0,
-        completedAt: completed ? new Date() : undefined
+        completedAt: completed ? new Date() : undefined,
       });
-      
-      res.json({ message: "Enrollment imported from Real Estate Express", enrollment: updated });
+
+      res.json({
+        message: "Enrollment imported from Real Estate Express",
+        enrollment: updated,
+      });
     } catch (err) {
       console.error("Error importing Real Estate Express data:", err);
-      res.status(500).json({ error: "Failed to import Real Estate Express enrollment" });
+      res
+        .status(500)
+        .json({ error: "Failed to import Real Estate Express enrollment" });
     }
   });
 
   // Course Content Export Routes
-  app.get("/api/export/course/:courseId/content.json", isAdmin, async (req, res) => {
-    try {
-      const jsonContent = await storage.exportCourseContentJSON(req.params.courseId);
-      res.setHeader("Content-Type", "application/json");
-      res.setHeader("Content-Disposition", `attachment; filename="course-content-${req.params.courseId}.json"`);
-      res.send(jsonContent);
-    } catch (err) {
-      console.error("Error exporting course content as JSON:", err);
-      res.status(500).json({ error: "Failed to export course content" });
-    }
-  });
+  app.get(
+    "/api/export/course/:courseId/content.json",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const jsonContent = await storage.exportCourseContentJSON(
+          req.params.courseId,
+        );
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="course-content-${req.params.courseId}.json"`,
+        );
+        res.send(jsonContent);
+      } catch (err) {
+        console.error("Error exporting course content as JSON:", err);
+        res.status(500).json({ error: "Failed to export course content" });
+      }
+    },
+  );
 
-  app.get("/api/export/course/:courseId/content.csv", isAdmin, async (req, res) => {
-    try {
-      const csvContent = await storage.exportCourseContentCSV(req.params.courseId);
-      res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename="course-content-${req.params.courseId}.csv"`);
-      res.send(csvContent);
-    } catch (err) {
-      console.error("Error exporting course content as CSV:", err);
-      res.status(500).json({ error: "Failed to export course content" });
-    }
-  });
+  app.get(
+    "/api/export/course/:courseId/content.csv",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const csvContent = await storage.exportCourseContentCSV(
+          req.params.courseId,
+        );
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="course-content-${req.params.courseId}.csv"`,
+        );
+        res.send(csvContent);
+      } catch (err) {
+        console.error("Error exporting course content as CSV:", err);
+        res.status(500).json({ error: "Failed to export course content" });
+      }
+    },
+  );
 
-  app.get("/api/export/course/:courseId/content.docx", isAdmin, async (req, res) => {
-    try {
-      const docxBuffer = await storage.exportCourseContentDocx(req.params.courseId);
-      res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-      res.setHeader("Content-Disposition", `attachment; filename="course-content-${req.params.courseId}.docx"`);
-      res.send(docxBuffer);
-    } catch (err) {
-      console.error("Error exporting course content as DOCX:", err);
-      res.status(500).json({ error: "Failed to export course content" });
-    }
-  });
+  app.get(
+    "/api/export/course/:courseId/content.docx",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const docxBuffer = await storage.exportCourseContentDocx(
+          req.params.courseId,
+        );
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        );
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="course-content-${req.params.courseId}.docx"`,
+        );
+        res.send(docxBuffer);
+      } catch (err) {
+        console.error("Error exporting course content as DOCX:", err);
+        res.status(500).json({ error: "Failed to export course content" });
+      }
+    },
+  );
 
   // All Users Data Export
   app.get("/api/export/users/data.json", isAdmin, async (req, res) => {
     try {
       const jsonContent = await storage.exportAllUsersData();
       res.setHeader("Content-Type", "application/json");
-      res.setHeader("Content-Disposition", `attachment; filename="users-data-${new Date().toISOString().split('T')[0]}.json"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="users-data-${new Date().toISOString().split("T")[0]}.json"`,
+      );
       res.send(jsonContent);
     } catch (err) {
       console.error("Error exporting users data:", err);
@@ -1501,7 +1764,10 @@ segment1.ts
     try {
       const csvContent = await storage.exportAllUsersDataCSV();
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename="users-data-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="users-data-${new Date().toISOString().split("T")[0]}.csv"`,
+      );
       res.send(csvContent);
     } catch (err) {
       console.error("Error exporting users data as CSV:", err);
@@ -1514,7 +1780,10 @@ segment1.ts
     try {
       const jsonContent = await storage.exportEmailCampaignData();
       res.setHeader("Content-Type", "application/json");
-      res.setHeader("Content-Disposition", `attachment; filename="campaigns-data-${new Date().toISOString().split('T')[0]}.json"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="campaigns-data-${new Date().toISOString().split("T")[0]}.json"`,
+      );
       res.send(jsonContent);
     } catch (err) {
       console.error("Error exporting campaign data:", err);
@@ -1526,7 +1795,10 @@ segment1.ts
     try {
       const csvContent = await storage.exportEmailCampaignDataCSV();
       res.setHeader("Content-Type", "text/csv");
-      res.setHeader("Content-Disposition", `attachment; filename="campaigns-data-${new Date().toISOString().split('T')[0]}.csv"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="campaigns-data-${new Date().toISOString().split("T")[0]}.csv"`,
+      );
       res.send(csvContent);
     } catch (err) {
       console.error("Error exporting campaign data as CSV:", err);
@@ -1551,17 +1823,22 @@ segment1.ts
 
   app.get("/api/admin/stats", isAdmin, async (req, res) => {
     try {
-      const allUsers = await storage.getUsers?.() || [];
-      const allCourses = await storage.getCourses?.() || [];
-      const allEnrollments = await storage.getEnrollments?.() || [];
-      
+      const allUsers = (await storage.getUsers?.()) || [];
+      const allCourses = (await storage.getCourses?.()) || [];
+      const allEnrollments = (await storage.getEnrollments?.()) || [];
+
       res.json({
         totalUsers: allUsers.length || 0,
         totalCourses: allCourses.length || 0,
         totalEnrollments: allEnrollments.length || 0,
-        completionRate: allEnrollments.length > 0 
-          ? Math.round((allEnrollments.filter((e: any) => e.completed).length / allEnrollments.length) * 100)
-          : 0,
+        completionRate:
+          allEnrollments.length > 0
+            ? Math.round(
+                (allEnrollments.filter((e: any) => e.completed).length /
+                  allEnrollments.length) *
+                  100,
+              )
+            : 0,
       });
     } catch (err) {
       console.error("Error fetching stats:", err);
@@ -1571,7 +1848,7 @@ segment1.ts
 
   app.get("/api/admin/users", isAdmin, async (req, res) => {
     try {
-      const allUsers = await storage.getUsers?.() || [];
+      const allUsers = (await storage.getUsers?.()) || [];
       res.json(allUsers.slice(0, 100));
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -1581,7 +1858,7 @@ segment1.ts
 
   app.get("/api/admin/enrollments", isAdmin, async (req, res) => {
     try {
-      const allEnrollments = await storage.getEnrollments?.() || [];
+      const allEnrollments = (await storage.getEnrollments?.()) || [];
       res.json(allEnrollments.slice(0, 100));
     } catch (err) {
       console.error("Error fetching enrollments:", err);
@@ -1614,7 +1891,7 @@ segment1.ts
 
   app.get("/api/admin/courses", isAdmin, async (req, res) => {
     try {
-      const allCourses = await storage.getCourses?.() || [];
+      const allCourses = (await storage.getCourses?.()) || [];
       res.json(allCourses.slice(0, 500));
     } catch (err) {
       console.error("Error fetching courses:", err);
@@ -1650,7 +1927,7 @@ segment1.ts
     try {
       const { slug } = req.params;
       const { blocks } = req.body;
-      
+
       const page = {
         id: slug,
         slug,
@@ -1658,7 +1935,7 @@ segment1.ts
         blocks: blocks || [],
         updatedAt: new Date().toISOString(),
       };
-      
+
       await storage.savePage?.(slug, page);
       res.json(page);
     } catch (err) {
@@ -1683,14 +1960,20 @@ segment1.ts
   app.post("/api/contact", async (req, res) => {
     try {
       const { name, email, subject, message } = req.body;
-      
+
       if (!name || !email || !subject || !message) {
         return res.status(400).json({ error: "All fields are required" });
       }
 
       // Log contact message (in production, send email here)
-      console.log("Contact form submission:", { name, email, subject, message, timestamp: new Date().toISOString() });
-      
+      console.log("Contact form submission:", {
+        name,
+        email,
+        subject,
+        message,
+        timestamp: new Date().toISOString(),
+      });
+
       res.json({ success: true, message: "Your message has been received" });
     } catch (err) {
       console.error("Contact form error:", err);
@@ -1708,7 +1991,9 @@ segment1.ts
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        return res.status(200).json({ message: "If email exists, reset link sent" });
+        return res
+          .status(200)
+          .json({ message: "If email exists, reset link sent" });
       }
 
       const crypto = await import("crypto");
@@ -1719,11 +2004,15 @@ segment1.ts
       const hashedToken = await bcrypt.default.hash(resetToken, 10);
 
       const db = (await import("./db")).db;
-      const { users } = (await import("@shared/schema"));
-      const { eq } = (await import("drizzle-orm"));
+      const { users } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
 
-      await db.update(users)
-        .set({ passwordResetToken: hashedToken, passwordResetTokenExpires: tokenExpires })
+      await db
+        .update(users)
+        .set({
+          passwordResetToken: hashedToken,
+          passwordResetTokenExpires: tokenExpires,
+        })
         .where(eq(users.id, user.id));
 
       const resetLink = `https://${process.env.REPL_ID}.id.replit.dev/reset-password?token=${resetToken}`;
@@ -1744,24 +2033,36 @@ segment1.ts
       }
 
       const db = (await import("./db")).db;
-      const { users } = (await import("@shared/schema"));
-      const { eq, and, gt } = (await import("drizzle-orm"));
+      const { users } = await import("@shared/schema");
+      const { eq, and, gt } = await import("drizzle-orm");
       const bcrypt = await import("bcrypt");
 
-      const user = await db.select().from(users).where(
-        and(
-          eq(users.passwordResetToken, token),
-          gt(users.passwordResetTokenExpires, new Date())
+      const user = await db
+        .select()
+        .from(users)
+        .where(
+          and(
+            eq(users.passwordResetToken, token),
+            gt(users.passwordResetTokenExpires, new Date()),
+          ),
         )
-      ).limit(1).then(results => results[0]);
+        .limit(1)
+        .then((results) => results[0]);
 
       if (!user) {
-        return res.status(400).json({ error: "Invalid or expired reset token" });
+        return res
+          .status(400)
+          .json({ error: "Invalid or expired reset token" });
       }
 
       const passwordHash = await bcrypt.default.hash(password, 10);
-      await db.update(users)
-        .set({ passwordHash, passwordResetToken: null, passwordResetTokenExpires: null })
+      await db
+        .update(users)
+        .set({
+          passwordHash,
+          passwordResetToken: null,
+          passwordResetTokenExpires: null,
+        })
         .where(eq(users.id, user.id));
 
       res.json({ message: "Password reset successful" });
@@ -1773,4 +2074,3 @@ segment1.ts
 
   return httpServer;
 }
-
