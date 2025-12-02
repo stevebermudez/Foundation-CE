@@ -125,7 +125,7 @@ export async function setupAuth(app: Express) {
     try {
       const user = await storage.getUser(userId);
       if (user) {
-        cb(null, { id: userId, ...user });
+        cb(null, user);
       } else {
         cb(null, { id: userId });
       }
