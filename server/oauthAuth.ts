@@ -48,8 +48,20 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Debug: Log all OAuth env vars
+  console.log("🔍 OAuth Environment Variables Debug:");
+  console.log("GOOGLE_CLIENT_ID exists:", !!process.env.GOOGLE_CLIENT_ID);
+  if (process.env.GOOGLE_CLIENT_ID) {
+    console.log("GOOGLE_CLIENT_ID starts with:", process.env.GOOGLE_CLIENT_ID.substring(0, 20));
+  }
+  console.log("GOOGLE_CLIENT_SECRET exists:", !!process.env.GOOGLE_CLIENT_SECRET);
+  if (process.env.GOOGLE_CLIENT_SECRET) {
+    console.log("GOOGLE_CLIENT_SECRET starts with:", process.env.GOOGLE_CLIENT_SECRET.substring(0, 20));
+  }
+
   // Google OAuth
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    console.log("✅ Setting up Google OAuth Strategy");
     passport.use(
       new GoogleStrategy(
         {
