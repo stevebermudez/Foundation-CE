@@ -110,7 +110,12 @@ export async function registerRoutes(
       const bcrypt = await import("bcrypt");
       const passwordHash = await bcrypt.default.hash(password, 10);
       
+      // Generate UUID for new user
+      const { v4: uuidv4 } = await import("uuid");
+      const userId = uuidv4();
+      
       const newUser = await storage.upsertUser({
+        id: userId,
         email,
         passwordHash,
         firstName,
@@ -131,8 +136,12 @@ export async function registerRoutes(
         user: { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName } 
       });
     } catch (err) {
-      console.error("Signup error:", err);
-      res.status(500).json({ error: "Signup failed" });
+      console.error("Signup error details:", {
+        message: (err as Error).message,
+        stack: (err as Error).stack,
+        name: (err as Error).name
+      });
+      res.status(500).json({ error: "Signup failed", details: (err as Error).message });
     }
   });
 
