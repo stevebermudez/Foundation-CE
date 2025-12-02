@@ -26,12 +26,20 @@ export default function FloridaCourses() {
         body: JSON.stringify({ courseId, email }),
       });
 
-      if (!response.ok) throw new Error("Checkout failed");
-      const { url } = await response.json();
-      if (url) window.location.href = url;
-    } catch (err) {
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Checkout failed");
+      }
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL received");
+      }
+    } catch (err: any) {
       console.error("Checkout error:", err);
-      alert("Failed to start checkout. Please try again.");
+      alert(`Checkout error: ${err.message}`);
     }
   };
 

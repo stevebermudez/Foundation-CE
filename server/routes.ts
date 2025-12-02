@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { getStripeClient } from "./stripeClient";
+import { getStripeClient, getStripeStatus } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
@@ -248,6 +248,12 @@ export async function registerRoutes(
     }
   });
 
+  // Stripe Status - Check if Stripe is configured
+  app.get("/api/stripe/status", (req, res) => {
+    const status = getStripeStatus();
+    res.json(status);
+  });
+
   app.get("/api/courses/:id", async (req, res) => {
     const course = await storage.getCourse(req.params.id);
     if (!course) return res.status(404).json({ error: "Course not found" });
@@ -295,9 +301,10 @@ export async function registerRoutes(
       });
 
       res.json({ url: session.url, sessionId: session.id });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Checkout error:", err);
-      res.status(500).json({ error: "Failed to create checkout session" });
+      const message = err.message || "Failed to create checkout session";
+      res.status(500).json({ error: message });
     }
   });
 
