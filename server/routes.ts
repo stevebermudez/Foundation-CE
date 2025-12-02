@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { getUncachableStripeClient } from "./stripeClient";
+import { getStripeClient } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
@@ -268,7 +268,7 @@ export async function registerRoutes(
       const successUrl = `${req.headers.origin || process.env.CLIENT_URL || "http://localhost:5000"}/checkout/success?courseId=${courseId}`;
       const cancelUrl = `${req.headers.origin || process.env.CLIENT_URL || "http://localhost:5000"}/checkout/cancel`;
 
-      const stripe = await getUncachableStripeClient();
+      const stripe = getStripeClient();
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card", "apple_pay", "google_pay"],
         line_items: [
@@ -312,7 +312,7 @@ export async function registerRoutes(
       const course = await storage.getCourse(courseId);
       if (!course) return res.status(404).json({ error: "Course not found" });
 
-      const stripe = await getUncachableStripeClient();
+      const stripe = getStripeClient();
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100),
         currency: "usd",
@@ -343,7 +343,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "intentId required" });
       }
 
-      const stripe = await getUncachableStripeClient();
+      const stripe = getStripeClient();
       const paymentIntent = await stripe.paymentIntents.confirm(intentId, {
         payment_method: paymentMethodId,
       });
