@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,30 @@ export default function CheckoutPage() {
   const params = useParams<{ courseId?: string }>();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/user");
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+          setEmail(userData.email || "");
+        } else {
+          setLocation("/login");
+        }
+      } catch (err) {
+        console.error("Auth check failed:", err);
+        setLocation("/login");
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+    checkAuth();
+  }, [setLocation]);
 
   const { data: course } = useQuery({
     queryKey: ["/api/courses", params.courseId],
@@ -48,6 +72,16 @@ export default function CheckoutPage() {
       setIsLoading(false);
     }
   };
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!course) {
     return (
