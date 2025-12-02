@@ -20,9 +20,7 @@ export function getStripeClient() {
     );
   }
 
-  return new Stripe(secretKey, {
-    apiVersion: "2024-12-27.acacia",
-  });
+  return new Stripe(secretKey);
 }
 
 export async function getStripePublishableKey() {
