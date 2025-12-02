@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Apple, Separator } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 
@@ -71,28 +71,15 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Social Login */}
-            <div className="space-y-3">
-              <a href="/api/google/login" className="w-full block">
-                <Button
-                  className="w-full h-12 text-base gap-2 bg-white text-slate-900 border border-border hover:bg-slate-50"
-                  data-testid="button-login-google"
-                >
-                  <SiGoogle className="h-5 w-5" />
-                  Sign In with Google
-                </Button>
-              </a>
-
-              <form action="/api/apple/login" method="POST" className="w-full">
-                <Button
-                  type="submit"
-                  className="w-full h-12 text-base gap-2 bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
-                  data-testid="button-login-apple"
-                >
-                  <Apple className="h-5 w-5" />
-                  Sign In with Apple
-                </Button>
-              </form>
-            </div>
+            <a href="/api/google/login" className="w-full block">
+              <Button
+                className="w-full h-12 text-base gap-2 bg-white text-slate-900 border border-border hover:bg-slate-50"
+                data-testid="button-login-google"
+              >
+                <SiGoogle className="h-5 w-5" />
+                Sign In with Google
+              </Button>
+            </a>
 
             {/* Divider */}
             <div className="relative">
