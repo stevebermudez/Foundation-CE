@@ -51,6 +51,8 @@ export default function SignupPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("authToken", data.token);
         toast({ title: "Success", description: "Account created! Redirecting..." });
         setTimeout(() => setLocation("/account-setup"), 1000);
       } else {

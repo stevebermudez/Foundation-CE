@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getStripeClient, getStripeStatus } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
+import { jwtAuth } from "./jwtAuth";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
 
 export async function registerRoutes(
@@ -32,42 +33,48 @@ export async function registerRoutes(
   } catch (err: any) {
     console.error("Error with FREC I seeding:", err);
   }
-  // Auth Routes
-  app.get("/api/user", isAuthenticated, async (req, res) => {
+  // Auth Routes - JWT or Passport
+  const authMiddleware = async (req: any, res: any, next: any) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+    if (token) {
+      try {
+        const jwtLib = await import("jsonwebtoken");
+        const decoded = jwtLib.default.verify(
+          token,
+          process.env.SESSION_SECRET || "fallback-secret"
+        ) as { id: string; email: string };
+        req.user = decoded;
+        return next();
+      } catch (err) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+    }
+    return isAuthenticated(req, res, next);
+  };
+
+  app.get("/api/user", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
-      if (!user) return res.status(401).json({ message: "Not authenticated" });
-      
-      try {
-        const userData = await storage.getUser(user.id);
-        res.json({
-          id: user.id,
-          email: userData?.email || user.email,
-          firstName: userData?.firstName || user.firstName,
-          lastName: userData?.lastName || user.lastName,
-          profileImageUrl: userData?.profileImageUrl || user.profileImageUrl,
-        });
-      } catch (dbErr) {
-        console.error("Error querying database:", dbErr);
-        res.json({
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
-        });
-      }
+      const userData = await storage.getUser(user.id);
+      res.json({
+        id: user.id,
+        email: userData?.email || user.email,
+        firstName: userData?.firstName || user.firstName,
+        lastName: userData?.lastName || user.lastName,
+        profileImageUrl: userData?.profileImageUrl || user.profileImageUrl,
+      });
     } catch (err) {
       console.error("Error fetching user:", err);
       res.status(500).json({ error: "Failed to fetch user" });
     }
   });
 
-  app.patch("/api/user/profile", isAuthenticated, async (req, res) => {
+  app.patch("/api/user/profile", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
       const { licenseNumber, licenseExpirationDate } = req.body;
-      // Profile saved successfully - license info can be used when completing courses
       res.json({ message: "Profile updated", licenseNumber, licenseExpirationDate });
     } catch (err) {
       console.error("Error updating profile:", err);
@@ -75,7 +82,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/enrollments/user", isAuthenticated, async (req, res) => {
+  app.get("/api/enrollments/user", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
       const enrollments = await storage.getCompletedEnrollments(user.id);
@@ -86,7 +93,7 @@ export async function registerRoutes(
     }
   });
 
-  // Email/Password Signup
+  // Email/Password Signup (JWT)
   app.post("/api/auth/signup", async (req, res) => {
     try {
       const { email, password, firstName, lastName } = req.body;
@@ -110,26 +117,26 @@ export async function registerRoutes(
         lastName,
       });
 
-      // Create session with promisified req.login
-      try {
-        await new Promise<void>((resolve, reject) => {
-          req.login(newUser, (err: any) => {
-            if (err) reject(err);
-            else resolve();
-          });
-        });
-        res.json({ message: "Signup successful", user: { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName } });
-      } catch (sessionErr) {
-        console.error("Signup session error:", sessionErr);
-        return res.status(500).json({ error: "Login failed", details: (sessionErr as Error).message });
-      }
+      // Generate JWT token
+      const jwt = await import("jsonwebtoken");
+      const token = jwt.default.sign(
+        { id: newUser.id, email: newUser.email },
+        process.env.SESSION_SECRET || "fallback-secret",
+        { expiresIn: "7d" }
+      );
+
+      res.json({ 
+        message: "Signup successful", 
+        token,
+        user: { id: newUser.id, email: newUser.email, firstName: newUser.firstName, lastName: newUser.lastName } 
+      });
     } catch (err) {
       console.error("Signup error:", err);
       res.status(500).json({ error: "Signup failed" });
     }
   });
 
-  // Email/Password Login
+  // Email/Password Login (JWT)
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -138,13 +145,11 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Email and password required" });
       }
 
-      // Query database
       const user = await storage.getUserByEmail(email);
       if (!user || !user.passwordHash) {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      // Compare password with bcrypt
       const bcrypt = await import("bcrypt");
       const passwordMatch = await bcrypt.default.compare(password, user.passwordHash);
       
@@ -152,18 +157,22 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      // Create session using promisified req.login
-      await new Promise<void>((resolve, reject) => {
-        req.login(user, (err: any) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
+      // Generate JWT token
+      const jwt = await import("jsonwebtoken");
+      const token = jwt.default.sign(
+        { id: user.id, email: user.email },
+        process.env.SESSION_SECRET || "fallback-secret",
+        { expiresIn: "7d" }
+      );
 
-      res.json({ message: "Login successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
+      res.json({ 
+        message: "Login successful", 
+        token,
+        user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } 
+      });
     } catch (err) {
-      console.error("🔐 LOGIN ERROR:", err);
-      res.status(500).json({ error: "Login failed", details: (err as Error).message });
+      console.error("Login error:", err);
+      res.status(500).json({ error: "Login failed" });
     }
   });
 

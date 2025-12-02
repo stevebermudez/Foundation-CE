@@ -41,6 +41,8 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("authToken", data.token);
         toast({ title: "Success", description: "Login successful!" });
         setLocation("/dashboard");
       } else {
