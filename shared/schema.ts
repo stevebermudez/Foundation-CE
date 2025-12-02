@@ -3,6 +3,10 @@ import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core"
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Type exports for purchases
+export type Purchase = typeof purchases.$inferSelect;
+export type UpsertPurchase = z.infer<typeof upsertPurchaseSchema>;
+
 // Session storage table (required for Replit Auth)
 export const sessions = pgTable("sessions", {
   sid: varchar("sid").primaryKey(),
@@ -285,6 +289,21 @@ export const examAnswers = pgTable("exam_answers", {
   userAnswer: varchar("user_answer").notNull(),
   isCorrect: integer("is_correct"), // 1 for correct, 0 for incorrect
   answeredAt: timestamp("answered_at").defaultNow(),
+});
+
+// Purchase history table - tracks individual course purchases via Stripe
+export const purchases = pgTable("purchases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  stripeSessionId: varchar("stripe_session_id").unique().notNull(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  amount: integer("amount").notNull(), // in cents
+  currency: varchar("currency").default("usd"),
+  status: varchar("status").default("completed"), // "pending", "completed", "failed", "refunded"
+  customerEmail: varchar("customer_email"),
+  purchasedAt: timestamp("purchased_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // User subscriptions (monthly/annual billing)
