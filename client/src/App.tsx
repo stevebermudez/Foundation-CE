@@ -12,6 +12,7 @@ import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
 import CoursesFLPage from "@/pages/courses-fl";
 import CourseViewPage from "@/pages/course-view";
+import CheckoutPage from "@/pages/checkout";
 import AccountSetupPage from "@/pages/account-setup";
 import DashboardPage from "@/pages/dashboard";
 import CompliancePage from "@/pages/compliance";
@@ -31,6 +32,7 @@ function Router() {
           <Route path="/contact" component={ContactPage} />
           <Route path="/courses/fl" component={CoursesFLPage} />
           <Route path="/course/:id" component={CourseViewPage} />
+          <Route path="/checkout/:courseId" component={CheckoutPage} />
           <Route path="/login" component={LoginPage} />
           <Route path="/signup" component={SignupPage} />
           <Route path="/account-setup" component={AccountSetupPage} />

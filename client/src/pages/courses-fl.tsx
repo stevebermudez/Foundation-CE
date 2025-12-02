@@ -14,32 +14,8 @@ export default function FloridaCourses() {
 
   const freci = allCourses.find(c => c.sku === "FL-RE-PL-SA-FRECI-63");
 
-  const handleEnroll = async (courseId: string) => {
-    try {
-      const email = prompt("Enter your email address:");
-      if (!email) return;
-
-      const response = await fetch("/api/checkout/course", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId, email }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || "Checkout failed");
-      }
-      
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL received");
-      }
-    } catch (err: any) {
-      console.error("Checkout error:", err);
-      alert(`Checkout error: ${err.message}`);
-    }
+  const handleBuyNow = (courseId: string) => {
+    setLocation(`/checkout/${courseId}`);
   };
 
   return (
@@ -124,7 +100,7 @@ export default function FloridaCourses() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg"
-                  onClick={() => freci && handleEnroll(freci.id)}
+                  onClick={() => freci && handleBuyNow(freci.id)}
                   className="flex-1 h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700"
                   data-testid="button-buy-course-fl"
                 >
