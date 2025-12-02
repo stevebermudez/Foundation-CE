@@ -10,11 +10,6 @@ export default function FloridaCourses() {
   
   const { data: allCourses = [] } = useQuery<SelectCourse[]>({
     queryKey: ["/api/courses"],
-    queryFn: async () => {
-      const res = await fetch("/api/courses", { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch courses");
-      return res.json();
-    },
   });
 
   const freci = allCourses.find(c => c.sku === "FL-RE-PL-SA-FRECI-63");

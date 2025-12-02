@@ -20,11 +20,6 @@ export default function HomePage() {
 
   const { data: allCourses = [] } = useQuery<SelectCourse[]>({
     queryKey: ["/api/courses"],
-    queryFn: async () => {
-      const res = await fetch("/api/courses", { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch courses");
-      return res.json();
-    },
   });
 
   const freci = allCourses.find(c => c.sku === "FL-RE-PL-SA-FRECI-63");
@@ -40,12 +35,12 @@ export default function HomePage() {
         body: JSON.stringify({ courseId, email }),
       });
 
-      if (!response.ok) throw new Error("Checkout failed");
-      const { url } = await response.json();
-      if (url) window.location.href = url;
-    } catch (err) {
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Checkout failed");
+      if (data.url) window.location.href = data.url;
+    } catch (err: any) {
       console.error("Checkout error:", err);
-      alert("Failed to start checkout. Please try again.");
+      alert(`Checkout error: ${err.message}`);
     }
   };
 
