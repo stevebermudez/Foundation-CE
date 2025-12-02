@@ -1,6 +1,8 @@
 import passport from "passport";
 // @ts-ignore
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+// @ts-ignore
+import { Strategy as AppleStrategy } from "passport-apple";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
@@ -75,6 +77,41 @@ export async function setupAuth(app: Express) {
   } else {
     app.get("/api/google/login", (req, res) => {
       res.status(500).json({ error: "Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET." });
+    });
+  }
+
+  // Apple OAuth
+  if (process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY && process.env.APPLE_BUNDLE_ID) {
+    passport.use(
+      new AppleStrategy(
+        {
+          teamID: process.env.APPLE_TEAM_ID,
+          keyID: process.env.APPLE_KEY_ID,
+          privateKeyPath: process.env.APPLE_PRIVATE_KEY_PATH || undefined,
+          privateKeyString: process.env.APPLE_PRIVATE_KEY,
+          bundleID: process.env.APPLE_BUNDLE_ID,
+          callbackURL: "/api/apple/callback",
+        },
+        async (accessToken: any, refreshToken: any, idToken: any, profile: any, done: any) => {
+          try {
+            const userId = await upsertUser(profile);
+            return done(null, { id: userId });
+          } catch (err) {
+            return done(err);
+          }
+        }
+      )
+    );
+
+    app.post("/api/apple/login", passport.authenticate("apple"));
+    app.post(
+      "/api/apple/callback",
+      passport.authenticate("apple", { failureRedirect: "/login" }),
+      (req, res) => res.redirect("/dashboard")
+    );
+  } else {
+    app.post("/api/apple/login", (req, res) => {
+      res.status(500).json({ error: "Apple Sign In not configured. Please set APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_BUNDLE_ID." });
     });
   }
 

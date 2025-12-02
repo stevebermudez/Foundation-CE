@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogIn, Globe } from "lucide-react";
+import { LogIn, Globe, Apple } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 
@@ -87,6 +87,17 @@ export default function LoginPage() {
                     Sign In with Google
                   </Button>
                 </a>
+
+                <form action="/api/apple/login" method="POST" className="w-full">
+                  <Button
+                    type="submit"
+                    className="w-full h-12 text-base gap-2 bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                    data-testid="button-login-apple"
+                  >
+                    <Apple className="h-5 w-5" />
+                    Sign In with Apple
+                  </Button>
+                </form>
 
                 <Button
                   disabled
