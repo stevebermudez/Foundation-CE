@@ -15,6 +15,11 @@ export default function FloridaCourses() {
   const freci = allCourses.find(c => c.sku === "FL-RE-PL-SA-FRECI-63");
 
   const handleBuyNow = (courseId: string) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      setLocation("/login");
+      return;
+    }
     setLocation(`/checkout/${courseId}`);
   };
 

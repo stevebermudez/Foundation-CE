@@ -19,7 +19,9 @@ export default function CheckoutPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch("/api/user");
+        const token = localStorage.getItem("authToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await fetch("/api/user", { headers });
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
@@ -57,9 +59,14 @@ export default function CheckoutPage() {
 
     setIsLoading(true);
     try {
+      const token = localStorage.getItem("authToken");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const response = await fetch("/api/checkout/course", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ courseId: course.id, email }),
       });
 

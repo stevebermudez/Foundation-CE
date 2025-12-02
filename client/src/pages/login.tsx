@@ -17,9 +17,15 @@ export default function LoginPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const response = await fetch("/api/user");
-      if (response.ok) {
-        setLocation("/dashboard");
+      try {
+        const token = localStorage.getItem("authToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await fetch("/api/user", { headers });
+        if (response.ok) {
+          setLocation("/dashboard");
+        }
+      } catch (err) {
+        // User not authenticated, show login page
       }
     };
     checkAuth();
