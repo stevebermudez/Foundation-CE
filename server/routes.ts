@@ -122,34 +122,55 @@ export async function registerRoutes(
 
   // Email/Password Login
   app.post("/api/auth/login", async (req, res) => {
+    console.log("🔐 [LOGIN] Request received");
     try {
       const { email, password } = req.body;
+      console.log("🔐 [LOGIN] Email:", email, "Password length:", password?.length);
       
       if (!email || !password) {
+        console.log("🔐 [LOGIN] Missing email or password");
         return res.status(400).json({ error: "Email and password required" });
       }
 
+      console.log("🔐 [LOGIN] Querying database for user with email:", email);
       const user = await storage.getUserByEmail(email);
+      console.log("🔐 [LOGIN] User found:", !!user);
+      if (user) {
+        console.log("🔐 [LOGIN] User ID:", user.id);
+        console.log("🔐 [LOGIN] User has passwordHash:", !!user.passwordHash);
+        console.log("🔐 [LOGIN] PasswordHash length:", user.passwordHash?.length);
+      }
+
       if (!user || !user.passwordHash) {
+        console.log("🔐 [LOGIN] User not found or no password hash");
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
+      console.log("🔐 [LOGIN] Comparing passwords...");
       const bcrypt = await import("bcrypt");
+      console.log("🔐 [LOGIN] Bcrypt imported successfully");
       const passwordMatch = await bcrypt.default.compare(password, user.passwordHash);
+      console.log("🔐 [LOGIN] Password match result:", passwordMatch);
       
       if (!passwordMatch) {
+        console.log("🔐 [LOGIN] Password does not match");
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
+      console.log("🔐 [LOGIN] Password matched! Attempting session creation...");
       req.login(user, (err) => {
         if (err) {
-          console.error("Session error:", err);
+          console.error("🔐 [LOGIN] Session error:", err);
+          console.error("🔐 [LOGIN] Error stack:", err.stack);
           return res.status(500).json({ error: "Login failed", details: err.message });
         }
+        console.log("🔐 [LOGIN] ✅ Session created successfully!");
+        console.log("🔐 [LOGIN] User is now authenticated. Session ID:", req.sessionID);
         res.json({ message: "Login successful", user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName } });
       });
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("🔐 [LOGIN] Catch block error:", err);
+      console.error("🔐 [LOGIN] Error stack:", (err as Error).stack);
       res.status(500).json({ error: "Login failed", details: (err as Error).message });
     }
   });
