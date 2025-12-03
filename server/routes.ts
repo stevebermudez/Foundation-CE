@@ -11,6 +11,8 @@ import {
   capturePaypalOrder,
   loadPaypalDefault,
 } from "./paypal";
+import { submitToDBPR, validateDBPRData, generateDBPRBatchFile } from "./dbprService";
+import { generateCertificateHTML, generateCertificateFileName, CertificateData } from "./certificates";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -485,13 +487,243 @@ export async function registerRoutes(
   });
 
   // Get DBPR reporting status
-  app.get("/api/dbpr/status/:enrollmentId", async (req, res) => {
+  app.get("/api/dbpr/status/:enrollmentId", isAuthenticated, async (req, res) => {
     try {
-      const status = await storage.getDBPRReport(req.params.enrollmentId);
+      const { enrollmentId } = req.params;
+      const userId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const enrollment = await storage.getEnrollment(enrollmentId);
+      if (!enrollment) {
+        return res.status(404).json({ error: "Enrollment not found" });
+      }
+      
+      if (enrollment.userId !== userId) {
+        return res.status(403).json({ error: "Access denied - you can only view your own DBPR status" });
+      }
+      
+      const status = await storage.getDBPRReport(enrollmentId);
       res.json(status);
     } catch (err) {
       console.error("Error fetching DBPR status:", err);
       res.status(500).json({ error: "Failed to fetch status" });
+    }
+  });
+
+  // Submit completion to DBPR
+  app.post("/api/dbpr/submit/:enrollmentId", isAuthenticated, async (req, res) => {
+    try {
+      const { enrollmentId } = req.params;
+      const userId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const report = await storage.getDBPRReport(enrollmentId);
+      
+      if (!report) {
+        return res.status(404).json({ error: "DBPR report not found" });
+      }
+
+      if (report.userId !== userId) {
+        return res.status(403).json({ error: "Access denied - you can only submit your own course completions" });
+      }
+
+      const enrollment = await storage.getEnrollment(enrollmentId);
+      if (!enrollment || !enrollment.completed) {
+        return res.status(400).json({ error: "Enrollment not found or course not completed" });
+      }
+
+      const course = await storage.getCourse(enrollment.courseId);
+      if (!course || course.state !== "FL" || course.productType !== "RealEstate") {
+        return res.status(400).json({ error: "DBPR reporting is only for Florida Real Estate courses" });
+      }
+
+      if (report.status === "accepted") {
+        return res.status(400).json({ error: "Report already accepted by DBPR" });
+      }
+
+      const validation = await validateDBPRData({
+        studentName: report.studentName,
+        licenseNumber: report.licenseNumber || "",
+        ssnLast4: report.ssnLast4 || undefined,
+        courseTitle: report.courseTitle,
+        courseOfferingNumber: report.courseOfferingNumber || "",
+        providerNumber: report.providerNumber || "",
+        completionDate: new Date(report.completionDate),
+        ceHours: report.ceHours,
+        instructorName: report.instructorName || undefined,
+        licenseType: report.licenseType as "salesperson" | "broker" | "instructor",
+      });
+
+      if (!validation.valid) {
+        return res.status(400).json({ error: "Validation failed", errors: validation.errors });
+      }
+
+      const result = await submitToDBPR({
+        studentName: report.studentName,
+        licenseNumber: report.licenseNumber || "",
+        ssnLast4: report.ssnLast4 || undefined,
+        courseTitle: report.courseTitle,
+        courseOfferingNumber: report.courseOfferingNumber || "",
+        providerNumber: report.providerNumber || "",
+        completionDate: new Date(report.completionDate),
+        ceHours: report.ceHours,
+        instructorName: report.instructorName || undefined,
+        licenseType: report.licenseType as "salesperson" | "broker" | "instructor",
+      });
+
+      const updated = await storage.updateDBPRReport(report.id, {
+        status: result.success ? "submitted" : "rejected",
+        confirmationNumber: result.confirmationNumber || null,
+        errorMessage: result.errorMessage || null,
+        submittedAt: result.submittedAt,
+        confirmedAt: result.success ? new Date() : null,
+      });
+
+      res.json({ success: result.success, report: updated, result });
+    } catch (err) {
+      console.error("DBPR submission error:", err);
+      res.status(500).json({ error: "Failed to submit to DBPR" });
+    }
+  });
+
+  // Export DBPR batch file for manual upload
+  app.get("/api/dbpr/export", isAdmin, async (req, res) => {
+    try {
+      const { status = "pending" } = req.query;
+      const db = (await import("./db")).db;
+      const { dbprReports } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const reports = await db
+        .select()
+        .from(dbprReports)
+        .where(eq(dbprReports.status, status as string));
+
+      if (reports.length === 0) {
+        return res.status(404).json({ error: "No reports found with status: " + status });
+      }
+
+      const batchFile = generateDBPRBatchFile(reports);
+      
+      res.setHeader("Content-Type", "text/plain");
+      res.setHeader("Content-Disposition", `attachment; filename="dbpr-batch-${new Date().toISOString().split('T')[0]}.txt"`);
+      res.send(batchFile);
+    } catch (err) {
+      console.error("DBPR export error:", err);
+      res.status(500).json({ error: "Failed to export DBPR batch" });
+    }
+  });
+
+  // Generate certificate for completed enrollment
+  app.get("/api/certificates/:enrollmentId", isAuthenticated, async (req, res) => {
+    try {
+      const { enrollmentId } = req.params;
+      const userId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const enrollment = await storage.getEnrollment(enrollmentId);
+      if (!enrollment) {
+        return res.status(404).json({ error: "Enrollment not found" });
+      }
+
+      if (enrollment.userId !== userId) {
+        return res.status(403).json({ error: "Access denied - you can only access your own certificates" });
+      }
+
+      if (!enrollment.completed) {
+        return res.status(400).json({ error: "Course not yet completed" });
+      }
+
+      const user = await storage.getUser(enrollment.userId);
+      const course = await storage.getCourse(enrollment.courseId);
+      
+      if (!user || !course) {
+        return res.status(404).json({ error: "User or course not found" });
+      }
+
+      const certificateData: CertificateData = {
+        studentName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
+        courseName: course.title,
+        hours: course.hoursRequired || 0,
+        completionDate: new Date(enrollment.completedAt || new Date()),
+        instructorName: course.instructorName || undefined,
+        schoolName: "FoundationCE",
+        schoolApprovalNumber: course.providerNumber || "ZH0004868",
+        deliveryMethod: course.deliveryMethod || "Self-Paced Online",
+      };
+
+      const html = generateCertificateHTML(certificateData);
+      
+      res.setHeader("Content-Type", "text/html");
+      res.send(html);
+    } catch (err) {
+      console.error("Certificate generation error:", err);
+      res.status(500).json({ error: "Failed to generate certificate" });
+    }
+  });
+
+  // Download certificate as HTML file
+  app.get("/api/certificates/:enrollmentId/download", isAuthenticated, async (req, res) => {
+    try {
+      const { enrollmentId } = req.params;
+      const userId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const enrollment = await storage.getEnrollment(enrollmentId);
+      if (!enrollment) {
+        return res.status(404).json({ error: "Enrollment not found" });
+      }
+
+      if (enrollment.userId !== userId) {
+        return res.status(403).json({ error: "Access denied - you can only download your own certificates" });
+      }
+
+      if (!enrollment.completed) {
+        return res.status(400).json({ error: "Course not yet completed" });
+      }
+
+      const user = await storage.getUser(enrollment.userId);
+      const course = await storage.getCourse(enrollment.courseId);
+      
+      if (!user || !course) {
+        return res.status(404).json({ error: "User or course not found" });
+      }
+
+      const studentName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
+      const completionDate = new Date(enrollment.completedAt || new Date());
+
+      const certificateData: CertificateData = {
+        studentName,
+        courseName: course.title,
+        hours: course.hoursRequired || 0,
+        completionDate,
+        instructorName: course.instructorName || undefined,
+        schoolName: "FoundationCE",
+        schoolApprovalNumber: course.providerNumber || "ZH0004868",
+        deliveryMethod: course.deliveryMethod || "Self-Paced Online",
+      };
+
+      const html = generateCertificateHTML(certificateData);
+      const filename = generateCertificateFileName(studentName, completionDate);
+      
+      res.setHeader("Content-Type", "text/html");
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.send(html);
+    } catch (err) {
+      console.error("Certificate download error:", err);
+      res.status(500).json({ error: "Failed to download certificate" });
     }
   });
 
@@ -530,7 +762,7 @@ export async function registerRoutes(
               currency: "usd",
               product_data: {
                 name: course.title,
-                description: course.description,
+                description: course.description || undefined,
               },
               unit_amount: course.price || 1500,
             },

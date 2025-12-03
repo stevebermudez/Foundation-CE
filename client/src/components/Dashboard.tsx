@@ -13,6 +13,9 @@ import {
   ChevronRight,
   AlertTriangle,
   CheckCircle,
+  FileCheck,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
 
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
@@ -20,6 +23,135 @@ import flRealEstate from "@assets/generated_images/florida_beachfront_properties
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+
+function CompletedCourseCard({ enrollment }: { enrollment: any }) {
+  const { toast } = useToast();
+  const [downloading, setDownloading] = useState(false);
+  const isFloridaCourse = enrollment.course?.state === "FL" && enrollment.course?.productType === "RealEstate";
+  
+  const { data: dbprStatus } = useQuery<any>({
+    queryKey: ["/api/dbpr/status", enrollment.id],
+    enabled: isFloridaCourse,
+  });
+
+  const handleDownloadCertificate = async () => {
+    setDownloading(true);
+    try {
+      const response = await fetch(`/api/certificates/${enrollment.id}/download`, {
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to download certificate");
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `certificate-${enrollment.id}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Certificate Downloaded",
+        description: "Your completion certificate has been downloaded.",
+      });
+    } catch (err) {
+      toast({
+        title: "Download Failed",
+        description: "Unable to download certificate. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleViewCertificate = () => {
+    window.open(`/api/certificates/${enrollment.id}`, "_blank");
+  };
+
+  const getDbprStatusBadge = () => {
+    if (!dbprStatus) return null;
+    
+    const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+      pending: { label: "DBPR Pending", variant: "secondary" },
+      submitted: { label: "DBPR Submitted", variant: "default" },
+      accepted: { label: "DBPR Reported", variant: "default" },
+      rejected: { label: "DBPR Error", variant: "destructive" },
+    };
+    
+    const config = statusMap[dbprStatus.status] || statusMap.pending;
+    return (
+      <Badge variant={config.variant} className="text-xs gap-1">
+        <FileCheck className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
+  };
+
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-start gap-2 mb-2">
+              <CheckCircle className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+              <h3 className="font-semibold" data-testid={`text-completed-course-${enrollment.id}`}>
+                {enrollment.course?.title}
+              </h3>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground ml-7">
+              <span>
+                Completed: {enrollment.completedAt ? new Date(enrollment.completedAt).toLocaleDateString() : "Recent"}
+              </span>
+              <Badge variant="secondary" className="text-xs">
+                {enrollment.course?.hoursRequired} CE Hours
+              </Badge>
+              {isFloridaCourse && getDbprStatusBadge()}
+            </div>
+            {dbprStatus?.confirmationNumber && (
+              <p className="text-xs text-muted-foreground ml-7 mt-1">
+                DBPR Confirmation: {dbprStatus.confirmationNumber}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-2 shrink-0 ml-7 sm:ml-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={handleViewCertificate}
+              data-testid={`button-view-cert-${enrollment.id}`}
+            >
+              <ExternalLink className="h-4 w-4" />
+              View
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={handleDownloadCertificate}
+              disabled={downloading}
+              data-testid={`button-download-cert-${enrollment.id}`}
+            >
+              {downloading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Certificate
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 interface DashboardProps {
   userName: string;
@@ -190,27 +322,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   </Card>
                 ) : (
                   completedCourses.map((enrollment: any) => (
-                    <Card key={enrollment.id} className="overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div>
-                            <h3 className="font-semibold mb-2">{enrollment.course?.title}</h3>
-                            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                              <span>Completed: {enrollment.completedAt ? new Date(enrollment.completedAt).toLocaleDateString() : 'Recent'}</span>
-                              <Badge variant="secondary" className="text-xs">
-                                {enrollment.course?.hoursRequired} hours
-                              </Badge>
-                            </div>
-                          </div>
-                          {enrollment.certificateUrl && (
-                            <Button variant="outline" size="sm" className="gap-2 shrink-0" data-testid={`button-download-cert-${enrollment.id}`}>
-                              <Download className="h-4 w-4" />
-                              Certificate
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <CompletedCourseCard key={enrollment.id} enrollment={enrollment} />
                   ))
                 )}
               </TabsContent>
