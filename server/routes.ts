@@ -11,7 +11,6 @@ import {
   capturePaypalOrder,
   loadPaypalDefault,
 } from "./paypal";
-import { v4 as uuidv4 } from "uuid";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -141,7 +140,7 @@ export async function registerRoutes(
       );
 
       res.json({
-        message: "Signup successful",
+        message: "handleSubmit successful",
         token,
         user: {
           id: newUser.id,
