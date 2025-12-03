@@ -36,6 +36,15 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
 - **LMS Integration**: Architected for seamless integration and potential migration to 3rd-party LMS systems like Moodle or Canvas via data export/import APIs and SCORM package conversion readiness.
 - **Real Estate Express Integration**: Dedicated APIs for exporting and importing enrollment data in Real Estate Express specific formats.
 
+### LMS Security Architecture
+The LMS implements comprehensive server-side authorization to prevent client-side bypass attempts:
+- **Enrollment Ownership**: All lesson, quiz, and exam routes verify the user owns the enrollment
+- **Course Matching**: Routes validate that units/lessons/question banks belong to the enrolled course
+- **Sequential Locking**: Unit progression is enforced server-side - locked units cannot be accessed even via direct API calls
+- **Attempt Ownership**: Quiz and exam attempt routes verify the attempt belongs to the authenticated user
+- **Practice Exam Security**: All practice exam routes require authentication and verify attempt ownership
+- **Storage Methods**: `getUnit()` and `getLesson()` methods enable individual record validation for security checks
+
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Replit Auth (Google, GitHub, X, Apple)

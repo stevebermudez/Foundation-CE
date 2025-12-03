@@ -29,6 +29,7 @@ import AdminIndexPage from "@/pages/admin/index";
 import AdminCoursesPage from "@/pages/admin/courses";
 import AdminContentBuilderPage from "@/pages/admin/content-builder";
 import AdminPagesManagerPage from "@/pages/admin/pages-manager";
+import CourseLearningPage from "@/pages/course-learning";
 
 function Router() {
   return (
@@ -42,6 +43,7 @@ function Router() {
           <Route path="/contact" component={ContactPage} />
           <Route path="/courses/fl" component={CoursesFLPage} />
           <Route path="/course/:id" component={CourseViewPage} />
+          <Route path="/course/:id/learn" component={CourseLearningPage} />
           <Route path="/checkout/success" component={CheckoutSuccessPage} />
           <Route path="/checkout/cancel" component={CheckoutCancelPage} />
           <Route path="/checkout/:courseId" component={CheckoutPage} />

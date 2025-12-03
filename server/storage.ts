@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, certificates, videos, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type Certificate, type Video } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -79,7 +79,9 @@ export interface IStorage {
   trackEmailClick(recipientId: string, campaignId: string, userId: string, linkUrl: string, userAgent?: string, ipAddress?: string): Promise<EmailTracking>;
   getCampaignStats(campaignId: string): Promise<{ campaign: EmailCampaign; recipients: EmailRecipient[]; tracking: EmailTracking[] }>;
   getUnits(courseId: string): Promise<Unit[]>;
+  getUnit(unitId: string): Promise<Unit | undefined>;
   getLessons(unitId: string): Promise<Lesson[]>;
+  getLesson(lessonId: string): Promise<Lesson | undefined>;
   saveLessonProgress(enrollmentId: string, userId: string, lessonId: string, timeSpentMinutes: number, completed: boolean): Promise<LessonProgress>;
   getLessonProgress(enrollmentId: string, lessonId: string): Promise<LessonProgress | undefined>;
   getEnrollmentProgress(enrollmentId: string): Promise<{ completed: number; total: number; percentage: number }>;
@@ -115,6 +117,39 @@ export interface IStorage {
   exportAllUsersDataCSV(): Promise<string>;
   exportEmailCampaignData(): Promise<string>;
   exportEmailCampaignDataCSV(): Promise<string>;
+  
+  // LMS Progress Tracking Methods
+  getUnitProgress(enrollmentId: string, unitId: string): Promise<UnitProgress | undefined>;
+  createUnitProgress(enrollmentId: string, unitId: string, userId: string): Promise<UnitProgress>;
+  updateUnitProgress(id: string, data: Partial<UnitProgress>): Promise<UnitProgress>;
+  getAllUnitProgress(enrollmentId: string): Promise<UnitProgress[]>;
+  
+  // Question Bank Methods
+  getQuestionBank(bankId: string): Promise<QuestionBank | undefined>;
+  getQuestionBankByUnit(unitId: string): Promise<QuestionBank | undefined>;
+  getFinalExamBank(courseId: string): Promise<QuestionBank | undefined>;
+  createQuestionBank(data: Omit<QuestionBank, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuestionBank>;
+  getBankQuestions(bankId: string): Promise<BankQuestion[]>;
+  createBankQuestion(data: Omit<BankQuestion, 'id' | 'createdAt' | 'updatedAt'>): Promise<BankQuestion>;
+  getRandomQuestions(bankId: string, count: number): Promise<BankQuestion[]>;
+  
+  // Quiz Attempt Methods
+  createQuizAttempt(data: Omit<QuizAttempt, 'id' | 'createdAt'>): Promise<QuizAttempt>;
+  getQuizAttempt(attemptId: string): Promise<QuizAttempt | undefined>;
+  updateQuizAttempt(attemptId: string, data: Partial<QuizAttempt>): Promise<QuizAttempt>;
+  getUserQuizAttempts(enrollmentId: string, bankId: string): Promise<QuizAttempt[]>;
+  
+  // Quiz Answer Methods
+  createQuizAnswer(data: Omit<QuizAnswer, 'id' | 'answeredAt'>): Promise<QuizAnswer>;
+  getQuizAnswers(attemptId: string): Promise<QuizAnswer[]>;
+  
+  // Progress Update Methods
+  updateLessonTimeSpent(enrollmentId: string, lessonId: string, secondsToAdd: number): Promise<LessonProgress>;
+  completeLesson(enrollmentId: string, lessonId: string, userId: string): Promise<LessonProgress>;
+  updateEnrollmentProgress(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment>;
+  checkUnitCompletion(enrollmentId: string, unitId: string): Promise<{ lessonsComplete: boolean; quizPassed: boolean }>;
+  unlockNextUnit(enrollmentId: string): Promise<UnitProgress | undefined>;
+  getEnrollmentById(enrollmentId: string): Promise<Enrollment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -916,8 +951,18 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(units).where(eq(units.courseId, courseId)).orderBy(units.unitNumber);
   }
 
+  async getUnit(unitId: string): Promise<Unit | undefined> {
+    const result = await db.select().from(units).where(eq(units.id, unitId)).limit(1);
+    return result[0];
+  }
+
   async getLessons(unitId: string): Promise<Lesson[]> {
     return await db.select().from(lessons).where(eq(lessons.unitId, unitId)).orderBy(lessons.lessonNumber);
+  }
+
+  async getLesson(lessonId: string): Promise<Lesson | undefined> {
+    const result = await db.select().from(lessons).where(eq(lessons.id, lessonId)).limit(1);
+    return result[0];
   }
 
   async saveLessonProgress(enrollmentId: string, userId: string, lessonId: string, timeSpentMinutes: number, completed: boolean): Promise<LessonProgress> {
@@ -1497,6 +1542,289 @@ export class DatabaseStorage implements IStorage {
   }
 
   private pages: Record<string, any> = {};
+
+  // ============================================================
+  // LMS Progress Tracking Methods
+  // ============================================================
+
+  async getUnitProgress(enrollmentId: string, unitId: string): Promise<UnitProgress | undefined> {
+    const [progress] = await db.select()
+      .from(unitProgress)
+      .where(and(
+        eq(unitProgress.enrollmentId, enrollmentId),
+        eq(unitProgress.unitId, unitId)
+      ));
+    return progress;
+  }
+
+  async createUnitProgress(enrollmentId: string, unitId: string, userId: string): Promise<UnitProgress> {
+    const [progress] = await db.insert(unitProgress)
+      .values({ enrollmentId, unitId, userId, status: "locked" })
+      .returning();
+    return progress;
+  }
+
+  async updateUnitProgress(id: string, data: Partial<UnitProgress>): Promise<UnitProgress> {
+    const [updated] = await db.update(unitProgress)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(unitProgress.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getAllUnitProgress(enrollmentId: string): Promise<UnitProgress[]> {
+    return await db.select()
+      .from(unitProgress)
+      .where(eq(unitProgress.enrollmentId, enrollmentId));
+  }
+
+  // ============================================================
+  // Question Bank Methods
+  // ============================================================
+
+  async getQuestionBank(bankId: string): Promise<QuestionBank | undefined> {
+    const [bank] = await db.select()
+      .from(questionBanks)
+      .where(eq(questionBanks.id, bankId));
+    return bank;
+  }
+
+  async getQuestionBankByUnit(unitId: string): Promise<QuestionBank | undefined> {
+    const [bank] = await db.select()
+      .from(questionBanks)
+      .where(and(
+        eq(questionBanks.unitId, unitId),
+        eq(questionBanks.bankType, "unit_quiz"),
+        eq(questionBanks.isActive, 1)
+      ));
+    return bank;
+  }
+
+  async getFinalExamBank(courseId: string): Promise<QuestionBank | undefined> {
+    const [bank] = await db.select()
+      .from(questionBanks)
+      .where(and(
+        eq(questionBanks.courseId, courseId),
+        eq(questionBanks.bankType, "final_exam"),
+        eq(questionBanks.isActive, 1)
+      ));
+    return bank;
+  }
+
+  async createQuestionBank(data: Omit<QuestionBank, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuestionBank> {
+    const [bank] = await db.insert(questionBanks)
+      .values(data)
+      .returning();
+    return bank;
+  }
+
+  async getBankQuestions(bankId: string): Promise<BankQuestion[]> {
+    return await db.select()
+      .from(bankQuestions)
+      .where(and(
+        eq(bankQuestions.bankId, bankId),
+        eq(bankQuestions.isActive, 1)
+      ));
+  }
+
+  async createBankQuestion(data: Omit<BankQuestion, 'id' | 'createdAt' | 'updatedAt'>): Promise<BankQuestion> {
+    const [question] = await db.insert(bankQuestions)
+      .values(data)
+      .returning();
+    return question;
+  }
+
+  async getRandomQuestions(bankId: string, count: number): Promise<BankQuestion[]> {
+    const allQuestions = await this.getBankQuestions(bankId);
+    // Shuffle and select random questions
+    const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.min(count, shuffled.length));
+  }
+
+  // ============================================================
+  // Quiz Attempt Methods
+  // ============================================================
+
+  async createQuizAttempt(data: Omit<QuizAttempt, 'id' | 'createdAt'>): Promise<QuizAttempt> {
+    const [attempt] = await db.insert(quizAttempts)
+      .values(data)
+      .returning();
+    return attempt;
+  }
+
+  async getQuizAttempt(attemptId: string): Promise<QuizAttempt | undefined> {
+    const [attempt] = await db.select()
+      .from(quizAttempts)
+      .where(eq(quizAttempts.id, attemptId));
+    return attempt;
+  }
+
+  async updateQuizAttempt(attemptId: string, data: Partial<QuizAttempt>): Promise<QuizAttempt> {
+    const [updated] = await db.update(quizAttempts)
+      .set(data)
+      .where(eq(quizAttempts.id, attemptId))
+      .returning();
+    return updated;
+  }
+
+  async getUserQuizAttempts(enrollmentId: string, bankId: string): Promise<QuizAttempt[]> {
+    return await db.select()
+      .from(quizAttempts)
+      .where(and(
+        eq(quizAttempts.enrollmentId, enrollmentId),
+        eq(quizAttempts.bankId, bankId)
+      ))
+      .orderBy(desc(quizAttempts.createdAt));
+  }
+
+  // ============================================================
+  // Quiz Answer Methods
+  // ============================================================
+
+  async createQuizAnswer(data: Omit<QuizAnswer, 'id' | 'answeredAt'>): Promise<QuizAnswer> {
+    const [answer] = await db.insert(quizAnswers)
+      .values(data)
+      .returning();
+    return answer;
+  }
+
+  async getQuizAnswers(attemptId: string): Promise<QuizAnswer[]> {
+    return await db.select()
+      .from(quizAnswers)
+      .where(eq(quizAnswers.attemptId, attemptId));
+  }
+
+  // ============================================================
+  // Progress Update Methods
+  // ============================================================
+
+  async updateLessonTimeSpent(enrollmentId: string, lessonId: string, secondsToAdd: number): Promise<LessonProgress> {
+    const existing = await this.getLessonProgress(enrollmentId, lessonId);
+    
+    if (existing) {
+      const [updated] = await db.update(lessonProgress)
+        .set({ 
+          timeSpentSeconds: (existing.timeSpentSeconds || 0) + secondsToAdd,
+          lastAccessedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(lessonProgress.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      // Get user from enrollment
+      const enrollment = await this.getEnrollmentById(enrollmentId);
+      if (!enrollment) throw new Error("Enrollment not found");
+      
+      const [created] = await db.insert(lessonProgress)
+        .values({ 
+          enrollmentId, 
+          lessonId, 
+          userId: enrollment.userId,
+          timeSpentSeconds: secondsToAdd 
+        })
+        .returning();
+      return created;
+    }
+  }
+
+  async completeLesson(enrollmentId: string, lessonId: string, userId: string): Promise<LessonProgress> {
+    const existing = await this.getLessonProgress(enrollmentId, lessonId);
+    
+    if (existing) {
+      const [updated] = await db.update(lessonProgress)
+        .set({ 
+          completed: 1,
+          completedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(lessonProgress.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(lessonProgress)
+        .values({ 
+          enrollmentId, 
+          lessonId, 
+          userId,
+          completed: 1,
+          completedAt: new Date()
+        })
+        .returning();
+      return created;
+    }
+  }
+
+  async updateEnrollmentProgress(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment> {
+    const [updated] = await db.update(enrollments)
+      .set(data)
+      .where(eq(enrollments.id, enrollmentId))
+      .returning();
+    return updated;
+  }
+
+  async checkUnitCompletion(enrollmentId: string, unitId: string): Promise<{ lessonsComplete: boolean; quizPassed: boolean }> {
+    // Get all lessons for the unit
+    const unitLessons = await this.getLessons(unitId);
+    
+    // Get completed lessons
+    let completedCount = 0;
+    for (const lesson of unitLessons) {
+      const progress = await this.getLessonProgress(enrollmentId, lesson.id);
+      if (progress?.completed) completedCount++;
+    }
+    
+    const lessonsComplete = unitLessons.length > 0 && completedCount === unitLessons.length;
+    
+    // Check quiz status
+    const unitProg = await this.getUnitProgress(enrollmentId, unitId);
+    const quizPassed = unitProg?.quizPassed === 1;
+    
+    return { lessonsComplete, quizPassed };
+  }
+
+  async unlockNextUnit(enrollmentId: string): Promise<UnitProgress | undefined> {
+    const enrollment = await this.getEnrollmentById(enrollmentId);
+    if (!enrollment) return undefined;
+    
+    // Get all units for the course
+    const courseUnits = await this.getUnits(enrollment.courseId);
+    const sortedUnits = courseUnits.sort((a, b) => a.unitNumber - b.unitNumber);
+    
+    // Find the next locked unit
+    for (const unit of sortedUnits) {
+      const progress = await this.getUnitProgress(enrollmentId, unit.id);
+      if (!progress) {
+        // Create and unlock this unit
+        const [newProgress] = await db.insert(unitProgress)
+          .values({
+            enrollmentId,
+            unitId: unit.id,
+            userId: enrollment.userId,
+            status: "in_progress",
+            startedAt: new Date()
+          })
+          .returning();
+        return newProgress;
+      } else if (progress.status === "locked") {
+        // Unlock existing progress
+        const [updated] = await db.update(unitProgress)
+          .set({ status: "in_progress", startedAt: new Date(), updatedAt: new Date() })
+          .where(eq(unitProgress.id, progress.id))
+          .returning();
+        return updated;
+      }
+    }
+    
+    return undefined;
+  }
+
+  async getEnrollmentById(enrollmentId: string): Promise<Enrollment | undefined> {
+    const [enrollment] = await db.select()
+      .from(enrollments)
+      .where(eq(enrollments.id, enrollmentId));
+    return enrollment;
+  }
 }
 
 export const storage = new DatabaseStorage();

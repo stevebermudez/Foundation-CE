@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
+import { seedLMSContent } from "./seedLMSContent";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
 import {
@@ -36,6 +37,9 @@ export async function registerRoutes(
     } else {
       console.log("✓ FREC I course already exists");
     }
+    
+    // Seed LMS content (units, lessons, question banks)
+    await seedLMSContent();
   } catch (err: any) {
     console.error("Error with FREC I seeding:", err);
   }
@@ -767,6 +771,571 @@ export async function registerRoutes(
     res.json(course);
   });
 
+  // ============================================================
+  // LMS Routes - Sequential Learning, Time Tracking, Quizzes
+  // ============================================================
+
+  // Get course units with progress status for enrolled user
+  app.get("/api/courses/:courseId/units-progress", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { courseId } = req.params;
+      
+      const enrollment = await storage.getEnrollment(user.id, courseId);
+      if (!enrollment) {
+        return res.status(404).json({ error: "Not enrolled in this course" });
+      }
+      
+      const units = await storage.getUnits(courseId);
+      const sortedUnits = units.sort((a, b) => a.unitNumber - b.unitNumber);
+      
+      const unitsWithProgress = await Promise.all(sortedUnits.map(async (unit, index) => {
+        let unitProg = await storage.getUnitProgress(enrollment.id, unit.id);
+        
+        // First unit should always be unlocked for enrolled users
+        if (!unitProg && index === 0) {
+          unitProg = await storage.createUnitProgress(enrollment.id, unit.id, user.id);
+          unitProg = await storage.updateUnitProgress(unitProg.id, { status: "in_progress", startedAt: new Date() });
+        } else if (!unitProg) {
+          // Create locked progress for other units
+          unitProg = await storage.createUnitProgress(enrollment.id, unit.id, user.id);
+        }
+        
+        const lessons = await storage.getLessons(unit.id);
+        const lessonProgress = await Promise.all(lessons.map(async (lesson) => {
+          const prog = await storage.getLessonProgress(enrollment.id, lesson.id);
+          return {
+            ...lesson,
+            completed: prog?.completed === 1,
+            timeSpentSeconds: prog?.timeSpentSeconds || 0
+          };
+        }));
+        
+        const completedLessons = lessonProgress.filter(l => l.completed).length;
+        
+        return {
+          ...unit,
+          status: unitProg.status,
+          lessonsCompleted: completedLessons,
+          totalLessons: lessons.length,
+          quizPassed: unitProg.quizPassed === 1,
+          quizScore: unitProg.quizScore,
+          quizAttempts: unitProg.quizAttempts || 0,
+          timeSpentSeconds: unitProg.timeSpentSeconds || 0,
+          lessons: lessonProgress.sort((a, b) => a.lessonNumber - b.lessonNumber),
+          isLocked: unitProg.status === "locked"
+        };
+      }));
+      
+      res.json({
+        enrollmentId: enrollment.id,
+        currentUnitIndex: enrollment.currentUnitIndex || 1,
+        totalTimeSeconds: enrollment.totalTimeSeconds || 0,
+        finalExamPassed: enrollment.finalExamPassed === 1,
+        finalExamScore: enrollment.finalExamScore,
+        units: unitsWithProgress
+      });
+    } catch (err) {
+      console.error("Error fetching units progress:", err);
+      res.status(500).json({ error: "Failed to fetch units progress" });
+    }
+  });
+
+  // Update time spent on a lesson (heartbeat from frontend)
+  app.post("/api/lessons/:lessonId/time", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { lessonId } = req.params;
+      const { enrollmentId, secondsToAdd } = req.body;
+      
+      if (!enrollmentId || typeof secondsToAdd !== 'number') {
+        return res.status(400).json({ error: "enrollmentId and secondsToAdd required" });
+      }
+      
+      // Verify enrollment ownership
+      const enrollment = await storage.getEnrollmentById(enrollmentId);
+      if (!enrollment || enrollment.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      // SECURITY: Verify the lesson belongs to a unit in the enrolled course
+      const lesson = await storage.getLesson(lessonId);
+      if (!lesson) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      const unit = await storage.getUnit(lesson.unitId);
+      if (!unit || unit.courseId !== enrollment.courseId) {
+        return res.status(403).json({ error: "Lesson not available for this enrollment" });
+      }
+      
+      // Check if unit is unlocked
+      const unitProg = await storage.getUnitProgress(enrollmentId, unit.id);
+      if (!unitProg || unitProg.status === "locked") {
+        return res.status(403).json({ error: "Unit is locked" });
+      }
+      
+      // Cap time increment to prevent spoofing (max 2 minutes per request)
+      const cappedSeconds = Math.min(secondsToAdd, 120);
+      
+      const progress = await storage.updateLessonTimeSpent(enrollmentId, lessonId, cappedSeconds);
+      
+      // Also update total course time
+      await storage.updateEnrollmentProgress(enrollmentId, {
+        totalTimeSeconds: (enrollment.totalTimeSeconds || 0) + cappedSeconds
+      });
+      
+      res.json({ 
+        timeSpentSeconds: progress.timeSpentSeconds,
+        totalCourseTimeSeconds: (enrollment.totalTimeSeconds || 0) + cappedSeconds
+      });
+    } catch (err) {
+      console.error("Error updating lesson time:", err);
+      res.status(500).json({ error: "Failed to update time" });
+    }
+  });
+
+  // Complete a lesson
+  app.post("/api/lessons/:lessonId/complete", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { lessonId } = req.params;
+      const { enrollmentId } = req.body;
+      
+      if (!enrollmentId) {
+        return res.status(400).json({ error: "enrollmentId required" });
+      }
+      
+      // Verify enrollment ownership
+      const enrollment = await storage.getEnrollmentById(enrollmentId);
+      if (!enrollment || enrollment.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      // SECURITY: Verify the lesson belongs to a unit in the enrolled course
+      const lesson = await storage.getLesson(lessonId);
+      if (!lesson) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
+      const unit = await storage.getUnit(lesson.unitId);
+      if (!unit || unit.courseId !== enrollment.courseId) {
+        return res.status(403).json({ error: "Lesson not available for this enrollment" });
+      }
+      
+      // Check if unit is unlocked
+      const unitProg = await storage.getUnitProgress(enrollmentId, unit.id);
+      if (!unitProg || unitProg.status === "locked") {
+        return res.status(403).json({ error: "Unit is locked" });
+      }
+      
+      // Check minimum time requirement (optional - can be configured per lesson)
+      const lessonProg = await storage.getLessonProgress(enrollmentId, lessonId);
+      const minTimeSeconds = 60; // Minimum 1 minute per lesson
+      if (lessonProg && (lessonProg.timeSpentSeconds || 0) < minTimeSeconds) {
+        return res.status(400).json({ 
+          error: "Minimum time not met",
+          required: minTimeSeconds,
+          spent: lessonProg.timeSpentSeconds || 0
+        });
+      }
+      
+      const progress = await storage.completeLesson(enrollmentId, lessonId, user.id);
+      
+      res.json({ 
+        completed: true,
+        lessonId,
+        completedAt: progress.completedAt
+      });
+    } catch (err) {
+      console.error("Error completing lesson:", err);
+      res.status(500).json({ error: "Failed to complete lesson" });
+    }
+  });
+
+  // Start a quiz attempt (unit quiz or final exam)
+  app.post("/api/quizzes/:bankId/start", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { bankId } = req.params;
+      const { enrollmentId } = req.body;
+      
+      if (!enrollmentId) {
+        return res.status(400).json({ error: "enrollmentId required" });
+      }
+      
+      // Verify enrollment ownership
+      const enrollment = await storage.getEnrollmentById(enrollmentId);
+      if (!enrollment || enrollment.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      const bank = await storage.getQuestionBank(bankId);
+      if (!bank) {
+        return res.status(404).json({ error: "Question bank not found" });
+      }
+      
+      // SECURITY: Verify the question bank belongs to the enrolled course
+      if (bank.courseId !== enrollment.courseId) {
+        return res.status(403).json({ error: "Quiz not available for this enrollment" });
+      }
+      
+      // For unit quizzes, check if unit is unlocked and lessons are complete
+      if (bank.bankType === "unit_quiz" && bank.unitId) {
+        // Check if this unit is unlocked (not locked)
+        const unitProg = await storage.getUnitProgress(enrollmentId, bank.unitId);
+        if (!unitProg || unitProg.status === "locked") {
+          return res.status(403).json({ error: "Unit is locked. Complete previous units first." });
+        }
+        
+        const { lessonsComplete } = await storage.checkUnitCompletion(enrollmentId, bank.unitId);
+        if (!lessonsComplete) {
+          return res.status(400).json({ error: "Complete all lessons before taking the quiz" });
+        }
+      }
+      
+      // For final exam, check if all units are complete with passed quizzes
+      if (bank.bankType === "final_exam") {
+        const units = await storage.getUnits(bank.courseId);
+        for (const unit of units) {
+          const { lessonsComplete, quizPassed } = await storage.checkUnitCompletion(enrollmentId, unit.id);
+          if (!lessonsComplete || !quizPassed) {
+            return res.status(403).json({ error: "Complete all units and pass all quizzes before the final exam" });
+          }
+        }
+      }
+      
+      // Get random questions for this attempt
+      const questionsCount = bank.questionsPerAttempt || 20;
+      const questions = await storage.getRandomQuestions(bankId, questionsCount);
+      
+      if (questions.length === 0) {
+        return res.status(404).json({ error: "No questions available in this quiz" });
+      }
+      
+      const questionIds = questions.map(q => q.id);
+      
+      // Create the attempt
+      const attempt = await storage.createQuizAttempt({
+        enrollmentId,
+        bankId,
+        userId: user.id,
+        questionIds: JSON.stringify(questionIds),
+        totalQuestions: questions.length,
+        correctAnswers: 0,
+        timeSpentSeconds: 0
+      });
+      
+      // Return questions without correct answers or explanations
+      const sanitizedQuestions = questions.map(q => ({
+        id: q.id,
+        questionText: q.questionText,
+        questionType: q.questionType,
+        options: JSON.parse(q.options)
+      }));
+      
+      res.json({
+        attemptId: attempt.id,
+        bankTitle: bank.title,
+        passingScore: bank.passingScore || 70,
+        timeLimit: bank.timeLimit,
+        questions: sanitizedQuestions
+      });
+    } catch (err) {
+      console.error("Error starting quiz:", err);
+      res.status(500).json({ error: "Failed to start quiz" });
+    }
+  });
+
+  // Submit an answer and get immediate feedback
+  app.post("/api/quizzes/attempts/:attemptId/answer", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { attemptId } = req.params;
+      const { questionId, selectedOption } = req.body;
+      
+      if (!questionId || selectedOption === undefined) {
+        return res.status(400).json({ error: "questionId and selectedOption required" });
+      }
+      
+      // Verify attempt ownership
+      const attempt = await storage.getQuizAttempt(attemptId);
+      if (!attempt || attempt.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      // SECURITY: Verify enrollment ownership and course matching
+      const enrollment = await storage.getEnrollmentById(attempt.enrollmentId);
+      if (!enrollment || enrollment.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      const bank = await storage.getQuestionBank(attempt.bankId);
+      if (!bank || bank.courseId !== enrollment.courseId) {
+        return res.status(403).json({ error: "Quiz not available for this enrollment" });
+      }
+      
+      // For unit quizzes, verify unit is still unlocked
+      if (bank.bankType === "unit_quiz" && bank.unitId) {
+        const unitProg = await storage.getUnitProgress(enrollment.id, bank.unitId);
+        if (!unitProg || unitProg.status === "locked") {
+          return res.status(403).json({ error: "Unit is locked" });
+        }
+      }
+      
+      if (attempt.completedAt) {
+        return res.status(400).json({ error: "Quiz already completed" });
+      }
+      
+      // Get the question to check answer
+      const allQuestions = await storage.getBankQuestions(attempt.bankId);
+      const question = allQuestions.find(q => q.id === questionId);
+      if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+      }
+      
+      const isCorrect = selectedOption === question.correctOption;
+      const options = JSON.parse(question.options);
+      
+      // Save the answer
+      await storage.createQuizAnswer({
+        attemptId,
+        questionId,
+        selectedOption,
+        isCorrect: isCorrect ? 1 : 0
+      });
+      
+      // Return feedback
+      res.json({
+        isCorrect,
+        correctOption: question.correctOption,
+        correctAnswer: options[question.correctOption],
+        explanation: question.explanation,
+        selectedAnswer: options[selectedOption]
+      });
+    } catch (err) {
+      console.error("Error submitting answer:", err);
+      res.status(500).json({ error: "Failed to submit answer" });
+    }
+  });
+
+  // Complete a quiz attempt
+  app.post("/api/quizzes/attempts/:attemptId/complete", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { attemptId } = req.params;
+      const { timeSpentSeconds } = req.body;
+      
+      // Verify attempt ownership
+      const attempt = await storage.getQuizAttempt(attemptId);
+      if (!attempt || attempt.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      // SECURITY: Verify enrollment ownership and course matching
+      const enrollment = await storage.getEnrollmentById(attempt.enrollmentId);
+      if (!enrollment || enrollment.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      const bank = await storage.getQuestionBank(attempt.bankId);
+      if (!bank || bank.courseId !== enrollment.courseId) {
+        return res.status(403).json({ error: "Quiz not available for this enrollment" });
+      }
+      
+      // For unit quizzes, verify unit is still unlocked
+      if (bank.bankType === "unit_quiz" && bank.unitId) {
+        const unitProg = await storage.getUnitProgress(enrollment.id, bank.unitId);
+        if (!unitProg || unitProg.status === "locked") {
+          return res.status(403).json({ error: "Unit is locked" });
+        }
+      }
+      
+      if (attempt.completedAt) {
+        return res.status(400).json({ error: "Quiz already completed" });
+      }
+      
+      // Calculate score
+      const answers = await storage.getQuizAnswers(attemptId);
+      const correctCount = answers.filter(a => a.isCorrect === 1).length;
+      const score = Math.round((correctCount / attempt.totalQuestions) * 100);
+      
+      const passed = score >= (bank?.passingScore || 70);
+      
+      // Update the attempt
+      const updatedAttempt = await storage.updateQuizAttempt(attemptId, {
+        score,
+        correctAnswers: correctCount,
+        passed: passed ? 1 : 0,
+        timeSpentSeconds: timeSpentSeconds || 0,
+        completedAt: new Date()
+      });
+      
+      // Update unit progress if this was a unit quiz
+      if (bank?.unitId) {
+        const unitProg = await storage.getUnitProgress(attempt.enrollmentId, bank.unitId);
+        if (unitProg) {
+          await storage.updateUnitProgress(unitProg.id, {
+            quizAttempts: (unitProg.quizAttempts || 0) + 1,
+            quizScore: passed ? Math.max(score, unitProg.quizScore || 0) : unitProg.quizScore,
+            quizPassed: passed ? 1 : unitProg.quizPassed
+          });
+          
+          // If passed, mark unit as complete and unlock next unit
+          if (passed) {
+            await storage.updateUnitProgress(unitProg.id, {
+              status: "completed",
+              completedAt: new Date()
+            });
+            
+            // Unlock next unit
+            await storage.unlockNextUnit(attempt.enrollmentId);
+            
+            // Update enrollment current unit index
+            const enrollment = await storage.getEnrollmentById(attempt.enrollmentId);
+            if (enrollment) {
+              const units = await storage.getUnits(enrollment.courseId);
+              const currentUnit = units.find(u => u.id === bank.unitId);
+              if (currentUnit) {
+                await storage.updateEnrollmentProgress(attempt.enrollmentId, {
+                  currentUnitIndex: currentUnit.unitNumber + 1
+                });
+              }
+            }
+          }
+        }
+      }
+      
+      // Update enrollment for final exam
+      if (bank?.bankType === "final_exam" && passed) {
+        await storage.updateEnrollmentProgress(attempt.enrollmentId, {
+          finalExamPassed: 1,
+          finalExamScore: score,
+          completed: 1,
+          completedAt: new Date(),
+          progress: 100
+        });
+      }
+      
+      res.json({
+        score,
+        passed,
+        correctAnswers: correctCount,
+        totalQuestions: attempt.totalQuestions,
+        passingScore: bank?.passingScore || 70
+      });
+    } catch (err) {
+      console.error("Error completing quiz:", err);
+      res.status(500).json({ error: "Failed to complete quiz" });
+    }
+  });
+
+  // Get quiz attempt history for a unit
+  app.get("/api/quizzes/:bankId/attempts", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { bankId } = req.params;
+      const { enrollmentId } = req.query;
+      
+      if (!enrollmentId) {
+        return res.status(400).json({ error: "enrollmentId required" });
+      }
+      
+      // Verify enrollment ownership
+      const enrollment = await storage.getEnrollmentById(enrollmentId as string);
+      if (!enrollment || enrollment.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      const attempts = await storage.getUserQuizAttempts(enrollmentId as string, bankId);
+      
+      res.json(attempts.map(a => ({
+        id: a.id,
+        score: a.score,
+        passed: a.passed === 1,
+        totalQuestions: a.totalQuestions,
+        correctAnswers: a.correctAnswers,
+        timeSpentSeconds: a.timeSpentSeconds,
+        startedAt: a.startedAt,
+        completedAt: a.completedAt
+      })));
+    } catch (err) {
+      console.error("Error fetching quiz attempts:", err);
+      res.status(500).json({ error: "Failed to fetch quiz attempts" });
+    }
+  });
+
+  // Get question bank for a unit
+  app.get("/api/units/:unitId/quiz", authMiddleware, async (req, res) => {
+    try {
+      const { unitId } = req.params;
+      
+      const bank = await storage.getQuestionBankByUnit(unitId);
+      if (!bank) {
+        return res.status(404).json({ error: "No quiz found for this unit" });
+      }
+      
+      res.json({
+        bankId: bank.id,
+        title: bank.title,
+        description: bank.description,
+        questionsPerAttempt: bank.questionsPerAttempt,
+        passingScore: bank.passingScore,
+        timeLimit: bank.timeLimit
+      });
+    } catch (err) {
+      console.error("Error fetching unit quiz:", err);
+      res.status(500).json({ error: "Failed to fetch unit quiz" });
+    }
+  });
+
+  // Get final exam info for a course
+  app.get("/api/courses/:courseId/final-exam", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { courseId } = req.params;
+      
+      const enrollment = await storage.getEnrollment(user.id, courseId);
+      if (!enrollment) {
+        return res.status(404).json({ error: "Not enrolled in this course" });
+      }
+      
+      const bank = await storage.getFinalExamBank(courseId);
+      if (!bank) {
+        return res.status(404).json({ error: "No final exam found for this course" });
+      }
+      
+      // Check if all units are complete
+      const units = await storage.getUnits(courseId);
+      let allUnitsComplete = true;
+      for (const unit of units) {
+        const { lessonsComplete, quizPassed } = await storage.checkUnitCompletion(enrollment.id, unit.id);
+        if (!lessonsComplete || !quizPassed) {
+          allUnitsComplete = false;
+          break;
+        }
+      }
+      
+      res.json({
+        bankId: bank.id,
+        title: bank.title,
+        description: bank.description,
+        questionsPerAttempt: bank.questionsPerAttempt,
+        passingScore: bank.passingScore,
+        timeLimit: bank.timeLimit,
+        isUnlocked: allUnitsComplete,
+        alreadyPassed: enrollment.finalExamPassed === 1,
+        bestScore: enrollment.finalExamScore,
+        attempts: enrollment.finalExamAttempts || 0
+      });
+    } catch (err) {
+      console.error("Error fetching final exam:", err);
+      res.status(500).json({ error: "Failed to fetch final exam" });
+    }
+  });
+
+  // ============================================================
+  // End of LMS Routes
+  // ============================================================
+
   // Checkout - Create Stripe checkout session for a course
   app.post("/api/checkout/course", async (req, res) => {
     try {
@@ -1275,14 +1844,14 @@ segment1.ts
     }
   });
 
-  app.post("/api/exams/:examId/start", async (req, res) => {
+  app.post("/api/exams/:examId/start", authMiddleware, async (req, res) => {
     try {
-      const { userId } = req.body;
+      const user = req.user as any;
       const exam = await storage.getPracticeExam(req.params.examId);
       if (!exam) return res.status(404).json({ error: "Exam not found" });
 
       const attempt = await storage.createExamAttempt({
-        userId,
+        userId: user.id,
         examId: req.params.examId,
         totalQuestions: exam.totalQuestions,
         startedAt: new Date(),
@@ -1299,9 +1868,18 @@ segment1.ts
     }
   });
 
-  app.post("/api/exams/attempts/:attemptId/answer", async (req, res) => {
+  app.post("/api/exams/attempts/:attemptId/answer", authMiddleware, async (req, res) => {
     try {
+      const user = req.user as any;
       const { questionId, userAnswer, correctAnswer } = req.body;
+      
+      // Verify attempt ownership - check that this attempt belongs to the user
+      const attempts = await storage.getUserExamAttempts(user.id, "");
+      const attempt = attempts.find((a: any) => a.id === req.params.attemptId);
+      if (!attempt) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
       const isCorrect = correctAnswer === userAnswer ? 1 : 0;
 
       const answer = await storage.submitExamAnswer({
@@ -1317,9 +1895,18 @@ segment1.ts
     }
   });
 
-  app.post("/api/exams/attempts/:attemptId/complete", async (req, res) => {
+  app.post("/api/exams/attempts/:attemptId/complete", authMiddleware, async (req, res) => {
     try {
+      const user = req.user as any;
       const { score, correctAnswers, timeSpent } = req.body;
+      
+      // Verify attempt ownership
+      const attempts = await storage.getUserExamAttempts(user.id, "");
+      const attempt = attempts.find((a: any) => a.id === req.params.attemptId);
+      if (!attempt) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      
       const passed = score >= 70 ? 1 : 0;
 
       const completed = await storage.completeExamAttempt(
@@ -1336,8 +1923,13 @@ segment1.ts
     }
   });
 
-  app.get("/api/exams/:examId/attempts/:userId", async (req, res) => {
+  app.get("/api/exams/:examId/attempts/:userId", authMiddleware, async (req, res) => {
     try {
+      const user = req.user as any;
+      // Only allow users to fetch their own attempts
+      if (req.params.userId !== user.id) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
       const attempts = await storage.getUserExamAttempts(
         req.params.userId,
         req.params.examId,

@@ -73,6 +73,12 @@ export const enrollments = pgTable("enrollments", {
   completed: integer("completed").default(0),
   completedAt: timestamp("completed_at"),
   certificateUrl: varchar("certificate_url"),
+  // LMS progress fields
+  currentUnitIndex: integer("current_unit_index").default(1), // Which unit user is on (1-19)
+  totalTimeSeconds: integer("total_time_seconds").default(0), // Total time spent in course
+  finalExamPassed: integer("final_exam_passed").default(0), // 1 if final exam passed
+  finalExamScore: integer("final_exam_score"), // Final exam score percentage
+  finalExamAttempts: integer("final_exam_attempts").default(0), // Number of final exam attempts
 });
 
 // Compliance requirements tracking
@@ -529,10 +535,98 @@ export const lessonProgress = pgTable("lesson_progress", {
   userId: varchar("user_id").notNull(),
   completed: integer("completed").default(0),
   timeSpentMinutes: integer("time_spent_minutes").default(0),
+  timeSpentSeconds: integer("time_spent_seconds").default(0), // More granular time tracking
   completedAt: timestamp("completed_at"),
   lastAccessedAt: timestamp("last_accessed_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Track user progress on units (sequential completion)
+export const unitProgress = pgTable("unit_progress", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull(),
+  unitId: varchar("unit_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  status: varchar("status").default("locked"), // "locked", "in_progress", "completed"
+  lessonsCompleted: integer("lessons_completed").default(0),
+  quizPassed: integer("quiz_passed").default(0), // 1 if unit quiz passed
+  quizScore: integer("quiz_score"), // Best quiz score percentage
+  quizAttempts: integer("quiz_attempts").default(0),
+  timeSpentSeconds: integer("time_spent_seconds").default(0),
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Question banks for unit quizzes and final exam
+export const questionBanks = pgTable("question_banks", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id").notNull(),
+  unitId: varchar("unit_id"), // null for final exam
+  bankType: varchar("bank_type").notNull(), // "unit_quiz" or "final_exam"
+  title: varchar("title").notNull(),
+  description: text("description"),
+  questionsPerAttempt: integer("questions_per_attempt").default(20), // How many questions to show per attempt
+  passingScore: integer("passing_score").default(70), // Percentage needed to pass
+  timeLimit: integer("time_limit"), // Optional time limit in minutes
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Questions in a question bank (larger pool for rotation)
+export const bankQuestions = pgTable("bank_questions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  bankId: varchar("bank_id").notNull(),
+  questionText: text("question_text").notNull(),
+  questionType: varchar("question_type").default("multiple_choice"), // "multiple_choice", "true_false"
+  options: text("options").notNull(), // JSON array of option strings
+  correctOption: integer("correct_option").notNull(), // Index of correct answer (0-based)
+  explanation: text("explanation").notNull(), // Feedback explaining why answer is correct
+  difficulty: varchar("difficulty").default("medium"), // "easy", "medium", "hard"
+  category: varchar("category"), // Optional category for organizing questions
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Quiz attempts (tracks each time user takes a quiz)
+export const quizAttempts = pgTable("quiz_attempts", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull(),
+  bankId: varchar("bank_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  questionIds: text("question_ids").notNull(), // JSON array of question IDs for this attempt (rotated selection)
+  score: integer("score"), // Percentage score
+  totalQuestions: integer("total_questions").notNull(),
+  correctAnswers: integer("correct_answers").default(0),
+  passed: integer("passed"), // 1 if passed, 0 if failed
+  timeSpentSeconds: integer("time_spent_seconds").default(0),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Individual answers within a quiz attempt
+export const quizAnswers = pgTable("quiz_answers", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  attemptId: varchar("attempt_id").notNull(),
+  questionId: varchar("question_id").notNull(),
+  selectedOption: integer("selected_option"), // Index of selected answer
+  isCorrect: integer("is_correct"), // 1 if correct, 0 if incorrect
+  answeredAt: timestamp("answered_at").defaultNow(),
 });
 
 // Certificates
@@ -614,6 +708,11 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type Unit = typeof units.$inferSelect;
 export type Lesson = typeof lessons.$inferSelect;
 export type LessonProgress = typeof lessonProgress.$inferSelect;
+export type UnitProgress = typeof unitProgress.$inferSelect;
+export type QuestionBank = typeof questionBanks.$inferSelect;
+export type BankQuestion = typeof bankQuestions.$inferSelect;
+export type QuizAttempt = typeof quizAttempts.$inferSelect;
+export type QuizAnswer = typeof quizAnswers.$inferSelect;
 export type Certificate = typeof certificates.$inferSelect;
 export type Video = typeof videos.$inferSelect;
 export type MediaAsset = typeof mediaAssets.$inferSelect;
