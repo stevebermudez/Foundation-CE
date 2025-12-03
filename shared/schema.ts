@@ -3,10 +3,6 @@ import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core"
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Type exports for purchases
-export type Purchase = typeof purchases.$inferSelect;
-export type UpsertPurchase = z.infer<typeof upsertPurchaseSchema>;
-
 // Session storage table (required for Replit Auth)
 export const sessions = pgTable("sessions", {
   sid: varchar("sid").primaryKey(),
@@ -307,6 +303,10 @@ export const purchases = pgTable("purchases", {
   purchasedAt: timestamp("purchased_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const upsertPurchaseSchema = createInsertSchema(purchases).omit({ id: true, createdAt: true });
+export type Purchase = typeof purchases.$inferSelect;
+export type UpsertPurchase = z.infer<typeof upsertPurchaseSchema>;
 
 // User subscriptions (monthly/annual billing)
 export const subscriptions = pgTable("subscriptions", {
