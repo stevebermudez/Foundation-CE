@@ -230,8 +230,8 @@ export default function CourseViewPage() {
   const { data: units = [] } = useQuery({
     queryKey: ["/api/courses", params.id, "units"],
     queryFn: async () => {
-      const res = await fetch(`/api/units?courseId=${params.id}`);
-      if (!res.ok) throw new Error("Units not found");
+      const res = await fetch(`/api/courses/${params.id}/units`);
+      if (!res.ok) return [];
       return res.json();
     },
     enabled: !!params.id,
@@ -241,18 +241,19 @@ export default function CourseViewPage() {
   const { data: enrollment } = useQuery({
     queryKey: ["/api/enrollments", params.id],
     queryFn: async () => {
-      const res = await fetch(`/api/enrollments/course/${params.id}`);
+      const res = await fetch(`/api/enrollments/user`, { credentials: "include" });
       if (!res.ok) return null;
-      return res.json();
+      const enrollments = await res.json();
+      return enrollments.find((e: any) => e.courseId === params.id) || null;
     },
     enabled: !!params.id,
   });
 
   // Fetch practice exams
   const { data: exams = [] } = useQuery({
-    queryKey: ["/api/exams", params.id],
+    queryKey: ["/api/courses", params.id, "exams"],
     queryFn: async () => {
-      const res = await fetch(`/api/exams?courseId=${params.id}`);
+      const res = await fetch(`/api/courses/${params.id}/exams`);
       if (!res.ok) return [];
       return res.json();
     },

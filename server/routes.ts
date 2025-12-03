@@ -362,6 +362,39 @@ export async function registerRoutes(
     res.json(courses);
   });
 
+  // Public route for course units
+  app.get("/api/courses/:courseId/units", async (req, res) => {
+    try {
+      const units = await storage.getUnits(req.params.courseId);
+      res.json(units);
+    } catch (err) {
+      console.error("Error fetching units:", err);
+      res.status(500).json({ error: "Failed to fetch units" });
+    }
+  });
+
+  // Public route for unit lessons
+  app.get("/api/units/:unitId/lessons", async (req, res) => {
+    try {
+      const lessons = await storage.getLessons(req.params.unitId);
+      res.json(lessons);
+    } catch (err) {
+      console.error("Error fetching lessons:", err);
+      res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
+
+  // Public route for practice exams by course
+  app.get("/api/courses/:courseId/exams", async (req, res) => {
+    try {
+      const exams = await storage.getPracticeExams(req.params.courseId);
+      res.json(exams);
+    } catch (err) {
+      console.error("Error fetching exams:", err);
+      res.status(500).json({ error: "Failed to fetch exams" });
+    }
+  });
+
   // Course Completion & Regulatory Reporting
   app.post("/api/enrollments/:id/complete", async (req, res) => {
     try {
