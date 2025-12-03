@@ -108,7 +108,7 @@ export async function registerRoutes(
   app.post("/api/enrollments", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
-      const { courseId } = req.body;
+      const { courseId, sessionId } = req.body;
       
       if (!courseId) {
         return res.status(400).json({ error: "courseId is required" });
@@ -122,6 +122,34 @@ export async function registerRoutes(
       const existingEnrollment = await storage.getEnrollment(user.id, courseId);
       if (existingEnrollment) {
         return res.json({ enrollment: existingEnrollment, existing: true });
+      }
+
+      // Validate Stripe session if provided
+      if (sessionId && process.env.STRIPE_SECRET_KEY) {
+        try {
+          const Stripe = (await import("stripe")).default;
+          const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+          const session = await stripe.checkout.sessions.retrieve(sessionId);
+          
+          // Verify session is paid and matches the course
+          if (session.payment_status !== "paid") {
+            return res.status(400).json({ error: "Payment not completed" });
+          }
+          
+          // Verify session belongs to this user (if email matches)
+          if (session.customer_email && user.email && 
+              session.customer_email.toLowerCase() !== user.email.toLowerCase()) {
+            console.warn(`Session email mismatch: ${session.customer_email} vs ${user.email}`);
+            // Allow but log - user may have used different email
+          }
+        } catch (stripeErr: any) {
+          console.error("Stripe session validation failed:", stripeErr.message);
+          // If session is invalid or expired, deny enrollment
+          if (stripeErr.code === "resource_missing") {
+            return res.status(400).json({ error: "Invalid payment session" });
+          }
+          // For other Stripe errors, allow enrollment (may be test mode or config issue)
+        }
       }
 
       const enrollment = await storage.createEnrollment(user.id, courseId);

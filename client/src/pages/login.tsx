@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const redirectUrl = params.get("redirect") || "/dashboard";
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -19,17 +22,23 @@ export default function LoginPage() {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const response = await fetch("/api/user", { headers });
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        const response = await fetch("/api/user", { 
+          headers,
+          credentials: "include"
+        });
         if (response.ok) {
-          setLocation("/dashboard");
+          setLocation(redirectUrl);
         }
       } catch (err) {
         // User not authenticated, show login page
       }
     };
     checkAuth();
-  }, [setLocation]);
+  }, [setLocation, redirectUrl]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +52,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -50,7 +60,7 @@ export default function LoginPage() {
         const data = await res.json();
         localStorage.setItem("authToken", data.token);
         toast({ title: "Success", description: "Login successful!" });
-        setLocation("/dashboard");
+        setLocation(redirectUrl);
       } else {
         const error = await res.json();
         toast({ title: "Error", description: error.error || "Login failed", variant: "destructive" });
@@ -61,6 +71,10 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const googleLoginUrl = redirectUrl !== "/dashboard" 
+    ? `/api/google/login?redirect=${encodeURIComponent(redirectUrl)}`
+    : "/api/google/login";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
@@ -79,7 +93,7 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Social Login */}
-            <a href="/api/google/login" className="w-full block">
+            <a href={googleLoginUrl} className="w-full block">
               <Button
                 className="w-full h-12 text-base gap-2 bg-white text-slate-900 border border-border hover:bg-slate-50"
                 data-testid="button-login-google"
