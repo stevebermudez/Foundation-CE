@@ -9,33 +9,153 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import StreamingVideoPlayer from "@/components/StreamingVideoPlayer";
 import QuizComponent from "@/components/QuizComponent";
-import { ArrowLeft, Clock, Award, FileText, Timer, TimerOff, CheckCircle2, Circle, BookOpen, Zap } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  Award,
+  FileText,
+  Timer,
+  TimerOff,
+  CheckCircle2,
+  Circle,
+  BookOpen,
+  Zap,
+} from "lucide-react";
 import { Link } from "wouter";
 
 import caRealEstate from "@assets/generated_images/california_luxury_real_estate.png";
 import flRealEstate from "@assets/generated_images/florida_beachfront_properties.png";
 
 const mockLessons = [
-  { id: "1", title: "Introduction to Real Estate Ethics", duration: "8:30", completed: true },
-  { id: "2", title: "Fiduciary Duties Explained", duration: "12:45", completed: true },
-  { id: "3", title: "Disclosure Requirements", duration: "15:20", completed: false },
-  { id: "4", title: "Professional Standards of Practice", duration: "10:15", completed: false },
-  { id: "5", title: "Case Studies and Real-World Examples", duration: "18:30", completed: false },
-  { id: "6", title: "Review and Summary", duration: "8:00", completed: false },
+  {
+    id: "1",
+    title: "Introduction to Florida Real Estate",
+    duration: "45:00",
+    completed: false,
+  },
+  {
+    id: "2",
+    title: "Real Estate License Law and Qualifications",
+    duration: "60:00",
+    completed: false,
+  },
+  {
+    id: "3",
+    title: "Authorized Relationships, Duties, and Disclosure",
+    duration: "75:00",
+    completed: false,
+  },
+  {
+    id: "4",
+    title: "Real Estate Brokerage Operations and Federal Laws",
+    duration: "90:00",
+    completed: false,
+  },
+  {
+    id: "5",
+    title: "Property Rights, Estates, and Ownership",
+    duration: "60:00",
+    completed: false,
+  },
+  {
+    id: "6",
+    title: "Encumbrances and Title Transfer",
+    duration: "75:00",
+    completed: false,
+  },
+  {
+    id: "7",
+    title: "Real Estate Contracts",
+    duration: "90:00",
+    completed: false,
+  },
+  {
+    id: "8",
+    title: "Residential Purchase and Sale Contract",
+    duration: "105:00",
+    completed: false,
+  },
+  {
+    id: "9",
+    title: "Professional Practices and Listing Presentations",
+    duration: "60:00",
+    completed: false,
+  },
+  {
+    id: "10",
+    title: "Real Estate Financing Principles",
+    duration: "75:00",
+    completed: false,
+  },
+  {
+    id: "11",
+    title: "Mortgage Lending and Loan Types",
+    duration: "90:00",
+    completed: false,
+  },
+  {
+    id: "12",
+    title: "Real Estate Appraisal and Market Analysis",
+    duration: "75:00",
+    completed: false,
+  },
+  {
+    id: "13",
+    title: "Real Estate Market Conditions and Property Analysis",
+    duration: "60:00",
+    completed: false,
+  },
+  {
+    id: "14",
+    title: "Real Estate Mathematics and Calculations",
+    duration: "90:00",
+    completed: false,
+  },
+  {
+    id: "15",
+    title: "Taxes Affecting Real Estate",
+    duration: "60:00",
+    completed: false,
+  },
+  {
+    id: "16",
+    title: "Land Use Controls and Regulations",
+    duration: "75:00",
+    completed: false,
+  },
+  {
+    id: "17",
+    title: "Construction, Building Codes, and Property Insurance",
+    duration: "60:00",
+    completed: false,
+  },
+  {
+    id: "18",
+    title: "Environmental Issues and Disclosures",
+    duration: "45:00",
+    completed: false,
+  },
+  {
+    id: "19",
+    title: "Final Exam Preparation and Review",
+    duration: "120:00",
+    completed: false,
+  },
 ];
-
 const mockQuestions = [
   {
     id: "1",
-    question: "What is the primary fiduciary duty owed by a real estate agent to their client?",
+    question:
+      "What is the primary fiduciary duty owed by a real estate agent to their client?",
     options: [
       "Obedience to all instructions",
       "Loyalty and putting client interests first",
       "Maintaining confidentiality only",
-      "Providing accurate market analysis"
+      "Providing accurate market analysis",
     ],
     correctAnswer: 1,
-    explanation: "The primary fiduciary duty is loyalty, which means putting the client's interests above all others."
+    explanation:
+      "The primary fiduciary duty is loyalty, which means putting the client's interests above all others.",
   },
   {
     id: "2",
@@ -44,46 +164,48 @@ const mockQuestions = [
       "Only when asked directly",
       "After the purchase agreement is signed",
       "As soon as the agent becomes aware of them",
-      "Only for properties over $1 million"
+      "Only for properties over $1 million",
     ],
     correctAnswer: 2,
-    explanation: "Material facts must be disclosed as soon as the agent becomes aware of them."
+    explanation:
+      "Material facts must be disclosed as soon as the agent becomes aware of them.",
   },
   {
     id: "3",
-    question: "Which of the following is NOT a protected class under fair housing laws?",
-    options: [
-      "Race",
-      "Religion",
-      "Income level",
-      "Familial status"
-    ],
+    question:
+      "Which of the following is NOT a protected class under fair housing laws?",
+    options: ["Race", "Religion", "Income level", "Familial status"],
     correctAnswer: 2,
-    explanation: "Income level is not a protected class under federal fair housing laws."
+    explanation:
+      "Income level is not a protected class under federal fair housing laws.",
   },
   {
     id: "4",
-    question: "What is the purpose of the Real Estate Transfer Disclosure Statement?",
+    question:
+      "What is the purpose of the Real Estate Transfer Disclosure Statement?",
     options: [
       "To transfer property title",
       "To disclose known property defects",
       "To calculate property taxes",
-      "To verify buyer financing"
+      "To verify buyer financing",
     ],
     correctAnswer: 1,
-    explanation: "The TDS is used to disclose known material facts and defects about the property to buyers."
+    explanation:
+      "The TDS is used to disclose known material facts and defects about the property to buyers.",
   },
   {
     id: "5",
-    question: "An agent may represent both buyer and seller in the same transaction when:",
+    question:
+      "An agent may represent both buyer and seller in the same transaction when:",
     options: [
       "Never - it's always illegal",
       "The broker gives permission",
       "Both parties provide informed written consent",
-      "The property value exceeds $500,000"
+      "The property value exceeds $500,000",
     ],
     correctAnswer: 2,
-    explanation: "Dual agency is permitted only when both parties provide informed written consent to the arrangement."
+    explanation:
+      "Dual agency is permitted only when both parties provide informed written consent to the arrangement.",
   },
 ];
 
@@ -138,10 +260,12 @@ export default function CourseViewPage() {
   });
 
   const handleLessonComplete = () => {
-    const updatedLessons = mockLessons.map(l => 
-      l.id === currentLesson.id ? { ...l, completed: true } : l
+    const updatedLessons = mockLessons.map((l) =>
+      l.id === currentLesson.id ? { ...l, completed: true } : l,
     );
-    const currentIndex = updatedLessons.findIndex(l => l.id === currentLesson.id);
+    const currentIndex = updatedLessons.findIndex(
+      (l) => l.id === currentLesson.id,
+    );
     if (currentIndex < updatedLessons.length - 1) {
       setCurrentLesson(updatedLessons[currentIndex + 1]);
     }
@@ -169,7 +293,7 @@ export default function CourseViewPage() {
 
   const courseTitle = course?.title || "Course";
   const courseHours = course?.hoursRequired || 3;
-  const courseDuration = `${Math.ceil((courseHours || 3) * 60 / 50)}m`;
+  const courseDuration = `${Math.ceil(((courseHours || 3) * 60) / 50)}m`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -231,19 +355,29 @@ export default function CourseViewPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-muted-foreground">{course?.description}</p>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm text-muted-foreground">Hours Required</p>
-                      <p className="text-2xl font-bold">{course?.hoursRequired}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Hours Required
+                      </p>
+                      <p className="text-2xl font-bold">
+                        {course?.hoursRequired}
+                      </p>
                     </div>
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-sm text-muted-foreground">Price</p>
-                      <p className="text-2xl font-bold">${((course?.price || 0) / 100).toFixed(2)}</p>
+                      <p className="text-2xl font-bold">
+                        ${((course?.price || 0) / 100).toFixed(2)}
+                      </p>
                     </div>
                     <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm text-muted-foreground">License Type</p>
-                      <p className="text-lg font-semibold">{course?.licenseType}</p>
+                      <p className="text-sm text-muted-foreground">
+                        License Type
+                      </p>
+                      <p className="text-lg font-semibold">
+                        {course?.licenseType}
+                      </p>
                     </div>
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-sm text-muted-foreground">State</p>
@@ -255,10 +389,26 @@ export default function CourseViewPage() {
                     <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
                       <div className="flex items-center justify-between mb-3">
                         <p className="font-semibold">Enrollment Progress</p>
-                        <Badge variant="secondary">{Math.round((enrollment.hoursCompleted / course?.hoursRequired) * 100)}%</Badge>
+                        <Badge variant="secondary">
+                          {Math.round(
+                            (enrollment.hoursCompleted /
+                              course?.hoursRequired) *
+                              100,
+                          )}
+                          %
+                        </Badge>
                       </div>
-                      <Progress value={(enrollment.hoursCompleted / course?.hoursRequired) * 100} className="h-2" />
-                      <p className="text-sm text-muted-foreground mt-2">{enrollment.hoursCompleted} of {course?.hoursRequired} hours completed</p>
+                      <Progress
+                        value={
+                          (enrollment.hoursCompleted / course?.hoursRequired) *
+                          100
+                        }
+                        className="h-2"
+                      />
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {enrollment.hoursCompleted} of {course?.hoursRequired}{" "}
+                        hours completed
+                      </p>
                     </div>
                   )}
                 </CardContent>
@@ -276,12 +426,22 @@ export default function CourseViewPage() {
                   <CardContent>
                     <div className="space-y-3">
                       {units.map((unit: any, idx: number) => (
-                        <div key={unit.id || idx} className="p-3 border rounded-lg hover-elevate cursor-pointer" data-testid={`unit-${idx}`}>
+                        <div
+                          key={unit.id || idx}
+                          className="p-3 border rounded-lg hover-elevate cursor-pointer"
+                          data-testid={`unit-${idx}`}
+                        >
                           <div className="flex items-start gap-3">
-                            <div className="mt-1 text-muted-foreground">Unit {unit.unitNumber || idx + 1}</div>
+                            <div className="mt-1 text-muted-foreground">
+                              Unit {unit.unitNumber || idx + 1}
+                            </div>
                             <div className="flex-1">
                               <p className="font-semibold">{unit.title}</p>
-                              {unit.description && <p className="text-sm text-muted-foreground">{unit.description}</p>}
+                              {unit.description && (
+                                <p className="text-sm text-muted-foreground">
+                                  {unit.description}
+                                </p>
+                              )}
                               <div className="flex gap-2 mt-2 text-xs">
                                 {unit.hoursRequired && (
                                   <span className="text-muted-foreground flex items-center gap-1">
@@ -311,12 +471,21 @@ export default function CourseViewPage() {
                   <CardContent>
                     <div className="space-y-2">
                       {exams.map((exam: any, idx: number) => (
-                        <div key={exam.id || idx} className="p-3 border rounded-lg flex items-center justify-between hover-elevate cursor-pointer" data-testid={`exam-${idx}`}>
+                        <div
+                          key={exam.id || idx}
+                          className="p-3 border rounded-lg flex items-center justify-between hover-elevate cursor-pointer"
+                          data-testid={`exam-${idx}`}
+                        >
                           <div>
                             <p className="font-medium">{exam.title}</p>
-                            <p className="text-sm text-muted-foreground">{exam.totalQuestions} questions • {exam.passingScore}% pass required</p>
+                            <p className="text-sm text-muted-foreground">
+                              {exam.totalQuestions} questions •{" "}
+                              {exam.passingScore}% pass required
+                            </p>
                           </div>
-                          <Button variant="outline" size="sm">Take Exam</Button>
+                          <Button variant="outline" size="sm">
+                            Take Exam
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -334,7 +503,7 @@ export default function CourseViewPage() {
               videoUrl="https://commondatastorage.googleapis.com/gtv-videos-library/sample/BigBuckBunny.mp4"
               hlsUrl="https://test-streams.mux.dev/x36xhzz/x3lis7z91.m3u8"
               onLessonSelect={(id) => {
-                const lesson = mockLessons.find(l => l.id === id);
+                const lesson = mockLessons.find((l) => l.id === id);
                 if (lesson) setCurrentLesson(lesson);
               }}
               onComplete={handleLessonComplete}
@@ -345,15 +514,33 @@ export default function CourseViewPage() {
           <TabsContent value="resources">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {[
-                { title: "Complete Course Study Guide", pages: 45, size: "2.3 MB" },
-                { title: "Ethics Quick Reference Card", pages: 2, size: "156 KB" },
+                {
+                  title: "Complete Course Study Guide",
+                  pages: 45,
+                  size: "2.3 MB",
+                },
+                {
+                  title: "Ethics Quick Reference Card",
+                  pages: 2,
+                  size: "156 KB",
+                },
                 { title: "DRE Regulations Summary", pages: 12, size: "890 KB" },
                 { title: "Case Study Workbook", pages: 28, size: "1.5 MB" },
               ].map((resource, index) => (
                 <div
                   key={index}
                   className="flex items-center gap-4 p-4 border rounded-lg hover-elevate cursor-pointer"
-                  onClick={() => console.log("Download:", resource.title)}
+                  onClick={() => {
+                    // Create a temporary link element to trigger download
+                    const link = document.createElement("a");
+                    link.href = "#"; // In production, this would be the actual PDF URL
+                    link.download = `${resource.title}.pdf`;
+                    link.click();
+                    // Show a message that download would occur in production
+                    alert(
+                      `Downloading: ${resource.title}\n\nIn production, this would download a ${resource.size} PDF file with ${resource.pages} pages of course materials.`,
+                    );
+                  }}
                   data-testid={`resource-${index}`}
                 >
                   <div className="h-12 w-12 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -374,9 +561,12 @@ export default function CourseViewPage() {
             {!testMode ? (
               <div className="max-w-2xl mx-auto">
                 <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2">Choose Your Testing Mode</h2>
+                  <h2 className="text-2xl font-bold mb-2">
+                    Choose Your Testing Mode
+                  </h2>
                   <p className="text-muted-foreground">
-                    Select how you'd like to take the assessment. Both options are compliant with state requirements.
+                    Select how you'd like to take the assessment. Both options
+                    are compliant with state requirements.
                   </p>
                 </div>
 
@@ -391,9 +581,13 @@ export default function CourseViewPage() {
                     </div>
                     <h3 className="font-semibold text-lg mb-2">No Timer</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Take the exam at your own pace. No time pressure - review questions as needed.
+                      Take the exam at your own pace. No time pressure - review
+                      questions as needed.
                     </p>
-                    <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300"
+                    >
                       Recommended
                     </Badge>
                   </div>
@@ -408,11 +602,10 @@ export default function CourseViewPage() {
                     </div>
                     <h3 className="font-semibold text-lg mb-2">Timed Exam</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      60 minutes to complete. Traditional testing experience with countdown timer.
+                      60 minutes to complete. Traditional testing experience
+                      with countdown timer.
                     </p>
-                    <Badge variant="outline">
-                      60 minute limit
-                    </Badge>
+                    <Badge variant="outline">60 minute limit</Badge>
                   </div>
                 </div>
               </div>
@@ -424,7 +617,9 @@ export default function CourseViewPage() {
                 timeLimit={60}
                 passingScore={70}
                 onComplete={handleQuizComplete}
-                onDownloadCertificate={() => console.log("Download certificate")}
+                onDownloadCertificate={() =>
+                  console.log("Download certificate")
+                }
               />
             )}
           </TabsContent>

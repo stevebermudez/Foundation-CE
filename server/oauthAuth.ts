@@ -35,8 +35,14 @@ async function upsertUser(profile: any, email?: string) {
   await storage.upsertUser({
     id: userId,
     email: email || profile.emails?.[0]?.value,
-    firstName: profile.name?.givenName || profile.given_name || profile.displayName?.split(" ")[0],
-    lastName: profile.name?.familyName || profile.family_name || profile.displayName?.split(" ")[1],
+    firstName:
+      profile.name?.givenName ||
+      profile.given_name ||
+      profile.displayName?.split(" ")[0],
+    lastName:
+      profile.name?.familyName ||
+      profile.family_name ||
+      profile.displayName?.split(" ")[1],
     profileImageUrl: profile.photos?.[0]?.value || profile.picture,
   });
   return userId;
@@ -52,25 +58,36 @@ export async function setupAuth(app: Express) {
   console.log("🔍 OAuth Environment Variables Debug:");
   console.log("GOOGLE_CLIENT_ID exists:", !!process.env.GOOGLE_CLIENT_ID);
   if (process.env.GOOGLE_CLIENT_ID) {
-    console.log("GOOGLE_CLIENT_ID starts with:", process.env.GOOGLE_CLIENT_ID.substring(0, 20));
+    console.log(
+      "GOOGLE_CLIENT_ID starts with:",
+      process.env.GOOGLE_CLIENT_ID.substring(0, 20),
+    );
   }
-  console.log("GOOGLE_CLIENT_SECRET exists:", !!process.env.GOOGLE_CLIENT_SECRET);
+  console.log(
+    "GOOGLE_CLIENT_SECRET exists:",
+    !!process.env.GOOGLE_CLIENT_SECRET,
+  );
   if (process.env.GOOGLE_CLIENT_SECRET) {
-    console.log("GOOGLE_CLIENT_SECRET starts with:", process.env.GOOGLE_CLIENT_SECRET.substring(0, 20));
+    console.log(
+      "GOOGLE_CLIENT_SECRET starts with:",
+      process.env.GOOGLE_CLIENT_SECRET.substring(0, 20),
+    );
   }
 
   // Google OAuth
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.log("✅ Setting up Google OAuth Strategy");
-    const callbackURL = process.env.REPL_SLUG
-      ? `https://${process.env.REPL_SLUG}.replit.app/api/google/callback`
-      : process.env.REPL_ID
-      ? `https://${process.env.REPL_ID}.id.replit.dev/api/google/callback`
-      : "http://localhost:5000/api/google/callback";
+    const callbackURL =
+      "https://foundation-ce--stevenbermudez1.replit.app/api/google/callback";
     console.log("📍 Google OAuth Callback URL:", callbackURL);
-    console.log("🔐 Google Client ID (last 30 chars):", process.env.GOOGLE_CLIENT_ID.slice(-30));
-    console.log("📝 Instructions: Add this callback URL to Google Cloud Console > Credentials > OAuth 2.0 Client > Authorized redirect URIs");
-    
+    console.log(
+      "🔐 Google Client ID (last 30 chars):",
+      process.env.GOOGLE_CLIENT_ID.slice(-30),
+    );
+    console.log(
+      "📝 Instructions: Add this callback URL to Google Cloud Console > Credentials > OAuth 2.0 Client > Authorized redirect URIs",
+    );
+
     passport.use(
       new GoogleStrategy(
         {
@@ -78,31 +95,49 @@ export async function setupAuth(app: Express) {
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
           callbackURL: callbackURL,
         },
-        async (accessToken: any, refreshToken: any, profile: any, done: any) => {
+        async (
+          accessToken: any,
+          refreshToken: any,
+          profile: any,
+          done: any,
+        ) => {
           try {
             const userId = await upsertUser(profile);
             return done(null, { id: userId });
           } catch (err) {
             return done(err);
           }
-        }
-      )
+        },
+      ),
     );
 
-    app.get("/api/google/login", passport.authenticate("google", { scope: ["profile", "email"] }));
+    app.get(
+      "/api/google/login",
+      passport.authenticate("google", { scope: ["profile", "email"] }),
+    );
     app.get(
       "/api/google/callback",
       passport.authenticate("google", { failureRedirect: "/login" }),
-      (req, res) => res.redirect("/dashboard")
+      (req, res) => res.redirect("/dashboard"),
     );
   } else {
     app.get("/api/google/login", (req, res) => {
-      res.status(500).json({ error: "Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET." });
+      res
+        .status(500)
+        .json({
+          error:
+            "Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.",
+        });
     });
   }
 
   // Apple OAuth
-  if (process.env.APPLE_TEAM_ID && process.env.APPLE_KEY_ID && process.env.APPLE_PRIVATE_KEY && process.env.APPLE_BUNDLE_ID) {
+  if (
+    process.env.APPLE_TEAM_ID &&
+    process.env.APPLE_KEY_ID &&
+    process.env.APPLE_PRIVATE_KEY &&
+    process.env.APPLE_BUNDLE_ID
+  ) {
     passport.use(
       new AppleStrategy(
         {
@@ -113,26 +148,37 @@ export async function setupAuth(app: Express) {
           bundleID: process.env.APPLE_BUNDLE_ID,
           callbackURL: "/api/apple/callback",
         },
-        async (accessToken: any, refreshToken: any, idToken: any, profile: any, done: any) => {
+        async (
+          accessToken: any,
+          refreshToken: any,
+          idToken: any,
+          profile: any,
+          done: any,
+        ) => {
           try {
             const userId = await upsertUser(profile);
             return done(null, { id: userId });
           } catch (err) {
             return done(err);
           }
-        }
-      )
+        },
+      ),
     );
 
     app.post("/api/apple/login", passport.authenticate("apple"));
     app.post(
       "/api/apple/callback",
       passport.authenticate("apple", { failureRedirect: "/login" }),
-      (req, res) => res.redirect("/dashboard")
+      (req, res) => res.redirect("/dashboard"),
     );
   } else {
     app.post("/api/apple/login", (req, res) => {
-      res.status(500).json({ error: "Apple Sign In not configured. Please set APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_BUNDLE_ID." });
+      res
+        .status(500)
+        .json({
+          error:
+            "Apple Sign In not configured. Please set APPLE_TEAM_ID, APPLE_KEY_ID, APPLE_PRIVATE_KEY, and APPLE_BUNDLE_ID.",
+        });
     });
   }
 
