@@ -95,11 +95,38 @@ export async function registerRoutes(
   app.get("/api/enrollments/user", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
-      const enrollments = await storage.getCompletedEnrollments(user.id);
-      res.json(enrollments);
+      const allEnrollments = await storage.getAllUserEnrollments(user.id);
+      res.json(allEnrollments);
     } catch (err) {
       console.error("Error fetching enrollments:", err);
       res.status(500).json({ error: "Failed to fetch enrollments" });
+    }
+  });
+
+  app.post("/api/enrollments", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { courseId } = req.body;
+      
+      if (!courseId) {
+        return res.status(400).json({ error: "courseId is required" });
+      }
+
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      const existingEnrollment = await storage.getEnrollment(user.id, courseId);
+      if (existingEnrollment) {
+        return res.json({ enrollment: existingEnrollment, existing: true });
+      }
+
+      const enrollment = await storage.createEnrollment(user.id, courseId);
+      res.json({ enrollment, existing: false });
+    } catch (err) {
+      console.error("Error creating enrollment:", err);
+      res.status(500).json({ error: "Failed to create enrollment" });
     }
   });
 

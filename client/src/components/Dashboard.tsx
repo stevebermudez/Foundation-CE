@@ -27,31 +27,24 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ userName, selectedState }: DashboardProps) {
-  const [completedCourses, setCompletedCourses] = useState<any[]>([]);
-
-  const { data: enrollments = [] } = useQuery({
+  const { data: enrollments = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/enrollments/user"],
-    enabled: true,
   });
 
-  useEffect(() => {
-    if (enrollments && Array.isArray(enrollments)) {
-      const completed = enrollments.filter((e: any) => e.completed);
-      setCompletedCourses(completed);
-    }
-  }, [enrollments]);
-
-  const mockEnrolledCourses = []; // Placeholder for in-progress courses
-  const totalCeHours = completedCourses.reduce((sum: number, course: any) => sum + (course.course?.hoursRequired || 0), 0);
-  const mockStats = {
-    enrolledCourses: 0,
+  const inProgressCourses = enrollments.filter((e: any) => !e.completed);
+  const completedCourses = enrollments.filter((e: any) => e.completed);
+  const totalCeHours = completedCourses.reduce((sum: number, e: any) => sum + (e.course?.hoursRequired || 0), 0);
+  const requiredCeHours = selectedState === "FL" ? 63 : 45;
+  
+  const stats = {
+    enrolledCourses: inProgressCourses.length,
     completedCourses: completedCourses.length,
     totalCeHours: totalCeHours,
-    requiredCeHours: 63,
+    requiredCeHours: requiredCeHours,
     upcomingDeadline: "Dec 31, 2025",
   };
   
-  const ceProgress = (mockStats.totalCeHours / mockStats.requiredCeHours) * 100;
+  const ceProgress = Math.min((stats.totalCeHours / stats.requiredCeHours) * 100, 100);
 
   return (
     <div className="py-8 px-4">
@@ -73,7 +66,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   <BookOpen className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{mockStats.enrolledCourses}</p>
+                  <p className="text-2xl font-bold" data-testid="stat-in-progress">{stats.enrolledCourses}</p>
                   <p className="text-sm text-muted-foreground">In Progress</p>
                 </div>
               </div>
@@ -87,7 +80,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   <Award className="h-6 w-6 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{mockStats.completedCourses}</p>
+                  <p className="text-2xl font-bold" data-testid="stat-completed">{stats.completedCourses}</p>
                   <p className="text-sm text-muted-foreground">Completed</p>
                 </div>
               </div>
@@ -101,7 +94,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   <TrendingUp className="h-6 w-6 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{mockStats.totalCeHours}/{mockStats.requiredCeHours}</p>
+                  <p className="text-2xl font-bold" data-testid="stat-ce-hours">{stats.totalCeHours}/{stats.requiredCeHours}</p>
                   <p className="text-sm text-muted-foreground">CE Hours</p>
                 </div>
               </div>
@@ -115,7 +108,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   <Calendar className="h-6 w-6 text-orange-500" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold">{mockStats.upcomingDeadline}</p>
+                  <p className="text-lg font-bold" data-testid="stat-deadline">{stats.upcomingDeadline}</p>
                   <p className="text-sm text-muted-foreground">Next Deadline</p>
                 </div>
               </div>
@@ -128,7 +121,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
             <Tabs defaultValue="in-progress">
               <TabsList className="mb-4">
                 <TabsTrigger value="in-progress" data-testid="tab-in-progress">
-                  In Progress ({mockEnrolledCourses.length})
+                  In Progress ({inProgressCourses.length})
                 </TabsTrigger>
                 <TabsTrigger value="completed" data-testid="tab-completed">
                   Completed ({completedCourses.length})
@@ -136,44 +129,48 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
               </TabsList>
 
               <TabsContent value="in-progress" className="space-y-4">
-                {mockEnrolledCourses.length === 0 ? (
+                {inProgressCourses.length === 0 ? (
                   <Card className="p-8 text-center">
-                    <p className="text-muted-foreground">No courses in progress. Visit the Courses page to enroll.</p>
+                    <p className="text-muted-foreground mb-4">No courses in progress.</p>
+                    <Button onClick={() => window.location.href = "/courses/fl"} data-testid="button-browse-courses">
+                      Browse Courses
+                    </Button>
                   </Card>
                 ) : (
-                  mockEnrolledCourses.map((course: any) => (
-                    <Card key={course.id} className="overflow-hidden">
+                  inProgressCourses.map((enrollment: any) => (
+                    <Card key={enrollment.id} className="overflow-hidden">
                       <div className="flex flex-col sm:flex-row">
-                        <div className="sm:w-40 h-32 sm:h-auto shrink-0">
-                          <img
-                            src={course.thumbnail}
-                            alt={course.title}
-                            className="h-full w-full object-cover"
-                          />
+                        <div className="sm:w-40 h-32 sm:h-auto shrink-0 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                          <BookOpen className="h-12 w-12 text-white/80" />
                         </div>
                         <CardContent className="flex-1 p-4">
                           <div className="flex flex-col h-full">
                             <div className="flex-1">
-                              <h3 className="font-semibold mb-2 line-clamp-2" data-testid={`text-course-title-${course.id}`}>
-                                {course.title}
+                              <h3 className="font-semibold mb-2 line-clamp-2" data-testid={`text-course-title-${enrollment.id}`}>
+                                {enrollment.course?.title}
                               </h3>
                               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-3">
                                 <span className="flex items-center gap-1">
                                   <Clock className="h-3.5 w-3.5" />
-                                  {course.lastAccessed}
+                                  {enrollment.hoursCompleted || 0}/{enrollment.course?.hoursRequired || 0} hours
                                 </span>
                                 <Badge variant="secondary" className="text-xs">
-                                  {course.ceHours} CE Hours
+                                  {enrollment.course?.hoursRequired} CE Hours
                                 </Badge>
                               </div>
                             </div>
                             <div>
                               <div className="flex items-center justify-between mb-1.5">
                                 <span className="text-sm text-muted-foreground">Progress</span>
-                                <span className="text-sm font-medium">{course.progress}%</span>
+                                <span className="text-sm font-medium">{enrollment.progress || 0}%</span>
                               </div>
-                              <Progress value={course.progress} className="h-2 mb-3" />
-                              <Button size="sm" className="gap-1" data-testid={`button-continue-${course.id}`}>
+                              <Progress value={enrollment.progress || 0} className="h-2 mb-3" />
+                              <Button 
+                                size="sm" 
+                                className="gap-1" 
+                                onClick={() => window.location.href = `/course/${enrollment.courseId}`}
+                                data-testid={`button-continue-${enrollment.id}`}
+                              >
                                 Continue
                                 <ChevronRight className="h-4 w-4" />
                               </Button>
@@ -250,8 +247,8 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                       />
                     </svg>
                     <div className="absolute text-center">
-                      <p className="text-3xl font-bold">{mockStats.totalCeHours}</p>
-                      <p className="text-xs text-muted-foreground">of {mockStats.requiredCeHours}</p>
+                      <p className="text-3xl font-bold">{stats.totalCeHours}</p>
+                      <p className="text-xs text-muted-foreground">of {stats.requiredCeHours}</p>
                     </div>
                   </div>
                 </div>
@@ -259,38 +256,64 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Required</span>
-                    <span className="font-medium">{mockStats.requiredCeHours} hours</span>
+                    <span className="font-medium">{stats.requiredCeHours} hours</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Completed</span>
-                    <span className="font-medium text-green-500">{mockStats.totalCeHours} hours</span>
+                    <span className="font-medium text-green-500">{stats.totalCeHours} hours</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Remaining</span>
-                    <span className="font-medium">{mockStats.requiredCeHours - mockStats.totalCeHours} hours</span>
+                    <span className="font-medium">{Math.max(0, stats.requiredCeHours - stats.totalCeHours)} hours</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/20">
-              <CardContent className="pt-6">
-                <div className="flex gap-3">
-                  <AlertTriangle className="h-5 w-5 text-orange-600 shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-orange-800 dark:text-orange-200 mb-1">
-                      Renewal Deadline Approaching
-                    </h4>
-                    <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
-                      Complete 42 more CE hours by {mockStats.upcomingDeadline} to renew your license.
-                    </p>
-                    <Button size="sm" variant="outline" className="border-orange-300 dark:border-orange-800" data-testid="button-view-requirements">
-                      View Requirements
-                    </Button>
+            {stats.totalCeHours < stats.requiredCeHours && (
+              <Card className="border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/20">
+                <CardContent className="pt-6">
+                  <div className="flex gap-3">
+                    <AlertTriangle className="h-5 w-5 text-orange-600 shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-orange-800 dark:text-orange-200 mb-1">
+                        Renewal Deadline Approaching
+                      </h4>
+                      <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
+                        Complete {stats.requiredCeHours - stats.totalCeHours} more CE hours by {stats.upcomingDeadline} to renew your license.
+                      </p>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-orange-300 dark:border-orange-800" 
+                        onClick={() => window.location.href = "/courses/fl"}
+                        data-testid="button-view-requirements"
+                      >
+                        View Courses
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+            
+            {stats.totalCeHours >= stats.requiredCeHours && (
+              <Card className="border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
+                <CardContent className="pt-6">
+                  <div className="flex gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-green-800 dark:text-green-200 mb-1">
+                        CE Requirements Complete
+                      </h4>
+                      <p className="text-sm text-green-700 dark:text-green-300">
+                        You have completed all required CE hours for this renewal period.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

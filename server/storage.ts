@@ -67,6 +67,7 @@ export interface IStorage {
   validateCoupon(code: string, productType?: string): Promise<{ valid: boolean; discount?: number; message: string }>;
   applyCoupon(userId: string, couponId: string, enrollmentId?: string, discountAmount?: number): Promise<CouponUsage>;
   getCompletedEnrollments(userId: string): Promise<(Enrollment & { course: Course })[]>;
+  getAllUserEnrollments(userId: string): Promise<(Enrollment & { course: Course })[]>;
   resetEnrollment(enrollmentId: string): Promise<Enrollment>;
   createEmailCampaign(campaign: Omit<EmailCampaign, 'id' | 'createdAt' | 'updatedAt'>): Promise<EmailCampaign>;
   getEmailCampaign(id: string): Promise<EmailCampaign | undefined>;
@@ -741,6 +742,20 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(enrollments.completedAt));
 
     return completed.map((row: any) => ({
+      ...row.enrollments,
+      course: row.courses
+    }));
+  }
+
+  async getAllUserEnrollments(userId: string): Promise<(Enrollment & { course: Course })[]> {
+    const allEnrollments = await db
+      .select()
+      .from(enrollments)
+      .innerJoin(courses, eq(enrollments.courseId, courses.id))
+      .where(eq(enrollments.userId, userId))
+      .orderBy(desc(enrollments.enrolledAt));
+
+    return allEnrollments.map((row: any) => ({
       ...row.enrollments,
       course: row.courses
     }));

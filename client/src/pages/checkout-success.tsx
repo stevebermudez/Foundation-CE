@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Download, BookOpen } from "lucide-react";
+import { CheckCircle, Download, BookOpen, Loader2 } from "lucide-react";
 
 export default function CheckoutSuccessPage() {
   const [, setLocation] = useLocation();
@@ -10,10 +10,13 @@ export default function CheckoutSuccessPage() {
   const params = new URLSearchParams(query);
   const courseId = params.get("courseId");
   const [course, setCourse] = useState<any>(null);
+  const [enrollmentCreated, setEnrollmentCreated] = useState(false);
+  const [isCreatingEnrollment, setIsCreatingEnrollment] = useState(false);
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchCourseAndCreateEnrollment = async () => {
       if (!courseId) return;
+      
       try {
         const res = await fetch(`/api/courses/${courseId}`);
         if (res.ok) {
@@ -23,8 +26,37 @@ export default function CheckoutSuccessPage() {
       } catch (err) {
         console.error("Failed to fetch course:", err);
       }
+
+      setIsCreatingEnrollment(true);
+      try {
+        const token = localStorage.getItem("authToken");
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        const enrollRes = await fetch("/api/enrollments", {
+          method: "POST",
+          headers,
+          credentials: "include",
+          body: JSON.stringify({ courseId }),
+        });
+        
+        if (enrollRes.ok) {
+          const data = await enrollRes.json();
+          setEnrollmentCreated(true);
+          console.log("Enrollment created:", data);
+        } else {
+          console.error("Failed to create enrollment:", await enrollRes.text());
+        }
+      } catch (err) {
+        console.error("Failed to create enrollment:", err);
+      } finally {
+        setIsCreatingEnrollment(false);
+      }
     };
-    fetchCourse();
+    
+    fetchCourseAndCreateEnrollment();
   }, [courseId]);
 
   return (
