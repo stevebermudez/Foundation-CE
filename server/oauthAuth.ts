@@ -218,9 +218,42 @@ export const isAuthenticated: RequestHandler = (req, res, next) => {
 };
 
 export const isAdmin: RequestHandler = async (req, res, next) => {
+  // First check for JWT token in Authorization header
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  
+  if (token) {
+    try {
+      const jwt = await import("jsonwebtoken");
+      const decoded = jwt.default.verify(
+        token,
+        process.env.SESSION_SECRET || "fallback-secret"
+      ) as { id: string; email: string; isAdmin?: boolean };
+      
+      // Check if token has isAdmin flag or verify from database
+      if (decoded.isAdmin) {
+        req.user = decoded;
+        return next();
+      }
+      
+      // Double-check with database
+      const isAdminUser = await storage.isAdmin(decoded.id);
+      if (isAdminUser) {
+        req.user = decoded;
+        return next();
+      }
+      
+      return res.status(403).json({ message: "Forbidden - Admin access required" });
+    } catch (err) {
+      // Token invalid, fall through to session check
+    }
+  }
+  
+  // Fall back to passport session authentication
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
+  
   const user = req.user as any;
   try {
     const isAdminUser = await storage.isAdmin(user.id);

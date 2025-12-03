@@ -11,7 +11,6 @@ import {
   capturePaypalOrder,
   loadPaypalDefault,
 } from "./paypal";
-import { v4 as uuidv4 } from "uuid";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -211,37 +210,119 @@ export async function registerRoutes(
 
 });
 
-  // Simplified Admin Login Route
+  // Admin Login Route - validates credentials and returns JWT with isAdmin flag
   app.post("/api/auth/admin/login", async (req, res) => {
     try {
-      const { email } = req.body;
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+      
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.passwordHash) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      // Verify password
+      const bcrypt = await import("bcrypt");
+      const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Invalid email or password" });
+      }
+      
+      // Check if user is admin
+      const isAdminUser = await storage.isAdmin(user.id);
+      if (!isAdminUser) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      
+      // Generate JWT token with isAdmin flag
       const jwt = await import("jsonwebtoken");
       const token = jwt.default.sign(
-        { id: 1, email: email || "admin@foundationce.com", isAdmin: true },
+        { id: user.id, email: user.email, isAdmin: true },
         process.env.SESSION_SECRET || "fallback-secret",
         { expiresIn: "7d" }
       );
+      
       res.json({ 
         token,
-        user: { id: 1, email: email || "admin@foundationce.com", fullName: "Admin User", isAdmin: true }
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          firstName: user.firstName,
+          lastName: user.lastName,
+          fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User',
+          isAdmin: true 
+        }
       });
     } catch (error) {
+      console.error("Admin login error:", error);
       res.status(500).json({ error: "Server error" });
     }
   });
 
-  // Get current user endpoint
+  // Get current user endpoint - requires valid JWT token
   app.get("/api/auth/user", async (req, res) => {
     try {
-      // Return fake admin user for any request
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+      
+      if (!token) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+      
+      const jwt = await import("jsonwebtoken");
+      const decoded = jwt.default.verify(
+        token,
+        process.env.SESSION_SECRET || "fallback-secret"
+      ) as { id: string; email: string; isAdmin?: boolean };
+      
+      const user = await storage.getUser(decoded.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const isAdminUser = await storage.isAdmin(decoded.id);
+      
       res.json({ 
-        id: 1, 
-        email: "admin@foundationce.com", 
-        fullName: "Admin User", 
-        isAdmin: true 
+        id: user.id, 
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        isAdmin: isAdminUser
       });
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: "Invalid or expired token" });
+      }
+      console.error("Get user error:", error);
       res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  // Check if user is admin endpoint - requires valid JWT token
+  app.get("/api/auth/is-admin", async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+      
+      if (!token) {
+        return res.json({ isAdmin: false });
+      }
+      
+      const jwt = await import("jsonwebtoken");
+      const decoded = jwt.default.verify(
+        token,
+        process.env.SESSION_SECRET || "fallback-secret"
+      ) as { id: string; email: string; isAdmin?: boolean };
+      
+      const isAdminUser = await storage.isAdmin(decoded.id);
+      res.json({ isAdmin: isAdminUser });
+    } catch (error) {
+      res.json({ isAdmin: false });
     }
   });
 
@@ -1898,17 +1979,6 @@ segment1.ts
     } catch (err) {
       console.error("Error fetching enrollments:", err);
       res.status(500).json({ error: "Failed to fetch enrollments" });
-    }
-  });
-
-  app.get("/api/auth/user", isAuthenticated, async (req, res) => {
-    try {
-      const user = req.user as any;
-      const userData = await storage.getUser(user.id);
-      res.json(userData);
-    } catch (err) {
-      console.error("Error fetching user:", err);
-      res.status(500).json({ error: "Failed to fetch user" });
     }
   });
 
