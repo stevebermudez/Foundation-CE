@@ -44,6 +44,7 @@ import {
   BookOpen,
   X,
   Check,
+  Eye,
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -72,7 +73,9 @@ interface Lesson {
   unitId: string;
   lessonNumber: number;
   title: string;
+  content?: string;
   videoUrl?: string;
+  imageUrl?: string;
   durationMinutes?: number;
 }
 
@@ -98,7 +101,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [mediaSelectCallback, setMediaSelectCallback] = useState<((url: string) => void) | null>(null);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("adminToken");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
@@ -237,7 +240,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
   });
 
   const createLessonMutation = useMutation({
-    mutationFn: async (data: { unitId: string; title: string; videoUrl?: string; durationMinutes?: number }) => {
+    mutationFn: async (data: { unitId: string; title: string; content?: string; videoUrl?: string; imageUrl?: string; durationMinutes?: number }) => {
       const existingLessons = allLessons[data.unitId]?.length || 0;
       const res = await fetch(`/api/admin/units/${data.unitId}/lessons`, {
         method: "POST",
@@ -403,7 +406,46 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
             <Badge variant="secondary">{selectedCourse?.sku}</Badge>
           </div>
         </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => window.open(`/course/${selectedCourseId}`, '_blank')}
+            data-testid="button-preview-course"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Preview
+          </Button>
+        </div>
       </div>
+
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200 dark:border-blue-800">
+        <CardContent className="py-4">
+          <div className="grid grid-cols-4 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{units.length}</p>
+              <p className="text-xs text-muted-foreground">Units</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {Object.values(allLessons).flat().length}
+              </p>
+              <p className="text-xs text-muted-foreground">Lessons</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {Object.values(allLessons).flat().filter(l => l.content || l.videoUrl || l.imageUrl).length}
+              </p>
+              <p className="text-xs text-muted-foreground">With Content</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {Object.values(allLessons).flat().filter(l => l.videoUrl).length}
+              </p>
+              <p className="text-xs text-muted-foreground">Videos</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -646,27 +688,58 @@ function LessonRow({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const hasContent = !!lesson.content;
+  const hasVideo = !!lesson.videoUrl;
+  const hasImage = !!lesson.imageUrl;
+  const isComplete = hasContent || hasVideo || hasImage;
+
   return (
     <div className="flex items-center gap-3 p-3 pl-12 hover:bg-muted/50 transition-colors" data-testid={`row-lesson-${lesson.id}`}>
       <div className="text-muted-foreground cursor-grab">
         <GripVertical className="h-4 w-4" />
       </div>
-      <div className="p-1.5 bg-secondary/50 rounded">
-        {lesson.videoUrl ? (
-          <Video className="h-4 w-4 text-primary" />
+      <div className={`p-1.5 rounded ${isComplete ? 'bg-green-100 dark:bg-green-900/30' : 'bg-secondary/50'}`}>
+        {hasVideo ? (
+          <Video className="h-4 w-4 text-green-600 dark:text-green-400" />
+        ) : hasContent ? (
+          <FileText className="h-4 w-4 text-green-600 dark:text-green-400" />
         ) : (
           <FileText className="h-4 w-4 text-muted-foreground" />
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-medium" data-testid={`text-lesson-title-${lesson.id}`}>
-          {lesson.lessonNumber}. {lesson.title}
-        </span>
-        {lesson.durationMinutes && (
-          <span className="text-xs text-muted-foreground ml-2">
-            ({lesson.durationMinutes} min)
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium" data-testid={`text-lesson-title-${lesson.id}`}>
+            {lesson.lessonNumber}. {lesson.title}
           </span>
-        )}
+          {lesson.durationMinutes && (
+            <span className="text-xs text-muted-foreground">
+              ({lesson.durationMinutes} min)
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
+          {hasContent && (
+            <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+              Text
+            </span>
+          )}
+          {hasVideo && (
+            <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded">
+              Video
+            </span>
+          )}
+          {hasImage && (
+            <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded">
+              Image
+            </span>
+          )}
+          {!isComplete && (
+            <span className="text-xs text-muted-foreground italic">
+              No content yet
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-1">
         <Button size="icon" variant="ghost" onClick={onEdit} data-testid={`button-edit-lesson-${lesson.id}`}>
@@ -771,27 +844,38 @@ function LessonFormDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { title: string; videoUrl?: string; durationMinutes?: number }) => void;
+  onSubmit: (data: { title: string; content?: string; videoUrl?: string; imageUrl?: string; durationMinutes?: number }) => void;
   isPending: boolean;
   initialData?: Lesson;
   onOpenMediaLibrary: (callback: (url: string) => void) => void;
 }) {
   const [title, setTitle] = useState(initialData?.title || "");
+  const [content, setContent] = useState(initialData?.content || "");
   const [videoUrl, setVideoUrl] = useState(initialData?.videoUrl || "");
+  const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
   const [durationMinutes, setDurationMinutes] = useState(initialData?.durationMinutes?.toString() || "");
+  const [activeTab, setActiveTab] = useState<"content" | "media">("content");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
       title,
+      content: content || undefined,
       videoUrl: videoUrl || undefined,
+      imageUrl: imageUrl || undefined,
       durationMinutes: durationMinutes ? parseInt(durationMinutes) : undefined,
     });
   };
 
+  const isYouTubeUrl = (url: string) => url.includes("youtube.com") || url.includes("youtu.be");
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)?.[1];
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  };
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{initialData ? "Edit Lesson" : "Add New Lesson"}</DialogTitle>
         </DialogHeader>
@@ -807,41 +891,151 @@ function LessonFormDialog({
               data-testid="input-lesson-title"
             />
           </div>
-          <div>
-            <Label htmlFor="lessonVideo">Video URL</Label>
-            <div className="flex gap-2">
-              <Input
-                id="lessonVideo"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://example.com/video.mp4"
-                className="flex-1"
-                data-testid="input-lesson-video"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => onOpenMediaLibrary((url) => setVideoUrl(url))}
-                data-testid="button-open-media-library"
-              >
-                <Upload className="h-4 w-4" />
-              </Button>
+
+          <div className="flex gap-2 border-b">
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "content" 
+                  ? "border-primary text-primary" 
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setActiveTab("content")}
+              data-testid="tab-lesson-content"
+            >
+              Content
+            </button>
+            <button
+              type="button"
+              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "media" 
+                  ? "border-primary text-primary" 
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setActiveTab("media")}
+              data-testid="tab-lesson-media"
+            >
+              Media
+            </button>
+          </div>
+
+          {activeTab === "content" && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="lessonContent">Lesson Content</Label>
+                <Textarea
+                  id="lessonContent"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Enter lesson content here. You can use basic formatting like paragraphs and lists."
+                  rows={10}
+                  className="font-mono text-sm"
+                  data-testid="input-lesson-content"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Tip: Use blank lines between paragraphs for formatting
+                </p>
+              </div>
             </div>
-          </div>
-          <div>
-            <Label htmlFor="lessonDuration">Duration (minutes)</Label>
-            <Input
-              id="lessonDuration"
-              type="number"
-              min="1"
-              value={durationMinutes}
-              onChange={(e) => setDurationMinutes(e.target.value)}
-              placeholder="e.g., 15"
-              data-testid="input-lesson-duration"
-            />
-          </div>
-          <div className="flex gap-2 justify-end">
+          )}
+
+          {activeTab === "media" && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="lessonVideo">Video URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="lessonVideo"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="https://youtube.com/watch?v=... or direct video URL"
+                    className="flex-1"
+                    data-testid="input-lesson-video"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => onOpenMediaLibrary((url) => setVideoUrl(url))}
+                    data-testid="button-open-video-library"
+                  >
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                </div>
+                {videoUrl && (
+                  <div className="mt-2 rounded-lg overflow-hidden border bg-muted">
+                    {isYouTubeUrl(videoUrl) ? (
+                      <iframe
+                        src={getYouTubeEmbedUrl(videoUrl) || undefined}
+                        className="w-full aspect-video"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="Video preview"
+                      />
+                    ) : (
+                      <video
+                        src={videoUrl}
+                        controls
+                        className="w-full aspect-video"
+                      >
+                        Your browser does not support video playback
+                      </video>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="lessonImage">Featured Image URL</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="lessonImage"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="flex-1"
+                    data-testid="input-lesson-image"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => onOpenMediaLibrary((url) => setImageUrl(url))}
+                    data-testid="button-open-image-library"
+                  >
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                </div>
+                {imageUrl && (
+                  <div className="mt-2 rounded-lg overflow-hidden border">
+                    <img
+                      src={imageUrl}
+                      alt="Featured image preview"
+                      className="w-full max-h-48 object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="lessonDuration">Duration (minutes)</Label>
+                <Input
+                  id="lessonDuration"
+                  type="number"
+                  min="1"
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(e.target.value)}
+                  placeholder="e.g., 15"
+                  data-testid="input-lesson-duration"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 justify-end pt-4 border-t">
             <Button type="button" variant="outline" onClick={onClose} data-testid="button-cancel-lesson">
               Cancel
             </Button>
@@ -870,7 +1064,7 @@ function MediaLibraryDialog({
   const [externalUrl, setExternalUrl] = useState("");
   const { toast } = useToast();
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("adminToken");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };

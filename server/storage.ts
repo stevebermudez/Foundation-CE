@@ -89,7 +89,7 @@ export interface IStorage {
   createUnit(courseId: string, unitNumber: number, title: string, description?: string, hoursRequired?: number): Promise<Unit>;
   updateUnit(unitId: string, data: Partial<Unit>): Promise<Unit>;
   deleteUnit(unitId: string): Promise<void>;
-  createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number): Promise<Lesson>;
+  createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number, content?: string, imageUrl?: string): Promise<Lesson>;
   updateLesson(lessonId: string, data: Partial<Lesson>): Promise<Lesson>;
   deleteLesson(lessonId: string): Promise<void>;
   adminOverrideEnrollmentData(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment>;
@@ -1016,13 +1016,15 @@ export class DatabaseStorage implements IStorage {
     await db.delete(units).where(eq(units.id, unitId));
   }
 
-  async createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number): Promise<Lesson> {
+  async createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number, content?: string, imageUrl?: string): Promise<Lesson> {
     const [lesson] = await db.insert(lessons).values({
       unitId,
       lessonNumber,
       title,
       videoUrl: videoUrl || null,
-      durationMinutes: durationMinutes || 15
+      durationMinutes: durationMinutes || 15,
+      content: content || null,
+      imageUrl: imageUrl || null
     }).returning();
     return lesson;
   }

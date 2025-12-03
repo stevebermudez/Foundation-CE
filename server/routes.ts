@@ -1417,7 +1417,7 @@ segment1.ts
 
   app.post("/api/units/:unitId/lessons", isAdmin, async (req, res) => {
     try {
-      const { lessonNumber, title, videoUrl, durationMinutes } = req.body;
+      const { lessonNumber, title, videoUrl, durationMinutes, content, imageUrl } = req.body;
       if (!lessonNumber || !title) {
         return res
           .status(400)
@@ -1429,6 +1429,8 @@ segment1.ts
         title,
         videoUrl,
         durationMinutes,
+        content,
+        imageUrl,
       );
       res.status(201).json(lesson);
     } catch (err) {
@@ -2105,8 +2107,8 @@ segment1.ts
   app.post("/api/admin/units/:unitId/lessons", isAdmin, async (req, res) => {
     try {
       const { unitId } = req.params;
-      const { lessonNumber, title, videoUrl, durationMinutes } = req.body;
-      const lesson = await storage.createLesson(unitId, lessonNumber, title, videoUrl, durationMinutes);
+      const { lessonNumber, title, videoUrl, durationMinutes, content, imageUrl } = req.body;
+      const lesson = await storage.createLesson(unitId, lessonNumber, title, videoUrl, durationMinutes, content, imageUrl);
       res.status(201).json(lesson);
     } catch (err) {
       console.error("Error creating lesson:", err);

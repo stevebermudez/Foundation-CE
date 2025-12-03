@@ -25,6 +25,9 @@ import ResetPasswordPage from "@/pages/reset-password";
 import AdminLoginPage from "@/pages/admin/login";
 import AdminDashboardPage from "@/pages/admin/dashboard";
 import AdminIndexPage from "@/pages/admin/index";
+import AdminCoursesPage from "@/pages/admin/courses";
+import AdminContentBuilderPage from "@/pages/admin/content-builder";
+import AdminPagesManagerPage from "@/pages/admin/pages-manager";
 
 function Router() {
   return (
@@ -50,6 +53,9 @@ function Router() {
           <Route path="/admin" component={AdminIndexPage} />
           <Route path="/admin/login" component={AdminLoginPage} />
           <Route path="/admin/dashboard" component={AdminDashboardPage} />
+          <Route path="/admin/courses" component={AdminCoursesPage} />
+          <Route path="/admin/content-builder" component={AdminContentBuilderPage} />
+          <Route path="/admin/pages-manager" component={AdminPagesManagerPage} />
           <Route path="/checkout"><CheckoutPage /></Route>
           <Route component={NotFound} />
         </Switch>
