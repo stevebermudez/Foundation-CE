@@ -76,6 +76,18 @@ Courses display with color-coded requirement buckets and detailed classification
 
 ## Recent Changes
 
+### Real Dashboard & Purchase Flow (December 2025)
+- **Dashboard Real Data**: Dashboard now shows actual user enrollments instead of mock data
+  - `getAllUserEnrollments` storage method joins enrollments with courses
+  - `/api/enrollments/user` returns all enrollments (in-progress + completed)
+  - Stats cards show real counts: In Progress, Completed, CE Hours
+  - Course cards display real progress percentages
+- **Enrollment After Purchase**: Checkout success page creates enrollment automatically
+  - POST `/api/enrollments` endpoint with session auth validation
+  - Duplicate enrollment check prevents re-enrolling
+  - Uses `credentials: 'include'` for session-based auth
+- **Purchase Flow**: Buy Now → Checkout → Stripe → Success → Enrollment Created → Dashboard
+
 ### Admin Content Builder Enhancements (December 2025)
 - **Admin Routes Registered**: Added /admin/courses, /admin/content-builder, /admin/pages-manager routes to App.tsx
 - **Lesson Schema Update**: Added `content` (text) and `imageUrl` (varchar) fields to lessons table
