@@ -76,6 +76,17 @@ Courses display with color-coded requirement buckets and detailed classification
 
 ## Recent Changes
 
+### Admin Content Builder Enhancements (December 2025)
+- **Admin Routes Registered**: Added /admin/courses, /admin/content-builder, /admin/pages-manager routes to App.tsx
+- **Lesson Schema Update**: Added `content` (text) and `imageUrl` (varchar) fields to lessons table
+- **Rich Content Editing**: LessonFormDialog now has tabbed interface (Content/Media tabs)
+  - Content tab: Title input, rich text content textarea
+  - Media tab: Video URL with YouTube embedding preview, Featured image URL with image preview
+- **Content Status Indicators**: LessonRow shows badges (Text, Video, Image) for content status
+- **Completion Logic**: Lessons count as complete if they have content OR video OR image
+- **Course Stats Card**: Shows unit/lesson/content/video counts with Preview Course button
+- **Session-Based Auth**: All admin API calls include `credentials: 'include'` for proper authentication
+
 ### Bug Fixes (December 2025)
 - Fixed TypeScript type declarations for jsonwebtoken and bcrypt packages
 - Fixed DBPR report type mismatch (now uses proper DBPRReport type instead of SirconReport)
