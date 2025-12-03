@@ -25,23 +25,41 @@ export default function AdminDashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("adminToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   // Check admin status on mount
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        const res = await fetch("/api/auth/is-admin");
+        const token = localStorage.getItem("adminToken");
+        if (!token) {
+          setLocation("/admin/login");
+          return;
+        }
+
+        const res = await fetch("/api/auth/is-admin", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!res.ok) {
+          localStorage.removeItem("adminToken");
+          localStorage.removeItem("adminUser");
           setLocation("/admin/login");
           return;
         }
         const data = await res.json();
         if (!data.isAdmin) {
+          localStorage.removeItem("adminToken");
+          localStorage.removeItem("adminUser");
           setLocation("/admin/login");
           return;
         }
         setIsAdmin(true);
       } catch (err) {
         console.error("Error checking admin status:", err);
+        localStorage.removeItem("adminToken");
         setLocation("/admin/login");
       } finally {
         setIsLoading(false);
@@ -54,7 +72,9 @@ export default function AdminDashboardPage() {
   const { data: stats } = useQuery({
     queryKey: ["/api/admin/stats"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/stats");
+      const res = await fetch("/api/admin/stats", {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) return null;
       return res.json();
     },
@@ -64,7 +84,9 @@ export default function AdminDashboardPage() {
   const { data: users = [] } = useQuery({
     queryKey: ["/api/admin/users"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/users");
+      const res = await fetch("/api/admin/users", {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) return [];
       return res.json();
     },
@@ -73,13 +95,22 @@ export default function AdminDashboardPage() {
 
   const { data: courses = [] } = useQuery({
     queryKey: ["/api/courses"],
+    queryFn: async () => {
+      const res = await fetch("/api/courses", {
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
     enabled: isAdmin,
   });
 
   const { data: enrollments = [] } = useQuery({
     queryKey: ["/api/admin/enrollments"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/enrollments");
+      const res = await fetch("/api/admin/enrollments", {
+        headers: getAuthHeaders(),
+      });
       if (!res.ok) return [];
       return res.json();
     },
@@ -105,8 +136,10 @@ export default function AdminDashboardPage() {
   }
 
   const handleLogout = async () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
     await fetch("/api/logout");
-    setLocation("/");
+    setLocation("/admin/login");
   };
 
   return (

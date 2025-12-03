@@ -2086,6 +2086,63 @@ segment1.ts
     }
   });
 
+  // Admin User Seeding - Creates a test admin user (should be removed in production)
+  app.post("/api/seed/admin", async (req, res) => {
+    try {
+      const bcrypt = await import("bcrypt");
+      const crypto = await import("crypto");
+      
+      const adminEmail = "admin@foundationce.com";
+      const adminPassword = "admin1234";
+      
+      // Check if admin already exists
+      let user = await storage.getUserByEmail(adminEmail);
+      
+      if (!user) {
+        // Create admin user
+        const passwordHash = await bcrypt.hash(adminPassword, 10);
+        const userId = crypto.randomUUID();
+        
+        user = await storage.upsertUser({
+          id: userId,
+          email: adminEmail,
+          passwordHash,
+          firstName: "Admin",
+          lastName: "User",
+        });
+      }
+      
+      // Add user to supervisors table with admin role
+      const db = (await import("./db")).db;
+      const { supervisors } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      // Check if already an admin
+      const existingAdmin = await db.select().from(supervisors).where(eq(supervisors.userId, user.id)).limit(1);
+      
+      if (existingAdmin.length === 0) {
+        await db.insert(supervisors).values({
+          userId: user.id,
+          role: "admin",
+          fullName: "Admin User",
+          email: adminEmail,
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Admin user created",
+        credentials: {
+          email: adminEmail,
+          password: adminPassword
+        }
+      });
+    } catch (err) {
+      console.error("Error seeding admin:", err);
+      res.status(500).json({ error: "Failed to seed admin user" });
+    }
+  });
+
   // Password Reset - Request Token
   app.post("/api/auth/forgot-password", async (req, res) => {
     try {

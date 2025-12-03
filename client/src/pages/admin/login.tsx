@@ -37,24 +37,31 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         setError(data.error || "Login failed");
         return;
       }
 
-      // Check if user is admin
-      const userRes = await fetch("/api/auth/user");
-      if (!userRes.ok) {
-        setError("Failed to verify admin status");
+      if (!data.token) {
+        setError("No authentication token received");
         return;
       }
 
-      const user = await userRes.json();
-      const isAdminRes = await fetch("/api/auth/is-admin");
+      localStorage.setItem("adminToken", data.token);
+      localStorage.setItem("adminUser", JSON.stringify(data.user));
+
+      const isAdminRes = await fetch("/api/auth/is-admin", {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
       const adminData = await isAdminRes.json();
 
       if (!adminData.isAdmin) {
+        localStorage.removeItem("adminToken");
+        localStorage.removeItem("adminUser");
         setError("Admin access required. Please contact support.");
         return;
       }
