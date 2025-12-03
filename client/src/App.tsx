@@ -50,6 +50,7 @@ function Router() {
           <Route path="/admin" component={AdminIndexPage} />
           <Route path="/admin/login" component={AdminLoginPage} />
           <Route path="/admin/dashboard" component={AdminDashboardPage} />
+          <Route path="/checkout"><CheckoutPage /></Route>
           <Route component={NotFound} />
         </Switch>
       </main>

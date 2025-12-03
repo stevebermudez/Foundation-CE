@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import type { SelectCourse } from "@shared/schema";
+import type { Course } from "@shared/schema";
 
 export default function CheckoutPage() {
   const [, setLocation] = useLocation();
@@ -20,7 +20,10 @@ export default function CheckoutPage() {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
         const response = await fetch("/api/user", { headers });
         if (response.ok) {
           const userData = await response.json();
