@@ -46,7 +46,7 @@ function Router() {
           <Route path="/reset-password" component={ResetPasswordPage} />
           <Route path="/account-setup" component={AccountSetupPage} />
           <Route path="/dashboard" component={DashboardPage} />
-          <Route path="/compliance" component={() => <CompliancePage />} />
+          <Route path="/compliance" component={() => <CompliancePage selectedState="FL" />} />
           <Route path="/admin" component={AdminIndexPage} />
           <Route path="/admin/login" component={AdminLoginPage} />
           <Route path="/admin/dashboard" component={AdminDashboardPage} />

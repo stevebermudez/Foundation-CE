@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { getStripeClient, getStripeStatus } from "./stripeClient";
+import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
