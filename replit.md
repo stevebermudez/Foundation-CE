@@ -1,240 +1,48 @@
 # FoundationCE - Continuing Education Platform
 
 ## Overview
-A comprehensive white-label continuing education platform (FoundationCE) for real estate and insurance professionals in California and Florida. Supports both web and native mobile apps with practice exams, compliance tracking, and supervisor workflows.
+FoundationCE is a white-label continuing education platform for real estate and insurance professionals in California and Florida. It supports web and native mobile applications, offering features like practice exams, compliance tracking, and supervisor workflows. The platform aims to meet state-specific regulatory requirements for licensing and renewals, providing a comprehensive solution for professional development in these sectors.
 
-## Key Requirements
-- 45-hour renewal requirement every 4 years (salespersons & brokers)
-- Prelicense education courses
-- Course pricing: $59.99
-- Compliance tracking and certificate generation
-- State-specific regulatory requirements
+## User Preferences
+I prefer simple language and clear, direct instructions. I appreciate iterative development and want to be involved in key decisions, so please ask before making major architectural changes or implementing complex features. Do not make changes to the `Z` folder. Do not make changes to the `Y` file.
 
-## Project Structure
-- **Web App**: React + TypeScript (client/src)
-  - Pages: home, courses by state (CA/FL), course-view, dashboard, account-setup, compliance
-  - Components: CourseBundle, PracticeExam, Dashboard, ComplianceTracker
-  - UI: shadcn/ui components with Tailwind CSS
-  - Ports to: http://0.0.0.0:5000
-  
-- **Native Mobile App**: Expo/React Native (native/)
-  - Tab navigation: Courses, Dashboard, Settings
-  - Cross-platform: iOS + Android via Expo
-  - Setup: `cd native && npm install --legacy-peer-deps && npx expo start`
-  
-- **Backend**: Express.js + Node.js (server/)
-  - API routes: /api/courses/*, /api/exams/*, /api/enrollments/*, /api/coupons/*, /api/emails/*
-  - Services: Stripe payments, Bitcoin integration, email campaigns with tracking
-  - Supervisor workflows: CE review management, license tracking
-  
-- **Database**: PostgreSQL (Neon)
-  - Core tables: users, courses, enrollments, subscriptions
-  - Features: practice exams, CE reviews, supervisor tracking, email campaigns, coupons
-  
-- **Authentication**: Replit Auth (Google, GitHub, X, Apple social logins)
-- **Payments**: Stripe + Bitcoin (BTCPAY_SERVER or Coinbase integration ready)
-- **Styling**: Tailwind CSS + shadcn components with dark mode
+## System Architecture
 
-## Course Classification System
-The platform uses comprehensive course attributes to distinguish between ALL factors:
+### UI/UX Decisions
+The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern and responsive design, including full dark mode support. The web application is built with React and TypeScript, while the native mobile app uses Expo/React Native, ensuring a consistent cross-platform experience. Key UI components include CourseDisplay for detailed course information with color-coded requirement badges and a dashboard for tracking progress and compliance.
 
-**Classification Fields:**
-- `productType`: "RealEstate" or "Insurance"
-- `state`: "CA", "FL"
-- `licenseType`: "Sales Associate", "Broker", "Sales Associate & Broker", etc.
-- `requirementCycleType`: "Post-Licensing" or "Continuing Education (Renewal)"
-- `requirementBucket`: "Core Law", "Ethics & Business Practices", "Specialty / Elective", "Post-Licensing Mandatory"
-- `deliveryMethod`: "Self-Paced Online", "Live Webinar", "Classroom"
-- `difficultyLevel`: "Basic", "Intermediate", "Advanced" (optional)
-- `sku`: Unique course code (e.g., "FL-RE-CE-14PKG", "CA-RE-CE-45PKG")
-- `renewalApplicable`: Boolean (true for renewal, false for prelicense)
+### Technical Implementations
+- **Frontend**: React + TypeScript for the web application, Expo/React Native for native mobile applications.
+- **Backend**: Express.js + Node.js providing API routes for courses, exams, enrollments, and payments.
+- **Database**: PostgreSQL (Neon) for data persistence, managed with Drizzle ORM.
+- **Authentication**: Replit Auth supporting Google, GitHub, X, and Apple social logins. Admin routes use session-based authentication with cookies.
+- **Payment Processing**: Stripe for credit card payments and Bitcoin integration (BTCPAY_SERVER or Coinbase).
+- **Course Classification**: A robust system categorizes courses by product type, state, license type, requirement cycle, and delivery method.
+- **Compliance & Reporting**: Includes electronic reporting to Florida DBPR and HTML certificate generation.
+- **Admin Content Builder**: A codeless LMS for managing course content, units, lessons, and media.
 
-**Product Type Separation:**
-- Real Estate courses: FL, CA with state-specific requirements
-- Insurance courses: Framework ready for expansion (separate pricing, requirements, renewal cycles)
+### Feature Specifications
+- **Course Management**: Supports state-specific courses (CA/FL), filtering by license type, and requirement buckets (Core Law, Ethics, Electives).
+- **Practice Exams**: Auto-scoring, real-time explanations, and answer tracking.
+- **Supervisor Workflows**: Tools for CE review management and license expiration tracking.
+- **White-Label Support**: Designed for multi-tenant architecture.
+- **Email Campaigns**: Features for creating and tracking email blasts.
 
-**Florida CE Structure:**
-- **Post-Licensing (First Renewal):**
-  - Sales Associates: 45 hours ($59.99)
-  - Brokers: 60 hours ($69.99)
-- **Continuing Education (Every 2 Years):**
-  - All licensees: 14 hours ($39.99)
-    - 3 hours Core Law (red badge)
-    - 3 hours Ethics & Business Practices (blue badge)
-    - 8 hours Specialty/Elective (purple badge)
-  
-**California CE Structure:**
-- **Renewal (Every 4 Years):**
-  - All licensees: 45 hours ($45.00)
-  
-**Pricing Options:**
-- Bundle: Pay full price for all courses in package
-- À la Carte: $15 per individual course
+### System Design Choices
+- **Layered Storage Interface**: Data operations are abstracted through an `IStorage` interface, allowing for flexible storage implementation changes.
+- **Standardized Data Format**: Export APIs provide data in a consistent, versioned format for external system compatibility.
+- **RESTful API Design**: Adheres to REST conventions for easy consumption by external systems.
+- **Authentication Abstraction**: OAuth/authentication logic is separated for adaptability.
+- **LMS Integration**: Architected for seamless integration and potential migration to 3rd-party LMS systems like Moodle or Canvas via data export/import APIs and SCORM package conversion readiness.
+- **Real Estate Express Integration**: Dedicated APIs for exporting and importing enrollment data in Real Estate Express specific formats.
 
-**Course Display:**
-Courses display with color-coded requirement buckets and detailed classification information via CourseDisplay component.
-
-## Recent Changes
-
-### DBPR Electronic Reporting & Certificates (December 2025)
-- **DBPR Service** (`server/dbprService.ts`): Electronic submission to Florida DBPR
-  - Validates license number, SSN last 4, course offering number, provider number
-  - Simulates submission when API credentials not configured
-  - Generates batch files for manual DBPR upload
-  - Exports: `submitToDBPR`, `validateDBPRData`, `generateDBPRBatchFile`
-- **Certificate Generation** (`server/certificates.ts`): HTML certificate with course details
-  - Generates professional certificate HTML with school branding
-  - Includes student name, course title, hours, completion date, delivery method
-  - Download as HTML file or view in browser
-- **API Endpoints** (all with authentication + ownership verification):
-  - `GET /api/dbpr/status/:enrollmentId` - Get DBPR reporting status
-  - `POST /api/dbpr/submit/:enrollmentId` - Submit completion to DBPR
-  - `GET /api/dbpr/export` - Admin-only batch file export
-  - `GET /api/certificates/:enrollmentId` - View certificate HTML
-  - `GET /api/certificates/:enrollmentId/download` - Download certificate file
-- **Dashboard UI** (`client/src/components/Dashboard.tsx`):
-  - Completed courses show DBPR status badge (Pending, Submitted, Reported, Error)
-  - View/Download certificate buttons for all completed courses
-  - DBPR confirmation number displayed when available
-- **Security**: All endpoints protected with `isAuthenticated` + ownership verification
-
-### Real Dashboard & Purchase Flow (December 2025)
-- **Dashboard Real Data**: Dashboard now shows actual user enrollments instead of mock data
-  - `getAllUserEnrollments` storage method joins enrollments with courses
-  - `/api/enrollments/user` returns all enrollments (in-progress + completed)
-  - Stats cards show real counts: In Progress, Completed, CE Hours
-  - Course cards display real progress percentages
-- **Enrollment After Purchase**: Checkout success page creates enrollment automatically
-  - POST `/api/enrollments` endpoint with session auth validation
-  - Duplicate enrollment check prevents re-enrolling
-  - Uses `credentials: 'include'` for session-based auth
-- **Purchase Flow**: Buy Now → Checkout → Stripe → Success → Enrollment Created → Dashboard
-
-### Admin Content Builder Enhancements (December 2025)
-- **Admin Routes Registered**: Added /admin/courses, /admin/content-builder, /admin/pages-manager routes to App.tsx
-- **Lesson Schema Update**: Added `content` (text) and `imageUrl` (varchar) fields to lessons table
-- **Rich Content Editing**: LessonFormDialog now has tabbed interface (Content/Media tabs)
-  - Content tab: Title input, rich text content textarea
-  - Media tab: Video URL with YouTube embedding preview, Featured image URL with image preview
-- **Content Status Indicators**: LessonRow shows badges (Text, Video, Image) for content status
-- **Completion Logic**: Lessons count as complete if they have content OR video OR image
-- **Course Stats Card**: Shows unit/lesson/content/video counts with Preview Course button
-- **Session-Based Auth**: All admin API calls include `credentials: 'include'` for proper authentication
-
-### Bug Fixes (December 2025)
-- Fixed TypeScript type declarations for jsonwebtoken and bcrypt packages
-- Fixed DBPR report type mismatch (now uses proper DBPRReport type instead of SirconReport)
-- Fixed createEnrollment function call with correct number of arguments
-- Fixed supervisors table insert (removed non-existent fullName/email fields)
-- Fixed course.name → course.title references in export functions
-- Removed invalid user.licenseNumber references (field doesn't exist in schema)
-- Fixed docx export bold property (moved from Paragraph to TextRun)
-- Removed enrollment updatedAt field from updates (field doesn't exist)
-- Fixed duplicate getPracticeExams in IStorage interface
-- Fixed Stripe payment_method_types (removed invalid apple_pay/google_pay values)
-
-### Complete Catalog Buildout (Real Estate - Florida & California)
-
-**Florida Real Estate CE:**
-- **Post-Licensing Packages:**
-  - Sales Associate: 45 hours, $59.99
-  - Broker: 60 hours, $69.99
-- **CE Renewal Package:** 14 hours (biennial), $39.99
-  - 3 hours Core Law
-  - 3 hours Ethics & Business Practices
-  - 8 hours Specialty/Elective
-- **À la Carte:** $15 per course (13 courses)
-- **SKU Format:** FL-RE-[CE/PL]-[TYPE]-[HOURS]
-
-**California Real Estate CE:**
-- **CE Renewal Package:** 45 hours (quadrennial), $39.99
-  - 7 mandatory courses (18 hours total)
-  - 7 elective courses (27+ hours available)
-- **À la Carte:** $15 per course (14 courses)
-- **SKU Format:** CA-RE-CE-[TYPE]-[HOURS]
-
-### Implementation
-- **Seed Files:** `server/seedFloridaCatalog.ts`, `server/seedCaliforniaCatalog.ts`
-- **UI Component:** CourseDisplay with product type, state, license type, cycle type, bucket, delivery, and pricing
-- **Color-Coded Display:** Red (Core Law), Blue (Ethics), Purple (Specialty)
-- **Pages:** /courses/fl for Florida, /courses/ca for California
-
-## Platform Features
-- **Course Management**: State-specific (CA/FL), license-type filtering, requirement buckets
-- **Practice Exams**: Auto-scoring (70% pass threshold), real-time explanations, answer tracking
-- **Subscriptions**: Monthly/annual billing via Stripe
-- **Coupons**: Discount codes with usage limits and validation
-- **Email Blasts**: Campaign creation with open/click tracking and analytics
-- **Supervisor Workflows**: CE review management, license expiration tracking
-- **White-Label Support**: Multi-tenant architecture for organizations
-- **Mobile Ready**: Native iOS/Android via Expo, web responsive design
-- **Dark Mode**: Full light/dark theme support
-
-## Architecture Notes
-- Individual-only accounts (company accounts removed in recent update)
-- Using Replit's built-in PostgreSQL database
-- Stripe + Bitcoin payment options
-- Server handles data persistence and API calls
-- Frontend manages UI state with React Query
-- Authentication: Replit Auth with social login support
-- No "Choose Account Type" landing page - users go straight to individual setup
-
-### Admin Authentication
-- **Admin routes** (`/api/admin/*`) use session-based authentication with cookies
-- All admin client fetch calls include `credentials: 'include'` for cookie transmission
-- Admin login creates a session cookie AND returns a JWT token (stored in localStorage)
-- Auth headers are also sent for backward compatibility
-- Admin check endpoint: `GET /api/auth/is-admin` validates admin status
-- Protected routes: `/admin/dashboard`, `/admin/courses`, `/admin/content-builder`, `/admin/pages-manager`
-
-### Content Builder (Admin LMS)
-- **Codeless course management**: Units, lessons, media library without coding
-- Drag-and-drop reordering for units and lessons
-- Media Library with external URL support (YouTube, Vimeo, images)
-- Rich text editing for lesson content
-- All CRUD operations use session-based auth with proper error handling
-
-## LMS Integration & Plug-and-Play Capability
-
-### Design for Future LMS Migration
-The platform is architected for seamless integration with 3rd-party LMS systems via standardized data export/import:
-
-**Data Export APIs (all with version="1.0" format):**
-- `GET /api/export/course/:courseId` - Full course structure (units, lessons, videos)
-- `GET /api/export/user/:userId/enrollments` - User enrollment history
-- `GET /api/export/enrollment/:enrollmentId/progress` - Detailed progress tracking and certificates
-
-**Plug-and-Play Architecture:**
-1. **Layered Storage Interface** - All data operations via `IStorage` interface (server/storage.ts) - swap implementations without changing routes
-2. **Standardized Data Format** - All exports include `formatVersion` and `exportedAt` for compatibility tracking
-3. **RESTful API Design** - All endpoints follow REST conventions, easily consumable by external systems
-4. **Authentication Abstraction** - OAuth/auth logic separated in `oauthAuth.ts` - adaptable to 3rd-party auth systems
-5. **Database Agnostic** - Uses Drizzle ORM with PostgreSQL - can migrate to other databases by updating drizzle.config.ts
-
-**Migration Path to Moodle/Canvas/Docebo:**
-- Export course structure via `/api/export/course/:courseId` → SCORM package converter
-- Export user progress via `/api/export/enrollment/:enrollmentId/progress` → LTI 1.3 grade sync
-- Maintain dual operation during transition period
-- All video assets remain accessible via `GET /api/videos/:videoId` endpoints
-
-### Real Estate Express Integration
-Real Estate Express specific endpoints for seamless data exchange:
-
-**Export to Real Estate Express:**
-- `GET /api/export/enrollment/:enrollmentId/ree` - Export enrollment data in Real Estate Express format
-  - Includes student ID, name, email, license number
-  - Course code (SKU), name, hours completed/required
-  - Completion status, certificate number, progress percentage
-  - Format version: "ree-1.0"
-
-**Import from Real Estate Express:**
-- `POST /api/import/ree/enrollment` - Import enrollment completion data from Real Estate Express
-  - Required: studentEmail, courseCode
-  - Optional: hoursCompleted, completed (boolean)
-  - Automatically updates enrollment status and marks complete if applicable
-
-**Use Cases:**
-- Pull student enrollments from Real Estate Express and sync to FoundationCE
-- Push completion data back to Real Estate Express after certificate generation
-- Dual operation with both platforms during transition
-- White-label support: each organization can maintain their own Real Estate Express account while using FoundationCE for delivery
+## External Dependencies
+- **Database**: Neon (PostgreSQL)
+- **Authentication**: Replit Auth (Google, GitHub, X, Apple)
+- **Payment Gateways**: Stripe, BTCPAY_SERVER, Coinbase
+- **UI Framework**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **Mobile Development**: Expo/React Native
+- **ORM**: Drizzle ORM
+- **Email Services**: Integrated for campaign management (specific provider not detailed, but functionality present)
+- **Government Portals**: Florida DBPR (for electronic reporting)
