@@ -76,6 +76,28 @@ Courses display with color-coded requirement buckets and detailed classification
 
 ## Recent Changes
 
+### DBPR Electronic Reporting & Certificates (December 2025)
+- **DBPR Service** (`server/dbprService.ts`): Electronic submission to Florida DBPR
+  - Validates license number, SSN last 4, course offering number, provider number
+  - Simulates submission when API credentials not configured
+  - Generates batch files for manual DBPR upload
+  - Exports: `submitToDBPR`, `validateDBPRData`, `generateDBPRBatchFile`
+- **Certificate Generation** (`server/certificates.ts`): HTML certificate with course details
+  - Generates professional certificate HTML with school branding
+  - Includes student name, course title, hours, completion date, delivery method
+  - Download as HTML file or view in browser
+- **API Endpoints** (all with authentication + ownership verification):
+  - `GET /api/dbpr/status/:enrollmentId` - Get DBPR reporting status
+  - `POST /api/dbpr/submit/:enrollmentId` - Submit completion to DBPR
+  - `GET /api/dbpr/export` - Admin-only batch file export
+  - `GET /api/certificates/:enrollmentId` - View certificate HTML
+  - `GET /api/certificates/:enrollmentId/download` - Download certificate file
+- **Dashboard UI** (`client/src/components/Dashboard.tsx`):
+  - Completed courses show DBPR status badge (Pending, Submitted, Reported, Error)
+  - View/Download certificate buttons for all completed courses
+  - DBPR confirmation number displayed when available
+- **Security**: All endpoints protected with `isAuthenticated` + ownership verification
+
 ### Real Dashboard & Purchase Flow (December 2025)
 - **Dashboard Real Data**: Dashboard now shows actual user enrollments instead of mock data
   - `getAllUserEnrollments` storage method joins enrollments with courses
