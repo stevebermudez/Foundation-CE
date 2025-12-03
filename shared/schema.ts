@@ -569,6 +569,7 @@ export type OrganizationCourse = typeof organizationCourses.$inferSelect;
 export type CourseBundle = typeof courseBundles.$inferSelect;
 export type BundleEnrollment = typeof bundleEnrollments.$inferSelect;
 export type SirconReport = typeof sirconReports.$inferSelect;
+export type DBPRReport = typeof dbprReports.$inferSelect;
 export type UserLicense = typeof userLicenses.$inferSelect;
 export type CEReview = typeof ceReviews.$inferSelect;
 export type Supervisor = typeof supervisors.$inferSelect;

@@ -76,6 +76,18 @@ Courses display with color-coded requirement buckets and detailed classification
 
 ## Recent Changes
 
+### Bug Fixes (December 2025)
+- Fixed TypeScript type declarations for jsonwebtoken and bcrypt packages
+- Fixed DBPR report type mismatch (now uses proper DBPRReport type instead of SirconReport)
+- Fixed createEnrollment function call with correct number of arguments
+- Fixed supervisors table insert (removed non-existent fullName/email fields)
+- Fixed course.name → course.title references in export functions
+- Removed invalid user.licenseNumber references (field doesn't exist in schema)
+- Fixed docx export bold property (moved from Paragraph to TextRun)
+- Removed enrollment updatedAt field from updates (field doesn't exist)
+- Fixed duplicate getPracticeExams in IStorage interface
+- Fixed Stripe payment_method_types (removed invalid apple_pay/google_pay values)
+
 ### Complete Catalog Buildout (Real Estate - Florida & California)
 
 **Florida Real Estate CE:**

@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, certificates, videos, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type Certificate, type Video } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, certificates, videos, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type Certificate, type Video } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -10,6 +10,7 @@ export interface IStorage {
   createEnrollment(userId: string, courseId: string): Promise<Enrollment>;
   getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
+  getCourseBySku(sku: string): Promise<Course | undefined>;
   createPurchase?(purchase: any): Promise<any>;
   getPurchase?(stripeSessionId: string): Promise<any>;
   getPurchasesByUser?(userId: string): Promise<any[]>;
@@ -20,7 +21,6 @@ export interface IStorage {
   getEnrollments?(): Promise<Enrollment[]>;
   createPracticeExam?(data: any): Promise<PracticeExam>;
   createExamQuestion?(data: any): Promise<ExamQuestion>;
-  getPracticeExams?(courseId: string): Promise<PracticeExam[]>;
   savePage?(slug: string, page: any): Promise<any>;
   getPage?(slug: string): Promise<any>;
   getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined>;
@@ -39,9 +39,9 @@ export interface IStorage {
   createSirconReport(report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<SirconReport>;
   getSirconReport(enrollmentId: string): Promise<SirconReport | undefined>;
   updateSirconReport(id: string, data: Partial<SirconReport>): Promise<SirconReport>;
-  createDBPRReport(report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<SirconReport>;
-  getDBPRReport(enrollmentId: string): Promise<SirconReport | undefined>;
-  updateDBPRReport(id: string, data: Partial<SirconReport>): Promise<SirconReport>;
+  createDBPRReport(report: Omit<DBPRReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<DBPRReport>;
+  getDBPRReport(enrollmentId: string): Promise<DBPRReport | undefined>;
+  updateDBPRReport(id: string, data: Partial<DBPRReport>): Promise<DBPRReport>;
   createUserLicense(license: Omit<UserLicense, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserLicense>;
   getUserLicenses(userId: string): Promise<UserLicense[]>;
   updateUserLicense(id: string, data: Partial<UserLicense>): Promise<UserLicense>;
@@ -190,6 +190,57 @@ export class DatabaseStorage implements IStorage {
       console.error(`Error fetching course ${id}:`, err);
       return undefined;
     }
+  }
+
+  async getCourseBySku(sku: string): Promise<Course | undefined> {
+    try {
+      const result = await db.select().from(courses).where(eq(courses.sku, sku));
+      return result && result.length > 0 ? result[0] : undefined;
+    } catch (err) {
+      console.error(`Error fetching course by SKU ${sku}:`, err);
+      return undefined;
+    }
+  }
+
+  async getUsers(): Promise<User[]> {
+    try {
+      const result = await db.select().from(users);
+      return result || [];
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      return [];
+    }
+  }
+
+  async getEnrollments(): Promise<Enrollment[]> {
+    try {
+      const result = await db.select().from(enrollments);
+      return result || [];
+    } catch (err) {
+      console.error("Error fetching enrollments:", err);
+      return [];
+    }
+  }
+
+  async createCourse(courseData: any): Promise<Course> {
+    const [course] = await db
+      .insert(courses)
+      .values(courseData)
+      .returning();
+    return course;
+  }
+
+  async updateCourse(courseId: string, data: Partial<Course>): Promise<Course | undefined> {
+    const [course] = await db
+      .update(courses)
+      .set(data)
+      .where(eq(courses.id, courseId))
+      .returning();
+    return course;
+  }
+
+  async deleteCourse(courseId: string): Promise<void> {
+    await db.delete(courses).where(eq(courses.id, courseId));
   }
 
   async getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined> {
@@ -382,8 +433,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createDBPRReport(
-    report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>
-  ): Promise<SirconReport> {
+    report: Omit<DBPRReport, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<DBPRReport> {
     const [created] = await db
       .insert(dbprReports)
       .values(report)
@@ -391,7 +442,7 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async getDBPRReport(enrollmentId: string): Promise<SirconReport | undefined> {
+  async getDBPRReport(enrollmentId: string): Promise<DBPRReport | undefined> {
     const [report] = await db
       .select()
       .from(dbprReports)
@@ -399,7 +450,7 @@ export class DatabaseStorage implements IStorage {
     return report;
   }
 
-  async updateDBPRReport(id: string, data: Partial<SirconReport>): Promise<SirconReport> {
+  async updateDBPRReport(id: string, data: Partial<DBPRReport>): Promise<DBPRReport> {
     const [updated] = await db
       .update(dbprReports)
       .set({ ...data, updatedAt: new Date() })
@@ -986,10 +1037,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async adminOverrideEnrollmentData(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment> {
-    const [updated] = await db.update(enrollments).set({
-      ...data,
-      updatedAt: new Date()
-    }).where(eq(enrollments.id, enrollmentId)).returning();
+    const [updated] = await db.update(enrollments).set(data).where(eq(enrollments.id, enrollmentId)).returning();
     return updated;
   }
 
@@ -1126,9 +1174,8 @@ export class DatabaseStorage implements IStorage {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
       email: user?.email || "",
-      licenseNumber: user?.licenseNumber || "",
       courseCode: course?.sku || "",
-      courseName: course?.name || "",
+      courseName: course?.title || "",
       completionStatus: enrollment.completed ? "completed" : "in_progress",
       completionDate: cert?.issuedDate || null,
       certificateNumber: cert?.certificateNumber || null,
@@ -1177,7 +1224,7 @@ export class DatabaseStorage implements IStorage {
     const exportData = {
       course: {
         id: course?.id,
-        name: course?.name,
+        name: course?.title,
         sku: course?.sku,
         description: course?.description,
         hoursRequired: course?.hoursRequired,
@@ -1231,7 +1278,7 @@ export class DatabaseStorage implements IStorage {
     // Title
     sections.push(
       new Paragraph({
-        text: course?.name || "Course Content",
+        text: course?.title || "Course Content",
         heading: HeadingLevel.HEADING_1,
         spacing: { after: 200 }
       })
@@ -1287,19 +1334,19 @@ export class DatabaseStorage implements IStorage {
           new TableRow({
             children: [
               new TableCell({
-                children: [new Paragraph({ text: "Lesson", bold: true })],
+                children: [new Paragraph({ children: [new TextRun({ text: "Lesson", bold: true })] })],
                 shading: { fill: "D3D3D3" }
               }),
               new TableCell({
-                children: [new Paragraph({ text: "Title", bold: true })],
+                children: [new Paragraph({ children: [new TextRun({ text: "Title", bold: true })] })],
                 shading: { fill: "D3D3D3" }
               }),
               new TableCell({
-                children: [new Paragraph({ text: "Duration (min)", bold: true })],
+                children: [new Paragraph({ children: [new TextRun({ text: "Duration (min)", bold: true })] })],
                 shading: { fill: "D3D3D3" }
               }),
               new TableCell({
-                children: [new Paragraph({ text: "Video URL", bold: true })],
+                children: [new Paragraph({ children: [new TextRun({ text: "Video URL", bold: true })] })],
                 shading: { fill: "D3D3D3" }
               })
             ]

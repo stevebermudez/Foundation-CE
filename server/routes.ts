@@ -463,7 +463,7 @@ export async function registerRoutes(
 
       const stripe = getStripeClient();
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card", "apple_pay", "google_pay"],
+        payment_method_types: ["card"],
         line_items: [
           {
             price_data: {
@@ -512,7 +512,7 @@ export async function registerRoutes(
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100),
         currency: "usd",
-        payment_method_types: ["card", "apple_pay", "google_pay"],
+        payment_method_types: ["card"],
         metadata: {
           courseId,
           email,
@@ -577,13 +577,7 @@ export async function registerRoutes(
         const existingUser = await storage.getUserByEmail(email);
         const enrollment = await storage.createEnrollment(
           existingUser!.id,
-          courseId,
-          {
-            progress: 0,
-            completed: 0,
-            hoursCompleted: 0,
-            completedAt: null,
-          },
+          courseId
         );
 
         res.json({ success: true, enrollment });
@@ -928,12 +922,10 @@ segment1.ts
 
   app.get("/api/company/:id/members", async (req, res) => {
     try {
-      const company = await storage.getCompanyAccount(req.params.id);
-      if (!company) return res.status(404).json({ error: "Company not found" });
+      const organization = await storage.getOrganization(req.params.id);
+      if (!organization) return res.status(404).json({ error: "Company not found" });
 
-      // Return company and its compliance info
-      const compliance = await storage.getCompanyCompliance(req.params.id);
-      res.json({ company, compliance });
+      res.json({ company: organization, compliance: null });
     } catch (err) {
       console.error("Error fetching company members:", err);
       res.status(500).json({ error: "Failed to fetch company members" });
@@ -973,6 +965,7 @@ segment1.ts
         userId,
         examId: req.params.examId,
         totalQuestions: exam.totalQuestions,
+        startedAt: new Date(),
         completedAt: null,
         score: null,
         correctAnswers: 0,
@@ -1056,6 +1049,11 @@ segment1.ts
         pricePerMonth,
         annualPrice,
         status: "active",
+        stripeSubscriptionId: null,
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        cancelledAt: null,
+        autoRenew: 1,
       });
       res.status(201).json(subscription);
     } catch (err) {
@@ -1168,6 +1166,12 @@ segment1.ts
         targetSegment,
         createdBy,
         status: "draft",
+        recipientCount: 0,
+        sentCount: 0,
+        openCount: 0,
+        clickCount: 0,
+        scheduleDateTime: null,
+        sentAt: null,
       });
       res.status(201).json(campaign);
     } catch (err) {
@@ -1237,17 +1241,16 @@ segment1.ts
   app.get("/api/email-campaigns/:id/stats", async (req, res) => {
     try {
       const stats = await storage.getCampaignStats(req.params.id);
+      const sentCount = stats.campaign.sentCount || 0;
+      const openCount = stats.campaign.openCount || 0;
+      const clickCount = stats.campaign.clickCount || 0;
       const openRate =
-        stats.campaign.sentCount > 0
-          ? Math.round(
-              (stats.campaign.openCount / stats.campaign.sentCount) * 100,
-            )
+        sentCount > 0
+          ? Math.round((openCount / sentCount) * 100)
           : 0;
       const clickRate =
-        stats.campaign.sentCount > 0
-          ? Math.round(
-              (stats.campaign.clickCount / stats.campaign.sentCount) * 100,
-            )
+        sentCount > 0
+          ? Math.round((clickCount / sentCount) * 100)
           : 0;
       res.json({
         ...stats,
@@ -1255,7 +1258,7 @@ segment1.ts
           openRate: `${openRate}%`,
           clickRate: `${clickRate}%`,
           recipients: stats.campaign.recipientCount,
-          sent: stats.campaign.sentCount,
+          sent: sentCount,
         },
       });
     } catch (err) {
@@ -1762,15 +1765,12 @@ segment1.ts
         return res.status(404).json({ error: "User not found" });
       }
 
-      const courseList = await db
-        .select()
-        .from(courses)
-        .where(eq(courses.sku, courseCode));
-      if (courseList.length === 0) {
+      const course = await storage.getCourseBySku(courseCode);
+      if (!course) {
         return res.status(404).json({ error: "Course not found" });
       }
 
-      const enrollment = await storage.getEnrollment(user.id, courseList[0].id);
+      const enrollment = await storage.getEnrollment(user.id, course.id);
       if (!enrollment) {
         return res.status(404).json({ error: "Enrollment not found" });
       }
@@ -2124,8 +2124,6 @@ segment1.ts
         await db.insert(supervisors).values({
           userId: user.id,
           role: "admin",
-          fullName: "Admin User",
-          email: adminEmail,
         });
       }
       
