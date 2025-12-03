@@ -20,6 +20,7 @@ export default function AdminIndexPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          credentials: 'include',
         });
 
         if (response.ok) {

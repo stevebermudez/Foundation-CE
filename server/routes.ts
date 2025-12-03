@@ -2027,6 +2027,263 @@ segment1.ts
     }
   });
 
+  // ===== Unit Management Routes =====
+  app.get("/api/admin/courses/:courseId/units", isAdmin, async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const unitList = await storage.getUnits(courseId);
+      res.json(unitList);
+    } catch (err) {
+      console.error("Error fetching units:", err);
+      res.status(500).json({ error: "Failed to fetch units" });
+    }
+  });
+
+  app.post("/api/admin/courses/:courseId/units", isAdmin, async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const { unitNumber, title, description, hoursRequired } = req.body;
+      const unit = await storage.createUnit(courseId, unitNumber, title, description, hoursRequired);
+      res.status(201).json(unit);
+    } catch (err) {
+      console.error("Error creating unit:", err);
+      res.status(500).json({ error: "Failed to create unit" });
+    }
+  });
+
+  app.patch("/api/admin/units/:unitId", isAdmin, async (req, res) => {
+    try {
+      const { unitId } = req.params;
+      const unit = await storage.updateUnit(unitId, req.body);
+      res.json(unit);
+    } catch (err) {
+      console.error("Error updating unit:", err);
+      res.status(500).json({ error: "Failed to update unit" });
+    }
+  });
+
+  app.delete("/api/admin/units/:unitId", isAdmin, async (req, res) => {
+    try {
+      const { unitId } = req.params;
+      await storage.deleteUnit(unitId);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting unit:", err);
+      res.status(500).json({ error: "Failed to delete unit" });
+    }
+  });
+
+  app.post("/api/admin/courses/:courseId/units/reorder", isAdmin, async (req, res) => {
+    try {
+      const { unitIds } = req.body; // Array of unit IDs in new order
+      const db = (await import("./db")).db;
+      const { units } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      for (let i = 0; i < unitIds.length; i++) {
+        await db.update(units).set({ unitNumber: i + 1 }).where(eq(units.id, unitIds[i]));
+      }
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error reordering units:", err);
+      res.status(500).json({ error: "Failed to reorder units" });
+    }
+  });
+
+  // ===== Lesson Management Routes =====
+  app.get("/api/admin/units/:unitId/lessons", isAdmin, async (req, res) => {
+    try {
+      const { unitId } = req.params;
+      const lessonList = await storage.getLessons(unitId);
+      res.json(lessonList);
+    } catch (err) {
+      console.error("Error fetching lessons:", err);
+      res.status(500).json({ error: "Failed to fetch lessons" });
+    }
+  });
+
+  app.post("/api/admin/units/:unitId/lessons", isAdmin, async (req, res) => {
+    try {
+      const { unitId } = req.params;
+      const { lessonNumber, title, videoUrl, durationMinutes } = req.body;
+      const lesson = await storage.createLesson(unitId, lessonNumber, title, videoUrl, durationMinutes);
+      res.status(201).json(lesson);
+    } catch (err) {
+      console.error("Error creating lesson:", err);
+      res.status(500).json({ error: "Failed to create lesson" });
+    }
+  });
+
+  app.patch("/api/admin/lessons/:lessonId", isAdmin, async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      const lesson = await storage.updateLesson(lessonId, req.body);
+      res.json(lesson);
+    } catch (err) {
+      console.error("Error updating lesson:", err);
+      res.status(500).json({ error: "Failed to update lesson" });
+    }
+  });
+
+  app.delete("/api/admin/lessons/:lessonId", isAdmin, async (req, res) => {
+    try {
+      const { lessonId } = req.params;
+      await storage.deleteLesson(lessonId);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting lesson:", err);
+      res.status(500).json({ error: "Failed to delete lesson" });
+    }
+  });
+
+  app.post("/api/admin/units/:unitId/lessons/reorder", isAdmin, async (req, res) => {
+    try {
+      const { lessonIds } = req.body; // Array of lesson IDs in new order
+      const db = (await import("./db")).db;
+      const { lessons } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      for (let i = 0; i < lessonIds.length; i++) {
+        await db.update(lessons).set({ lessonNumber: i + 1 }).where(eq(lessons.id, lessonIds[i]));
+      }
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error reordering lessons:", err);
+      res.status(500).json({ error: "Failed to reorder lessons" });
+    }
+  });
+
+  // ===== Media Asset Management Routes =====
+  app.get("/api/admin/media", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { mediaAssets } = await import("@shared/schema");
+      const { desc } = await import("drizzle-orm");
+      
+      const media = await db.select().from(mediaAssets).orderBy(desc(mediaAssets.createdAt)).limit(200);
+      res.json(media);
+    } catch (err) {
+      console.error("Error fetching media:", err);
+      res.status(500).json({ error: "Failed to fetch media" });
+    }
+  });
+
+  app.post("/api/admin/media", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { mediaAssets } = await import("@shared/schema");
+      
+      const user = req.user as any;
+      const { fileName, fileUrl, fileType, mimeType, fileSize, width, height, duration, thumbnailUrl, altText, description, courseId, unitId, lessonId } = req.body;
+      
+      const [media] = await db.insert(mediaAssets).values({
+        fileName,
+        fileUrl,
+        fileType,
+        mimeType,
+        fileSize: fileSize || 0,
+        width,
+        height,
+        duration,
+        thumbnailUrl,
+        altText,
+        description,
+        uploadedBy: user?.id || "system",
+        courseId,
+        unitId,
+        lessonId,
+      }).returning();
+      
+      res.status(201).json(media);
+    } catch (err) {
+      console.error("Error creating media asset:", err);
+      res.status(500).json({ error: "Failed to create media asset" });
+    }
+  });
+
+  app.delete("/api/admin/media/:mediaId", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { mediaAssets } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      await db.delete(mediaAssets).where(eq(mediaAssets.id, req.params.mediaId));
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting media:", err);
+      res.status(500).json({ error: "Failed to delete media" });
+    }
+  });
+
+  // ===== Video Management Routes =====
+  app.get("/api/admin/courses/:courseId/videos", isAdmin, async (req, res) => {
+    try {
+      const videos = await storage.getVideos(req.params.courseId);
+      res.json(videos);
+    } catch (err) {
+      console.error("Error fetching videos:", err);
+      res.status(500).json({ error: "Failed to fetch videos" });
+    }
+  });
+
+  app.post("/api/admin/videos", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { videos } = await import("@shared/schema");
+      
+      const user = req.user as any;
+      const { courseId, unitId, title, videoUrl, thumbnailUrl, description, durationMinutes } = req.body;
+      
+      const [video] = await db.insert(videos).values({
+        courseId,
+        unitId,
+        title,
+        videoUrl,
+        thumbnailUrl,
+        description,
+        durationMinutes,
+        uploadedBy: user?.id || "system",
+      }).returning();
+      
+      res.status(201).json(video);
+    } catch (err) {
+      console.error("Error creating video:", err);
+      res.status(500).json({ error: "Failed to create video" });
+    }
+  });
+
+  app.patch("/api/admin/videos/:videoId", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { videos } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const [video] = await db.update(videos).set({
+        ...req.body,
+        updatedAt: new Date()
+      }).where(eq(videos.id, req.params.videoId)).returning();
+      
+      res.json(video);
+    } catch (err) {
+      console.error("Error updating video:", err);
+      res.status(500).json({ error: "Failed to update video" });
+    }
+  });
+
+  app.delete("/api/admin/videos/:videoId", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { videos } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      await db.delete(videos).where(eq(videos.id, req.params.videoId));
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting video:", err);
+      res.status(500).json({ error: "Failed to delete video" });
+    }
+  });
+
   // Website Pages Management Routes
   app.post("/api/admin/pages/:slug", isAdmin, async (req, res) => {
     try {

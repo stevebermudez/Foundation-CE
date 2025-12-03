@@ -134,6 +134,21 @@ Courses display with color-coded requirement buckets and detailed classification
 - Authentication: Replit Auth with social login support
 - No "Choose Account Type" landing page - users go straight to individual setup
 
+### Admin Authentication
+- **Admin routes** (`/api/admin/*`) use session-based authentication with cookies
+- All admin client fetch calls include `credentials: 'include'` for cookie transmission
+- Admin login creates a session cookie AND returns a JWT token (stored in localStorage)
+- Auth headers are also sent for backward compatibility
+- Admin check endpoint: `GET /api/auth/is-admin` validates admin status
+- Protected routes: `/admin/dashboard`, `/admin/courses`, `/admin/content-builder`, `/admin/pages-manager`
+
+### Content Builder (Admin LMS)
+- **Codeless course management**: Units, lessons, media library without coding
+- Drag-and-drop reordering for units and lessons
+- Media Library with external URL support (YouTube, Vimeo, images)
+- Rich text editing for lesson content
+- All CRUD operations use session-based auth with proper error handling
+
 ## LMS Integration & Plug-and-Play Capability
 
 ### Design for Future LMS Migration

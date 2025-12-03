@@ -558,6 +558,30 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Media library for uploaded assets (images, videos, documents)
+export const mediaAssets = pgTable("media_assets", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  fileName: varchar("file_name").notNull(),
+  fileUrl: varchar("file_url").notNull(),
+  fileType: varchar("file_type").notNull(), // "image", "video", "document"
+  mimeType: varchar("mime_type").notNull(),
+  fileSize: integer("file_size").notNull(), // bytes
+  width: integer("width"), // for images/videos
+  height: integer("height"), // for images/videos
+  duration: integer("duration"), // for videos (seconds)
+  thumbnailUrl: varchar("thumbnail_url"),
+  altText: varchar("alt_text"),
+  description: text("description"),
+  uploadedBy: varchar("uploaded_by").notNull(),
+  courseId: varchar("course_id"), // optional link to course
+  unitId: varchar("unit_id"), // optional link to unit
+  lessonId: varchar("lesson_id"), // optional link to lesson
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -590,6 +614,7 @@ export type Lesson = typeof lessons.$inferSelect;
 export type LessonProgress = typeof lessonProgress.$inferSelect;
 export type Certificate = typeof certificates.$inferSelect;
 export type Video = typeof videos.$inferSelect;
+export type MediaAsset = typeof mediaAssets.$inferSelect;
 
 // Chat Zod schemas
 export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({

@@ -73,8 +73,9 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
     mutationFn: async (data: CourseFormData) => {
       const priceInCents = Math.round(parseFloat(data.price) * 100);
       const res = await fetch("/api/admin/courses", {
-        method: initialData ? "PATCH" : "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({
           ...data,
           hoursRequired: parseInt(data.hoursRequired),
@@ -83,7 +84,10 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
           renewalPeriodYears: parseInt(data.renewalPeriodYears),
         }),
       });
-      if (!res.ok) throw new Error("Failed to create course");
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to create course");
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -471,22 +475,57 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
 }
 
 export default function AdminCoursesPage() {
+  const [editingCourse, setEditingCourse] = useState<any | null>(null);
+  
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["/api/admin/courses"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/courses");
+      const res = await fetch("/api/admin/courses", { credentials: 'include' });
       if (!res.ok) return [];
       return res.json();
     },
   });
 
   const { toast } = useToast();
+  
+  const updateCourseMutation = useMutation({
+    mutationFn: async ({ courseId, data }: { courseId: string; data: any }) => {
+      const res = await fetch(`/api/admin/courses/${courseId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to update course");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Course updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses"] });
+      setEditingCourse(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update course",
+        variant: "destructive",
+      });
+    },
+  });
+  
   const deleteMutation = useMutation({
     mutationFn: async (courseId: string) => {
       const res = await fetch(`/api/admin/courses/${courseId}`, {
         method: "DELETE",
+        credentials: 'include',
       });
-      if (!res.ok) throw new Error("Failed to delete course");
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to delete course");
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -544,6 +583,7 @@ export default function AdminCoursesPage() {
                     <Button
                       size="icon"
                       variant="outline"
+                      onClick={() => setEditingCourse(course)}
                       data-testid={`button-edit-${course.id}`}
                     >
                       <Edit2 className="h-4 w-4" />
@@ -593,6 +633,229 @@ export default function AdminCoursesPage() {
           ))}
         </div>
       )}
+      
+      {editingCourse && (
+        <EditCourseDialog
+          course={editingCourse}
+          onClose={() => setEditingCourse(null)}
+          onSave={(data) => updateCourseMutation.mutate({ courseId: editingCourse.id, data })}
+          isPending={updateCourseMutation.isPending}
+        />
+      )}
     </div>
+  );
+}
+
+function EditCourseDialog({
+  course,
+  onClose,
+  onSave,
+  isPending,
+}: {
+  course: any;
+  onClose: () => void;
+  onSave: (data: any) => void;
+  isPending: boolean;
+}) {
+  const [formData, setFormData] = useState<CourseFormData>({
+    title: course.title || "",
+    description: course.description || "",
+    productType: course.productType || "RealEstate",
+    state: course.state || "FL",
+    licenseType: course.licenseType || "Sales Associate",
+    requirementCycleType: course.requirementCycleType || "Continuing Education (Renewal)",
+    requirementBucket: course.requirementBucket || "Core Law",
+    hoursRequired: course.hoursRequired?.toString() || "3",
+    deliveryMethod: course.deliveryMethod || "Self-Paced Online",
+    difficultyLevel: course.difficultyLevel || "Basic",
+    price: ((course.price || 0) / 100).toString(),
+    sku: course.sku || "",
+    renewalApplicable: course.renewalApplicable ? "1" : "0",
+    renewalPeriodYears: course.renewalPeriodYears?.toString() || "2",
+    providerNumber: course.providerNumber || "",
+    courseOfferingNumber: course.courseOfferingNumber || "",
+    instructorName: course.instructorName || "",
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const priceInCents = Math.round(parseFloat(formData.price) * 100);
+    onSave({
+      ...formData,
+      hoursRequired: parseInt(formData.hoursRequired),
+      price: priceInCents,
+      renewalApplicable: formData.renewalApplicable === "1" ? 1 : 0,
+      renewalPeriodYears: parseInt(formData.renewalPeriodYears),
+    });
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Course</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <Label htmlFor="edit-title">Course Title *</Label>
+              <Input
+                id="edit-title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                required
+                data-testid="input-edit-course-title"
+              />
+            </div>
+
+            <div className="col-span-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={3}
+                data-testid="input-edit-course-description"
+              />
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <h3 className="font-semibold mb-4">Classification</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Product Type</Label>
+                <Select
+                  value={formData.productType}
+                  onValueChange={(val) => setFormData({ ...formData, productType: val })}
+                >
+                  <SelectTrigger data-testid="select-edit-product-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="RealEstate">Real Estate</SelectItem>
+                    <SelectItem value="Insurance">Insurance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>State</Label>
+                <Select
+                  value={formData.state}
+                  onValueChange={(val) => setFormData({ ...formData, state: val })}
+                >
+                  <SelectTrigger data-testid="select-edit-state">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FL">Florida</SelectItem>
+                    <SelectItem value="CA">California</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>License Type</Label>
+                <Select
+                  value={formData.licenseType}
+                  onValueChange={(val) => setFormData({ ...formData, licenseType: val })}
+                >
+                  <SelectTrigger data-testid="select-edit-license-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sales Associate">Sales Associate</SelectItem>
+                    <SelectItem value="Broker">Broker</SelectItem>
+                    <SelectItem value="Sales Associate & Broker">Sales Associate & Broker</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Requirement Cycle</Label>
+                <Select
+                  value={formData.requirementCycleType}
+                  onValueChange={(val) => setFormData({ ...formData, requirementCycleType: val })}
+                >
+                  <SelectTrigger data-testid="select-edit-cycle-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Post-Licensing">Post-Licensing</SelectItem>
+                    <SelectItem value="Continuing Education (Renewal)">Continuing Education (Renewal)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <h3 className="font-semibold mb-4">Content Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-hours">Hours Required</Label>
+                <Input
+                  id="edit-hours"
+                  type="number"
+                  value={formData.hoursRequired}
+                  onChange={(e) => setFormData({ ...formData, hoursRequired: e.target.value })}
+                  data-testid="input-edit-hours"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-price">Price ($)</Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  data-testid="input-edit-price"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-sku">SKU</Label>
+                <Input
+                  id="edit-sku"
+                  value={formData.sku}
+                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  data-testid="input-edit-sku"
+                />
+              </div>
+
+              <div>
+                <Label>Delivery Method</Label>
+                <Select
+                  value={formData.deliveryMethod}
+                  onValueChange={(val) => setFormData({ ...formData, deliveryMethod: val })}
+                >
+                  <SelectTrigger data-testid="select-edit-delivery">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Self-Paced Online">Self-Paced Online</SelectItem>
+                    <SelectItem value="Live Webinar">Live Webinar</SelectItem>
+                    <SelectItem value="Classroom">Classroom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-4 border-t">
+            <Button type="submit" disabled={isPending} data-testid="button-update-course">
+              {isPending ? "Saving..." : "Update Course"}
+            </Button>
+            <Button type="button" variant="outline" onClick={onClose} data-testid="button-cancel-edit">
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

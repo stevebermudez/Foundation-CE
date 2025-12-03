@@ -1420,7 +1420,7 @@ export class DatabaseStorage implements IStorage {
     
     for (const user of userList) {
       const enrollmentCount = await db.select().from(enrollments).where(eq(enrollments.userId, user.id)).then(r => r.length);
-      csv += `"${user.id}","${user.email || ''}","${user.firstName || ''}","${user.lastName || ''}","${user.licenseNumber || ''}",${enrollmentCount},"${user.createdAt || ''}"\n`;
+      csv += `"${user.id}","${user.email || ''}","${user.firstName || ''}","${user.lastName || ''}","",${enrollmentCount},"${user.createdAt || ''}"\n`;
     }
     
     return csv;

@@ -47,7 +47,7 @@ export default function PagesManagerPage() {
   const { data: pageData, isLoading } = useQuery({
     queryKey: [`/api/admin/pages/${selectedPageSlug}`],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/pages/${selectedPageSlug}`);
+      const res = await fetch(`/api/admin/pages/${selectedPageSlug}`, { credentials: 'include' });
       if (res.status === 404) return { blocks: [] };
       if (!res.ok) throw new Error("Failed");
       return res.json();
@@ -59,6 +59,7 @@ export default function PagesManagerPage() {
       const res = await fetch(`/api/admin/pages/${selectedPageSlug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({ blocks }),
       });
       if (!res.ok) throw new Error("Failed");

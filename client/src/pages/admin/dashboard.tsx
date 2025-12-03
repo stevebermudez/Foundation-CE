@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminCoursesPage from "./courses";
 import PagesManagerPage from "./pages-manager";
+import ContentBuilderPage from "./content-builder";
 import {
   BarChart3,
   Users,
@@ -42,6 +43,7 @@ export default function AdminDashboardPage() {
 
         const res = await fetch("/api/auth/is-admin", {
           headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
         });
         if (!res.ok) {
           localStorage.removeItem("adminToken");
@@ -74,6 +76,7 @@ export default function AdminDashboardPage() {
     queryFn: async () => {
       const res = await fetch("/api/admin/stats", {
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
       if (!res.ok) return null;
       return res.json();
@@ -86,6 +89,7 @@ export default function AdminDashboardPage() {
     queryFn: async () => {
       const res = await fetch("/api/admin/users", {
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
       if (!res.ok) return [];
       return res.json();
@@ -98,6 +102,7 @@ export default function AdminDashboardPage() {
     queryFn: async () => {
       const res = await fetch("/api/courses", {
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
       if (!res.ok) return [];
       return res.json();
@@ -110,6 +115,7 @@ export default function AdminDashboardPage() {
     queryFn: async () => {
       const res = await fetch("/api/admin/enrollments", {
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
       if (!res.ok) return [];
       return res.json();
@@ -138,7 +144,7 @@ export default function AdminDashboardPage() {
   const handleLogout = async () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminUser");
-    await fetch("/api/logout");
+    await fetch("/api/logout", { credentials: 'include' });
     setLocation("/admin/login");
   };
 
@@ -349,14 +355,7 @@ export default function AdminDashboardPage() {
 
           {/* Content Builder Tab */}
           <TabsContent value="content">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Content builder for creating course materials with text, images, and videos</p>
-                  <p className="text-sm mt-2">Select a course to build its content</p>
-                </div>
-              </CardContent>
-            </Card>
+            <ContentBuilderPage />
           </TabsContent>
 
           {/* Website Pages Tab */}

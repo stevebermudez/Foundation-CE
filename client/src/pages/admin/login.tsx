@@ -34,6 +34,7 @@ export default function AdminLoginPage() {
       const response = await fetch("/api/auth/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -56,6 +57,7 @@ export default function AdminLoginPage() {
         headers: {
           Authorization: `Bearer ${data.token}`,
         },
+        credentials: 'include',
       });
       const adminData = await isAdminRes.json();
 
