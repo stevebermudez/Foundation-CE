@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -25,7 +31,7 @@ export default function AdminLoginPage() {
         return;
       }
 
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -79,7 +85,10 @@ export default function AdminLoginPage() {
         <CardContent className="pt-6">
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
-              <Alert variant="destructive" className="bg-red-950 border-red-700">
+              <Alert
+                variant="destructive"
+                className="bg-red-950 border-red-700"
+              >
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>

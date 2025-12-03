@@ -1,5 +1,12 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  varchar,
+  timestamp,
+  integer,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -12,7 +19,9 @@ export const sessions = pgTable("sessions", {
 
 // User table (required for Replit Auth)
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   email: varchar("email").unique(),
   passwordHash: varchar("password_hash"), // for email/password auth
   passwordResetToken: varchar("password_reset_token"), // for password reset
@@ -23,11 +32,14 @@ export const users = pgTable("users", {
   stripeCustomerId: varchar("stripe_customer_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  isAdmin: boolean("is_admin").default(false).notNull(),
 });
 
 // Courses table
 export const courses = pgTable("courses", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   title: varchar("title").notNull(),
   description: text("description"),
   productType: varchar("product_type").notNull(), // "RealEstate" or "Insurance"
@@ -50,7 +62,9 @@ export const courses = pgTable("courses", {
 
 // Course enrollment table
 export const enrollments = pgTable("enrollments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   courseId: varchar("course_id").notNull(),
   enrolledAt: timestamp("enrolled_at").defaultNow(),
@@ -63,7 +77,9 @@ export const enrollments = pgTable("enrollments", {
 
 // Compliance requirements tracking
 export const complianceRequirements = pgTable("compliance_requirements", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   licenseType: varchar("license_type").notNull(), // "salesperson" or "broker"
   state: varchar("state").notNull(),
@@ -76,7 +92,9 @@ export const complianceRequirements = pgTable("compliance_requirements", {
 
 // White label organizations table
 export const organizations = pgTable("organizations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   slug: varchar("slug").unique().notNull(), // URL-friendly identifier
   logoUrl: varchar("logo_url"),
@@ -92,7 +110,9 @@ export const organizations = pgTable("organizations", {
 
 // Map users to organizations
 export const userOrganizations = pgTable("user_organizations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   organizationId: varchar("organization_id").notNull(),
   role: varchar("role").default("member"), // "admin" or "member"
@@ -101,7 +121,9 @@ export const userOrganizations = pgTable("user_organizations", {
 
 // White label course catalog (org-specific courses)
 export const organizationCourses = pgTable("organization_courses", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   organizationId: varchar("organization_id").notNull(),
   courseId: varchar("course_id").notNull(),
   customTitle: varchar("custom_title"), // override course title
@@ -110,10 +132,11 @@ export const organizationCourses = pgTable("organization_courses", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-
 // Course bundles (e.g., 45-hour packages)
 export const courseBundles = pgTable("course_bundles", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   description: text("description"),
   productType: varchar("product_type").notNull(), // "RealEstate" or "Insurance"
@@ -129,7 +152,9 @@ export const courseBundles = pgTable("course_bundles", {
 
 // Map courses to bundles
 export const bundleCourses = pgTable("bundle_courses", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   bundleId: varchar("bundle_id").notNull(),
   courseId: varchar("course_id").notNull(),
   sequence: integer("sequence").default(0),
@@ -138,7 +163,9 @@ export const bundleCourses = pgTable("bundle_courses", {
 
 // Track bundle purchases and enrollments
 export const bundleEnrollments = pgTable("bundle_enrollments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   bundleId: varchar("bundle_id").notNull(),
   enrolledAt: timestamp("enrolled_at").defaultNow(),
@@ -150,7 +177,9 @@ export const bundleEnrollments = pgTable("bundle_enrollments", {
 
 // Sircon reporting for insurance CE completions
 export const sirconReports = pgTable("sircon_reports", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   enrollmentId: varchar("enrollment_id").notNull(),
   userId: varchar("user_id").notNull(),
   courseId: varchar("course_id").notNull(),
@@ -171,7 +200,9 @@ export const sirconReports = pgTable("sircon_reports", {
 
 // DBPR reporting for Florida real estate course completions
 export const dbprReports = pgTable("dbpr_reports", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   enrollmentId: varchar("enrollment_id").notNull(),
   userId: varchar("user_id").notNull(),
   courseId: varchar("course_id").notNull(),
@@ -196,7 +227,9 @@ export const dbprReports = pgTable("dbpr_reports", {
 
 // User license tracking
 export const userLicenses = pgTable("user_licenses", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   licenseNumber: varchar("license_number").notNull(),
   licenseType: varchar("license_type").notNull(), // "salesperson", "broker"
@@ -211,7 +244,9 @@ export const userLicenses = pgTable("user_licenses", {
 
 // CE review table (supervisors reviewing agent CE completions)
 export const ceReviews = pgTable("ce_reviews", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   enrollmentId: varchar("enrollment_id").notNull(),
   userId: varchar("user_id").notNull(),
   supervisorId: varchar("supervisor_id").notNull(),
@@ -225,7 +260,9 @@ export const ceReviews = pgTable("ce_reviews", {
 
 // Supervisor role assignments
 export const supervisors = pgTable("supervisors", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().unique(),
   companyId: varchar("company_id"),
   role: varchar("role").default("supervisor"), // "supervisor", "admin"
@@ -238,7 +275,9 @@ export const supervisors = pgTable("supervisors", {
 
 // Practice exams
 export const practiceExams = pgTable("practice_exams", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   courseId: varchar("course_id").notNull(),
   title: varchar("title").notNull(),
   description: text("description"),
@@ -252,7 +291,9 @@ export const practiceExams = pgTable("practice_exams", {
 
 // Exam questions
 export const examQuestions = pgTable("exam_questions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   examId: varchar("exam_id").notNull(),
   questionText: text("question_text").notNull(),
   questionType: varchar("question_type").notNull(), // "multiple_choice", "true_false"
@@ -266,7 +307,9 @@ export const examQuestions = pgTable("exam_questions", {
 
 // User exam attempts
 export const examAttempts = pgTable("exam_attempts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   examId: varchar("exam_id").notNull(),
   startedAt: timestamp("started_at").defaultNow(),
@@ -281,7 +324,9 @@ export const examAttempts = pgTable("exam_attempts", {
 
 // User exam answers (tracks each answer during exam)
 export const examAnswers = pgTable("exam_answers", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   attemptId: varchar("attempt_id").notNull(),
   questionId: varchar("question_id").notNull(),
   userAnswer: varchar("user_answer").notNull(),
@@ -291,7 +336,9 @@ export const examAnswers = pgTable("exam_answers", {
 
 // Purchase history table - tracks individual course purchases via Stripe
 export const purchases = pgTable("purchases", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   courseId: varchar("course_id").notNull(),
   stripeSessionId: varchar("stripe_session_id").unique().notNull(),
@@ -304,13 +351,18 @@ export const purchases = pgTable("purchases", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const upsertPurchaseSchema = createInsertSchema(purchases).omit({ id: true, createdAt: true });
+export const upsertPurchaseSchema = createInsertSchema(purchases).omit({
+  id: true,
+  createdAt: true,
+});
 export type Purchase = typeof purchases.$inferSelect;
 export type UpsertPurchase = z.infer<typeof upsertPurchaseSchema>;
 
 // User subscriptions (monthly/annual billing)
 export const subscriptions = pgTable("subscriptions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   stripeSubscriptionId: varchar("stripe_subscription_id").unique(),
   subscriptionType: varchar("subscription_type").notNull(), // "monthly" or "annual"
@@ -327,7 +379,9 @@ export const subscriptions = pgTable("subscriptions", {
 
 // Coupon codes for discounts and registration
 export const coupons = pgTable("coupons", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   code: varchar("code").unique().notNull(), // "EARLY50", "WELCOME25", etc.
   discountType: varchar("discount_type").notNull(), // "percentage" or "fixed"
   discountValue: integer("discount_value").notNull(), // percentage (50 = 50%) or cents (2500 = $25.00)
@@ -343,7 +397,9 @@ export const coupons = pgTable("coupons", {
 
 // Track coupon usage per user
 export const couponUsage = pgTable("coupon_usage", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   couponId: varchar("coupon_id").notNull(),
   enrollmentId: varchar("enrollment_id"), // which enrollment used it
@@ -353,7 +409,9 @@ export const couponUsage = pgTable("coupon_usage", {
 
 // Email campaigns/blasts
 export const emailCampaigns = pgTable("email_campaigns", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   subject: varchar("subject").notNull(),
   htmlContent: text("html_content").notNull(),
@@ -373,7 +431,9 @@ export const emailCampaigns = pgTable("email_campaigns", {
 
 // Email campaign recipients tracking
 export const emailRecipients = pgTable("email_recipients", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   campaignId: varchar("campaign_id").notNull(),
   userId: varchar("user_id").notNull(),
   email: varchar("email").notNull(),
@@ -386,7 +446,9 @@ export const emailRecipients = pgTable("email_recipients", {
 
 // Email tracking (individual opens/clicks with tracking pixel)
 export const emailTracking = pgTable("email_tracking", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   recipientId: varchar("recipient_id").notNull(),
   campaignId: varchar("campaign_id").notNull(),
   userId: varchar("user_id").notNull(),
@@ -399,7 +461,9 @@ export const emailTracking = pgTable("email_tracking", {
 
 // AI Support Chat
 export const chatSessions = pgTable("chat_sessions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   title: varchar("title").default("New Chat"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -408,7 +472,9 @@ export const chatSessions = pgTable("chat_sessions", {
 
 // Course units (19 units in FREC I)
 export const units = pgTable("units", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   courseId: varchar("course_id").notNull(),
   unitNumber: integer("unit_number").notNull(), // 1-19
   title: varchar("title").notNull(),
@@ -420,7 +486,9 @@ export const units = pgTable("units", {
 
 // Videos (reusable video assets - can be at course or unit level)
 export const videos = pgTable("videos", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   courseId: varchar("course_id").notNull(),
   unitId: varchar("unit_id"),
   title: varchar("title").notNull(),
@@ -435,7 +503,9 @@ export const videos = pgTable("videos", {
 
 // Lessons within units (3 lessons per unit)
 export const lessons = pgTable("lessons", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   unitId: varchar("unit_id").notNull(),
   videoId: varchar("video_id"),
   lessonNumber: integer("lesson_number").notNull(),
@@ -449,7 +519,9 @@ export const lessons = pgTable("lessons", {
 
 // Track user progress on lessons
 export const lessonProgress = pgTable("lesson_progress", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   enrollmentId: varchar("enrollment_id").notNull(),
   lessonId: varchar("lesson_id").notNull(),
   userId: varchar("user_id").notNull(),
@@ -463,7 +535,9 @@ export const lessonProgress = pgTable("lesson_progress", {
 
 // Certificates
 export const certificates = pgTable("certificates", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   enrollmentId: varchar("enrollment_id").notNull(),
   userId: varchar("user_id").notNull(),
   courseId: varchar("course_id").notNull(),
@@ -475,7 +549,9 @@ export const certificates = pgTable("certificates", {
 });
 
 export const chatMessages = pgTable("chat_messages", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
   sessionId: varchar("session_id").notNull(),
   role: varchar("role").notNull(), // "user" or "assistant"
   content: text("content").notNull(),

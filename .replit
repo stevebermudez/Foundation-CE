@@ -43,6 +43,10 @@ localPort = 41111
 externalPort = 8008
 
 [[ports]]
+localPort = 41721
+externalPort = 8080
+
+[[ports]]
 localPort = 43457
 externalPort = 8000
 
@@ -83,7 +87,7 @@ args = "npm run dev"
 waitForPort = 5000
 
 [agent]
-integrations = ["javascript_mem_db:1.0.0", "javascript_log_in_with_replit:1.0.0", "stripe:1.0.0", "javascript_paypal:1.0.0", "javascript_database:1.0.0", "javascript_stripe:1.0.0"]
+integrations = ["javascript_mem_db:1.0.0", "javascript_log_in_with_replit:1.0.0", "stripe:1.0.0", "javascript_paypal:1.0.0", "javascript_database:1.0.0"]
 
 [userenv]
 

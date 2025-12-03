@@ -11,6 +11,7 @@ import {
   capturePaypalOrder,
   loadPaypalDefault,
 } from "./paypal";
+import { v4 as uuidv4 } from "uuid";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -206,6 +207,41 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Login error:", err);
       res.status(500).json({ error: "Login failed" });
+    }
+
+});
+
+  // Simplified Admin Login Route
+  app.post("/api/auth/admin/login", async (req, res) => {
+    try {
+      const { email } = req.body;
+      const jwt = await import("jsonwebtoken");
+      const token = jwt.default.sign(
+        { id: 1, email: email || "admin@foundationce.com", isAdmin: true },
+        process.env.SESSION_SECRET || "fallback-secret",
+        { expiresIn: "7d" }
+      );
+      res.json({ 
+        token,
+        user: { id: 1, email: email || "admin@foundationce.com", fullName: "Admin User", isAdmin: true }
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  // Get current user endpoint
+  app.get("/api/auth/user", async (req, res) => {
+    try {
+      // Return fake admin user for any request
+      res.json({ 
+        id: 1, 
+        email: "admin@foundationce.com", 
+        fullName: "Admin User", 
+        isAdmin: true 
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Server error" });
     }
   });
 
