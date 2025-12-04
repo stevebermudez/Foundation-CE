@@ -98,6 +98,60 @@ export async function registerRoutes(
     }
   });
 
+  // Notification Routes
+  app.get("/api/notifications", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const notificationsList = await storage.getUserNotifications(user.id);
+      res.json(notificationsList);
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/count", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const count = await storage.getUnreadNotificationCount(user.id);
+      res.json({ count });
+    } catch (err) {
+      console.error("Error fetching notification count:", err);
+      res.status(500).json({ error: "Failed to fetch notification count" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", authMiddleware, async (req, res) => {
+    try {
+      const notification = await storage.markNotificationRead(req.params.id);
+      res.json(notification);
+    } catch (err) {
+      console.error("Error marking notification read:", err);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/notifications/read-all", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      await storage.markAllNotificationsRead(user.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error marking all notifications read:", err);
+      res.status(500).json({ error: "Failed to mark all notifications as read" });
+    }
+  });
+
+  app.delete("/api/notifications/:id", authMiddleware, async (req, res) => {
+    try {
+      await storage.deleteNotification(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting notification:", err);
+      res.status(500).json({ error: "Failed to delete notification" });
+    }
+  });
+
   app.get("/api/enrollments/user", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
