@@ -145,6 +145,7 @@ export default function AdminDashboardPage() {
   // Fetch detailed progress for an enrollment
   const fetchDetailedProgress = async (enrollmentId: string) => {
     setLoadingProgress(true);
+    setExpandedUnits({}); // Reset expanded units
     try {
       const res = await fetch(`/api/admin/enrollments/${enrollmentId}/detailed-progress`, {
         headers: getAuthHeaders(),
@@ -153,6 +154,10 @@ export default function AdminDashboardPage() {
       if (!res.ok) throw new Error('Failed to fetch progress');
       const data = await res.json();
       setDetailedProgress(data);
+      // Auto-expand the first unit to show lessons immediately
+      if (data.units && data.units.length > 0) {
+        setExpandedUnits({ [data.units[0].unit.id]: true });
+      }
     } catch (err) {
       toast({ title: "Error", description: "Failed to load progress details", variant: "destructive" });
     } finally {
@@ -570,6 +575,7 @@ export default function AdminDashboardPage() {
                         <span>{getCourseDisplay(selectedEnrollment.courseId)}</span>
                       </>
                     )}
+                    <span className="block mt-1 text-xs">Click on a unit to expand and view lessons</span>
                   </DialogDescription>
                 </DialogHeader>
 
