@@ -123,7 +123,11 @@ export async function registerRoutes(
 
   app.patch("/api/notifications/:id/read", authMiddleware, async (req, res) => {
     try {
-      const notification = await storage.markNotificationRead(req.params.id);
+      const user = req.user as any;
+      const notification = await storage.markNotificationRead(req.params.id, user.id);
+      if (!notification) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
       res.json(notification);
     } catch (err) {
       console.error("Error marking notification read:", err);
@@ -144,7 +148,11 @@ export async function registerRoutes(
 
   app.delete("/api/notifications/:id", authMiddleware, async (req, res) => {
     try {
-      await storage.deleteNotification(req.params.id);
+      const user = req.user as any;
+      const deleted = await storage.deleteNotification(req.params.id, user.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
       res.json({ success: true });
     } catch (err) {
       console.error("Error deleting notification:", err);

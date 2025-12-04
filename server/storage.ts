@@ -155,9 +155,9 @@ export interface IStorage {
   createNotification(data: InsertNotification): Promise<Notification>;
   getUserNotifications(userId: string): Promise<Notification[]>;
   getUnreadNotificationCount(userId: string): Promise<number>;
-  markNotificationRead(notificationId: string): Promise<Notification>;
+  markNotificationRead(notificationId: string, userId: string): Promise<Notification | null>;
   markAllNotificationsRead(userId: string): Promise<void>;
-  deleteNotification(notificationId: string): Promise<void>;
+  deleteNotification(notificationId: string, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1916,12 +1916,15 @@ export class DatabaseStorage implements IStorage {
     return result[0]?.count || 0;
   }
 
-  async markNotificationRead(notificationId: string): Promise<Notification> {
+  async markNotificationRead(notificationId: string, userId: string): Promise<Notification | null> {
     const [notification] = await db.update(notifications)
       .set({ read: true })
-      .where(eq(notifications.id, notificationId))
+      .where(and(
+        eq(notifications.id, notificationId),
+        eq(notifications.userId, userId)
+      ))
       .returning();
-    return notification;
+    return notification || null;
   }
 
   async markAllNotificationsRead(userId: string): Promise<void> {
@@ -1930,9 +1933,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(notifications.userId, userId));
   }
 
-  async deleteNotification(notificationId: string): Promise<void> {
-    await db.delete(notifications)
-      .where(eq(notifications.id, notificationId));
+  async deleteNotification(notificationId: string, userId: string): Promise<boolean> {
+    const result = await db.delete(notifications)
+      .where(and(
+        eq(notifications.id, notificationId),
+        eq(notifications.userId, userId)
+      ))
+      .returning();
+    return result.length > 0;
   }
 }
 
