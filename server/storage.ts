@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -150,6 +150,14 @@ export interface IStorage {
   checkUnitCompletion(enrollmentId: string, unitId: string): Promise<{ lessonsComplete: boolean; quizPassed: boolean }>;
   unlockNextUnit(enrollmentId: string): Promise<UnitProgress | undefined>;
   getEnrollmentById(enrollmentId: string): Promise<Enrollment | undefined>;
+  
+  // Notification Methods
+  createNotification(data: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string): Promise<Notification[]>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  markNotificationRead(notificationId: string): Promise<Notification>;
+  markAllNotificationsRead(userId: string): Promise<void>;
+  deleteNotification(notificationId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1881,6 +1889,50 @@ export class DatabaseStorage implements IStorage {
       .from(enrollments)
       .where(eq(enrollments.id, enrollmentId));
     return enrollment;
+  }
+
+  // Notification Methods
+  async createNotification(data: InsertNotification): Promise<Notification> {
+    const [notification] = await db.insert(notifications)
+      .values(data)
+      .returning();
+    return notification;
+  }
+
+  async getUserNotifications(userId: string): Promise<Notification[]> {
+    return await db.select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const result = await db.select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.read, false)
+      ));
+    return result[0]?.count || 0;
+  }
+
+  async markNotificationRead(notificationId: string): Promise<Notification> {
+    const [notification] = await db.update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, notificationId))
+      .returning();
+    return notification;
+  }
+
+  async markAllNotificationsRead(userId: string): Promise<void> {
+    await db.update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.userId, userId));
+  }
+
+  async deleteNotification(notificationId: string): Promise<void> {
+    await db.delete(notifications)
+      .where(eq(notifications.id, notificationId));
   }
 }
 
