@@ -1120,6 +1120,63 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  async adminOverrideUnitProgress(unitProgressId: string, data: Partial<UnitProgress>): Promise<UnitProgress> {
+    const [updated] = await db.update(unitProgress).set({
+      ...data,
+      updatedAt: new Date()
+    }).where(eq(unitProgress.id, unitProgressId)).returning();
+    return updated;
+  }
+
+  async adminCreateUnitProgress(enrollmentId: string, unitId: string, userId: string, data: Partial<UnitProgress>): Promise<UnitProgress> {
+    const [created] = await db.insert(unitProgress).values({
+      enrollmentId,
+      unitId,
+      userId,
+      status: data.status || "locked",
+      lessonsCompleted: data.lessonsCompleted || 0,
+      quizPassed: data.quizPassed || 0,
+      quizScore: data.quizScore || null,
+      timeSpentSeconds: data.timeSpentSeconds || 0,
+      startedAt: data.startedAt || null,
+      completedAt: data.completedAt || null
+    }).returning();
+    return created;
+  }
+
+  async getEnrollmentDetailedProgress(enrollmentId: string): Promise<{
+    enrollment: Enrollment;
+    units: Array<{
+      unit: Unit;
+      progress: UnitProgress | null;
+      lessons: Array<{
+        lesson: Lesson;
+        progress: LessonProgress | null;
+      }>;
+    }>;
+  } | null> {
+    const enrollment = await this.getEnrollmentById(enrollmentId);
+    if (!enrollment) return null;
+
+    const courseUnits = await this.getUnits(enrollment.courseId);
+    const sortedUnits = courseUnits.sort((a, b) => a.unitNumber - b.unitNumber);
+
+    const unitDetails = await Promise.all(sortedUnits.map(async (unit) => {
+      const progress = await this.getUnitProgress(enrollmentId, unit.id);
+      const unitLessons = await this.getLessons(unit.id);
+      const sortedLessons = unitLessons.sort((a, b) => a.lessonNumber - b.lessonNumber);
+
+      const lessonDetails = await Promise.all(sortedLessons.map(async (lesson) => {
+        const lessonProg = await this.getLessonProgress(enrollmentId, lesson.id);
+        return { lesson, progress: lessonProg || null };
+      }));
+
+      return { unit, progress: progress || null, lessons: lessonDetails };
+    }));
+
+    return { enrollment, units: unitDetails };
+  }
+
   async adminOverrideUserData(userId: string, data: Partial<User>): Promise<User> {
     const [updated] = await db.update(users).set({
       ...data,

@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import AdminCoursesPage from "./courses";
 import PagesManagerPage from "./pages-manager";
 import ContentBuilderPage from "./content-builder";
@@ -19,6 +24,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  ChevronDown,
+  ChevronRight,
+  Check,
+  X,
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -26,7 +35,7 @@ export default function AdminDashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("adminToken");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
@@ -122,6 +131,122 @@ export default function AdminDashboardPage() {
     },
     enabled: isAdmin,
   });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Progress override state
+  const [selectedEnrollment, setSelectedEnrollment] = useState<any>(null);
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
+  const [detailedProgress, setDetailedProgress] = useState<any>(null);
+  const [expandedUnits, setExpandedUnits] = useState<Record<string, boolean>>({});
+  const [loadingProgress, setLoadingProgress] = useState(false);
+
+  // Fetch detailed progress for an enrollment
+  const fetchDetailedProgress = async (enrollmentId: string) => {
+    setLoadingProgress(true);
+    try {
+      const res = await fetch(`/api/admin/enrollments/${enrollmentId}/detailed-progress`, {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to fetch progress');
+      const data = await res.json();
+      setDetailedProgress(data);
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to load progress details", variant: "destructive" });
+    } finally {
+      setLoadingProgress(false);
+    }
+  };
+
+  // Open progress dialog
+  const openProgressDialog = async (enrollment: any) => {
+    setSelectedEnrollment(enrollment);
+    setProgressDialogOpen(true);
+    await fetchDetailedProgress(enrollment.id);
+  };
+
+  // Complete all lessons in a unit
+  const completeUnitMutation = useMutation({
+    mutationFn: async ({ enrollmentId, unitId }: { enrollmentId: string; unitId: string }) => {
+      const res = await fetch(`/api/admin/enrollments/${enrollmentId}/units/${unitId}/complete-all`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error('Failed to complete unit');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "Success", description: data.message });
+      if (selectedEnrollment) fetchDetailedProgress(selectedEnrollment.id);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to complete unit", variant: "destructive" });
+    }
+  });
+
+  // Override unit progress
+  const overrideUnitProgressMutation = useMutation({
+    mutationFn: async ({ progressId, data }: { progressId: string; data: any }) => {
+      const res = await fetch(`/api/admin/unit-progress/${progressId}/data`, {
+        method: 'PATCH',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to update unit progress');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "Success", description: data.message });
+      if (selectedEnrollment) fetchDetailedProgress(selectedEnrollment.id);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update unit progress", variant: "destructive" });
+    }
+  });
+
+  // Override lesson progress
+  const overrideLessonProgressMutation = useMutation({
+    mutationFn: async ({ progressId, data }: { progressId: string; data: any }) => {
+      const res = await fetch(`/api/admin/lesson-progress/${progressId}/data`, {
+        method: 'PATCH',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to update lesson progress');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "Success", description: data.message });
+      if (selectedEnrollment) fetchDetailedProgress(selectedEnrollment.id);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update lesson progress", variant: "destructive" });
+    }
+  });
+
+  // Toggle unit expansion
+  const toggleUnitExpansion = (unitId: string) => {
+    setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
+  };
+
+  // Get user info for display
+  const getUserDisplay = (userId: string) => {
+    const user = users.find((u: any) => u.id === userId);
+    return user ? `${user.firstName || ''} ${user.lastName || ''} (${user.email})`.trim() : `User ${userId.slice(0, 8)}...`;
+  };
+
+  // Get course info for display
+  const getCourseDisplay = (courseId: string) => {
+    const course = courses.find((c: any) => c.id === courseId);
+    return course ? course.title : `Course ${courseId.slice(0, 8)}...`;
+  };
 
   if (isLoading) {
     return (
@@ -367,7 +492,7 @@ export default function AdminDashboardPage() {
           <TabsContent value="enrollments">
             <Card data-testid="card-enrollments-list">
               <CardHeader>
-                <CardTitle>Enrollment Overrides</CardTitle>
+                <CardTitle>Enrollment Progress Management</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -382,26 +507,193 @@ export default function AdminDashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {enrollments.slice(0, 5).map((enr: any, idx: number) => (
-                        <tr key={enr.id || idx} className="border-b hover:bg-muted/50" data-testid={`enrollment-row-${idx}`}>
-                          <td className="p-2">User {idx + 1}</td>
-                          <td className="p-2">Course {idx + 1}</td>
-                          <td className="p-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-600" style={{ width: `${Math.random() * 100}%` }} />
-                              </div>
-                            </div>
+                      {enrollments.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="text-center p-4 text-muted-foreground">
+                            No enrollments found
                           </td>
-                          <td className="p-2"><Badge variant="secondary">In Progress</Badge></td>
-                          <td className="p-2"><Button size="sm" variant="outline">Override</Button></td>
                         </tr>
-                      ))}
+                      ) : (
+                        enrollments.map((enr: any, idx: number) => (
+                          <tr key={enr.id || idx} className="border-b hover:bg-muted/50" data-testid={`enrollment-row-${enr.id}`}>
+                            <td className="p-2">{getUserDisplay(enr.userId)}</td>
+                            <td className="p-2">{getCourseDisplay(enr.courseId)}</td>
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-blue-600" 
+                                    style={{ width: `${Math.round((enr.hoursCompleted / (enr.hoursRequired || 63)) * 100)}%` }} 
+                                  />
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {enr.hoursCompleted || 0}h / {enr.hoursRequired || 63}h
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-2">
+                              {enr.completed ? (
+                                <Badge className="bg-green-600">Completed</Badge>
+                              ) : (
+                                <Badge variant="secondary">In Progress</Badge>
+                              )}
+                            </td>
+                            <td className="p-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => openProgressDialog(enr)}
+                                data-testid={`button-override-${enr.id}`}
+                              >
+                                Manage Progress
+                              </Button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Progress Override Dialog */}
+            <Dialog open={progressDialogOpen} onOpenChange={setProgressDialogOpen}>
+              <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Manage Course Progress</DialogTitle>
+                  <DialogDescription>
+                    {selectedEnrollment && (
+                      <>
+                        <span className="font-medium">{getUserDisplay(selectedEnrollment.userId)}</span>
+                        <span className="mx-2">-</span>
+                        <span>{getCourseDisplay(selectedEnrollment.courseId)}</span>
+                      </>
+                    )}
+                  </DialogDescription>
+                </DialogHeader>
+
+                {loadingProgress ? (
+                  <div className="py-8 text-center">
+                    <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+                    <p className="mt-2 text-muted-foreground">Loading progress...</p>
+                  </div>
+                ) : detailedProgress ? (
+                  <div className="space-y-3">
+                    {detailedProgress.units.map((unitData: any) => (
+                      <div key={unitData.unit.id} className="border rounded-lg overflow-hidden">
+                        <div 
+                          className="flex items-center justify-between p-3 bg-muted/50 cursor-pointer hover-elevate"
+                          onClick={() => toggleUnitExpansion(unitData.unit.id)}
+                        >
+                          <div className="flex items-center gap-2">
+                            {expandedUnits[unitData.unit.id] ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <span className="font-medium">
+                              Unit {unitData.unit.unitNumber}: {unitData.unit.title}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {unitData.progress?.status === "completed" ? (
+                              <Badge className="bg-green-600">Completed</Badge>
+                            ) : unitData.progress?.status === "in_progress" ? (
+                              <Badge variant="secondary">In Progress</Badge>
+                            ) : (
+                              <Badge variant="outline">Locked</Badge>
+                            )}
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                completeUnitMutation.mutate({
+                                  enrollmentId: selectedEnrollment.id,
+                                  unitId: unitData.unit.id
+                                });
+                              }}
+                              disabled={completeUnitMutation.isPending}
+                              data-testid={`button-complete-unit-${unitData.unit.id}`}
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Complete Unit
+                            </Button>
+                          </div>
+                        </div>
+
+                        {expandedUnits[unitData.unit.id] && (
+                          <div className="p-3 space-y-2">
+                            {unitData.progress && (
+                              <div className="flex items-center gap-4 p-2 bg-muted/30 rounded text-sm mb-3">
+                                <span>Lessons: {unitData.progress.lessonsCompleted || 0}/{unitData.lessons.length}</span>
+                                <span>Quiz: {unitData.progress.quizPassed ? 'Passed' : 'Not Passed'}</span>
+                                <span>Score: {unitData.progress.quizScore || 0}%</span>
+                                {unitData.progress.status !== "completed" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => overrideUnitProgressMutation.mutate({
+                                      progressId: unitData.progress.id,
+                                      data: { status: "completed", quizPassed: true, quizScore: 100 }
+                                    })}
+                                    data-testid={`button-mark-complete-${unitData.unit.id}`}
+                                  >
+                                    Mark Completed
+                                  </Button>
+                                )}
+                              </div>
+                            )}
+                            
+                            <div className="space-y-1">
+                              <p className="text-xs font-medium text-muted-foreground mb-2">Lessons:</p>
+                              {unitData.lessons.map((lessonData: any) => (
+                                <div 
+                                  key={lessonData.lesson.id}
+                                  className="flex items-center justify-between p-2 bg-background rounded border"
+                                >
+                                  <span className="text-sm">
+                                    {lessonData.lesson.lessonNumber}. {lessonData.lesson.title}
+                                  </span>
+                                  <div className="flex items-center gap-2">
+                                    {lessonData.progress?.completed ? (
+                                      <Check className="h-4 w-4 text-green-600" />
+                                    ) : (
+                                      <X className="h-4 w-4 text-muted-foreground" />
+                                    )}
+                                    {lessonData.progress && !lessonData.progress.completed && (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => overrideLessonProgressMutation.mutate({
+                                          progressId: lessonData.progress.id,
+                                          data: { completed: true }
+                                        })}
+                                        data-testid={`button-complete-lesson-${lessonData.lesson.id}`}
+                                      >
+                                        Complete
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-4">No progress data available</p>
+                )}
+
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setProgressDialogOpen(false)}>
+                    Close
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           {/* Settings Tab */}

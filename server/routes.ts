@@ -528,7 +528,7 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Authentication required" });
       }
       
-      const enrollment = await storage.getEnrollment(enrollmentId);
+      const enrollment = await storage.getEnrollmentById(enrollmentId);
       if (!enrollment) {
         return res.status(404).json({ error: "Enrollment not found" });
       }
@@ -565,7 +565,7 @@ export async function registerRoutes(
         return res.status(403).json({ error: "Access denied - you can only submit your own course completions" });
       }
 
-      const enrollment = await storage.getEnrollment(enrollmentId);
+      const enrollment = await storage.getEnrollmentById(enrollmentId);
       if (!enrollment || !enrollment.completed) {
         return res.status(400).json({ error: "Enrollment not found or course not completed" });
       }
@@ -662,7 +662,7 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Authentication required" });
       }
       
-      const enrollment = await storage.getEnrollment(enrollmentId);
+      const enrollment = await storage.getEnrollmentById(enrollmentId);
       if (!enrollment) {
         return res.status(404).json({ error: "Enrollment not found" });
       }
@@ -713,7 +713,7 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Authentication required" });
       }
       
-      const enrollment = await storage.getEnrollment(enrollmentId);
+      const enrollment = await storage.getEnrollmentById(enrollmentId);
       if (!enrollment) {
         return res.status(404).json({ error: "Enrollment not found" });
       }
@@ -2425,6 +2425,153 @@ segment1.ts
       } catch (err) {
         console.error("Error overriding lesson progress:", err);
         res.status(500).json({ error: "Failed to override lesson progress" });
+      }
+    },
+  );
+
+  // Admin Unit Progress Override - allows admin to override unit completion status
+  app.patch(
+    "/api/admin/unit-progress/:progressId/data",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { status, lessonsCompleted, quizPassed, quizScore, timeSpentSeconds } = req.body;
+        const progress = await storage.adminOverrideUnitProgress(
+          req.params.progressId,
+          {
+            status: status || undefined,
+            lessonsCompleted: typeof lessonsCompleted === "number" ? lessonsCompleted : undefined,
+            quizPassed: typeof quizPassed === "boolean" ? (quizPassed ? 1 : 0) : undefined,
+            quizScore: typeof quizScore === "number" ? quizScore : undefined,
+            timeSpentSeconds: typeof timeSpentSeconds === "number" ? timeSpentSeconds : undefined,
+            completedAt: status === "completed" ? new Date() : undefined,
+            startedAt: status === "in_progress" ? new Date() : undefined
+          },
+        );
+        res.json({ message: "Unit progress overridden", progress });
+      } catch (err) {
+        console.error("Error overriding unit progress:", err);
+        res.status(500).json({ error: "Failed to override unit progress" });
+      }
+    },
+  );
+
+  // Admin Create Unit Progress - allows admin to create progress for a unit that doesn't have one
+  app.post(
+    "/api/admin/enrollments/:enrollmentId/units/:unitId/progress",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { enrollmentId, unitId } = req.params;
+        const { status, lessonsCompleted, quizPassed, quizScore } = req.body;
+
+        const enrollment = await storage.getEnrollmentById(enrollmentId);
+        if (!enrollment) {
+          return res.status(404).json({ error: "Enrollment not found" });
+        }
+
+        // Check if progress already exists
+        const existingProgress = await storage.getUnitProgress(enrollmentId, unitId);
+        if (existingProgress) {
+          return res.status(400).json({ error: "Unit progress already exists. Use PATCH to update." });
+        }
+
+        const progress = await storage.adminCreateUnitProgress(
+          enrollmentId,
+          unitId,
+          enrollment.userId,
+          {
+            status: status || "in_progress",
+            lessonsCompleted: lessonsCompleted || 0,
+            quizPassed: quizPassed ? 1 : 0,
+            quizScore: quizScore || null,
+            startedAt: new Date(),
+            completedAt: status === "completed" ? new Date() : null
+          }
+        );
+        res.json({ message: "Unit progress created", progress });
+      } catch (err) {
+        console.error("Error creating unit progress:", err);
+        res.status(500).json({ error: "Failed to create unit progress" });
+      }
+    },
+  );
+
+  // Admin Get Detailed Enrollment Progress - get all units and lessons with progress
+  app.get(
+    "/api/admin/enrollments/:enrollmentId/detailed-progress",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const detailedProgress = await storage.getEnrollmentDetailedProgress(req.params.enrollmentId);
+        if (!detailedProgress) {
+          return res.status(404).json({ error: "Enrollment not found" });
+        }
+        res.json(detailedProgress);
+      } catch (err) {
+        console.error("Error getting detailed progress:", err);
+        res.status(500).json({ error: "Failed to get detailed progress" });
+      }
+    },
+  );
+
+  // Admin Complete All Lessons in a Unit - bulk operation
+  app.post(
+    "/api/admin/enrollments/:enrollmentId/units/:unitId/complete-all",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { enrollmentId, unitId } = req.params;
+
+        const enrollment = await storage.getEnrollmentById(enrollmentId);
+        if (!enrollment) {
+          return res.status(404).json({ error: "Enrollment not found" });
+        }
+
+        // Get all lessons for this unit
+        const lessons = await storage.getLessons(unitId);
+        
+        // Complete each lesson
+        const completedLessons = await Promise.all(
+          lessons.map(lesson => 
+            storage.completeLesson(enrollmentId, lesson.id, enrollment.userId)
+          )
+        );
+
+        // Update unit progress to completed
+        let unitProg = await storage.getUnitProgress(enrollmentId, unitId);
+        if (unitProg) {
+          unitProg = await storage.adminOverrideUnitProgress(unitProg.id, {
+            status: "completed",
+            lessonsCompleted: lessons.length,
+            quizPassed: 1,
+            quizScore: 100,
+            completedAt: new Date()
+          });
+        } else {
+          unitProg = await storage.adminCreateUnitProgress(
+            enrollmentId,
+            unitId,
+            enrollment.userId,
+            {
+              status: "completed",
+              lessonsCompleted: lessons.length,
+              quizPassed: 1,
+              quizScore: 100,
+              startedAt: new Date(),
+              completedAt: new Date()
+            }
+          );
+        }
+
+        res.json({ 
+          message: `Unit completed with ${lessons.length} lessons`, 
+          unitProgress: unitProg,
+          lessonsCompleted: completedLessons.length
+        });
+      } catch (err) {
+        console.error("Error completing unit:", err);
+        res.status(500).json({ error: "Failed to complete unit" });
       }
     },
   );
