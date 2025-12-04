@@ -688,7 +688,7 @@ export default function AdminDashboardPage() {
                 )}
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setProgressDialogOpen(false)}>
+                  <Button variant="outline" onClick={() => setProgressDialogOpen(false)} data-testid="button-close-progress-dialog">
                     Close
                   </Button>
                 </DialogFooter>
