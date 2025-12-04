@@ -59,21 +59,41 @@ export default function Header() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/user");
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-        }
-      } catch (err) {
-        console.error("Auth check failed:", err);
-      } finally {
-        setIsLoading(false);
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("authToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("/api/user", {
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        setUser(null);
       }
-    };
+    } catch (err) {
+      console.error("Auth check failed:", err);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     checkAuth();
+  }, []);
+
+  // Listen for auth changes (login/signup/logout)
+  useEffect(() => {
+    const handleAuthUpdate = () => {
+      checkAuth();
+    };
+    window.addEventListener("auth:updated", handleAuthUpdate);
+    return () => window.removeEventListener("auth:updated", handleAuthUpdate);
   }, []);
 
   // Fetch notifications when user is logged in
@@ -82,9 +102,10 @@ export default function Header() {
     
     const fetchNotifications = async () => {
       try {
+        const headers = getAuthHeaders();
         const [notifResponse, countResponse] = await Promise.all([
-          fetch("/api/notifications"),
-          fetch("/api/notifications/count")
+          fetch("/api/notifications", { headers }),
+          fetch("/api/notifications/count", { headers })
         ]);
         
         if (notifResponse.ok) {
@@ -109,7 +130,10 @@ export default function Header() {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await fetch(`/api/notifications/${notificationId}/read`, { method: "PATCH" });
+      await fetch(`/api/notifications/${notificationId}/read`, { 
+        method: "PATCH",
+        headers: getAuthHeaders()
+      });
       setNotifications(prev => prev.map(n => 
         n.id === notificationId ? { ...n, read: true } : n
       ));
@@ -121,7 +145,10 @@ export default function Header() {
 
   const markAllAsRead = async () => {
     try {
-      await fetch("/api/notifications/read-all", { method: "POST" });
+      await fetch("/api/notifications/read-all", { 
+        method: "POST",
+        headers: getAuthHeaders()
+      });
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (err) {
@@ -131,7 +158,10 @@ export default function Header() {
 
   const deleteNotification = async (notificationId: string) => {
     try {
-      await fetch(`/api/notifications/${notificationId}`, { method: "DELETE" });
+      await fetch(`/api/notifications/${notificationId}`, { 
+        method: "DELETE",
+        headers: getAuthHeaders()
+      });
       const notification = notifications.find(n => n.id === notificationId);
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
       if (notification && !notification.read) {

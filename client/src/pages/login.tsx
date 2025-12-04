@@ -59,6 +59,7 @@ export default function LoginPage() {
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem("authToken", data.token);
+        window.dispatchEvent(new Event("auth:updated"));
         toast({ title: "Success", description: "Login successful!" });
         setLocation(redirectUrl);
       } else {
