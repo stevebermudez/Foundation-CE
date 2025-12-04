@@ -211,6 +211,21 @@ export async function registerRoutes(
       }
 
       const enrollment = await storage.createEnrollment(user.id, courseId);
+      
+      // Create welcome notification for the user
+      try {
+        await storage.createNotification({
+          userId: user.id,
+          type: "enrollment",
+          title: "Welcome to " + course.title,
+          message: `You've successfully enrolled in ${course.title}. Start learning today!`,
+          link: `/learn/${enrollment.id}`,
+          read: false
+        });
+      } catch (notifErr) {
+        console.error("Failed to create enrollment notification:", notifErr);
+      }
+      
       res.json({ enrollment, existing: false });
     } catch (err) {
       console.error("Error creating enrollment:", err);
@@ -254,6 +269,20 @@ export async function registerRoutes(
         { expiresIn: "7d" },
       );
 
+      // Create welcome notification for new user
+      try {
+        await storage.createNotification({
+          userId: newUser.id,
+          type: "system",
+          title: "Welcome to FoundationCE!",
+          message: "Get started by exploring our course catalog and enrolling in your first course.",
+          link: "/courses/fl",
+          read: false
+        });
+      } catch (notifErr) {
+        console.error("Failed to create welcome notification:", notifErr);
+      }
+      
       res.json({
         message: "handleSubmit successful",
         token,

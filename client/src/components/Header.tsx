@@ -34,7 +34,20 @@ import {
   LogOut,
   Settings,
   Mail,
+  Check,
+  Trash2,
 } from "lucide-react";
+
+interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  link: string | null;
+  read: boolean;
+  createdAt: string;
+}
 
 export default function Header() {
   const [location, setLocation] = useLocation();
@@ -43,6 +56,8 @@ export default function Header() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -60,6 +75,82 @@ export default function Header() {
     };
     checkAuth();
   }, []);
+
+  // Fetch notifications when user is logged in
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchNotifications = async () => {
+      try {
+        const [notifResponse, countResponse] = await Promise.all([
+          fetch("/api/notifications"),
+          fetch("/api/notifications/count")
+        ]);
+        
+        if (notifResponse.ok) {
+          const notifData = await notifResponse.json();
+          setNotifications(notifData);
+        }
+        
+        if (countResponse.ok) {
+          const countData = await countResponse.json();
+          setUnreadCount(countData.count);
+        }
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+    
+    fetchNotifications();
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      await fetch(`/api/notifications/${notificationId}/read`, { method: "PATCH" });
+      setNotifications(prev => prev.map(n => 
+        n.id === notificationId ? { ...n, read: true } : n
+      ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await fetch("/api/notifications/read-all", { method: "POST" });
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      await fetch(`/api/notifications/${notificationId}`, { method: "DELETE" });
+      const notification = notifications.find(n => n.id === notificationId);
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      if (notification && !notification.read) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error("Failed to delete notification:", err);
+    }
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    if (notification.link) {
+      setLocation(notification.link);
+      setNotificationsOpen(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -135,27 +226,78 @@ export default function Header() {
                   <PopoverTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
                       <Bell className="h-4 w-4" />
-                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
-                        3
-                      </span>
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent align="end" className="w-80">
                     <div className="space-y-4">
-                      <div className="font-semibold">Notifications</div>
-                      <div className="space-y-3 max-h-96 overflow-y-auto">
-                        <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
-                          <p className="font-medium">New course available</p>
-                          <p className="text-xs text-muted-foreground">Advanced Real Estate Law just released</p>
-                        </div>
-                        <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
-                          <p className="font-medium">Certificate expiring soon</p>
-                          <p className="text-xs text-muted-foreground">Your Florida CE certificate expires in 30 days</p>
-                        </div>
-                        <div className="text-sm p-2 rounded border border-border hover-elevate cursor-pointer">
-                          <p className="font-medium">Exam results ready</p>
-                          <p className="text-xs text-muted-foreground">You scored 92% on the Ethics exam</p>
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">Notifications</span>
+                        {unreadCount > 0 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={markAllAsRead}
+                            className="text-xs h-6"
+                            data-testid="button-mark-all-read"
+                          >
+                            <Check className="h-3 w-3 mr-1" />
+                            Mark all read
+                          </Button>
+                        )}
+                      </div>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="text-sm text-muted-foreground text-center py-4">
+                            No notifications yet
+                          </div>
+                        ) : (
+                          notifications.map((notification) => (
+                            <div 
+                              key={notification.id}
+                              className={`text-sm p-2 rounded border cursor-pointer group relative ${
+                                notification.read 
+                                  ? "border-border bg-muted/30" 
+                                  : "border-primary/30 bg-primary/5"
+                              } hover-elevate`}
+                              onClick={() => handleNotificationClick(notification)}
+                              data-testid={`notification-${notification.id}`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className={`font-medium truncate ${notification.read ? "text-muted-foreground" : ""}`}>
+                                    {notification.title}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">
+                                    {notification.message}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground/60 mt-1">
+                                    {new Date(notification.createdAt).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteNotification(notification.id);
+                                  }}
+                                  data-testid={`button-delete-notification-${notification.id}`}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              {!notification.read && (
+                                <div className="absolute top-2 right-8 h-2 w-2 rounded-full bg-primary" />
+                              )}
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   </PopoverContent>
