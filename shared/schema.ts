@@ -678,6 +678,20 @@ export const mediaAssets = pgTable("media_assets", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// User notifications table
+export const notifications = pgTable("notifications", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  type: varchar("type").notNull(), // "course_available", "certificate_expiring", "exam_results", "enrollment", "system"
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  link: varchar("link"), // optional link to navigate to
+  read: boolean("read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type UpsertUser = typeof users.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
@@ -716,6 +730,14 @@ export type QuizAnswer = typeof quizAnswers.$inferSelect;
 export type Certificate = typeof certificates.$inferSelect;
 export type Video = typeof videos.$inferSelect;
 export type MediaAsset = typeof mediaAssets.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
+
+// Notification Zod schemas
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 
 // Chat Zod schemas
 export const insertChatSessionSchema = createInsertSchema(chatSessions).omit({
