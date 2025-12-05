@@ -902,7 +902,7 @@ export async function registerRoutes(
       }
 
       const certificateData: CertificateData = {
-        studentName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
+        studentName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "Student",
         courseName: course.title,
         hours: course.hoursRequired || 0,
         completionDate: new Date(enrollment.completedAt || new Date()),
@@ -952,11 +952,11 @@ export async function registerRoutes(
         return res.status(404).json({ error: "User or course not found" });
       }
 
-      const studentName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email;
+      const studentName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email || "Student";
       const completionDate = new Date(enrollment.completedAt || new Date());
 
       const certificateData: CertificateData = {
-        studentName,
+        studentName: studentName,
         courseName: course.title,
         hours: course.hoursRequired || 0,
         completionDate,
@@ -1240,7 +1240,11 @@ export async function registerRoutes(
         questionIds: JSON.stringify(questionIds),
         totalQuestions: questions.length,
         correctAnswers: 0,
-        timeSpentSeconds: 0
+        timeSpentSeconds: 0,
+        startedAt: new Date(),
+        completedAt: null,
+        score: null,
+        passed: null
       });
       
       // Return questions without correct answers or explanations
