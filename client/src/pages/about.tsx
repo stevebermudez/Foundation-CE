@@ -73,6 +73,58 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Official Licensing */}
+      <section className="py-16 px-4 bg-slate-100 dark:bg-slate-800/50">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-3xl font-bold mb-8 text-center text-slate-900 dark:text-white">
+            Official Licensing
+          </h2>
+          <Card className="border-0 shadow-lg">
+            <CardContent className="pt-8 pb-8">
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                    Corporate Entity
+                  </h3>
+                  <div className="space-y-2 text-slate-600 dark:text-slate-400">
+                    <p><span className="font-medium">Legal Name:</span> Haymakers FL Inc.</p>
+                    <p><span className="font-medium">DBA:</span> Foundation CE</p>
+                    <p><span className="font-medium">Parent Company:</span> Haymakers, Inc.</p>
+                    <p><span className="font-medium">Incorporated:</span> Delaware</p>
+                    <p><span className="font-medium">Registered:</span> State of Florida</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                    Florida DBPR License
+                  </h3>
+                  <div className="space-y-2 text-slate-600 dark:text-slate-400">
+                    <p><span className="font-medium">License Number:</span> ZH1003162</p>
+                    <p><span className="font-medium">Division:</span> Division of Real Estate</p>
+                    <p><span className="font-medium">Authority:</span> Chapter 475, Florida Statutes</p>
+                    <p><span className="font-medium">Issued:</span> December 2, 2025</p>
+                    <p><span className="font-medium">Expires:</span> September 30, 2027</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
+                  Verify license at{" "}
+                  <a 
+                    href="https://www.myfloridalicense.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    MyFloridaLicense.com
+                  </a>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* Core Values */}
       <section className="py-20 px-4 bg-white dark:bg-slate-900">
         <div className="mx-auto max-w-4xl">

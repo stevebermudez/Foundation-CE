@@ -135,11 +135,13 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              &copy; {currentYear} FoundationCE. All rights reserved.
-            </p>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <span>FL DBPR Provider #0012345</span>
+            <div className="text-sm text-muted-foreground text-center sm:text-left">
+              <p>&copy; {currentYear} Haymakers FL Inc. dba Foundation CE. All rights reserved.</p>
+              <p className="text-xs mt-1">A Delaware corporation registered in Florida</p>
+            </div>
+            <div className="flex flex-col items-center sm:items-end gap-1 text-sm text-muted-foreground">
+              <span className="font-medium">FL DBPR License #ZH1003162</span>
+              <span className="text-xs">Division of Real Estate | Expires Sept 30, 2027</span>
             </div>
           </div>
         </div>
