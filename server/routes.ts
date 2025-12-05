@@ -1566,7 +1566,6 @@ export async function registerRoutes(
 
       const stripe = getStripeClient();
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
         line_items: [
           {
             price_data: {
@@ -1615,7 +1614,9 @@ export async function registerRoutes(
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100),
         currency: "usd",
-        payment_method_types: ["card"],
+        automatic_payment_methods: {
+          enabled: true,
+        },
         metadata: {
           courseId,
           email,
