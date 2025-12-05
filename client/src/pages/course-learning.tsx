@@ -359,27 +359,27 @@ export default function CourseLearningPage() {
                   {progressData.units.filter(u => u.status === "completed").length} of {progressData.units.length} completed
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-0 overflow-hidden">
+              <CardContent className="p-0">
                 <ScrollArea className="h-[calc(100vh-300px)]">
-                  <div className="p-3 space-y-2 overflow-hidden">
+                  <div className="p-3 space-y-2">
                     {progressData.units.map((unit, idx) => (
-                      <div key={unit.id} className="border rounded-lg overflow-hidden">
+                      <div key={unit.id} className="border rounded-lg">
                         <div
-                          className={`flex items-center gap-2 p-3 cursor-pointer hover-elevate ${
+                          className={`flex items-start gap-2 p-3 cursor-pointer hover-elevate ${
                             unit.isLocked ? "opacity-60" : ""
                           }`}
                           onClick={() => !unit.isLocked && toggleUnit(unit.id)}
                           data-testid={`unit-header-${idx}`}
                         >
                           {unit.isLocked ? (
-                            <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                           ) : unit.status === "completed" ? (
-                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
                           ) : (
-                            <PlayCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                            <PlayCircle className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
                           )}
-                          <div className="flex-1 min-w-0 overflow-hidden">
-                            <p className={`font-medium text-sm truncate ${unit.isLocked ? "text-muted-foreground" : ""}`}>
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium text-sm ${unit.isLocked ? "text-muted-foreground" : ""}`}>
                               Unit {unit.unitNumber}: {unit.title}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
