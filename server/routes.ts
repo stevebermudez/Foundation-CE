@@ -15,6 +15,7 @@ import {
 } from "./paypal";
 import { submitToDBPR, validateDBPRData, generateDBPRBatchFile } from "./dbprService";
 import { generateCertificateHTML, generateCertificateFileName, CertificateData } from "./certificates";
+import { sendContactFormEmail, sendEnrollmentConfirmationEmail, sendCertificateEmail } from "./emailService";
 import express from "express";
 import path from "path";
 
@@ -365,6 +366,20 @@ export async function registerRoutes(
       } catch (notifErr) {
         console.error("Failed to create enrollment notification:", notifErr);
       }
+
+      // Send enrollment confirmation email
+      try {
+        const studentName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email?.split("@")[0] || "Student";
+        await sendEnrollmentConfirmationEmail({
+          studentEmail: user.email || "",
+          studentName,
+          courseName: course.title,
+          courseHours: course.hoursRequired || 0,
+          purchaseAmount: course.price || 0,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send enrollment confirmation email:", emailErr);
+      }
       
       res.json({ enrollment, existing: false });
     } catch (err) {
@@ -676,6 +691,36 @@ export async function registerRoutes(
           : user?.firstName && user?.lastName
             ? `${user.firstName} ${user.lastName}`
             : "Unknown";
+
+      // Send certificate email on course completion
+      if (user?.email && course) {
+        try {
+          const completionDate = new Date();
+          const certificateData: CertificateData = {
+            studentName,
+            courseName: course.title,
+            hours: course.hoursRequired || 0,
+            completionDate,
+            instructorName: course.instructorName || undefined,
+            schoolName: "FoundationCE",
+            schoolApprovalNumber: course.providerNumber || "ZH0004868",
+            deliveryMethod: course.deliveryMethod || "Self-Paced Online",
+          };
+          const certificateHtml = generateCertificateHTML(certificateData);
+          
+          await sendCertificateEmail({
+            studentEmail: user.email,
+            studentName,
+            courseName: course.title,
+            courseHours: course.hoursRequired || 0,
+            completionDate,
+            certificateHtml,
+          });
+          console.log("Certificate email sent to:", user.email);
+        } catch (emailErr) {
+          console.error("Failed to send certificate email:", emailErr);
+        }
+      }
 
       // Trigger Sircon reporting if it's an insurance course
       if (course?.productType === "Insurance" && licenseNumber) {
@@ -3882,7 +3927,7 @@ segment1.ts
         return res.status(400).json({ error: "All fields are required" });
       }
 
-      // Log contact message (in production, send email here)
+      // Log contact message
       console.log("Contact form submission:", {
         name,
         email,
@@ -3890,6 +3935,12 @@ segment1.ts
         message,
         timestamp: new Date().toISOString(),
       });
+
+      // Send email notification
+      const emailSent = await sendContactFormEmail({ name, email, subject, message });
+      if (emailSent) {
+        console.log("Contact form email sent successfully");
+      }
 
       res.json({ success: true, message: "Your message has been received" });
     } catch (err) {
