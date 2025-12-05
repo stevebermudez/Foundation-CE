@@ -78,6 +78,20 @@ Complete admin UI for managing user payments, refunds, and account credits:
   - `POST /api/admin/refunds` - Issue a refund
   - `POST /api/admin/credits` - Add account credit
 
+### WCAG 2.1 Level AA Accessibility Compliance
+The platform implements comprehensive accessibility features to ensure ADA compliance and protect against potential litigation:
+- **Skip Navigation**: SkipLinks component allows keyboard users to bypass repetitive navigation and jump directly to main content
+- **ARIA Landmarks**: Proper roles assigned to header (role="banner"), main content (role="main"), footer (role="contentinfo"), and navigation areas
+- **Focus Indicators**: High-visibility focus outlines (2px solid ring) on all interactive elements for keyboard navigation
+- **Screen Reader Support**: All icon-only buttons include descriptive aria-label attributes; decorative icons marked with aria-hidden="true"
+- **Reduced Motion**: CSS media query @media (prefers-reduced-motion: reduce) disables animations for users with vestibular disorders
+- **Form Accessibility**: All form inputs have associated labels via htmlFor/id pairing
+- **Accessibility Statement**: Dedicated /accessibility page with compliance information and contact details for accessibility concerns
+- **Key Files**: 
+  - `client/src/components/SkipLinks.tsx` - Skip navigation component
+  - `client/src/pages/accessibility.tsx` - Accessibility statement page
+  - `client/src/index.css` - Focus indicators and reduced motion CSS utilities
+
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Replit Auth (Google, GitHub, X, Apple)
