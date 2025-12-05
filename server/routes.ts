@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
+import { updateAllLessonContent } from "./updateLessonContent";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
 import {
@@ -45,6 +46,9 @@ export async function registerRoutes(
     
     // Seed LMS content (units, lessons, question banks)
     await seedLMSContent();
+    
+    // Update lesson content with real FREC I educational material
+    await updateAllLessonContent();
   } catch (err: any) {
     console.error("Error with FREC I seeding:", err);
   }

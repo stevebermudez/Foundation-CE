@@ -36,6 +36,20 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
 - **LMS Integration**: Architected for seamless integration and potential migration to 3rd-party LMS systems like Moodle or Canvas via data export/import APIs and SCORM package conversion readiness.
 - **Real Estate Express Integration**: Dedicated APIs for exporting and importing enrollment data in Real Estate Express specific formats.
 
+### LMS Content Architecture
+The LMS now contains real FREC I educational content (63-hour Florida Sales Associate Pre-Licensing Course):
+- **Content Source**: Detailed lesson scripts extracted from uploaded course materials in attached_assets
+- **Coverage**: All 19 units have full educational content with learning objectives, key concepts, and exam preparation tips (60+ lessons total)
+- **Content File**: `server/lessonContent.ts` contains all lesson HTML content organized by unit and lesson number
+- **Auto-Update**: `server/updateLessonContent.ts` updates existing database lessons with real content on application startup
+- **Topics Covered**: 
+  - Units 1-3: Real estate business, license law, DBPR/FREC
+  - Units 4-6: Agency relationships, brokerage operations, violations/penalties
+  - Units 7-10: Fair housing, property rights, deeds, legal descriptions
+  - Units 11-13: Real estate contracts, mortgages, loan types
+  - Units 14-16: Closing procedures, market analysis, appraisal
+  - Units 17-19: Investments, taxes, planning/zoning
+
 ### LMS Security Architecture
 The LMS implements comprehensive server-side authorization to prevent client-side bypass attempts:
 - **Enrollment Ownership**: All lesson, quiz, and exam routes verify the user owns the enrollment

@@ -1,6 +1,7 @@
 import { db } from "./db";
 import { courses, units, lessons, questionBanks, bankQuestions } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import { getLessonContent } from "./lessonContent";
 
 export async function seedLMSContent() {
   try {
@@ -174,7 +175,7 @@ export async function seedLMSContent() {
           unitId: unit.id,
           lessonNumber: i + 1,
           title: lessonTopics[i],
-          content: generateLessonContent(unit.title, lessonTopics[i]),
+          content: getLessonContent(unit.unitNumber, i + 1),
           durationMinutes: Math.floor((unit.hoursRequired * 60) / lessonCount),
           sequence: i + 1,
         });
@@ -281,19 +282,6 @@ function getLessonTopics(unitNumber: number, lessonCount: number): string[] {
     Array.from({ length: lessonCount }, (_, i) => `Lesson ${i + 1}`);
 }
 
-function generateLessonContent(unitTitle: string, lessonTitle: string): string {
-  return `<h2>${lessonTitle}</h2>
-<p>This lesson covers important concepts related to ${lessonTitle.toLowerCase()} as part of the ${unitTitle} unit.</p>
-<h3>Learning Objectives</h3>
-<ul>
-<li>Understand key concepts and terminology</li>
-<li>Apply knowledge to real-world scenarios</li>
-<li>Prepare for the unit quiz assessment</li>
-</ul>
-<h3>Key Points</h3>
-<p>Review the material carefully and take notes. You will need to spend adequate time on this lesson before proceeding.</p>
-<p>After completing this lesson, you'll be one step closer to completing the unit and taking the unit quiz.</p>`;
-}
 
 function getUnitQuestions(unitNumber: number): Array<{
   text: string;
