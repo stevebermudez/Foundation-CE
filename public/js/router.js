@@ -41,6 +41,9 @@ async function handleRoute(course) {
     }
   } catch (err) {
     console.error("Route error:", err);
-    document.getElementById("content").innerHTML = `<p>Error loading content: ${err.message}</p>`;
+    const contentEl = document.getElementById("content");
+    const errorP = document.createElement("p");
+    errorP.textContent = `Error loading content: ${err.message}`;
+    contentEl.replaceChildren(errorP);
   }
 }
