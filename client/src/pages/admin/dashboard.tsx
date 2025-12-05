@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import AdminCoursesPage from "./courses";
 import PagesManagerPage from "./pages-manager";
@@ -142,6 +143,18 @@ export default function AdminDashboardPage() {
   const [expandedUnits, setExpandedUnits] = useState<Record<string, boolean>>({});
   const [loadingProgress, setLoadingProgress] = useState(false);
 
+  // Add User dialog state
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserFirstName, setNewUserFirstName] = useState("");
+  const [newUserLastName, setNewUserLastName] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+
+  // Add Enrollment dialog state
+  const [addEnrollmentDialogOpen, setAddEnrollmentDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+
   // Fetch detailed progress for an enrollment
   const fetchDetailedProgress = async (enrollmentId: string) => {
     setLoadingProgress(true);
@@ -239,6 +252,88 @@ export default function AdminDashboardPage() {
   // Toggle unit expansion
   const toggleUnitExpansion = (unitId: string) => {
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
+  };
+
+  // Create user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: { email: string; firstName: string; lastName: string; password: string }) => {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(userData),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to create user');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "User created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setAddUserDialogOpen(false);
+      setNewUserEmail("");
+      setNewUserFirstName("");
+      setNewUserLastName("");
+      setNewUserPassword("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Create enrollment mutation
+  const createEnrollmentMutation = useMutation({
+    mutationFn: async (data: { userId: string; courseId: string }) => {
+      const res = await fetch('/api/admin/enrollments', {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to create enrollment');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Enrollment created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
+      setAddEnrollmentDialogOpen(false);
+      setSelectedUserId("");
+      setSelectedCourseId("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  // Handle create user form submit
+  const handleCreateUser = () => {
+    if (!newUserEmail) {
+      toast({ title: "Error", description: "Email is required", variant: "destructive" });
+      return;
+    }
+    createUserMutation.mutate({
+      email: newUserEmail,
+      firstName: newUserFirstName,
+      lastName: newUserLastName,
+      password: newUserPassword
+    });
+  };
+
+  // Handle create enrollment form submit
+  const handleCreateEnrollment = () => {
+    if (!selectedUserId || !selectedCourseId) {
+      toast({ title: "Error", description: "Please select a user and course", variant: "destructive" });
+      return;
+    }
+    createEnrollmentMutation.mutate({
+      userId: selectedUserId,
+      courseId: selectedCourseId
+    });
   };
 
   // Get user info for display
@@ -446,7 +541,7 @@ export default function AdminDashboardPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>User Management</CardTitle>
-                  <Button size="sm" data-testid="button-add-user">Add User</Button>
+                  <Button size="sm" onClick={() => setAddUserDialogOpen(true)} data-testid="button-add-user">Add User</Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -497,7 +592,10 @@ export default function AdminDashboardPage() {
           <TabsContent value="enrollments">
             <Card data-testid="card-enrollments-list">
               <CardHeader>
-                <CardTitle>Enrollment Progress Management</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Enrollment Progress Management</CardTitle>
+                  <Button size="sm" onClick={() => setAddEnrollmentDialogOpen(true)} data-testid="button-add-enrollment">Add Enrollment</Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -730,6 +828,132 @@ export default function AdminDashboardPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Add User Dialog */}
+        <Dialog open={addUserDialogOpen} onOpenChange={setAddUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New User</DialogTitle>
+              <DialogDescription>
+                Create a new user account. Password is optional - users can login with Google OAuth.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  data-testid="input-user-email"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    placeholder="John"
+                    value={newUserFirstName}
+                    onChange={(e) => setNewUserFirstName(e.target.value)}
+                    data-testid="input-user-firstname"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Doe"
+                    value={newUserLastName}
+                    onChange={(e) => setNewUserLastName(e.target.value)}
+                    data-testid="input-user-lastname"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password (optional)</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Leave blank for OAuth-only login"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  data-testid="input-user-password"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddUserDialogOpen(false)} data-testid="button-cancel-add-user">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCreateUser} 
+                disabled={createUserMutation.isPending}
+                data-testid="button-confirm-add-user"
+              >
+                {createUserMutation.isPending ? "Creating..." : "Create User"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Enrollment Dialog */}
+        <Dialog open={addEnrollmentDialogOpen} onOpenChange={setAddEnrollmentDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Enrollment</DialogTitle>
+              <DialogDescription>
+                Enroll a user in a course. Select the user and course below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="user-select">Select User *</Label>
+                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                  <SelectTrigger data-testid="select-enrollment-user">
+                    <SelectValue placeholder="Choose a user..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user: any) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="course-select">Select Course *</Label>
+                <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
+                  <SelectTrigger data-testid="select-enrollment-course">
+                    <SelectValue placeholder="Choose a course..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map((course: any) => (
+                      <SelectItem key={course.id} value={course.id}>
+                        {course.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddEnrollmentDialogOpen(false)} data-testid="button-cancel-add-enrollment">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleCreateEnrollment} 
+                disabled={createEnrollmentMutation.isPending || !selectedUserId || !selectedCourseId}
+                data-testid="button-confirm-add-enrollment"
+              >
+                {createEnrollmentMutation.isPending ? "Creating..." : "Create Enrollment"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

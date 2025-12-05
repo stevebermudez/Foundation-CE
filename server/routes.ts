@@ -3268,6 +3268,78 @@ segment1.ts
     }
   });
 
+  // Admin create user endpoint
+  app.post("/api/admin/users", isAdmin, async (req, res) => {
+    try {
+      const { email, firstName, lastName, password } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "User with this email already exists" });
+      }
+
+      // Hash password if provided
+      let passwordHash = undefined;
+      if (password) {
+        const bcrypt = await import("bcrypt");
+        passwordHash = await bcrypt.hash(password, 10);
+      }
+
+      const user = await storage.upsertUser({
+        id: crypto.randomUUID(),
+        email,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        passwordHash,
+      });
+
+      res.status(201).json(user);
+    } catch (err) {
+      console.error("Error creating user:", err);
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
+  // Admin create enrollment endpoint
+  app.post("/api/admin/enrollments", isAdmin, async (req, res) => {
+    try {
+      const { userId, courseId } = req.body;
+      
+      if (!userId || !courseId) {
+        return res.status(400).json({ error: "userId and courseId are required" });
+      }
+
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Check if course exists
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // Check if enrollment already exists
+      const existingEnrollment = await storage.getEnrollment(userId, courseId);
+      if (existingEnrollment) {
+        return res.status(400).json({ error: "User is already enrolled in this course" });
+      }
+
+      const enrollment = await storage.createEnrollment(userId, courseId);
+      res.status(201).json(enrollment);
+    } catch (err) {
+      console.error("Error creating enrollment:", err);
+      res.status(500).json({ error: "Failed to create enrollment" });
+    }
+  });
+
   // Course Management Admin Routes
   app.post("/api/admin/courses", isAdmin, async (req, res) => {
     try {
