@@ -3918,6 +3918,236 @@ segment1.ts
     }
   });
 
+  // ===== Admin Financial Management Routes =====
+  
+  // Get all purchases (admin)
+  app.get("/api/admin/purchases", isAdmin, async (req, res) => {
+    try {
+      const allPurchases = await storage.getAllPurchases();
+      res.json(allPurchases);
+    } catch (err) {
+      console.error("Error fetching purchases:", err);
+      res.status(500).json({ error: "Failed to fetch purchases" });
+    }
+  });
+
+  // Get user's financial summary
+  app.get("/api/admin/users/:userId/financial", isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const summary = await storage.getUserFinancialSummary(userId);
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+        ...summary
+      });
+    } catch (err) {
+      console.error("Error fetching user financial summary:", err);
+      res.status(500).json({ error: "Failed to fetch financial summary" });
+    }
+  });
+
+  // Get all refunds (admin)
+  app.get("/api/admin/refunds", isAdmin, async (req, res) => {
+    try {
+      const allRefunds = await storage.getAllRefunds();
+      res.json(allRefunds);
+    } catch (err) {
+      console.error("Error fetching refunds:", err);
+      res.status(500).json({ error: "Failed to fetch refunds" });
+    }
+  });
+
+  // Get all account credits (admin)
+  app.get("/api/admin/credits", isAdmin, async (req, res) => {
+    try {
+      const allCredits = await storage.getAllAccountCredits();
+      res.json(allCredits);
+    } catch (err) {
+      console.error("Error fetching credits:", err);
+      res.status(500).json({ error: "Failed to fetch credits" });
+    }
+  });
+
+  // Issue a refund via Stripe
+  app.post("/api/admin/refunds", isAdmin, async (req, res) => {
+    try {
+      const { purchaseId, amount, reason, notes } = req.body;
+      const adminUserId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!purchaseId) {
+        return res.status(400).json({ error: "purchaseId is required" });
+      }
+
+      const purchase = await storage.getPurchaseById(purchaseId);
+      if (!purchase) {
+        return res.status(404).json({ error: "Purchase not found" });
+      }
+
+      // Calculate refund amount (default to full amount)
+      const refundAmount = amount || purchase.amount;
+      if (refundAmount > purchase.amount) {
+        return res.status(400).json({ error: "Refund amount cannot exceed purchase amount" });
+      }
+
+      // Create refund record
+      const refundRecord = await storage.createRefund({
+        purchaseId,
+        userId: purchase.userId,
+        amount: refundAmount,
+        reason: reason || "requested_by_customer",
+        notes,
+        status: "pending",
+        processedBy: adminUserId,
+      });
+
+      // Process Stripe refund if payment intent exists
+      let stripeRefundId = null;
+      if (purchase.stripePaymentIntentId && process.env.STRIPE_SECRET_KEY) {
+        try {
+          const stripe = getStripeClient();
+          const stripeRefund = await stripe.refunds.create({
+            payment_intent: purchase.stripePaymentIntentId,
+            amount: refundAmount,
+            reason: reason === "duplicate" ? "duplicate" : 
+                    reason === "fraudulent" ? "fraudulent" : 
+                    "requested_by_customer",
+          });
+          stripeRefundId = stripeRefund.id;
+          
+          // Update refund status to succeeded
+          await storage.updateRefundStatus(refundRecord.id, "succeeded", stripeRefundId);
+          
+          // Update purchase status
+          if (refundAmount === purchase.amount) {
+            await storage.updatePurchaseStatus(purchaseId, "refunded");
+          }
+        } catch (stripeErr: any) {
+          console.error("Stripe refund failed:", stripeErr.message);
+          await storage.updateRefundStatus(refundRecord.id, "failed");
+          return res.status(500).json({ 
+            error: "Stripe refund failed", 
+            details: stripeErr.message,
+            refundId: refundRecord.id
+          });
+        }
+      } else {
+        // No Stripe payment intent - just mark as succeeded (manual refund)
+        await storage.updateRefundStatus(refundRecord.id, "succeeded");
+        if (refundAmount === purchase.amount) {
+          await storage.updatePurchaseStatus(purchaseId, "refunded");
+        }
+      }
+
+      const updatedRefund = await storage.getRefund(refundRecord.id);
+      res.status(201).json(updatedRefund);
+    } catch (err) {
+      console.error("Error processing refund:", err);
+      res.status(500).json({ error: "Failed to process refund" });
+    }
+  });
+
+  // Add account credit
+  app.post("/api/admin/credits", isAdmin, async (req, res) => {
+    try {
+      const { userId, amount, type, description, expiresAt, relatedPurchaseId } = req.body;
+      const adminUserId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!userId || !amount) {
+        return res.status(400).json({ error: "userId and amount are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const credit = await storage.createAccountCredit({
+        userId,
+        amount: Math.round(amount), // Ensure it's in cents
+        type: type || "adjustment",
+        description: description || "Account credit issued by admin",
+        relatedPurchaseId,
+        issuedBy: adminUserId,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+      });
+
+      res.status(201).json(credit);
+    } catch (err) {
+      console.error("Error creating credit:", err);
+      res.status(500).json({ error: "Failed to create credit" });
+    }
+  });
+
+  // Get user's account credit balance
+  app.get("/api/admin/users/:userId/credit-balance", isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const balance = await storage.getAccountCreditBalance(userId);
+      const credits = await storage.getAccountCredits(userId);
+      
+      res.json({ 
+        userId,
+        balance,
+        credits 
+      });
+    } catch (err) {
+      console.error("Error fetching credit balance:", err);
+      res.status(500).json({ error: "Failed to fetch credit balance" });
+    }
+  });
+
+  // Use account credit for enrollment (deduct from balance)
+  app.post("/api/admin/credits/use", isAdmin, async (req, res) => {
+    try {
+      const { userId, amount, enrollmentId, description } = req.body;
+      const adminUserId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!userId || !amount) {
+        return res.status(400).json({ error: "userId and amount are required" });
+      }
+
+      const currentBalance = await storage.getAccountCreditBalance(userId);
+      if (currentBalance < amount) {
+        return res.status(400).json({ 
+          error: "Insufficient credit balance",
+          currentBalance,
+          requestedAmount: amount 
+        });
+      }
+
+      // Create negative credit entry to record usage
+      const credit = await storage.createAccountCredit({
+        userId,
+        amount: -Math.abs(amount), // Negative to deduct
+        type: "used",
+        description: description || "Credit applied to enrollment",
+        relatedEnrollmentId: enrollmentId,
+        issuedBy: adminUserId,
+      });
+
+      const newBalance = await storage.getAccountCreditBalance(userId);
+      res.status(201).json({ credit, newBalance });
+    } catch (err) {
+      console.error("Error using credit:", err);
+      res.status(500).json({ error: "Failed to use credit" });
+    }
+  });
+
   // Contact Form Submission
   app.post("/api/contact", async (req, res) => {
     try {
