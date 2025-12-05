@@ -87,9 +87,8 @@ export default function AboutPage() {
                     Corporate Entity
                   </h3>
                   <div className="space-y-2 text-slate-600 dark:text-slate-400">
-                    <p><span className="font-medium">School Permitholder:</span> Haymakers FL, Inc.</p>
-                    <p><span className="font-medium">DBA:</span> Foundation CE</p>
-                    <p><span className="font-medium">Parent Company:</span> Haymakers, Inc. (Delaware)</p>
+                    <p><span className="font-medium">Legal Entity:</span> Haymakers, Inc., a Delaware corporation</p>
+                    <p><span className="font-medium">Registered to Transact Business in Florida as:</span> Haymakers FL, Inc. dba Foundation CE</p>
                     <p><span className="font-medium">Address:</span> 10 E. Yanonali Street #134<br />Santa Barbara, CA 93101</p>
                   </div>
                 </div>
