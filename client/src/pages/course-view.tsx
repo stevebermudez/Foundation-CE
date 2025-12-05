@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
   Circle,
   BookOpen,
   Zap,
+  ShoppingCart,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -211,6 +212,7 @@ const mockQuestions = [
 
 export default function CourseViewPage() {
   const params = useParams<{ id: string }>();
+  const [, setLocation] = useLocation();
   const [currentLesson, setCurrentLesson] = useState(mockLessons[2]);
   const [activeTab, setActiveTab] = useState("overview");
   const [testMode, setTestMode] = useState<"untimed" | "timed" | false>(false);
@@ -241,7 +243,15 @@ export default function CourseViewPage() {
   const { data: enrollment } = useQuery({
     queryKey: ["/api/enrollments", params.id],
     queryFn: async () => {
-      const res = await fetch(`/api/enrollments/user`, { credentials: "include" });
+      const token = localStorage.getItem("authToken");
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch(`/api/enrollments/user`, { 
+        headers,
+        credentials: "include" 
+      });
       if (!res.ok) return null;
       const enrollments = await res.json();
       return enrollments.find((e: any) => e.courseId === params.id) || null;
@@ -323,6 +333,16 @@ export default function CourseViewPage() {
                 </div>
               </div>
             </div>
+            {!enrollment && course && (
+              <Button
+                onClick={() => setLocation(`/checkout/${params.id}`)}
+                className="gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                data-testid="button-buy-course"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Buy Now - ${((course.price || 0) / 100).toFixed(2)}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -410,6 +430,27 @@ export default function CourseViewPage() {
                         {enrollment.hoursCompleted} of {course?.hoursRequired}{" "}
                         hours completed
                       </p>
+                    </div>
+                  )}
+
+                  {!enrollment && course && (
+                    <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-green-800 dark:text-green-200">Ready to Get Started?</p>
+                          <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                            Enroll now and begin your learning journey today.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => setLocation(`/checkout/${params.id}`)}
+                          className="gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 shrink-0"
+                          data-testid="button-enroll-overview"
+                        >
+                          <ShoppingCart className="h-4 w-4" />
+                          Enroll Now - ${((course.price || 0) / 100).toFixed(2)}
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
