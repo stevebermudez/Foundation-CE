@@ -165,6 +165,13 @@ export default function AdminDashboardPage() {
   const [newUserLastName, setNewUserLastName] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
 
+  // Edit User dialog state
+  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editUserEmail, setEditUserEmail] = useState("");
+  const [editUserFirstName, setEditUserFirstName] = useState("");
+  const [editUserLastName, setEditUserLastName] = useState("");
+
   // Add Enrollment dialog state
   const [addEnrollmentDialogOpen, setAddEnrollmentDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -298,6 +305,39 @@ export default function AdminDashboardPage() {
     }
   });
 
+  // Update user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async (userData: { userId: string; email: string; firstName: string; lastName: string }) => {
+      const res = await fetch(`/api/admin/users/${userData.userId}/data`, {
+        method: 'PATCH',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+        }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to update user');
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "User updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setEditUserDialogOpen(false);
+      setEditingUser(null);
+      setEditUserEmail("");
+      setEditUserFirstName("");
+      setEditUserLastName("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
   // Create enrollment mutation
   const createEnrollmentMutation = useMutation({
     mutationFn: async (data: { userId: string; courseId: string }) => {
@@ -336,6 +376,29 @@ export default function AdminDashboardPage() {
       firstName: newUserFirstName,
       lastName: newUserLastName,
       password: newUserPassword
+    });
+  };
+
+  // Open edit user dialog
+  const openEditUserDialog = (user: any) => {
+    setEditingUser(user);
+    setEditUserEmail(user.email || "");
+    setEditUserFirstName(user.firstName || "");
+    setEditUserLastName(user.lastName || "");
+    setEditUserDialogOpen(true);
+  };
+
+  // Handle update user form submit
+  const handleUpdateUser = () => {
+    if (!editingUser || !editUserEmail) {
+      toast({ title: "Error", description: "Email is required", variant: "destructive" });
+      return;
+    }
+    updateUserMutation.mutate({
+      userId: editingUser.id,
+      email: editUserEmail,
+      firstName: editUserFirstName,
+      lastName: editUserLastName,
     });
   };
 
@@ -629,7 +692,16 @@ export default function AdminDashboardPage() {
                                   <Badge variant="secondary">Pending</Badge>
                                 )}
                               </td>
-                              <td className="p-2"><Button size="sm" variant="outline">Edit</Button></td>
+                              <td className="p-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => openEditUserDialog(user)}
+                                  data-testid={`button-edit-user-${idx}`}
+                                >
+                                  Edit
+                                </Button>
+                              </td>
                             </tr>
                           );
                         })
@@ -1018,6 +1090,65 @@ export default function AdminDashboardPage() {
                 data-testid="button-confirm-add-enrollment"
               >
                 {createEnrollmentMutation.isPending ? "Creating..." : "Create Enrollment"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit User Dialog */}
+        <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update user information. Changes will be saved immediately.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email *</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={editUserEmail}
+                  onChange={(e) => setEditUserEmail(e.target.value)}
+                  data-testid="input-edit-user-email"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-firstName">First Name</Label>
+                  <Input
+                    id="edit-firstName"
+                    placeholder="John"
+                    value={editUserFirstName}
+                    onChange={(e) => setEditUserFirstName(e.target.value)}
+                    data-testid="input-edit-user-firstname"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lastName">Last Name</Label>
+                  <Input
+                    id="edit-lastName"
+                    placeholder="Doe"
+                    value={editUserLastName}
+                    onChange={(e) => setEditUserLastName(e.target.value)}
+                    data-testid="input-edit-user-lastname"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditUserDialogOpen(false)} data-testid="button-cancel-edit-user">
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateUser} 
+                disabled={updateUserMutation.isPending}
+                data-testid="button-confirm-edit-user"
+              >
+                {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </DialogContent>
