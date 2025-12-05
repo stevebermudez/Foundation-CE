@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
-import { isAuthenticated, isAdmin } from "./replitAuth";
+import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
 import {
   createPaypalOrder,
