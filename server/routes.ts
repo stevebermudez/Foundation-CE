@@ -3625,14 +3625,26 @@ segment1.ts
     }
   });
 
-  // Admin User Seeding - Creates a test admin user (should be removed in production)
+  // Admin User Seeding - Development only, requires environment variables
   app.post("/api/seed/admin", async (req, res) => {
     try {
+      // Only allow in development environment
+      if (process.env.NODE_ENV === "production") {
+        return res.status(403).json({ error: "Seeding not allowed in production" });
+      }
+
+      // Require environment variables for admin credentials
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+
+      if (!adminEmail || !adminPassword) {
+        return res.status(400).json({ 
+          error: "ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required" 
+        });
+      }
+
       const bcrypt = await import("bcrypt");
       const crypto = await import("crypto");
-      
-      const adminEmail = "admin@foundationce.com";
-      const adminPassword = "admin1234";
       
       // Check if admin already exists
       let user = await storage.getUserByEmail(adminEmail);
@@ -3669,10 +3681,7 @@ segment1.ts
       res.json({ 
         success: true, 
         message: "Admin user created",
-        credentials: {
-          email: adminEmail,
-          password: adminPassword
-        }
+        email: adminEmail
       });
     } catch (err) {
       console.error("Error seeding admin:", err);
