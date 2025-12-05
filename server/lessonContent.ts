@@ -435,6 +435,46 @@ const lessonContentByUnit: Record<number, Record<number, string>> = {
 <li>Understand the difference between fiduciary duties and transaction broker duties</li>
 <li>Know the conditions for designated sales associates</li>
 <li>Identify transactions where disclosure rules do not apply</li>
+</ul>`,
+
+    4: `<h2>Disclosure Requirements</h2>
+<p>In this lesson, we examine the specific disclosure requirements in Florida real estate transactions.</p>
+
+<h3>Brokerage Relationship Disclosures</h3>
+<p>Florida law requires written disclosure of the brokerage relationship in residential transactions. The specific forms include:</p>
+<ul>
+<li><strong>Single Agent Notice</strong> - Must be given before or at the time of entering a listing or representation agreement, or before showing property</li>
+<li><strong>Transaction Broker Notice</strong> - While transaction brokerage is presumed, the notice should still be given</li>
+<li><strong>No Brokerage Relationship Notice</strong> - Must be provided in writing before showing property</li>
+<li><strong>Consent to Transition</strong> - Required when changing from single agent to transaction broker</li>
+</ul>
+
+<h3>Property Condition Disclosures</h3>
+<p>Licensees must disclose all known facts that materially affect the value of residential property and are not readily observable. This includes:</p>
+<ul>
+<li>Known defects in the property</li>
+<li>Environmental hazards</li>
+<li>Neighborhood conditions affecting value</li>
+<li>Zoning issues or pending changes</li>
+</ul>
+
+<h3>Johnson v. Davis Rule</h3>
+<p>The Johnson v. Davis case established that sellers of residential property must disclose known material facts that:</p>
+<ul>
+<li>Are not readily observable</li>
+<li>Are not known to the buyer</li>
+<li>Materially affect the value of the property</li>
+</ul>
+
+<h3>Radon Gas Disclosure</h3>
+<p>Florida law requires a radon gas disclosure in every contract for the sale of real property. The disclosure warns buyers about the potential for radon gas.</p>
+
+<h3>Key Points to Remember</h3>
+<ul>
+<li>Single agent notice must be given before entering agreements or showing property</li>
+<li>Material facts affecting value must be disclosed</li>
+<li>Johnson v. Davis requires seller disclosure of known defects</li>
+<li>Radon disclosure is required in all sales contracts</li>
 </ul>`
   },
 
@@ -817,6 +857,38 @@ const lessonContentByUnit: Record<number, Record<number, string>> = {
 <li>A prohibited solicitation to a do-not-call number</li>
 <li>Missing disclosures in commercial email</li>
 <li>Steering or discriminatory statements in advertising</li>
+</ul>`,
+
+    4: `<h2>Environmental Regulations</h2>
+<p>This lesson covers environmental laws that affect real estate transactions in Florida.</p>
+
+<h3>Lead-Based Paint Disclosure</h3>
+<p>Federal law requires disclosure of known lead-based paint hazards in housing built before 1978. The disclosure includes:</p>
+<ul>
+<li>Known presence of lead-based paint</li>
+<li>A 10-day inspection opportunity</li>
+<li>A pamphlet about lead hazards</li>
+<li>Signed acknowledgment of receipt</li>
+</ul>
+
+<h3>Asbestos</h3>
+<p>Asbestos was commonly used in building materials before 1978. When disturbed, asbestos fibers become airborne and can cause serious respiratory illness. Licensees should be aware of potential asbestos in older buildings.</p>
+
+<h3>Radon Gas</h3>
+<p>Radon is a naturally occurring radioactive gas that seeps up through the ground. Florida law requires a radon gas disclosure in all real estate contracts. Testing can determine radon levels, and mitigation systems can reduce exposure.</p>
+
+<h3>Underground Storage Tanks</h3>
+<p>Properties with underground storage tanks may have contamination issues. Lenders often require environmental assessments for commercial properties with tanks.</p>
+
+<h3>CERCLA (Superfund)</h3>
+<p>The Comprehensive Environmental Response, Compensation, and Liability Act establishes liability for contaminated properties. Liability is strict, meaning responsible parties can be held liable regardless of fault. The innocent landowner defense may protect buyers who conducted appropriate due diligence.</p>
+
+<h3>Key Points to Remember</h3>
+<ul>
+<li>Lead-based paint disclosure required for pre-1978 housing</li>
+<li>Radon disclosure required in all Florida real estate contracts</li>
+<li>CERCLA imposes strict liability for contamination</li>
+<li>Environmental issues can significantly affect property value</li>
 </ul>`
   },
 
@@ -949,6 +1021,48 @@ const lessonContentByUnit: Record<number, Record<number, string>> = {
 <li>HOAs enforce CC&Rs and collect assessments</li>
 <li>CDDs are government entities that finance infrastructure</li>
 <li>Time shares can be fee simple ownership or right to use</li>
+</ul>`,
+
+    4: `<h2>HOAs and Time Sharing</h2>
+<p>This lesson provides additional detail on homeowners associations and time share regulations in Florida.</p>
+
+<h3>HOA Governance</h3>
+<p>Homeowners associations are governed by:</p>
+<ul>
+<li><strong>Declaration of Covenants</strong> - The master document creating the HOA and establishing CC&Rs</li>
+<li><strong>Articles of Incorporation</strong> - Creates the HOA as a legal entity</li>
+<li><strong>Bylaws</strong> - Internal operating rules for the association</li>
+<li><strong>Rules and Regulations</strong> - Day-to-day policies adopted by the board</li>
+</ul>
+
+<h3>HOA Disclosure Requirements</h3>
+<p>Before selling property in an HOA community, sellers must provide buyers with:</p>
+<ul>
+<li>A copy of the declaration and any amendments</li>
+<li>The articles of incorporation and bylaws</li>
+<li>Current rules and regulations</li>
+<li>Financial information and assessment history</li>
+<li>Any pending litigation involving the association</li>
+</ul>
+
+<h3>Time Share Regulations</h3>
+<p>Florida heavily regulates time share sales to protect consumers:</p>
+<ul>
+<li><strong>Public offering statement</strong> - Must be provided before sale</li>
+<li><strong>Rescission period</strong> - Buyers have 10 days to cancel after signing or receiving documents, whichever is later</li>
+<li><strong>No deposits before rescission period expires</strong> - Developers cannot require payment until rescission period ends</li>
+<li><strong>Advertising rules</strong> - Must be truthful and not misleading</li>
+</ul>
+
+<h3>Exchange Programs</h3>
+<p>Many time share owners participate in exchange programs that allow them to trade their time at different resorts. Exchange companies facilitate these trades for a fee.</p>
+
+<h3>Key Points to Remember</h3>
+<ul>
+<li>HOA documents must be disclosed before sale</li>
+<li>Time share buyers have a 10-day rescission period</li>
+<li>Developers cannot collect deposits during rescission period</li>
+<li>CC&Rs run with the land and bind future owners</li>
 </ul>`
   },
 
