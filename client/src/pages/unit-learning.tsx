@@ -306,8 +306,8 @@ export default function UnitLearningPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Link href={`/course/${params.courseId}/learn`}>
-                <Button variant="ghost" size="icon" data-testid="button-back-course">
-                  <ArrowLeft className="h-4 w-4" />
+                <Button variant="ghost" size="icon" data-testid="button-back-course" aria-label="Back to course overview">
+                  <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </Link>
               <div>
@@ -338,20 +338,24 @@ export default function UnitLearningPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y">
+            <div className="divide-y" role="list" aria-label="Lesson list">
               {currentUnit.lessons.map((lesson, idx) => (
-                <div
+                <button
                   key={lesson.id}
-                  className={`flex items-center gap-3 p-4 cursor-pointer hover-elevate ${
+                  type="button"
+                  className={`flex items-center gap-3 p-4 cursor-pointer hover-elevate w-full text-left ${
                     activeLesson === lesson.id ? "bg-primary/5 border-l-2 border-l-primary" : ""
                   }`}
                   onClick={() => {
                     setActiveLesson(lesson.id);
                     setIsQuizMode(false);
                   }}
+                  aria-current={activeLesson === lesson.id ? "true" : undefined}
+                  aria-label={`${lesson.title}${lesson.completed ? ", completed" : ""}, ${formatTime(lesson.timeSpentSeconds)} spent`}
                   data-testid={`lesson-item-${idx}`}
+                  role="listitem"
                 >
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0" aria-hidden="true">
                     {lesson.completed ? (
                       <CheckCircle className="h-5 w-5 text-green-500" />
                     ) : activeLesson === lesson.id ? (
@@ -368,8 +372,8 @@ export default function UnitLearningPage() {
                       {formatTime(lesson.timeSpentSeconds)} spent
                     </p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                </button>
               ))}
             </div>
           </CardContent>
@@ -521,13 +525,13 @@ function LessonViewer({
             <CardTitle className="text-xl">{lesson.title}</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="flex items-center gap-1" data-testid="badge-time-spent">
-              <Clock className="h-3 w-3" />
+            <Badge variant="outline" className="flex items-center gap-1" data-testid="badge-time-spent" aria-label={`Time spent: ${formatTime(localElapsedSeconds)}`}>
+              <Clock className="h-3 w-3" aria-hidden="true" />
               {formatTime(localElapsedSeconds)}
             </Badge>
             {lesson.completed && (
-              <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                <CheckCircle className="h-3 w-3 mr-1" />
+              <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" aria-label="Lesson completed">
+                <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
                 Completed
               </Badge>
             )}
@@ -535,17 +539,17 @@ function LessonViewer({
         </div>
         
         {!lesson.completed && (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-2" role="region" aria-label="Lesson time progress">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Time Progress</span>
               {canComplete ? (
                 <span className="text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
-                  <CheckCircle className="h-3.5 w-3.5" />
+                  <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
                   Ready to complete
                 </span>
               ) : (
                 <span className="text-orange-600 dark:text-orange-400 font-medium flex items-center gap-1" data-testid="text-time-remaining">
-                  <Timer className="h-3.5 w-3.5" />
+                  <Timer className="h-3.5 w-3.5" aria-hidden="true" />
                   {formatTime(timeRemaining)} remaining
                 </span>
               )}
@@ -554,6 +558,7 @@ function LessonViewer({
               value={progressPercent} 
               className={`h-2 ${canComplete ? '[&>div]:bg-green-500' : ''}`}
               data-testid="progress-time"
+              aria-label={`Time progress: ${Math.round(progressPercent)}%`}
             />
           </div>
         )}
@@ -566,9 +571,10 @@ function LessonViewer({
                 src={lesson.videoUrl.replace("watch?v=", "embed/")}
                 className="w-full h-full"
                 allowFullScreen
+                title={`Video: ${lesson.title}`}
               />
             ) : (
-              <video src={lesson.videoUrl} controls className="w-full h-full" />
+              <video src={lesson.videoUrl} controls className="w-full h-full" aria-label={`Video: ${lesson.title}`} />
             )}
           </div>
         )}

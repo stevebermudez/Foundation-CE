@@ -160,8 +160,8 @@ export default function CourseLearningPage() {
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3 mb-4">
             <Link href="/dashboard">
-              <Button variant="ghost" size="icon" data-testid="button-back-dashboard">
-                <ArrowLeft className="h-4 w-4" />
+              <Button variant="ghost" size="icon" data-testid="button-back-dashboard" aria-label="Back to dashboard">
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               </Button>
             </Link>
             <div className="flex-1">
@@ -222,7 +222,7 @@ export default function CourseLearningPage() {
         )}
 
         {/* Units List */}
-        <div className="space-y-3">
+        <div className="space-y-3" role="list" aria-label="Course units">
           <h2 className="font-semibold text-lg px-1">Course Units</h2>
           
           {progressData.units.map((unit, idx) => (
@@ -244,11 +244,28 @@ export default function CourseLearningPage() {
                   setLocation(`/course/${params.id}/unit/${unit.id}`);
                 }
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  if (unit.isLocked) {
+                    toast({
+                      title: "Unit Locked",
+                      description: "Complete the previous unit to unlock this one.",
+                      variant: "destructive",
+                    });
+                  } else {
+                    setLocation(`/course/${params.id}/unit/${unit.id}`);
+                  }
+                }
+              }}
+              tabIndex={0}
+              role="listitem"
+              aria-label={`Unit ${unit.unitNumber}: ${unit.title}${unit.isLocked ? ', locked' : unit.status === 'completed' ? ', completed' : ''}`}
               data-testid={`unit-card-${idx}`}
             >
               <CardContent className="py-4">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">
+                  <div className="flex-shrink-0 mt-1" aria-hidden="true">
                     {unit.isLocked ? (
                       <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
                         <Lock className="h-5 w-5 text-muted-foreground" />
