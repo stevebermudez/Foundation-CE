@@ -74,17 +74,15 @@ export async function setupAuth(app: Express) {
     );
   }
 
-  // Google OAuth
+  // Google OAuth - Production: www.foundationce.com
+  const PRODUCTION_DOMAIN = "https://www.foundationce.com";
+  const callbackURL = `${PRODUCTION_DOMAIN}/api/google/callback`;
+  
+  console.log("🌐 Google OAuth configured for:", PRODUCTION_DOMAIN);
+  console.log("📍 Callback URL:", callbackURL);
+
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    console.log("✅ Setting up Google OAuth Strategy");
-    
-    // Use Replit domain in development, custom domain in production
-    const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
-    const baseUrl = process.env.SITE_URL || (replitDomain ? `https://${replitDomain}` : "https://www.foundationce.com");
-    const callbackURL = `${baseUrl}/api/google/callback`;
-    
-    console.log("📍 Google OAuth Callback URL:", callbackURL);
-    console.log("📝 Add this URL to Google Cloud Console > Credentials > OAuth 2.0 Client > Authorized redirect URIs");
+    console.log("✅ Google OAuth credentials found");
 
     passport.use(
       new GoogleStrategy(
@@ -119,13 +117,11 @@ export async function setupAuth(app: Express) {
       (req, res) => res.redirect("/dashboard"),
     );
   } else {
+    console.log("⚠️ Google OAuth credentials missing");
     app.get("/api/google/login", (req, res) => {
-      res
-        .status(500)
-        .json({
-          error:
-            "Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.",
-        });
+      res.status(500).json({
+        error: "Google OAuth not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET.",
+      });
     });
   }
 
