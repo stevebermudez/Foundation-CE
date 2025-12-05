@@ -108,4 +108,4 @@ GOOGLE_CLIENT_ID = "476573721402-vqm30ko38u2vh1ogt0n1tjvrgqiapa6a.apps.googleuse
 GOOGLE_CLIENT_SECRET = "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"
 TESTING_VITE_STRIPE_PUBLIC_KEY = "pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 TESTING_STRIPE_SECRET_KEY = "sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-SITE_URL = "https://foundation-ce--stevenbermudez1.replit.app"
+SITE_URL = "https://foundationce.com"
