@@ -38,9 +38,11 @@ export interface IStorage {
   getBundleEnrollment(userId: string, bundleId: string): Promise<BundleEnrollment | undefined>;
   createSirconReport(report: Omit<SirconReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<SirconReport>;
   getSirconReport(enrollmentId: string): Promise<SirconReport | undefined>;
+  getSirconReportsByUser(userId: string): Promise<SirconReport[]>;
   updateSirconReport(id: string, data: Partial<SirconReport>): Promise<SirconReport>;
   createDBPRReport(report: Omit<DBPRReport, 'id' | 'createdAt' | 'updatedAt'>): Promise<DBPRReport>;
   getDBPRReport(enrollmentId: string): Promise<DBPRReport | undefined>;
+  getDBPRReportsByUser(userId: string): Promise<DBPRReport[]>;
   updateDBPRReport(id: string, data: Partial<DBPRReport>): Promise<DBPRReport>;
   createUserLicense(license: Omit<UserLicense, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserLicense>;
   getUserLicenses(userId: string): Promise<UserLicense[]>;
@@ -467,6 +469,14 @@ export class DatabaseStorage implements IStorage {
     return report;
   }
 
+  async getSirconReportsByUser(userId: string): Promise<SirconReport[]> {
+    return await db
+      .select()
+      .from(sirconReports)
+      .where(eq(sirconReports.userId, userId))
+      .orderBy(desc(sirconReports.createdAt));
+  }
+
   async updateSirconReport(id: string, data: Partial<SirconReport>): Promise<SirconReport> {
     const [updated] = await db
       .update(sirconReports)
@@ -492,6 +502,14 @@ export class DatabaseStorage implements IStorage {
       .from(dbprReports)
       .where(eq(dbprReports.enrollmentId, enrollmentId));
     return report;
+  }
+
+  async getDBPRReportsByUser(userId: string): Promise<DBPRReport[]> {
+    return await db
+      .select()
+      .from(dbprReports)
+      .where(eq(dbprReports.userId, userId))
+      .orderBy(desc(dbprReports.createdAt));
   }
 
   async updateDBPRReport(id: string, data: Partial<DBPRReport>): Promise<DBPRReport> {

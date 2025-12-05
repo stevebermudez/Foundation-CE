@@ -171,6 +171,123 @@ export async function registerRoutes(
     }
   });
 
+  // Compliance API endpoints
+  app.get("/api/compliance/licenses", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const licenses = await storage.getUserLicenses(user.id);
+      res.json(licenses);
+    } catch (err) {
+      console.error("Error fetching user licenses:", err);
+      res.status(500).json({ error: "Failed to fetch licenses" });
+    }
+  });
+
+  app.post("/api/compliance/licenses", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { licenseNumber, licenseType, state, issueDate, expirationDate, renewalDueDate } = req.body;
+      
+      if (!licenseNumber || !licenseType || !state || !issueDate || !expirationDate) {
+        return res.status(400).json({ error: "Missing required license fields" });
+      }
+
+      const license = await storage.createUserLicense({
+        userId: user.id,
+        licenseNumber,
+        licenseType,
+        state,
+        issueDate: new Date(issueDate),
+        expirationDate: new Date(expirationDate),
+        renewalDueDate: renewalDueDate ? new Date(renewalDueDate) : new Date(expirationDate),
+        status: "active"
+      });
+      res.json(license);
+    } catch (err) {
+      console.error("Error creating license:", err);
+      res.status(500).json({ error: "Failed to create license" });
+    }
+  });
+
+  app.get("/api/compliance/enrollments", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const completedEnrollments = await storage.getCompletedEnrollments(user.id);
+      res.json(completedEnrollments);
+    } catch (err) {
+      console.error("Error fetching completed enrollments:", err);
+      res.status(500).json({ error: "Failed to fetch completed enrollments" });
+    }
+  });
+
+  app.get("/api/compliance/reports", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const [dbprReports, sirconReports] = await Promise.all([
+        storage.getDBPRReportsByUser(user.id),
+        storage.getSirconReportsByUser(user.id)
+      ]);
+      res.json({ dbprReports, sirconReports });
+    } catch (err) {
+      console.error("Error fetching compliance reports:", err);
+      res.status(500).json({ error: "Failed to fetch compliance reports" });
+    }
+  });
+
+  app.get("/api/compliance/summary", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const state = req.query.state as string;
+      
+      const [licenses, completedEnrollments, dbprReports, sirconReports] = await Promise.all([
+        storage.getUserLicenses(user.id),
+        storage.getCompletedEnrollments(user.id),
+        storage.getDBPRReportsByUser(user.id),
+        storage.getSirconReportsByUser(user.id)
+      ]);
+
+      // Filter by state if provided
+      const filteredLicenses = state 
+        ? licenses.filter(l => l.state === state)
+        : licenses;
+      
+      const filteredEnrollments = state
+        ? completedEnrollments.filter(e => e.course.state === state)
+        : completedEnrollments;
+
+      // Calculate hours completed per license type
+      const hoursCompleted: Record<string, number> = {};
+      for (const enrollment of filteredEnrollments) {
+        const key = enrollment.course.licenseType;
+        hoursCompleted[key] = (hoursCompleted[key] || 0) + (enrollment.hoursCompleted || 0);
+      }
+
+      // Combine all reports for reporting history
+      const reportingHistory = [
+        ...dbprReports.map(r => ({
+          ...r,
+          reportType: "DBPR" as const,
+          agency: "FREC"
+        })),
+        ...sirconReports.map(r => ({
+          ...r,
+          reportType: "Sircon" as const,
+          agency: r.licenseType?.includes("insurance") ? "OIR" : "FREC"
+        }))
+      ].sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
+
+      res.json({
+        licenses: filteredLicenses,
+        enrollments: filteredEnrollments,
+        hoursCompleted,
+        reportingHistory
+      });
+    } catch (err) {
+      console.error("Error fetching compliance summary:", err);
+      res.status(500).json({ error: "Failed to fetch compliance summary" });
+    }
+  });
+
   app.post("/api/enrollments", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
