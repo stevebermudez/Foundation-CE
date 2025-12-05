@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -160,6 +160,38 @@ export interface IStorage {
   markNotificationRead(notificationId: string, userId: string): Promise<Notification | null>;
   markAllNotificationsRead(userId: string): Promise<void>;
   deleteNotification(notificationId: string, userId: string): Promise<boolean>;
+  
+  // Financial/Payment Methods
+  createPurchase(data: UpsertPurchase): Promise<Purchase>;
+  getPurchase(stripeSessionId: string): Promise<Purchase | undefined>;
+  getPurchaseById(purchaseId: string): Promise<Purchase | undefined>;
+  getPurchasesByUser(userId: string): Promise<Purchase[]>;
+  getAllPurchases(): Promise<Purchase[]>;
+  updatePurchaseStatus(purchaseId: string, status: string): Promise<Purchase>;
+  
+  // Account Credits Methods
+  createAccountCredit(data: InsertAccountCredit): Promise<AccountCredit>;
+  getAccountCredits(userId: string): Promise<AccountCredit[]>;
+  getAccountCreditBalance(userId: string): Promise<number>;
+  getAllAccountCredits(): Promise<AccountCredit[]>;
+  
+  // Refund Methods
+  createRefund(data: InsertRefund): Promise<Refund>;
+  getRefund(refundId: string): Promise<Refund | undefined>;
+  getRefundsByUser(userId: string): Promise<Refund[]>;
+  getRefundsByPurchase(purchaseId: string): Promise<Refund[]>;
+  getAllRefunds(): Promise<Refund[]>;
+  updateRefundStatus(refundId: string, status: string, stripeRefundId?: string): Promise<Refund>;
+  
+  // Financial Summary Methods
+  getUserFinancialSummary(userId: string): Promise<{
+    totalSpent: number;
+    totalRefunded: number;
+    creditBalance: number;
+    purchases: Purchase[];
+    refunds: Refund[];
+    credits: AccountCredit[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1979,6 +2011,160 @@ export class DatabaseStorage implements IStorage {
       ))
       .returning();
     return result.length > 0;
+  }
+
+  // Financial/Payment Methods
+  async createPurchase(data: UpsertPurchase): Promise<Purchase> {
+    const [purchase] = await db.insert(purchases)
+      .values(data)
+      .returning();
+    return purchase;
+  }
+
+  async getPurchase(stripeSessionId: string): Promise<Purchase | undefined> {
+    const [purchase] = await db.select()
+      .from(purchases)
+      .where(eq(purchases.stripeSessionId, stripeSessionId));
+    return purchase;
+  }
+
+  async getPurchaseById(purchaseId: string): Promise<Purchase | undefined> {
+    const [purchase] = await db.select()
+      .from(purchases)
+      .where(eq(purchases.id, purchaseId));
+    return purchase;
+  }
+
+  async getPurchasesByUser(userId: string): Promise<Purchase[]> {
+    return await db.select()
+      .from(purchases)
+      .where(eq(purchases.userId, userId))
+      .orderBy(desc(purchases.purchasedAt));
+  }
+
+  async getAllPurchases(): Promise<Purchase[]> {
+    return await db.select()
+      .from(purchases)
+      .orderBy(desc(purchases.purchasedAt));
+  }
+
+  async updatePurchaseStatus(purchaseId: string, status: string): Promise<Purchase> {
+    const [purchase] = await db.update(purchases)
+      .set({ status })
+      .where(eq(purchases.id, purchaseId))
+      .returning();
+    return purchase;
+  }
+
+  // Account Credits Methods
+  async createAccountCredit(data: InsertAccountCredit): Promise<AccountCredit> {
+    const [credit] = await db.insert(accountCredits)
+      .values(data)
+      .returning();
+    return credit;
+  }
+
+  async getAccountCredits(userId: string): Promise<AccountCredit[]> {
+    return await db.select()
+      .from(accountCredits)
+      .where(eq(accountCredits.userId, userId))
+      .orderBy(desc(accountCredits.createdAt));
+  }
+
+  async getAccountCreditBalance(userId: string): Promise<number> {
+    const credits = await this.getAccountCredits(userId);
+    const now = new Date();
+    return credits
+      .filter(c => !c.expiresAt || new Date(c.expiresAt) > now)
+      .reduce((sum, c) => sum + c.amount, 0);
+  }
+
+  async getAllAccountCredits(): Promise<AccountCredit[]> {
+    return await db.select()
+      .from(accountCredits)
+      .orderBy(desc(accountCredits.createdAt));
+  }
+
+  // Refund Methods
+  async createRefund(data: InsertRefund): Promise<Refund> {
+    const [refund] = await db.insert(refunds)
+      .values(data)
+      .returning();
+    return refund;
+  }
+
+  async getRefund(refundId: string): Promise<Refund | undefined> {
+    const [refund] = await db.select()
+      .from(refunds)
+      .where(eq(refunds.id, refundId));
+    return refund;
+  }
+
+  async getRefundsByUser(userId: string): Promise<Refund[]> {
+    return await db.select()
+      .from(refunds)
+      .where(eq(refunds.userId, userId))
+      .orderBy(desc(refunds.createdAt));
+  }
+
+  async getRefundsByPurchase(purchaseId: string): Promise<Refund[]> {
+    return await db.select()
+      .from(refunds)
+      .where(eq(refunds.purchaseId, purchaseId))
+      .orderBy(desc(refunds.createdAt));
+  }
+
+  async getAllRefunds(): Promise<Refund[]> {
+    return await db.select()
+      .from(refunds)
+      .orderBy(desc(refunds.createdAt));
+  }
+
+  async updateRefundStatus(refundId: string, status: string, stripeRefundId?: string): Promise<Refund> {
+    const updateData: Partial<Refund> = { 
+      status,
+      processedAt: status === 'succeeded' || status === 'failed' ? new Date() : undefined
+    };
+    if (stripeRefundId) {
+      updateData.stripeRefundId = stripeRefundId;
+    }
+    const [refund] = await db.update(refunds)
+      .set(updateData)
+      .where(eq(refunds.id, refundId))
+      .returning();
+    return refund;
+  }
+
+  // Financial Summary Methods
+  async getUserFinancialSummary(userId: string): Promise<{
+    totalSpent: number;
+    totalRefunded: number;
+    creditBalance: number;
+    purchases: Purchase[];
+    refunds: Refund[];
+    credits: AccountCredit[];
+  }> {
+    const userPurchases = await this.getPurchasesByUser(userId);
+    const userRefunds = await this.getRefundsByUser(userId);
+    const userCredits = await this.getAccountCredits(userId);
+    const creditBalance = await this.getAccountCreditBalance(userId);
+
+    const totalSpent = userPurchases
+      .filter(p => p.status === 'completed')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const totalRefunded = userRefunds
+      .filter(r => r.status === 'succeeded')
+      .reduce((sum, r) => sum + r.amount, 0);
+
+    return {
+      totalSpent,
+      totalRefunded,
+      creditBalance,
+      purchases: userPurchases,
+      refunds: userRefunds,
+      credits: userCredits
+    };
   }
 }
 
