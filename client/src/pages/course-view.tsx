@@ -229,7 +229,7 @@ export default function CourseViewPage() {
                 <CardContent className="space-y-4">
                   <p className="text-muted-foreground">{course?.description}</p>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className={`grid grid-cols-2 ${enrollment ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-4`}>
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-sm text-muted-foreground">
                         Hours Required
@@ -238,12 +238,14 @@ export default function CourseViewPage() {
                         {course?.hoursRequired}
                       </p>
                     </div>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="text-sm text-muted-foreground">Price</p>
-                      <p className="text-2xl font-bold">
-                        ${((course?.price || 0) / 100).toFixed(2)}
-                      </p>
-                    </div>
+                    {!enrollment && (
+                      <div className="p-3 bg-muted rounded-lg">
+                        <p className="text-sm text-muted-foreground">Price</p>
+                        <p className="text-2xl font-bold">
+                          ${((course?.price || 0) / 100).toFixed(2)}
+                        </p>
+                      </div>
+                    )}
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-sm text-muted-foreground">
                         License Type
