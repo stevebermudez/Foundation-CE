@@ -59,6 +59,25 @@ The LMS implements comprehensive server-side authorization to prevent client-sid
 - **Practice Exam Security**: All practice exam routes require authentication and verify attempt ownership
 - **Storage Methods**: `getUnit()` and `getLesson()` methods enable individual record validation for security checks
 
+### Admin Financial Management
+Complete admin UI for managing user payments, refunds, and account credits:
+- **Finance Tab**: Located in admin dashboard (`/admin/dashboard` → Finance tab)
+- **Database Tables**: `purchases`, `refunds`, `accountCredits` track all financial transactions
+- **Features**:
+  - View all purchases with search/filter by user email
+  - Issue Stripe refunds (full or partial) with reason and notes
+  - Add manual account credits for adjustments, promotions, or compensation
+  - View user financial summaries with complete transaction history
+  - Revenue/refund/credit totals displayed in overview cards
+- **Validation**: Client-side validation ensures positive amounts, caps refunds to purchase amount
+- **API Routes**:
+  - `GET /api/admin/purchases` - List all purchases
+  - `GET /api/admin/refunds` - List all refunds
+  - `GET /api/admin/credits` - List all account credits
+  - `GET /api/admin/users/:userId/financial` - User financial summary
+  - `POST /api/admin/refunds` - Issue a refund
+  - `POST /api/admin/credits` - Add account credit
+
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Replit Auth (Google, GitHub, X, Apple)
