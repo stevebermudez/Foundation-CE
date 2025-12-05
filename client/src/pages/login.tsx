@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn } from "lucide-react";
-import { SiGoogle } from "react-icons/si";
+import { LogIn, User } from "lucide-react";
+import { SiGoogle, SiApple, SiGithub } from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
@@ -93,16 +93,25 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Social Login - Replit Auth supports Google, GitHub, Apple, etc. */}
-            <a href={socialLoginUrl} className="w-full block">
-              <Button
-                className="w-full h-12 text-base gap-2 bg-white text-slate-900 border border-border hover:bg-slate-50"
-                data-testid="button-login-social"
-              >
-                <SiGoogle className="h-5 w-5" />
-                Sign In with Google, Apple, or GitHub
-              </Button>
-            </a>
+            {/* Social Login - Shows all available providers */}
+            <div className="space-y-3">
+              <a href={socialLoginUrl} className="w-full block">
+                <Button
+                  className="w-full h-12 text-base gap-3 bg-white text-slate-900 border border-border hover:bg-slate-50"
+                  data-testid="button-login-social"
+                >
+                  <div className="flex items-center gap-2">
+                    <SiGoogle className="h-5 w-5 text-red-500" />
+                    <SiApple className="h-5 w-5 text-slate-900" />
+                    <SiGithub className="h-5 w-5 text-slate-700" />
+                  </div>
+                  <span>Sign In with Social Account</span>
+                </Button>
+              </a>
+              <p className="text-xs text-muted-foreground text-center">
+                Sign in with Google, Apple, or GitHub
+              </p>
+            </div>
 
             {/* Divider */}
             <div className="relative">
