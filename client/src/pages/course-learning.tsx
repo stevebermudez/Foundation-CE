@@ -537,24 +537,54 @@ function LessonViewer({
   onComplete: () => void;
   isCompleting: boolean;
 }) {
+  const MIN_TIME_SECONDS = 60; // 1 minute minimum
+  
+  // Local state for real-time timer
+  const [localElapsedSeconds, setLocalElapsedSeconds] = useState(lesson.timeSpentSeconds);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Reset local timer when lesson changes
+  useEffect(() => {
+    setLocalElapsedSeconds(lesson.timeSpentSeconds);
+  }, [lesson.id, lesson.timeSpentSeconds]);
+  
+  // Real-time 1-second timer
+  useEffect(() => {
+    if (lesson.completed) return;
+    
+    timerRef.current = setInterval(() => {
+      setLocalElapsedSeconds(prev => prev + 1);
+    }, 1000);
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [lesson.id, lesson.completed]);
+  
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
+  
+  const timeRemaining = Math.max(0, MIN_TIME_SECONDS - localElapsedSeconds);
+  const canComplete = localElapsedSeconds >= MIN_TIME_SECONDS;
+  const progressPercent = Math.min(100, (localElapsedSeconds / MIN_TIME_SECONDS) * 100);
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <CardDescription>Unit {unit.unitNumber}</CardDescription>
             <CardTitle className="text-xl">{lesson.title}</CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="flex items-center gap-1">
+            <Badge variant="outline" className="flex items-center gap-1" data-testid="badge-time-spent">
               <Clock className="h-3 w-3" />
-              {formatTime(lesson.timeSpentSeconds)}
+              {formatTime(localElapsedSeconds)}
             </Badge>
             {lesson.completed && (
               <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
@@ -564,6 +594,31 @@ function LessonViewer({
             )}
           </div>
         </div>
+        
+        {/* Progress bar for time requirement */}
+        {!lesson.completed && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Time Progress</span>
+              {canComplete ? (
+                <span className="text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  Ready to complete
+                </span>
+              ) : (
+                <span className="text-orange-600 dark:text-orange-400 font-medium flex items-center gap-1" data-testid="text-time-remaining">
+                  <Timer className="h-3.5 w-3.5" />
+                  {formatTime(timeRemaining)} remaining
+                </span>
+              )}
+            </div>
+            <Progress 
+              value={progressPercent} 
+              className={`h-2 ${canComplete ? '[&>div]:bg-green-500' : ''}`}
+              data-testid="progress-time"
+            />
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Video Player */}
@@ -600,16 +655,16 @@ function LessonViewer({
           <div className="flex justify-end pt-4 border-t">
             <Button
               onClick={onComplete}
-              disabled={isCompleting || lesson.timeSpentSeconds < 60}
+              disabled={isCompleting || !canComplete}
               className="gap-2"
               data-testid="button-complete-lesson"
             >
               {isCompleting ? (
                 "Completing..."
-              ) : lesson.timeSpentSeconds < 60 ? (
+              ) : !canComplete ? (
                 <>
                   <Timer className="h-4 w-4" />
-                  Spend at least 1 minute
+                  {formatTime(timeRemaining)} remaining
                 </>
               ) : (
                 <>
