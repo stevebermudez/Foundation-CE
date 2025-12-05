@@ -230,8 +230,34 @@ export default function CourseLearningPage() {
   };
 
   const handleCompleteLesson = () => {
-    if (activeLesson) {
-      completeLessonMutation.mutate(activeLesson.lessonId);
+    if (activeLesson && progressData) {
+      const currentUnit = progressData.units.find(u => u.id === activeLesson.unitId);
+      if (!currentUnit) return;
+      
+      const currentLessonIndex = currentUnit.lessons.findIndex(l => l.id === activeLesson.lessonId);
+      const nextLesson = currentUnit.lessons[currentLessonIndex + 1];
+      
+      completeLessonMutation.mutate(activeLesson.lessonId, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["/api/courses", params.id, "units-progress"] });
+          
+          if (nextLesson) {
+            // Go to next lesson in same unit
+            setActiveLesson({ unitId: activeLesson.unitId, lessonId: nextLesson.id });
+            toast({
+              title: "Lesson Completed",
+              description: "Great job! Moving to the next lesson.",
+            });
+          } else {
+            // Last lesson in unit - prompt for quiz
+            setActiveLesson(null);
+            toast({
+              title: "Unit Lessons Complete!",
+              description: "All lessons in this unit are done. Take the unit quiz to continue.",
+            });
+          }
+        },
+      });
     }
   };
 
