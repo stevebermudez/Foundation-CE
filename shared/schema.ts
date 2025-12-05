@@ -364,6 +364,53 @@ export const upsertPurchaseSchema = createInsertSchema(purchases).omit({
 export type Purchase = typeof purchases.$inferSelect;
 export type UpsertPurchase = z.infer<typeof upsertPurchaseSchema>;
 
+// Account credits - track credits issued to users for refunds, promotions, etc.
+export const accountCredits = pgTable("account_credits", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  amount: integer("amount").notNull(), // in cents (positive = credit, negative = used)
+  type: varchar("type").notNull(), // "refund", "promotional", "adjustment", "used"
+  description: varchar("description"),
+  relatedPurchaseId: varchar("related_purchase_id"), // if from a refund
+  relatedEnrollmentId: varchar("related_enrollment_id"), // if used for enrollment
+  issuedBy: varchar("issued_by"), // admin user ID who issued the credit
+  expiresAt: timestamp("expires_at"), // optional expiration date
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAccountCreditSchema = createInsertSchema(accountCredits).omit({
+  id: true,
+  createdAt: true,
+});
+export type AccountCredit = typeof accountCredits.$inferSelect;
+export type InsertAccountCredit = z.infer<typeof insertAccountCreditSchema>;
+
+// Refund history - tracks all refunds processed
+export const refunds = pgTable("refunds", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  purchaseId: varchar("purchase_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  stripeRefundId: varchar("stripe_refund_id"),
+  amount: integer("amount").notNull(), // in cents
+  reason: varchar("reason"), // "requested_by_customer", "duplicate", "fraudulent", "other"
+  notes: text("notes"), // admin notes
+  status: varchar("status").default("pending"), // "pending", "succeeded", "failed", "cancelled"
+  processedBy: varchar("processed_by"), // admin user ID
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertRefundSchema = createInsertSchema(refunds).omit({
+  id: true,
+  createdAt: true,
+});
+export type Refund = typeof refunds.$inferSelect;
+export type InsertRefund = z.infer<typeof insertRefundSchema>;
+
 // User subscriptions (monthly/annual billing)
 export const subscriptions = pgTable("subscriptions", {
   id: varchar("id")
