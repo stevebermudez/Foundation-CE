@@ -59,7 +59,7 @@ export default function Header() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("authToken");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };

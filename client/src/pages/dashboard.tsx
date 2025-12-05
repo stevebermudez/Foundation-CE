@@ -10,15 +10,26 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("/api/user");
+        const token = localStorage.getItem("authToken");
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        const response = await fetch("/api/user", {
+          headers,
+          credentials: "include",
+        });
         if (response.ok) {
           const user = await response.json();
           setUserName(user.firstName || user.email?.split("@")[0] || "User");
         } else {
+          // Clear invalid token and redirect
+          localStorage.removeItem("authToken");
           setLocation("/login");
         }
       } catch (err) {
         console.error("Failed to fetch user:", err);
+        localStorage.removeItem("authToken");
         setLocation("/login");
       }
     };
