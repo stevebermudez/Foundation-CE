@@ -87,19 +87,19 @@ export default function AboutPage() {
                     Corporate Entity
                   </h3>
                   <div className="space-y-2 text-slate-600 dark:text-slate-400">
-                    <p><span className="font-medium">Legal Name:</span> Haymakers FL Inc.</p>
+                    <p><span className="font-medium">School Permitholder:</span> Haymakers FL, Inc.</p>
                     <p><span className="font-medium">DBA:</span> Foundation CE</p>
-                    <p><span className="font-medium">Parent Company:</span> Haymakers, Inc.</p>
-                    <p><span className="font-medium">Incorporated:</span> Delaware</p>
-                    <p><span className="font-medium">Registered:</span> State of Florida</p>
+                    <p><span className="font-medium">Parent Company:</span> Haymakers, Inc. (Delaware)</p>
+                    <p><span className="font-medium">Address:</span> 10 E. Yanonali Street #134<br />Santa Barbara, CA 93101</p>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                    Florida DBPR License
+                    Florida DBPR School Permit
                   </h3>
                   <div className="space-y-2 text-slate-600 dark:text-slate-400">
-                    <p><span className="font-medium">License Number:</span> ZH1003162</p>
+                    <p><span className="font-medium">Permit Number:</span> ZH1003162</p>
+                    <p><span className="font-medium">Regulator:</span> FL Dept. of Business and Professional Regulation</p>
                     <p><span className="font-medium">Division:</span> Division of Real Estate</p>
                     <p><span className="font-medium">Authority:</span> Chapter 475, Florida Statutes</p>
                     <p><span className="font-medium">Issued:</span> December 2, 2025</p>
@@ -109,7 +109,7 @@ export default function AboutPage() {
               </div>
               <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
                 <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
-                  Verify license at{" "}
+                  Verify permit at{" "}
                   <a 
                     href="https://www.myfloridalicense.com" 
                     target="_blank" 
