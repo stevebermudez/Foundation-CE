@@ -3,23 +3,20 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, DollarSign } from "lucide-react";
-import type { SelectCourse } from "@shared/schema";
+import type { Course } from "@shared/schema";
 
 export default function FloridaCourses() {
   const [, setLocation] = useLocation();
   
-  const { data: allCourses = [] } = useQuery<SelectCourse[]>({
+  const { data: allCourses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
   const freci = allCourses.find(c => c.sku === "FL-RE-PL-SA-FRECI-63");
 
   const handleBuyNow = (courseId: string) => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      setLocation("/login");
-      return;
-    }
+    // Navigate to checkout - the checkout page handles auth verification
+    // and will redirect to login if needed (supports both JWT and Google OAuth)
     setLocation(`/checkout/${courseId}`);
   };
 

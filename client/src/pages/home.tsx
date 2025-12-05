@@ -7,7 +7,7 @@ import TrustBadges from "@/components/TrustBadges";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, DollarSign, CheckCircle2 } from "lucide-react";
-import type { SelectCourse } from "@shared/schema";
+import type { Course } from "@shared/schema";
 
 export default function HomePage() {
   const [, setLocation] = useLocation();
@@ -18,7 +18,7 @@ export default function HomePage() {
     ogDescription: "Professional continuing education for real estate professionals. State-approved courses in California and Florida with modern learning experience.",
   });
 
-  const { data: allCourses = [] } = useQuery<SelectCourse[]>({
+  const { data: allCourses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
 
