@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import AdminCoursesPage from "./courses";
 import PagesManagerPage from "./pages-manager";
 import ContentBuilderPage from "./content-builder";
+import AdminFinancePage from "./finance";
 import {
   BarChart3,
   Users,
@@ -566,6 +567,9 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="settings" data-testid="tab-admin-settings">
               Settings
             </TabsTrigger>
+            <TabsTrigger value="finance" data-testid="tab-admin-finance">
+              Finance
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -966,6 +970,11 @@ export default function AdminDashboardPage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Finance Tab */}
+          <TabsContent value="finance">
+            <AdminFinancePage />
           </TabsContent>
         </Tabs>
 
