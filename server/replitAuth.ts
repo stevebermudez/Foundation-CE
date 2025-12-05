@@ -60,12 +60,18 @@ async function upsertUser(claims: any) {
 }
 
 export async function setupAuth(app: Express) {
+  console.log("🔐 Setting up Replit Auth...");
   app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
 
+  console.log("🔍 Discovering OIDC config...");
+  console.log("ISSUER_URL:", process.env.ISSUER_URL ?? "https://replit.com/oidc");
+  console.log("REPL_ID:", process.env.REPL_ID);
+  
   const config = await getOidcConfig();
+  console.log("✅ OIDC config discovered successfully");
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -81,13 +87,16 @@ export async function setupAuth(app: Express) {
 
   const ensureStrategy = (domain: string) => {
     const strategyName = `replitauth:${domain}`;
+    console.log(`📝 Ensuring strategy for domain: ${domain}`);
     if (!registeredStrategies.has(strategyName)) {
+      const callbackURL = `https://${domain}/api/callback`;
+      console.log(`🔗 Creating strategy with callback: ${callbackURL}`);
       const strategy = new Strategy(
         {
           name: strategyName,
           config,
           scope: "openid email profile offline_access",
-          callbackURL: `https://${domain}/api/callback`,
+          callbackURL,
         },
         verify
       );
@@ -100,6 +109,7 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    console.log(`🚀 /api/login called from hostname: ${req.hostname}`);
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
@@ -108,6 +118,7 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
+    console.log(`📥 /api/callback called from hostname: ${req.hostname}`);
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
@@ -127,12 +138,14 @@ export async function setupAuth(app: Express) {
       );
     });
   });
+  
+  console.log("✅ Replit Auth routes registered: /api/login, /api/callback, /api/logout");
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user?.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -155,5 +168,51 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   } catch (error) {
     res.status(401).json({ message: "Unauthorized" });
     return;
+  }
+};
+
+export const isAdmin: RequestHandler = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  
+  if (token) {
+    try {
+      const jwt = await import("jsonwebtoken");
+      const decoded = jwt.default.verify(
+        token,
+        process.env.SESSION_SECRET || "fallback-secret"
+      ) as { id: string; email: string; isAdmin?: boolean };
+      
+      if (decoded.isAdmin) {
+        req.user = decoded;
+        return next();
+      }
+      
+      const isAdminUser = await storage.isAdmin(decoded.id);
+      if (isAdminUser) {
+        req.user = decoded;
+        return next();
+      }
+      
+      return res.status(403).json({ message: "Forbidden - Admin access required" });
+    } catch (err) {
+      // Token invalid, fall through to session check
+    }
+  }
+  
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  const user = req.user as any;
+  try {
+    const isAdminUser = await storage.isAdmin(user.id);
+    if (isAdminUser) {
+      return next();
+    }
+    res.status(403).json({ message: "Forbidden - Admin access required" });
+  } catch (err) {
+    console.error("Error checking admin status:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

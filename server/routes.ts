@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
-import { isAuthenticated, isAdmin } from "./oauthAuth";
+import { isAuthenticated, isAdmin } from "./replitAuth";
 import { jwtAuth } from "./jwtAuth";
 import {
   createPaypalOrder,
@@ -69,13 +69,19 @@ export async function registerRoutes(
   app.get("/api/user", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
-      const userData = await storage.getUser(user.id);
+      const userId = user.id || user.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User not found in session" });
+      }
+      
+      const userData = await storage.getUser(userId);
       res.json({
-        id: user.id,
-        email: userData?.email || user.email,
-        firstName: userData?.firstName || user.firstName,
-        lastName: userData?.lastName || user.lastName,
-        profileImageUrl: userData?.profileImageUrl || user.profileImageUrl,
+        id: userId,
+        email: userData?.email || user.email || user.claims?.email,
+        firstName: userData?.firstName || user.firstName || user.claims?.first_name,
+        lastName: userData?.lastName || user.lastName || user.claims?.last_name,
+        profileImageUrl: userData?.profileImageUrl || user.profileImageUrl || user.claims?.profile_image_url,
       });
     } catch (err) {
       console.error("Error fetching user:", err);
