@@ -359,9 +359,9 @@ export default function CourseLearningPage() {
                   {progressData.units.filter(u => u.status === "completed").length} of {progressData.units.length} completed
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-hidden">
                 <ScrollArea className="h-[calc(100vh-300px)]">
-                  <div className="p-3 space-y-2">
+                  <div className="p-3 space-y-2 overflow-hidden">
                     {progressData.units.map((unit, idx) => (
                       <div key={unit.id} className="border rounded-lg overflow-hidden">
                         <div
@@ -378,13 +378,13 @@ export default function CourseLearningPage() {
                           ) : (
                             <PlayCircle className="h-4 w-4 text-blue-500 flex-shrink-0" />
                           )}
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 overflow-hidden">
                             <p className={`font-medium text-sm truncate ${unit.isLocked ? "text-muted-foreground" : ""}`}>
                               Unit {unit.unitNumber}: {unit.title}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
                               <Progress value={getUnitProgress(unit)} className="h-1.5 flex-1" />
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-xs text-muted-foreground flex-shrink-0">
                                 {unit.lessonsCompleted}/{unit.totalLessons}
                               </span>
                             </div>
