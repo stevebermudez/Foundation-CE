@@ -73,9 +73,9 @@ export default function LoginPage() {
     }
   };
 
-  const googleLoginUrl = redirectUrl !== "/dashboard" 
-    ? `/api/google/login?redirect=${encodeURIComponent(redirectUrl)}`
-    : "/api/google/login";
+  // Use Replit Auth which supports Google, GitHub, Apple, etc.
+  // It dynamically handles the callback URL based on the current domain
+  const socialLoginUrl = "/api/login";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
@@ -93,14 +93,14 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Social Login */}
-            <a href={googleLoginUrl} className="w-full block">
+            {/* Social Login - Replit Auth supports Google, GitHub, Apple, etc. */}
+            <a href={socialLoginUrl} className="w-full block">
               <Button
                 className="w-full h-12 text-base gap-2 bg-white text-slate-900 border border-border hover:bg-slate-50"
-                data-testid="button-login-google"
+                data-testid="button-login-social"
               >
                 <SiGoogle className="h-5 w-5" />
-                Sign In with Google
+                Sign In with Google, Apple, or GitHub
               </Button>
             </a>
 
