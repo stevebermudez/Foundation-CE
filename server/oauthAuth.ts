@@ -80,7 +80,7 @@ export async function setupAuth(app: Express) {
     
     // Use Replit domain in development, custom domain in production
     const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
-    const baseUrl = process.env.SITE_URL || (replitDomain ? `https://${replitDomain}` : "https://foundationce.com");
+    const baseUrl = process.env.SITE_URL || (replitDomain ? `https://${replitDomain}` : "https://www.foundationce.com");
     const callbackURL = `${baseUrl}/api/google/callback`;
     
     console.log("📍 Google OAuth Callback URL:", callbackURL);

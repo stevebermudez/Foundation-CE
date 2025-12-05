@@ -3708,7 +3708,7 @@ segment1.ts
         })
         .where(eq(users.id, user.id));
 
-      const siteUrl = process.env.SITE_URL || "https://foundationce.com";
+      const siteUrl = process.env.SITE_URL || "https://www.foundationce.com";
       const resetLink = `${siteUrl}/reset-password?token=${resetToken}`;
       console.log("Reset link:", resetLink);
       res.json({ message: "If email exists, reset link sent" });

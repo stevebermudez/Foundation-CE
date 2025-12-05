@@ -47,10 +47,6 @@ localPort = 41401
 externalPort = 8080
 
 [[ports]]
-localPort = 42861
-externalPort = 8081
-
-[[ports]]
 localPort = 43457
 externalPort = 8000
 
@@ -100,4 +96,4 @@ GOOGLE_CLIENT_ID = "476573721402-vqm30ko38u2vh1ogt0n1tjvrgqiapa6a.apps.googleuse
 GOOGLE_CLIENT_SECRET = "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"
 TESTING_VITE_STRIPE_PUBLIC_KEY = "pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 TESTING_STRIPE_SECRET_KEY = "sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-SITE_URL = "https://foundationce.com"
+SITE_URL = "https://www.foundationce.com"
