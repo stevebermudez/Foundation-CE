@@ -12,7 +12,21 @@ async function main() {
     initRouter(course);
   } catch (err) {
     console.error("Failed to initialize app:", err);
-    document.body.innerHTML = `<div style="padding: 2rem; color: red;"><h1>Error</h1><p>${err.message}</p></div>`;
+    
+    const errorContainer = document.createElement('div');
+    errorContainer.style.padding = '2rem';
+    errorContainer.style.color = 'red';
+    
+    const heading = document.createElement('h1');
+    heading.textContent = 'Error';
+    
+    const message = document.createElement('p');
+    message.textContent = err.message;
+    
+    errorContainer.appendChild(heading);
+    errorContainer.appendChild(message);
+    document.body.innerHTML = '';
+    document.body.appendChild(errorContainer);
   }
 }
 
