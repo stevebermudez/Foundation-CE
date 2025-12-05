@@ -3,7 +3,7 @@ import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, BookOpen, Loader2, AlertCircle, RefreshCw, ArrowRight } from "lucide-react";
+import { CheckCircle, BookOpen, Loader2, AlertCircle, RefreshCw, ArrowRight, KeyRound, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function CheckoutSuccessPage() {
@@ -13,8 +13,10 @@ export default function CheckoutSuccessPage() {
   const courseId = params.get("courseId");
   const sessionId = params.get("session_id");
   const [course, setCourse] = useState<any>(null);
-  const [enrollmentStatus, setEnrollmentStatus] = useState<"loading" | "success" | "error" | "auth_required" | "idle">("idle");
+  const [enrollmentStatus, setEnrollmentStatus] = useState<"loading" | "success" | "error" | "idle">("idle");
   const [enrollmentError, setEnrollmentError] = useState<string>("");
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
   const { toast } = useToast();
 
   const fetchCourse = async () => {
@@ -30,7 +32,7 @@ export default function CheckoutSuccessPage() {
     }
   };
 
-  const createEnrollment = async () => {
+  const completeEnrollment = async () => {
     if (!courseId) {
       setEnrollmentError("No course ID provided");
       setEnrollmentStatus("error");
@@ -47,55 +49,47 @@ export default function CheckoutSuccessPage() {
     setEnrollmentError("");
     
     try {
-      const token = localStorage.getItem("authToken");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      
-      const enrollRes = await fetch("/api/enrollments", {
+      const response = await fetch("/api/checkout/complete-enrollment", {
         method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({ courseId, sessionId }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, courseId }),
       });
       
-      if (enrollRes.status === 401) {
-        setEnrollmentStatus("auth_required");
-        const currentUrl = `/checkout/success?courseId=${courseId}&session_id=${sessionId}`;
-        toast({
-          title: "Session Expired",
-          description: "Please sign in to complete your enrollment.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          setLocation(`/login?redirect=${encodeURIComponent(currentUrl)}`);
-        }, 2000);
-        return;
-      }
+      const data = await response.json();
       
-      if (enrollRes.ok) {
-        const data = await enrollRes.json();
-        setEnrollmentStatus("success");
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to complete enrollment");
+      }
+
+      // Save auth token to localStorage for auto-login
+      if (data.token) {
+        localStorage.setItem("authToken", data.token);
+      }
+
+      // Track if this is a new user
+      setIsNewUser(data.isNewUser);
+      setUserEmail(data.user?.email || "");
+      
+      setEnrollmentStatus("success");
+      
+      if (data.existing) {
+        toast({
+          title: "Already Enrolled",
+          description: "You already have access to this course.",
+        });
+      } else if (data.isNewUser) {
+        toast({
+          title: "Account Created",
+          description: "Your account has been created and you're enrolled in the course!",
+        });
+      } else {
         toast({
           title: "Enrollment Complete",
           description: "Your course has been added to your dashboard.",
         });
-        console.log("Enrollment created:", data);
-      } else {
-        const errorText = await enrollRes.text();
-        if (enrollRes.status === 409 || errorText.includes("already enrolled")) {
-          setEnrollmentStatus("success");
-          toast({
-            title: "Already Enrolled",
-            description: "You already have access to this course.",
-          });
-        } else {
-          throw new Error(errorText || "Failed to create enrollment");
-        }
       }
     } catch (err: any) {
-      console.error("Failed to create enrollment:", err);
+      console.error("Failed to complete enrollment:", err);
       setEnrollmentError(err.message || "Failed to activate your course access");
       setEnrollmentStatus("error");
       toast({
@@ -108,28 +102,12 @@ export default function CheckoutSuccessPage() {
 
   useEffect(() => {
     fetchCourse();
-    createEnrollment();
+    completeEnrollment();
   }, [courseId, sessionId]);
 
   const handleRetry = () => {
-    createEnrollment();
+    completeEnrollment();
   };
-
-  if (enrollmentStatus === "auth_required") {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-6 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-            <h2 className="text-xl font-semibold mb-2">Session Expired</h2>
-            <p className="text-muted-foreground">
-              Redirecting you to sign in...
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-green-950 dark:to-slate-900 flex items-center justify-center p-4">
@@ -155,21 +133,52 @@ export default function CheckoutSuccessPage() {
                 <div className="flex items-center gap-3">
                   <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
                   <p className="text-slate-700 dark:text-slate-300">
-                    Activating your course access...
+                    Setting up your account and course access...
                   </p>
                 </div>
               </div>
             )}
 
             {enrollmentStatus === "success" && (
-              <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <p className="text-slate-700 dark:text-slate-300">
-                    Your course has been added to your dashboard. You can start learning immediately!
-                  </p>
+              <>
+                <div className="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <p className="text-slate-700 dark:text-slate-300">
+                      {isNewUser 
+                        ? "Your account has been created and you're enrolled! You can start learning immediately."
+                        : "Your course has been added to your dashboard. You can start learning immediately!"}
+                    </p>
+                  </div>
                 </div>
-              </div>
+
+                {isNewUser && userEmail && (
+                  <div className="bg-amber-50 dark:bg-amber-900/30 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <div className="flex items-start gap-3">
+                      <KeyRound className="h-5 w-5 text-amber-600 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-slate-700 dark:text-slate-300 font-medium">
+                          Set Up Your Password
+                        </p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                          We've created an account for <span className="font-medium">{userEmail}</span>. 
+                          For security, please set your password using the forgot password feature on the login page.
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setLocation("/login?showReset=true")}
+                          className="mt-3 gap-2"
+                          data-testid="button-set-password"
+                        >
+                          <Mail className="h-4 w-4" />
+                          Set Password
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {enrollmentStatus === "error" && (
@@ -230,9 +239,21 @@ export default function CheckoutSuccessPage() {
                 Go to Dashboard
                 <ArrowRight className="h-4 w-4" />
               </Button>
+              {courseId && (
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setLocation(`/course/${courseId}/learn`)}
+                  className="w-full gap-2"
+                  data-testid="button-start-learning"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Start Learning Now
+                </Button>
+              )}
               <Button
                 size="lg"
-                variant="outline"
+                variant="ghost"
                 onClick={() => setLocation("/courses/fl")}
                 className="w-full"
                 data-testid="button-browse-more-courses"
@@ -244,7 +265,7 @@ export default function CheckoutSuccessPage() {
             <div className="border-t pt-4 dark:border-slate-700">
               <div className="text-center space-y-2">
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  A confirmation email has been sent to your registered email address with your receipt and course access details.
+                  A confirmation email has been sent to your email address with your receipt and course access details.
                 </p>
                 {sessionId && (
                   <p className="text-xs text-muted-foreground">

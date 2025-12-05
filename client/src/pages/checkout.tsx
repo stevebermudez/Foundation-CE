@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Loader2, Shield, Clock, CheckCircle, CreditCard } from "lucide-react";
+import { ArrowLeft, Loader2, Shield, Clock, CheckCircle, CreditCard, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Course } from "@shared/schema";
 
@@ -16,9 +16,10 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
   const { toast } = useToast();
 
+  // Check if user is logged in (optional - does not block checkout)
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -35,20 +36,17 @@ export default function CheckoutPage() {
           const userData = await response.json();
           setUser(userData);
           setEmail(userData.email || "");
-        } else {
-          const returnUrl = params.courseId ? `/checkout/${params.courseId}` : "/checkout";
-          setLocation(`/login?redirect=${encodeURIComponent(returnUrl)}`);
         }
+        // No redirect if not logged in - allow guest checkout
       } catch (err) {
         console.error("Auth check failed:", err);
-        const returnUrl = params.courseId ? `/checkout/${params.courseId}` : "/checkout";
-        setLocation(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+        // Continue without auth - guest checkout allowed
       } finally {
-        setAuthChecked(true);
+        setPageReady(true);
       }
     };
     checkAuth();
-  }, [setLocation, params.courseId]);
+  }, []);
 
   const { data: course, isLoading: courseLoading, error: courseError } = useQuery<Course>({
     queryKey: ["/api/courses", params.courseId],
@@ -58,7 +56,7 @@ export default function CheckoutPage() {
       if (!res.ok) throw new Error("Course not found");
       return res.json();
     },
-    enabled: !!params.courseId && authChecked,
+    enabled: !!params.courseId && pageReady,
   });
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -120,12 +118,12 @@ export default function CheckoutPage() {
     }
   };
 
-  if (!authChecked || (authChecked && !user)) {
+  if (!pageReady) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-muted-foreground">Verifying your session...</p>
+          <p className="text-muted-foreground">Loading checkout...</p>
         </div>
       </div>
     );
@@ -254,7 +252,9 @@ export default function CheckoutPage() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">Payment Details</CardTitle>
                 <CardDescription>
-                  Enter your email to receive your receipt and course access
+                  {user 
+                    ? "Your account email will be used for course access" 
+                    : "Enter your email to receive your receipt and course access"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -263,17 +263,25 @@ export default function CheckoutPage() {
                     <label htmlFor="email" className="block text-sm font-medium mb-2">
                       Email Address
                     </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={isLoading}
-                      required
-                      className="h-12"
-                      data-testid="input-email-checkout"
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isLoading || !!user}
+                        required
+                        className="h-12 pl-10"
+                        data-testid="input-email-checkout"
+                      />
+                    </div>
+                    {!user && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Your account will be created automatically after purchase
+                      </p>
+                    )}
                   </div>
 
                   <Button

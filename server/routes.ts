@@ -1607,6 +1607,161 @@ export async function registerRoutes(
     }
   });
 
+  // Guest enrollment - Auto-create account after successful payment
+  app.post("/api/checkout/complete-enrollment", async (req, res) => {
+    try {
+      const { sessionId, courseId } = req.body;
+      
+      if (!sessionId || !courseId) {
+        return res.status(400).json({ error: "sessionId and courseId are required" });
+      }
+
+      // Verify the Stripe session
+      const stripe = getStripeClient();
+      let session;
+      try {
+        session = await stripe.checkout.sessions.retrieve(sessionId);
+      } catch (stripeErr: any) {
+        console.error("Stripe session retrieval failed:", stripeErr.message);
+        return res.status(400).json({ error: "Invalid payment session" });
+      }
+
+      // Verify payment is complete
+      if (session.payment_status !== "paid") {
+        return res.status(400).json({ error: "Payment not completed" });
+      }
+
+      // SECURITY: Verify the courseId from session metadata matches the request
+      const sessionCourseId = session.metadata?.courseId;
+      if (!sessionCourseId) {
+        return res.status(400).json({ error: "Invalid session - no course information" });
+      }
+      if (sessionCourseId !== courseId) {
+        console.error(`Course mismatch: session has ${sessionCourseId}, request has ${courseId}`);
+        return res.status(400).json({ error: "Course mismatch - payment was for a different course" });
+      }
+
+      // Get email from session
+      const email = session.customer_email || session.metadata?.email;
+      if (!email) {
+        return res.status(400).json({ error: "No email found in payment session" });
+      }
+
+      // Check if course exists
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+
+      // Find or create user
+      let user = await storage.getUserByEmail(email);
+      let isNewUser = false;
+      let temporaryPassword: string | null = null;
+
+      if (!user) {
+        // Create new user account
+        isNewUser = true;
+        const { randomUUID } = await import("crypto");
+        const userId = randomUUID();
+        
+        // Generate a temporary password
+        temporaryPassword = randomUUID().slice(0, 12);
+        const bcrypt = await import("bcrypt");
+        const passwordHash = await bcrypt.default.hash(temporaryPassword, 10);
+
+        user = await storage.upsertUser({
+          id: userId,
+          email,
+          passwordHash,
+          firstName: "",
+          lastName: "",
+        });
+
+        // Create welcome notification
+        try {
+          await storage.createNotification({
+            userId: user.id,
+            type: "system",
+            title: "Welcome to FoundationCE!",
+            message: "Your account has been created. Check your email to set your password.",
+            link: "/dashboard",
+            read: false
+          });
+        } catch (notifErr) {
+          console.error("Failed to create welcome notification:", notifErr);
+        }
+      }
+
+      // Check for existing enrollment
+      const existingEnrollment = await storage.getEnrollment(user.id, courseId);
+      if (existingEnrollment) {
+        // Already enrolled - still return success with token
+        const jwt = await import("jsonwebtoken");
+        const token = jwt.default.sign(
+          { id: user.id, email: user.email },
+          process.env.SESSION_SECRET || "fallback-secret",
+          { expiresIn: "7d" }
+        );
+
+        return res.json({
+          success: true,
+          enrollment: existingEnrollment,
+          existing: true,
+          isNewUser: false,
+          token,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          }
+        });
+      }
+
+      // Create enrollment
+      const enrollment = await storage.createEnrollment(user.id, courseId);
+
+      // Create enrollment notification
+      try {
+        await storage.createNotification({
+          userId: user.id,
+          type: "enrollment",
+          title: "Course Enrollment Confirmed",
+          message: `You've been enrolled in "${course.title}". Start learning now!`,
+          link: `/course/${courseId}/learn`,
+          read: false
+        });
+      } catch (notifErr) {
+        console.error("Failed to create enrollment notification:", notifErr);
+      }
+
+      // Generate JWT token for auto-login
+      const jwt = await import("jsonwebtoken");
+      const token = jwt.default.sign(
+        { id: user.id, email: user.email },
+        process.env.SESSION_SECRET || "fallback-secret",
+        { expiresIn: "7d" }
+      );
+
+      res.json({
+        success: true,
+        enrollment,
+        isNewUser,
+        temporaryPassword: isNewUser ? temporaryPassword : null,
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }
+      });
+    } catch (err: any) {
+      console.error("Complete enrollment error:", err);
+      res.status(500).json({ error: err.message || "Failed to complete enrollment" });
+    }
+  });
+
   // Create Payment Intent for direct payment (supports Apple Pay, Google Pay, Cards)
   app.post("/api/payment/create-intent", async (req, res) => {
     try {
