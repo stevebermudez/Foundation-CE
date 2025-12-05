@@ -87,7 +87,12 @@ export function renderLesson(unitMeta, lessonMeta, unitData, course) {
   header.className = "lesson-header";
   
   const titleDiv = document.createElement("div");
-  titleDiv.innerHTML = `<h1>Unit ${unitMeta.number}: ${unitMeta.title}</h1><p>${lessonMeta.title}</p>`;
+  const h1 = document.createElement("h1");
+  h1.textContent = `Unit ${unitMeta.number}: ${unitMeta.title}`;
+  const p = document.createElement("p");
+  p.textContent = lessonMeta.title;
+  titleDiv.appendChild(h1);
+  titleDiv.appendChild(p);
   header.appendChild(titleDiv);
 
   const navDiv = document.createElement("div");
