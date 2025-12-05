@@ -144,12 +144,6 @@ export default function AdminLoginPage() {
               {isLoading ? "Logging in..." : "Sign In as Admin"}
             </Button>
           </form>
-
-          <div className="mt-6 pt-4 border-t border-slate-700 text-xs text-slate-400">
-            <p className="font-semibold mb-2">Demo Admin Credentials:</p>
-            <p>Email: admin@foundationce.com</p>
-            <p>Password: admin1234</p>
-          </div>
         </CardContent>
       </Card>
     </div>
