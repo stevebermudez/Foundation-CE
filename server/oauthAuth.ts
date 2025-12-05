@@ -74,34 +74,26 @@ export async function setupAuth(app: Express) {
     );
   }
 
-  // Google OAuth - Dynamic callback URL based on request host
+  // Google OAuth
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.log("✅ Setting up Google OAuth Strategy");
     
-    // Get the Replit domain for development
+    // Use Replit domain in development, custom domain in production
     const replitDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
-    const devUrl = replitDomain ? `https://${replitDomain}` : null;
-    const prodUrl = process.env.SITE_URL || "https://foundationce.com";
+    const baseUrl = process.env.SITE_URL || (replitDomain ? `https://${replitDomain}` : "https://foundationce.com");
+    const callbackURL = `${baseUrl}/api/google/callback`;
     
-    console.log("📍 OAuth Callback URLs to add to Google Cloud Console:");
-    if (devUrl) console.log(`   - Development: ${devUrl}/api/google/callback`);
-    console.log(`   - Production: ${prodUrl}/api/google/callback`);
-    console.log(
-      "🔐 Google Client ID (last 30 chars):",
-      process.env.GOOGLE_CLIENT_ID.slice(-30),
-    );
+    console.log("📍 Google OAuth Callback URL:", callbackURL);
+    console.log("📝 Add this URL to Google Cloud Console > Credentials > OAuth 2.0 Client > Authorized redirect URIs");
 
-    // Use passReqToCallback to dynamically determine callback URL
     passport.use(
       new GoogleStrategy(
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "/api/google/callback",
-          passReqToCallback: true,
+          callbackURL: callbackURL,
         },
         async (
-          req: any,
           accessToken: any,
           refreshToken: any,
           profile: any,
@@ -119,27 +111,11 @@ export async function setupAuth(app: Express) {
 
     app.get(
       "/api/google/login",
-      (req, res, next) => {
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-        const host = req.headers.host;
-        const callbackURL = `${protocol}://${host}/api/google/callback`;
-        passport.authenticate("google", { 
-          scope: ["profile", "email"],
-          callbackURL: callbackURL
-        })(req, res, next);
-      }
+      passport.authenticate("google", { scope: ["profile", "email"] })
     );
     app.get(
       "/api/google/callback",
-      (req, res, next) => {
-        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-        const host = req.headers.host;
-        const callbackURL = `${protocol}://${host}/api/google/callback`;
-        passport.authenticate("google", { 
-          failureRedirect: "/login",
-          callbackURL: callbackURL
-        })(req, res, next);
-      },
+      passport.authenticate("google", { failureRedirect: "/login" }),
       (req, res) => res.redirect("/dashboard"),
     );
   } else {
