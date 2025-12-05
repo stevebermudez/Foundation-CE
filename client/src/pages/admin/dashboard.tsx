@@ -133,6 +133,21 @@ export default function AdminDashboardPage() {
     enabled: isAdmin,
   });
 
+  // Health check for system status
+  const { data: healthStatus } = useQuery({
+    queryKey: ["/api/admin/health"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/health", {
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: isAdmin,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -518,17 +533,53 @@ export default function AdminDashboardPage() {
                   <CardTitle>System Status</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-900">
+                  <div className={`flex items-center justify-between p-3 rounded-lg border ${
+                    healthStatus?.database?.status === 'healthy' 
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900'
+                      : healthStatus?.database?.status === 'error'
+                      ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900'
+                      : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900'
+                  }`}>
                     <span className="font-medium">Database Connection</span>
-                    <Badge className="bg-green-600">Healthy</Badge>
+                    <Badge className={
+                      healthStatus?.database?.status === 'healthy' ? 'bg-green-600' :
+                      healthStatus?.database?.status === 'error' ? 'bg-red-600' :
+                      'bg-yellow-600'
+                    }>
+                      {healthStatus?.database?.status === 'healthy' ? 'Healthy' :
+                       healthStatus?.database?.status === 'error' ? 'Error' : 'Checking...'}
+                    </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-900">
+                  <div className={`flex items-center justify-between p-3 rounded-lg border ${
+                    healthStatus?.api?.status === 'healthy' 
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900'
+                      : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900'
+                  }`}>
                     <span className="font-medium">API Server</span>
-                    <Badge className="bg-green-600">Running</Badge>
+                    <Badge className={healthStatus?.api?.status === 'healthy' ? 'bg-green-600' : 'bg-yellow-600'}>
+                      {healthStatus?.api?.status === 'healthy' ? 'Running' : 'Checking...'}
+                    </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-900">
+                  <div className={`flex items-center justify-between p-3 rounded-lg border ${
+                    healthStatus?.payment?.status === 'healthy' 
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900'
+                      : healthStatus?.payment?.status === 'not_configured'
+                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900'
+                      : healthStatus?.payment?.status === 'error'
+                      ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900'
+                      : 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-900'
+                  }`}>
                     <span className="font-medium">Payment Gateway</span>
-                    <Badge className="bg-green-600">Connected</Badge>
+                    <Badge className={
+                      healthStatus?.payment?.status === 'healthy' ? 'bg-green-600' :
+                      healthStatus?.payment?.status === 'not_configured' ? 'bg-yellow-600' :
+                      healthStatus?.payment?.status === 'error' ? 'bg-red-600' :
+                      'bg-gray-600'
+                    }>
+                      {healthStatus?.payment?.status === 'healthy' ? 'Connected' :
+                       healthStatus?.payment?.status === 'not_configured' ? 'Not Configured' :
+                       healthStatus?.payment?.status === 'error' ? 'Error' : 'Checking...'}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -557,15 +608,32 @@ export default function AdminDashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {users.slice(0, 5).map((user: any, idx: number) => (
-                        <tr key={user.id || idx} className="border-b hover:bg-muted/50" data-testid={`user-row-${idx}`}>
-                          <td className="p-2">{user.email}</td>
-                          <td className="p-2">{user.firstName} {user.lastName}</td>
-                          <td className="p-2">0</td>
-                          <td className="p-2"><Badge>Active</Badge></td>
-                          <td className="p-2"><Button size="sm" variant="outline">Edit</Button></td>
+                      {users.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="text-center p-4 text-muted-foreground">
+                            No users found. Click "Add User" to create one.
+                          </td>
                         </tr>
-                      ))}
+                      ) : (
+                        users.map((user: any, idx: number) => {
+                          const userEnrollments = enrollments.filter((e: any) => e.userId === user.id);
+                          return (
+                            <tr key={user.id || idx} className="border-b hover:bg-muted/50" data-testid={`user-row-${idx}`}>
+                              <td className="p-2">{user.email}</td>
+                              <td className="p-2">{user.firstName || ''} {user.lastName || ''}</td>
+                              <td className="p-2">{userEnrollments.length}</td>
+                              <td className="p-2">
+                                {user.passwordHash || user.googleId ? (
+                                  <Badge className="bg-green-600">Active</Badge>
+                                ) : (
+                                  <Badge variant="secondary">Pending</Badge>
+                                )}
+                              </td>
+                              <td className="p-2"><Button size="sm" variant="outline">Edit</Button></td>
+                            </tr>
+                          );
+                        })
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -3248,6 +3248,45 @@ segment1.ts
     }
   });
 
+  // Admin health check endpoint - checks database and payment gateway status
+  app.get("/api/admin/health", isAdmin, async (req, res) => {
+    const healthStatus = {
+      database: { status: "unknown", message: "" },
+      api: { status: "healthy", message: "API server is running" },
+      payment: { status: "unknown", message: "" }
+    };
+
+    // Check database connection
+    try {
+      const users = await storage.getUsers?.();
+      if (users !== undefined) {
+        healthStatus.database = { status: "healthy", message: "Database connection active" };
+      } else {
+        healthStatus.database = { status: "degraded", message: "Database query returned undefined" };
+      }
+    } catch (err) {
+      healthStatus.database = { status: "error", message: "Database connection failed" };
+    }
+
+    // Check Stripe status
+    try {
+      const stripeStatus = getStripeStatus();
+      if (stripeStatus.configured) {
+        healthStatus.payment = { status: "healthy", message: "Stripe connected" };
+      } else if (stripeStatus.hasSecretKey && !stripeStatus.hasPublishableKey) {
+        healthStatus.payment = { status: "degraded", message: "Stripe partially configured (missing publishable key)" };
+      } else if (!stripeStatus.hasSecretKey && stripeStatus.hasPublishableKey) {
+        healthStatus.payment = { status: "degraded", message: "Stripe partially configured (missing secret key)" };
+      } else {
+        healthStatus.payment = { status: "not_configured", message: "Stripe not configured" };
+      }
+    } catch (err) {
+      healthStatus.payment = { status: "error", message: "Payment gateway check failed" };
+    }
+
+    res.json(healthStatus);
+  });
+
   app.get("/api/admin/users", isAdmin, async (req, res) => {
     try {
       const allUsers = (await storage.getUsers?.()) || [];
