@@ -83,7 +83,7 @@ export class BitcoinService {
         currency: 'USD',
         orderId: request.enrollmentId,
         itemDescription: request.description,
-        notificationUrl: `${process.env.REPLIT_DOMAINS ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0] : ''}/api/bitcoin/webhook`,
+        notificationUrl: `${process.env.SITE_URL || 'https://foundationce.com'}/api/bitcoin/webhook`,
         redirectUrl: request.returnUrl,
         metadata: {
           enrollmentId: request.enrollmentId,

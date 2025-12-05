@@ -77,8 +77,8 @@ export async function setupAuth(app: Express) {
   // Google OAuth
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.log("✅ Setting up Google OAuth Strategy");
-    const callbackURL =
-      "https://foundation-ce--stevenbermudez1.replit.app/api/google/callback";
+    const siteUrl = process.env.SITE_URL || "https://foundationce.com";
+    const callbackURL = `${siteUrl}/api/google/callback`;
     console.log("📍 Google OAuth Callback URL:", callbackURL);
     console.log(
       "🔐 Google Client ID (last 30 chars):",
