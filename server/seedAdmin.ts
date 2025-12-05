@@ -7,8 +7,14 @@ import * as crypto from "crypto";
 async function seedAdminUser() {
   console.log("Seeding admin user...");
 
-  const adminEmail = "admin@foundationce.com";
-  const adminPassword = "admin1234";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@foundationce.com";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    console.error("ERROR: ADMIN_PASSWORD environment variable is not set.");
+    console.error("Please set ADMIN_PASSWORD as a secret in Replit before running this script.");
+    process.exit(1);
+  }
 
   try {
     // Check if admin already exists
@@ -44,8 +50,8 @@ async function seedAdminUser() {
     }
 
     console.log("\nAdmin Credentials:");
-    console.log("Email: admin@foundationce.com");
-    console.log("Password: admin1234");
+    console.log(`Email: ${adminEmail}`);
+    console.log("Password: [Set from ADMIN_PASSWORD secret]");
     console.log("\nYou can now login at /admin/login");
   } catch (error) {
     console.error("Error seeding admin user:", error);
