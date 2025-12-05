@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { SkipLinks } from "@/components/SkipLinks";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
@@ -31,13 +32,16 @@ import AdminContentBuilderPage from "@/pages/admin/content-builder";
 import AdminPagesManagerPage from "@/pages/admin/pages-manager";
 import CourseLearningPage from "@/pages/course-learning";
 import UnitLearningPage from "@/pages/unit-learning";
+import AccessibilityPage from "@/pages/accessibility";
 
 function Router() {
   return (
     <div className="flex flex-col min-h-screen">
+      <SkipLinks />
       <ScrollToTop />
+      <a id="main-navigation" className="sr-only focus:not-sr-only" tabIndex={-1}>Navigation</a>
       <Header />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1" role="main" aria-label="Main content">
         <Switch>
           <Route path="/" component={HomePage} />
           <Route path="/about" component={AboutPage} />
@@ -56,6 +60,7 @@ function Router() {
           <Route path="/account-setup" component={AccountSetupPage} />
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/compliance" component={() => <CompliancePage selectedState="FL" />} />
+          <Route path="/accessibility" component={AccessibilityPage} />
           <Route path="/admin" component={AdminIndexPage} />
           <Route path="/admin/login" component={AdminLoginPage} />
           <Route path="/admin/dashboard" component={AdminDashboardPage} />

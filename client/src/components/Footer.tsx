@@ -25,6 +25,7 @@ export default function Footer() {
     ],
     company: [
       { label: "Home", href: "/" },
+      { label: "Accessibility", href: "/accessibility" },
       { label: "Terms & Conditions", href: "#terms" },
       { label: "Privacy", href: "#privacy" },
       { label: "Support Email", href: "mailto:support@foundationce.com" },
@@ -32,7 +33,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-card border-t">
+    <footer className="bg-card border-t" role="contentinfo" aria-label="Site footer">
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div className="sm:col-span-2 lg:col-span-1">

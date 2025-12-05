@@ -205,12 +205,12 @@ export default function Header() {
   const isActive = (path: string) => location === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="banner">
       <div className="mx-auto max-w-7xl px-2">
         <div className="flex h-16 items-center justify-between gap-1">
           <div className="flex items-center gap-1 flex-shrink-0 mr-auto">
-            <Link href="/" className="flex items-center gap-1 hover-elevate rounded-md px-1 py-1 -ml-1">
-              <img src={logoImage} alt="FoundationCE Logo" className="h-10 w-10" />
+            <Link href="/" className="flex items-center gap-1 hover-elevate rounded-md px-1 py-1 -ml-1" aria-label="FoundationCE - Go to homepage">
+              <img src={logoImage} alt="" className="h-10 w-10" aria-hidden="true" />
               <span 
                 className="font-black text-sm text-blue-600 whitespace-nowrap" 
                 data-testid="text-logo"
@@ -220,7 +220,7 @@ export default function Header() {
             </Link>
           </div>
 
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1" role="navigation" aria-label="Main navigation">
             {navItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <Button
@@ -242,11 +242,12 @@ export default function Header() {
               size="icon"
               onClick={toggleTheme}
               data-testid="button-theme-toggle"
+              aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
             >
               {theme === "light" ? (
-                <Moon className="h-4 w-4" />
+                <Moon className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Sun className="h-4 w-4" />
+                <Sun className="h-4 w-4" aria-hidden="true" />
               )}
             </Button>
 
@@ -254,8 +255,8 @@ export default function Header() {
               <>
                 <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
-                      <Bell className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications" aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}>
+                      <Bell className="h-4 w-4" aria-hidden="true" />
                       {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
                           {unreadCount > 9 ? "9+" : unreadCount}
@@ -335,8 +336,8 @@ export default function Header() {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" data-testid="button-user-menu">
-                      <User className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" data-testid="button-user-menu" aria-label="User menu">
+                      <User className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -365,12 +366,12 @@ export default function Header() {
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" data-testid="button-mobile-menu">
-                  <Menu className="h-5 w-5" />
+                <Button variant="ghost" size="icon" data-testid="button-mobile-menu" aria-label="Open mobile menu">
+                  <Menu className="h-5 w-5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72">
-                <nav className="flex flex-col gap-2 mt-8">
+              <SheetContent side="right" className="w-72" aria-label="Mobile navigation">
+                <nav className="flex flex-col gap-2 mt-8" role="navigation" aria-label="Mobile navigation">
                   {navItems.map((item) => (
                     <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}>
                       <Button
