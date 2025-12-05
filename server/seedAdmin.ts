@@ -1,41 +1,36 @@
 import { db } from "./db";
-import { users } from "@shared/schema";
+import { users, supervisors } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import * as bcrypt from "bcrypt";
 import * as crypto from "crypto";
 
-async function seedAdminUser() {
-  console.log("Seeding admin user...");
-
+export async function ensureAdminExists(): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL || "admin@foundationce.com";
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminPassword) {
-    console.error("ERROR: ADMIN_PASSWORD environment variable is not set.");
-    console.error("Please set ADMIN_PASSWORD as a secret in Replit before running this script.");
-    process.exit(1);
+    console.log("⚠ ADMIN_PASSWORD not set - skipping admin seeding");
+    return;
   }
 
   try {
-    // Check if admin already exists
     const existingAdmin = await db
       .select()
       .from(users)
       .where(eq(users.email, adminEmail));
 
+    let userId: string;
+
     if (existingAdmin.length > 0) {
-      console.log("Admin user already exists. Updating to admin status...");
-      // Update existing user to admin
+      userId = existingAdmin[0].id;
       const passwordHash = await bcrypt.hash(adminPassword, 10);
       await db
         .update(users)
         .set({ isAdmin: true, passwordHash })
         .where(eq(users.email, adminEmail));
-      console.log("✓ Admin user updated successfully");
+      console.log("✓ Admin user credentials updated");
     } else {
-      console.log("Creating new admin user...");
-      // Create new admin user
-      const userId = crypto.randomUUID();
+      userId = crypto.randomUUID();
       const passwordHash = await bcrypt.hash(adminPassword, 10);
 
       await db.insert(users).values({
@@ -46,19 +41,25 @@ async function seedAdminUser() {
         lastName: "User",
         isAdmin: true,
       });
-      console.log("✓ Admin user created successfully");
+      console.log("✓ Admin user created");
     }
 
-    console.log("\nAdmin Credentials:");
-    console.log(`Email: ${adminEmail}`);
-    console.log("Password: [Set from ADMIN_PASSWORD secret]");
-    console.log("\nYou can now login at /admin/login");
+    const existingSupervisor = await db
+      .select()
+      .from(supervisors)
+      .where(eq(supervisors.userId, userId));
+
+    if (existingSupervisor.length === 0) {
+      await db.insert(supervisors).values({
+        userId: userId,
+        role: "admin",
+        canReviewCE: 1,
+        canTrackLicenses: 1,
+        canApproveRenewals: 0,
+      });
+      console.log("✓ Admin supervisor role created");
+    }
   } catch (error) {
-    console.error("Error seeding admin user:", error);
-    process.exit(1);
+    console.error("Error ensuring admin exists:", error);
   }
-
-  process.exit(0);
 }
-
-seedAdminUser();

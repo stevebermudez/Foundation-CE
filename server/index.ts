@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { setupAuth } from "./oauthAuth";
 import { createServer } from "http";
+import { ensureAdminExists } from "./seedAdmin";
 
 const app = express();
 const httpServer = createServer(app);
@@ -61,6 +62,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  await ensureAdminExists();
   await setupAuth(app);
   await registerRoutes(httpServer, app);
 
