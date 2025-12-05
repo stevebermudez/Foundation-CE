@@ -14,11 +14,16 @@ import {
 } from "./paypal";
 import { submitToDBPR, validateDBPRData, generateDBPRBatchFile } from "./dbprService";
 import { generateCertificateHTML, generateCertificateFileName, CertificateData } from "./certificates";
+import express from "express";
+import path from "path";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express,
 ): Promise<Server> {
+  // Serve static course viewer files from /public directory
+  const publicPath = path.resolve(process.cwd(), "public");
+  app.use("/course-viewer", express.static(publicPath));
   // Seed FREC I course on startup if not already present
   try {
     const db = (await import("./db")).db;
