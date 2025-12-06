@@ -1938,6 +1938,7 @@ export class DatabaseStorage implements IStorage {
   async completeLesson(enrollmentId: string, lessonId: string, userId: string): Promise<LessonProgress> {
     const existing = await this.getLessonProgress(enrollmentId, lessonId);
     
+    let result: LessonProgress;
     if (existing) {
       const [updated] = await db.update(lessonProgress)
         .set({ 
@@ -1947,7 +1948,7 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(lessonProgress.id, existing.id))
         .returning();
-      return updated;
+      result = updated;
     } else {
       const [created] = await db.insert(lessonProgress)
         .values({ 
@@ -1958,8 +1959,29 @@ export class DatabaseStorage implements IStorage {
           completedAt: new Date()
         })
         .returning();
-      return created;
+      result = created;
     }
+    
+    // Update unit_progress.lessonsCompleted to keep admin dashboard in sync
+    const lesson = await this.getLesson(lessonId);
+    if (lesson) {
+      const unitId = lesson.unitId;
+      const unitLessons = await this.getLessons(unitId);
+      let completedCount = 0;
+      for (const l of unitLessons) {
+        const prog = await this.getLessonProgress(enrollmentId, l.id);
+        if (prog?.completed) completedCount++;
+      }
+      
+      const unitProg = await this.getUnitProgress(enrollmentId, unitId);
+      if (unitProg) {
+        await db.update(unitProgress)
+          .set({ lessonsCompleted: completedCount, updatedAt: new Date() })
+          .where(eq(unitProgress.id, unitProg.id));
+      }
+    }
+    
+    return result;
   }
 
   async updateEnrollmentProgress(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment> {
