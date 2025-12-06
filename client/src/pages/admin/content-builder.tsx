@@ -728,6 +728,95 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
         </div>
       )}
 
+      {/* Course Final Exam Section */}
+      <Card className="mt-6 border-amber-200 dark:border-amber-800">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <CardTitle className="text-lg">Course Final Exam</CardTitle>
+            </div>
+            <Button 
+              size="sm" 
+              className="gap-1"
+              onClick={() => {
+                setSelectedUnitId(null);
+                setShowQuestionBankForm(true);
+              }}
+              data-testid="button-add-final-exam"
+            >
+              <Plus className="h-3 w-3" />
+              Add Final Exam
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {getFinalExamBanks().length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground">
+              <FileText className="h-10 w-10 mx-auto mb-2 opacity-50" />
+              <p>No final exam configured</p>
+              <p className="text-xs mt-1">Add a final exam question bank to enable end-of-course assessment</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {getFinalExamBanks().map((bank) => (
+                <div 
+                  key={bank.id} 
+                  className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  data-testid={`card-final-exam-${bank.id}`}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{bank.title}</span>
+                      <Badge variant="secondary" className="text-xs">
+                        {bank.questionsPerAttempt} questions
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {bank.passingScore}% to pass
+                      </Badge>
+                      {bank.timeLimit && (
+                        <Badge variant="outline" className="text-xs">
+                          {bank.timeLimit} min limit
+                        </Badge>
+                      )}
+                    </div>
+                    {bank.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{bank.description}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => setSelectedBankId(bank.id)}
+                      data-testid={`button-manage-questions-${bank.id}`}
+                    >
+                      Manage Questions
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      onClick={() => setEditingQuestionBank(bank)}
+                      data-testid={`button-edit-bank-${bank.id}`}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      onClick={() => deleteQuestionBankMutation.mutate(bank.id)}
+                      data-testid={`button-delete-bank-${bank.id}`}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <UnitFormDialog
         open={showUnitForm}
         onClose={() => setShowUnitForm(false)}
@@ -1626,12 +1715,13 @@ function QuestionBankFormDialog({
   courseId: string;
   unitId?: string | null;
 }) {
+  const defaultBankType = initialData?.bankType || (unitId ? "unit_quiz" : "final_exam");
   const [title, setTitle] = useState(initialData?.title || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [questionsPerAttempt, setQuestionsPerAttempt] = useState(initialData?.questionsPerAttempt?.toString() || "10");
   const [passingScore, setPassingScore] = useState(initialData?.passingScore?.toString() || "70");
   const [timeLimit, setTimeLimit] = useState(initialData?.timeLimit?.toString() || "");
-  const [bankType, setBankType] = useState(initialData?.bankType || "unit_quiz");
+  const [bankType, setBankType] = useState(defaultBankType);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1778,7 +1868,7 @@ function QuestionFormDialog({
       bankId,
       questionText,
       questionType,
-      options: options.filter(o => o.trim() !== ""),
+      options: JSON.stringify(options.filter(o => o.trim() !== "")),
       correctOption: parseInt(correctOption),
       explanation,
       difficulty,

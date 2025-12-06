@@ -26,8 +26,8 @@ export default function Footer() {
     company: [
       { label: "Home", href: "/" },
       { label: "Accessibility", href: "/accessibility" },
-      { label: "Terms & Conditions", href: "#terms" },
-      { label: "Privacy", href: "#privacy" },
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Security & Compliance", href: "/legal-compliance" },
       { label: "Support Email", href: "mailto:support@foundationce.com" },
     ],
   };

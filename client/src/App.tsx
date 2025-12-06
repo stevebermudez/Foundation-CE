@@ -35,6 +35,8 @@ import AdminSettingsPage from "@/pages/admin/settings";
 import CourseLearningPage from "@/pages/course-learning";
 import UnitLearningPage from "@/pages/unit-learning";
 import AccessibilityPage from "@/pages/accessibility";
+import PrivacyPolicyPage from "@/pages/privacy-policy";
+import LegalCompliancePage from "@/pages/legal-compliance";
 
 function Router() {
   return (
@@ -63,6 +65,10 @@ function Router() {
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/compliance" component={() => <CompliancePage selectedState="FL" />} />
           <Route path="/accessibility" component={AccessibilityPage} />
+          <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+          <Route path="/privacy" component={PrivacyPolicyPage} />
+          <Route path="/legal-compliance" component={LegalCompliancePage} />
+          <Route path="/security" component={LegalCompliancePage} />
           <Route path="/admin" component={AdminIndexPage} />
           <Route path="/admin/login" component={AdminLoginPage} />
           <Route path="/admin/dashboard" component={AdminDashboardPage} />
