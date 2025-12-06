@@ -848,3 +848,69 @@ export const websitePages = pgTable("website_pages", {
 
 export type WebsitePage = typeof websitePages.$inferSelect;
 export type InsertWebsitePage = typeof websitePages.$inferInsert;
+
+// System Settings table for platform-wide configuration
+export const systemSettings = pgTable("system_settings", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  key: varchar("key").notNull().unique(),
+  value: text("value"),
+  category: varchar("category").notNull().default("general"),
+  label: varchar("label"),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by"),
+});
+
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = typeof systemSettings.$inferInsert;
+
+// Email Templates table for customizable email communications
+export const emailTemplates = pgTable("email_templates", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(),
+  subject: varchar("subject").notNull(),
+  body: text("body").notNull(),
+  category: varchar("category").notNull().default("transactional"),
+  variables: text("variables"), // JSON array of available template variables
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by"),
+});
+
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+export type InsertEmailTemplate = typeof emailTemplates.$inferInsert;
+
+// User Roles table for role-based access control
+export const userRoles = pgTable("user_roles", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(),
+  description: text("description"),
+  permissions: text("permissions"), // JSON array of permission strings
+  isSystem: integer("is_system").default(0), // System roles cannot be deleted
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UserRole = typeof userRoles.$inferSelect;
+export type InsertUserRole = typeof userRoles.$inferInsert;
+
+// User Role Assignments - links users to roles
+export const userRoleAssignments = pgTable("user_role_assignments", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  roleId: varchar("role_id").notNull(),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  assignedBy: varchar("assigned_by"),
+});
+
+export type UserRoleAssignment = typeof userRoleAssignments.$inferSelect;
+export type InsertUserRoleAssignment = typeof userRoleAssignments.$inferInsert;

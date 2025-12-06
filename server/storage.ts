@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -193,6 +193,35 @@ export interface IStorage {
     refunds: Refund[];
     credits: AccountCredit[];
   }>;
+  
+  // System Settings Methods
+  getSystemSetting(key: string): Promise<string | null>;
+  setSystemSetting(key: string, value: string, category?: string, label?: string, description?: string, updatedBy?: string): Promise<any>;
+  getSystemSettingsByCategory(category: string): Promise<any[]>;
+  getAllSystemSettings(): Promise<any[]>;
+  
+  // Email Template Methods
+  getEmailTemplate(name: string): Promise<any | undefined>;
+  getEmailTemplateById(id: string): Promise<any | undefined>;
+  getAllEmailTemplates(): Promise<any[]>;
+  createEmailTemplate(data: { name: string; subject: string; body: string; category?: string; variables?: string; updatedBy?: string }): Promise<any>;
+  updateEmailTemplate(id: string, data: Partial<{ subject: string; body: string; category: string; variables: string; isActive: number; updatedBy: string }>): Promise<any>;
+  deleteEmailTemplate(id: string): Promise<void>;
+  
+  // User Roles Methods
+  getUserRole(id: string): Promise<any | undefined>;
+  getUserRoleByName(name: string): Promise<any | undefined>;
+  getAllUserRoles(): Promise<any[]>;
+  createUserRole(data: { name: string; description?: string; permissions?: string; isSystem?: number }): Promise<any>;
+  updateUserRole(id: string, data: Partial<{ name: string; description: string; permissions: string }>): Promise<any>;
+  deleteUserRole(id: string): Promise<void>;
+  
+  // User Role Assignments
+  getUserRoleAssignments(userId: string): Promise<any[]>;
+  assignUserRole(userId: string, roleId: string, assignedBy?: string): Promise<any>;
+  removeUserRole(userId: string, roleId: string): Promise<void>;
+  getUsersWithRole(roleId: string): Promise<User[]>;
+  getAllSupervisors(): Promise<Supervisor[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2309,6 +2338,151 @@ export class DatabaseStorage implements IStorage {
       refunds: userRefunds,
       credits: userCredits
     };
+  }
+
+  // System Settings Methods
+  async getSystemSetting(key: string): Promise<string | null> {
+    const [setting] = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
+    return setting?.value ?? null;
+  }
+
+  async setSystemSetting(key: string, value: string, category: string = "general", label?: string, description?: string, updatedBy?: string): Promise<SystemSetting> {
+    const existing = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
+    if (existing.length > 0) {
+      const [updated] = await db.update(systemSettings)
+        .set({ value, category, label, description, updatedBy, updatedAt: new Date() })
+        .where(eq(systemSettings.key, key))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(systemSettings)
+      .values({ key, value, category, label, description, updatedBy })
+      .returning();
+    return created;
+  }
+
+  async getSystemSettingsByCategory(category: string): Promise<SystemSetting[]> {
+    return await db.select().from(systemSettings).where(eq(systemSettings.category, category));
+  }
+
+  async getAllSystemSettings(): Promise<SystemSetting[]> {
+    return await db.select().from(systemSettings).orderBy(systemSettings.category, systemSettings.key);
+  }
+
+  // Email Template Methods
+  async getEmailTemplate(name: string): Promise<EmailTemplate | undefined> {
+    const [template] = await db.select().from(emailTemplates).where(eq(emailTemplates.name, name));
+    return template;
+  }
+
+  async getEmailTemplateById(id: string): Promise<EmailTemplate | undefined> {
+    const [template] = await db.select().from(emailTemplates).where(eq(emailTemplates.id, id));
+    return template;
+  }
+
+  async getAllEmailTemplates(): Promise<EmailTemplate[]> {
+    return await db.select().from(emailTemplates).orderBy(emailTemplates.category, emailTemplates.name);
+  }
+
+  async createEmailTemplate(data: { name: string; subject: string; body: string; category?: string; variables?: string; updatedBy?: string }): Promise<EmailTemplate> {
+    const [template] = await db.insert(emailTemplates)
+      .values({
+        name: data.name,
+        subject: data.subject,
+        body: data.body,
+        category: data.category || "transactional",
+        variables: data.variables,
+        updatedBy: data.updatedBy
+      })
+      .returning();
+    return template;
+  }
+
+  async updateEmailTemplate(id: string, data: Partial<{ subject: string; body: string; category: string; variables: string; isActive: number; updatedBy: string }>): Promise<EmailTemplate> {
+    const [template] = await db.update(emailTemplates)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(emailTemplates.id, id))
+      .returning();
+    return template;
+  }
+
+  async deleteEmailTemplate(id: string): Promise<void> {
+    await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
+  }
+
+  // User Roles Methods
+  async getUserRole(id: string): Promise<UserRole | undefined> {
+    const [role] = await db.select().from(userRoles).where(eq(userRoles.id, id));
+    return role;
+  }
+
+  async getUserRoleByName(name: string): Promise<UserRole | undefined> {
+    const [role] = await db.select().from(userRoles).where(eq(userRoles.name, name));
+    return role;
+  }
+
+  async getAllUserRoles(): Promise<UserRole[]> {
+    return await db.select().from(userRoles).orderBy(userRoles.name);
+  }
+
+  async createUserRole(data: { name: string; description?: string; permissions?: string; isSystem?: number }): Promise<UserRole> {
+    const [role] = await db.insert(userRoles)
+      .values({
+        name: data.name,
+        description: data.description,
+        permissions: data.permissions,
+        isSystem: data.isSystem || 0
+      })
+      .returning();
+    return role;
+  }
+
+  async updateUserRole(id: string, data: Partial<{ name: string; description: string; permissions: string }>): Promise<UserRole> {
+    const [role] = await db.update(userRoles)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(userRoles.id, id))
+      .returning();
+    return role;
+  }
+
+  async deleteUserRole(id: string): Promise<void> {
+    // First remove all assignments for this role
+    await db.delete(userRoleAssignments).where(eq(userRoleAssignments.roleId, id));
+    // Then delete the role
+    await db.delete(userRoles).where(eq(userRoles.id, id));
+  }
+
+  // User Role Assignments
+  async getUserRoleAssignments(userId: string): Promise<UserRoleAssignment[]> {
+    return await db.select().from(userRoleAssignments).where(eq(userRoleAssignments.userId, userId));
+  }
+
+  async assignUserRole(userId: string, roleId: string, assignedBy?: string): Promise<UserRoleAssignment> {
+    // Check if already assigned
+    const existing = await db.select().from(userRoleAssignments)
+      .where(and(eq(userRoleAssignments.userId, userId), eq(userRoleAssignments.roleId, roleId)));
+    if (existing.length > 0) return existing[0];
+    
+    const [assignment] = await db.insert(userRoleAssignments)
+      .values({ userId, roleId, assignedBy })
+      .returning();
+    return assignment;
+  }
+
+  async removeUserRole(userId: string, roleId: string): Promise<void> {
+    await db.delete(userRoleAssignments)
+      .where(and(eq(userRoleAssignments.userId, userId), eq(userRoleAssignments.roleId, roleId)));
+  }
+
+  async getUsersWithRole(roleId: string): Promise<User[]> {
+    const assignments = await db.select().from(userRoleAssignments).where(eq(userRoleAssignments.roleId, roleId));
+    if (assignments.length === 0) return [];
+    const userIds = assignments.map(a => a.userId);
+    return await db.select().from(users).where(inArray(users.id, userIds));
+  }
+
+  async getAllSupervisors(): Promise<Supervisor[]> {
+    return await db.select().from(supervisors).orderBy(supervisors.createdAt);
   }
 }
 
