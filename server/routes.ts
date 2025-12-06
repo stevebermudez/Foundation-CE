@@ -3897,6 +3897,177 @@ segment1.ts
     }
   });
 
+  // ===== Question Bank Management Routes =====
+  
+  // Get all question banks for a course
+  app.get("/api/admin/courses/:courseId/question-banks", isAdmin, async (req, res) => {
+    try {
+      const banks = await storage.getQuestionBanksByCourse(req.params.courseId);
+      res.json(banks);
+    } catch (err) {
+      console.error("Error fetching question banks:", err);
+      res.status(500).json({ error: "Failed to fetch question banks" });
+    }
+  });
+
+  // Get question banks for a specific unit
+  app.get("/api/admin/units/:unitId/question-banks", isAdmin, async (req, res) => {
+    try {
+      const banks = await storage.getQuestionBanksByUnit(req.params.unitId);
+      res.json(banks);
+    } catch (err) {
+      console.error("Error fetching unit question banks:", err);
+      res.status(500).json({ error: "Failed to fetch question banks" });
+    }
+  });
+
+  // Get a single question bank
+  app.get("/api/admin/question-banks/:bankId", isAdmin, async (req, res) => {
+    try {
+      const bank = await storage.getQuestionBank(req.params.bankId);
+      if (!bank) {
+        return res.status(404).json({ error: "Question bank not found" });
+      }
+      res.json(bank);
+    } catch (err) {
+      console.error("Error fetching question bank:", err);
+      res.status(500).json({ error: "Failed to fetch question bank" });
+    }
+  });
+
+  // Create a question bank
+  app.post("/api/admin/question-banks", isAdmin, async (req, res) => {
+    try {
+      const { courseId, unitId, bankType, title, description, questionsPerAttempt, passingScore, timeLimit } = req.body;
+      
+      if (!courseId || !bankType || !title) {
+        return res.status(400).json({ error: "courseId, bankType, and title are required" });
+      }
+      
+      const bank = await storage.createQuestionBank({
+        courseId,
+        unitId: unitId || null,
+        bankType,
+        title,
+        description: description || null,
+        questionsPerAttempt: questionsPerAttempt || 10,
+        passingScore: passingScore || 70,
+        timeLimit: timeLimit || null,
+        isActive: 1,
+      });
+      
+      res.status(201).json(bank);
+    } catch (err) {
+      console.error("Error creating question bank:", err);
+      res.status(500).json({ error: "Failed to create question bank" });
+    }
+  });
+
+  // Update a question bank
+  app.patch("/api/admin/question-banks/:bankId", isAdmin, async (req, res) => {
+    try {
+      const bank = await storage.updateQuestionBank(req.params.bankId, req.body);
+      res.json(bank);
+    } catch (err) {
+      console.error("Error updating question bank:", err);
+      res.status(500).json({ error: "Failed to update question bank" });
+    }
+  });
+
+  // Delete a question bank
+  app.delete("/api/admin/question-banks/:bankId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteQuestionBank(req.params.bankId);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting question bank:", err);
+      res.status(500).json({ error: "Failed to delete question bank" });
+    }
+  });
+
+  // ===== Bank Questions Management Routes =====
+
+  // Get all questions in a bank
+  app.get("/api/admin/question-banks/:bankId/questions", isAdmin, async (req, res) => {
+    try {
+      const questions = await storage.getBankQuestions(req.params.bankId);
+      res.json(questions);
+    } catch (err) {
+      console.error("Error fetching bank questions:", err);
+      res.status(500).json({ error: "Failed to fetch questions" });
+    }
+  });
+
+  // Get a single question
+  app.get("/api/admin/questions/:questionId", isAdmin, async (req, res) => {
+    try {
+      const question = await storage.getBankQuestion(req.params.questionId);
+      if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+      }
+      res.json(question);
+    } catch (err) {
+      console.error("Error fetching question:", err);
+      res.status(500).json({ error: "Failed to fetch question" });
+    }
+  });
+
+  // Create a question in a bank
+  app.post("/api/admin/question-banks/:bankId/questions", isAdmin, async (req, res) => {
+    try {
+      const { bankId } = req.params;
+      const { questionText, questionType, options, correctOption, explanation, difficulty, category } = req.body;
+      
+      if (!questionText || options === undefined || correctOption === undefined || !explanation) {
+        return res.status(400).json({ error: "questionText, options, correctOption, and explanation are required" });
+      }
+      
+      const question = await storage.createBankQuestion({
+        bankId,
+        questionText,
+        questionType: questionType || "multiple_choice",
+        options: typeof options === "string" ? options : JSON.stringify(options),
+        correctOption,
+        explanation,
+        difficulty: difficulty || "medium",
+        category: category || null,
+        isActive: 1,
+      });
+      
+      res.status(201).json(question);
+    } catch (err) {
+      console.error("Error creating question:", err);
+      res.status(500).json({ error: "Failed to create question" });
+    }
+  });
+
+  // Update a question
+  app.patch("/api/admin/questions/:questionId", isAdmin, async (req, res) => {
+    try {
+      const data = { ...req.body };
+      // Ensure options is stringified if it's an array
+      if (data.options && typeof data.options !== "string") {
+        data.options = JSON.stringify(data.options);
+      }
+      const question = await storage.updateBankQuestion(req.params.questionId, data);
+      res.json(question);
+    } catch (err) {
+      console.error("Error updating question:", err);
+      res.status(500).json({ error: "Failed to update question" });
+    }
+  });
+
+  // Delete a question
+  app.delete("/api/admin/questions/:questionId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteBankQuestion(req.params.questionId);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting question:", err);
+      res.status(500).json({ error: "Failed to delete question" });
+    }
+  });
+
   // ===== Media Asset Management Routes =====
   app.get("/api/admin/media", isAdmin, async (req, res) => {
     try {
