@@ -36,6 +36,7 @@ export default function AdminDashboardPage() {
   const [, setLocation] = useLocation();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("adminToken");
@@ -544,7 +545,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="overview">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="overview" data-testid="tab-admin-overview">
               Overview
@@ -580,15 +581,30 @@ export default function AdminDashboardPage() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Button className="w-full justify-start" variant="outline" data-testid="button-create-course">
+                  <Button 
+                    className="w-full justify-start" 
+                    variant="outline" 
+                    data-testid="button-create-course"
+                    onClick={() => setActiveTab("courses")}
+                  >
                     <BookOpen className="h-4 w-4 mr-2" />
                     Create New Course
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" data-testid="button-manage-users">
+                  <Button 
+                    className="w-full justify-start" 
+                    variant="outline" 
+                    data-testid="button-manage-users"
+                    onClick={() => setActiveTab("users")}
+                  >
                     <Users className="h-4 w-4 mr-2" />
                     Manage Users
                   </Button>
-                  <Button className="w-full justify-start" variant="outline" data-testid="button-view-reports">
+                  <Button 
+                    className="w-full justify-start" 
+                    variant="outline" 
+                    data-testid="button-view-reports"
+                    onClick={() => setActiveTab("enrollments")}
+                  >
                     <BarChart3 className="h-4 w-4 mr-2" />
                     View Reports
                   </Button>
