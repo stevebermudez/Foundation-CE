@@ -45,7 +45,7 @@ export default function CourseViewPage() {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Fetch course data from API
-  const { data: course, isLoading } = useQuery({
+  const { data: course, isLoading, isError: courseError } = useQuery({
     queryKey: ["/api/courses", params.id],
     queryFn: async () => {
       const res = await fetch(`/api/courses/${params.id}`);
@@ -53,6 +53,7 @@ export default function CourseViewPage() {
       return res.json();
     },
     enabled: !!params.id,
+    retry: false,
   });
 
   // Fetch units with their lessons
@@ -141,6 +142,31 @@ export default function CourseViewPage() {
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // Show error page if course not found
+  if (courseError || !course) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-6 text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Course Not Found</h2>
+            <p className="text-muted-foreground mb-6">
+              The course you're looking for doesn't exist or may have been removed.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Link href="/courses/fl">
+                <Button data-testid="button-browse-courses">Browse Courses</Button>
+              </Link>
+              <Link href="/">
+                <Button variant="outline" data-testid="button-go-home">Go Home</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
