@@ -622,17 +622,36 @@ export default function AdminCoursesPage() {
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = `/api/export/course/${course.id}/content.docx`;
-                        link.download = `${course.title.replace(/[^a-z0-9]/gi, '-')}-content.docx`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        toast({
-                          title: "Export Started",
-                          description: "Your Word document is being downloaded.",
-                        });
+                      onClick={async () => {
+                        try {
+                          const token = localStorage.getItem("adminToken");
+                          const res = await fetch(`/api/export/course/${course.id}/content.docx`, {
+                            credentials: 'include',
+                            headers: token ? { Authorization: `Bearer ${token}` } : {}
+                          });
+                          if (!res.ok) {
+                            throw new Error("Failed to download");
+                          }
+                          const blob = await res.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.download = `${course.title.replace(/[^a-z0-9]/gi, '-')}-content.docx`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          window.URL.revokeObjectURL(url);
+                          toast({
+                            title: "Export Complete",
+                            description: "Your Word document has been downloaded.",
+                          });
+                        } catch (err) {
+                          toast({
+                            title: "Export Failed",
+                            description: "Could not download course content.",
+                            variant: "destructive"
+                          });
+                        }
                       }}
                       data-testid={`button-export-${course.id}`}
                       aria-label={`Export ${course.title} to Word document`}
