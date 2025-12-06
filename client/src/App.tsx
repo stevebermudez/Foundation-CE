@@ -30,6 +30,8 @@ import AdminIndexPage from "@/pages/admin/index";
 import AdminCoursesPage from "@/pages/admin/courses";
 import AdminContentBuilderPage from "@/pages/admin/content-builder";
 import AdminPagesManagerPage from "@/pages/admin/pages-manager";
+import AdminFinancePage from "@/pages/admin/finance";
+import AdminSettingsPage from "@/pages/admin/settings";
 import CourseLearningPage from "@/pages/course-learning";
 import UnitLearningPage from "@/pages/unit-learning";
 import AccessibilityPage from "@/pages/accessibility";
@@ -67,6 +69,8 @@ function Router() {
           <Route path="/admin/courses" component={AdminCoursesPage} />
           <Route path="/admin/content-builder">{() => <AdminContentBuilderPage />}</Route>
           <Route path="/admin/pages-manager" component={AdminPagesManagerPage} />
+          <Route path="/admin/finance" component={AdminFinancePage} />
+          <Route path="/admin/settings" component={AdminSettingsPage} />
           <Route path="/checkout"><CheckoutPage /></Route>
           <Route component={NotFound} />
         </Switch>

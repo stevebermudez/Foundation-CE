@@ -16,6 +16,7 @@ import AdminCoursesPage from "./courses";
 import PagesManagerPage from "./pages-manager";
 import ContentBuilderPage from "./content-builder";
 import AdminFinancePage from "./finance";
+import AdminSettingsPage from "./settings";
 import {
   BarChart3,
   Users,
@@ -993,30 +994,7 @@ export default function AdminDashboardPage() {
 
           {/* Settings Tab */}
           <TabsContent value="settings">
-            <Card data-testid="card-admin-settings">
-              <CardHeader>
-                <CardTitle>Administration Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 border rounded-lg">
-                  <h3 className="font-semibold mb-2">System Configuration</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Manage platform-wide settings and configurations</p>
-                  <Button variant="outline" data-testid="button-system-settings">Configure Settings</Button>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <h3 className="font-semibold mb-2">Email Templates</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Customize email communications</p>
-                  <Button variant="outline" data-testid="button-email-templates">Manage Templates</Button>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <h3 className="font-semibold mb-2">User Roles</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Configure user permissions and roles</p>
-                  <Button variant="outline" data-testid="button-user-roles">Manage Roles</Button>
-                </div>
-              </CardContent>
-            </Card>
+            <AdminSettingsPage />
           </TabsContent>
 
           {/* Finance Tab */}
