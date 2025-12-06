@@ -1206,12 +1206,40 @@ export async function registerRoutes(
         });
       }
       
-      const progress = await storage.completeLesson(enrollmentId, lessonId, user.id);
+      const lessonProg2 = await storage.completeLesson(enrollmentId, lessonId, user.id);
+      
+      // Recalculate and update overall enrollment progress
+      const courseUnits = await storage.getUnits(enrollment.courseId);
+      let totalLessons = 0;
+      let completedLessons = 0;
+      
+      for (const u of courseUnits) {
+        const unitLessons = await storage.getLessons(u.id);
+        totalLessons += unitLessons.length;
+        
+        for (const l of unitLessons) {
+          const lp = await storage.getLessonProgress(enrollmentId, l.id);
+          if (lp?.completed) {
+            completedLessons++;
+          }
+        }
+      }
+      
+      const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+      const course = await storage.getCourse(enrollment.courseId);
+      const hoursCompleted = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * (course?.hoursRequired || 63)) : 0;
+      
+      await storage.updateEnrollmentProgress(enrollmentId, { 
+        progress: overallProgress,
+        hoursCompleted: hoursCompleted
+      });
       
       res.json({ 
         completed: true,
         lessonId,
-        completedAt: progress.completedAt
+        completedAt: lessonProg2.completedAt,
+        overallProgress,
+        hoursCompleted
       });
     } catch (err) {
       console.error("Error completing lesson:", err);
