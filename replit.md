@@ -122,6 +122,27 @@ The platform implements enrollment expiration to encourage timely course complet
   - `storage.canRepurchaseCourse()` - Determines if user can repurchase after expiration
 - **API Protection**: Lesson/quiz routes return 403 with `expired: true` flag for expired enrollments
 
+### Admin Settings Management
+Complete administrative settings infrastructure for system configuration, email templates, and user roles:
+- **Settings Tab**: Located in admin dashboard (`/admin/dashboard` → Settings tab)
+- **Database Tables**: 
+  - `system_settings` - Key-value configuration with categories (general, email, payments, security, integrations)
+  - `email_templates` - Customizable email templates with variables support
+  - `user_roles` - Role management with JSON permissions
+- **Features**:
+  - System Configuration: Create/edit/delete key-value settings organized by category
+  - Email Templates: Manage email templates with name, subject, body, and variables
+  - User Roles: Define roles with descriptions and permission sets
+- **API Routes**:
+  - `GET/POST/PATCH/DELETE /api/admin/settings` - System settings CRUD
+  - `GET/POST/PATCH/DELETE /api/admin/email-templates` - Email template CRUD
+  - `GET/POST/PATCH/DELETE /api/admin/roles` - User role CRUD
+- **Key Files**:
+  - `client/src/pages/admin/settings.tsx` - Settings management UI
+  - `shared/schema.ts` - Database table definitions
+  - `server/routes.ts` - API endpoint handlers
+- **Admin Authentication**: Uses ADMIN_PASSWORD secret for admin account (admin@foundationce.com)
+
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Replit Auth (Google, GitHub, X, Apple)
