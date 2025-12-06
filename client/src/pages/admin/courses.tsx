@@ -73,10 +73,14 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
 
   const createCourseMutation = useMutation({
     mutationFn: async (data: CourseFormData) => {
+      const token = localStorage.getItem("adminToken");
       const priceInCents = Math.round(parseFloat(data.price) * 100);
       const res = await fetch("/api/admin/courses", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         credentials: 'include',
         body: JSON.stringify({
           ...data,
@@ -505,7 +509,11 @@ export default function AdminCoursesPage() {
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["/api/admin/courses"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/courses", { credentials: 'include' });
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch("/api/admin/courses", { 
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
       if (!res.ok) return [];
       return res.json();
     },
@@ -515,9 +523,13 @@ export default function AdminCoursesPage() {
   
   const updateCourseMutation = useMutation({
     mutationFn: async ({ courseId, data }: { courseId: string; data: any }) => {
+      const token = localStorage.getItem("adminToken");
       const res = await fetch(`/api/admin/courses/${courseId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         credentials: 'include',
         body: JSON.stringify(data),
       });
@@ -543,9 +555,11 @@ export default function AdminCoursesPage() {
   
   const deleteMutation = useMutation({
     mutationFn: async (courseId: string) => {
+      const token = localStorage.getItem("adminToken");
       const res = await fetch(`/api/admin/courses/${courseId}`, {
         method: "DELETE",
         credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       if (!res.ok) {
         const error = await res.text();
