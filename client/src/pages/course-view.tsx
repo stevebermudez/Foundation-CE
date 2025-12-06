@@ -422,7 +422,7 @@ export default function CourseViewPage() {
                 </Card>
               ) : null}
 
-              {/* Practice Exams */}
+              {/* Practice Exams - Preview only, no Take Exam buttons */}
               {exams.length > 0 && (
                 <Card data-testid="card-practice-exams">
                   <CardHeader>
@@ -436,22 +436,22 @@ export default function CourseViewPage() {
                       {exams.map((exam: any, idx: number) => (
                         <div
                           key={exam.id || idx}
-                          className="p-3 border rounded-lg flex items-center justify-between hover-elevate cursor-pointer"
+                          className="p-3 border rounded-lg"
                           data-testid={`exam-${idx}`}
                         >
-                          <div>
-                            <p className="font-medium">{exam.title}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {exam.totalQuestions} questions •{" "}
-                              {exam.passingScore}% pass required
-                            </p>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            Take Exam
-                          </Button>
+                          <p className="font-medium">{exam.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {exam.totalQuestions} questions •{" "}
+                            {exam.passingScore}% pass required
+                          </p>
                         </div>
                       ))}
                     </div>
+                    {!enrollment && (
+                      <p className="text-sm text-muted-foreground mt-4 text-center">
+                        Enroll to access practice exams
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               )}
