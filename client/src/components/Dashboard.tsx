@@ -163,10 +163,35 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
     queryKey: ["/api/enrollments/user"],
   });
 
+  // Separate Pre-Licensing courses from CE courses
+  const preLicensingEnrollments = enrollments.filter((e: any) => 
+    e.course?.requirementCycleType === "Pre-Licensing" || 
+    e.course?.requirementCycleType === "Post-Licensing" ||
+    e.course?.sku?.includes("-PL-")
+  );
+  const ceEnrollments = enrollments.filter((e: any) => 
+    e.course?.requirementCycleType === "Continuing Education" ||
+    e.course?.renewalApplicable === 1
+  );
+
   const inProgressCourses = enrollments.filter((e: any) => !e.completed);
   const completedCourses = enrollments.filter((e: any) => e.completed);
-  const totalCeHours = completedCourses.reduce((sum: number, e: any) => sum + (e.course?.hoursRequired || 0), 0);
-  const requiredCeHours = selectedState === "FL" ? 63 : 45;
+  
+  // CE hours only count from actual CE courses, not pre-licensing
+  const completedCECourses = ceEnrollments.filter((e: any) => e.completed);
+  const totalCeHours = completedCECourses.reduce((sum: number, e: any) => sum + (e.course?.hoursRequired || 0), 0);
+  
+  // Florida CE requirement is 14 hours per renewal cycle (not 63 - that's pre-licensing)
+  // California CE is 45 hours
+  const requiredCeHours = selectedState === "FL" ? 14 : 45;
+  
+  // Check if user has any pre-licensing enrollments (in progress or completed)
+  const hasPreLicensing = preLicensingEnrollments.length > 0;
+  const hasCE = ceEnrollments.length > 0;
+  
+  // Get pre-licensing progress (based on course progress, not hours)
+  const preLicensingInProgress = preLicensingEnrollments.filter((e: any) => !e.completed);
+  const preLicensingCompleted = preLicensingEnrollments.filter((e: any) => e.completed);
   
   const stats = {
     enrolledCourses: inProgressCourses.length,
@@ -176,7 +201,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
     upcomingDeadline: "Dec 31, 2025",
   };
   
-  const ceProgress = Math.min((stats.totalCeHours / stats.requiredCeHours) * 100, 100);
+  const ceProgress = requiredCeHours > 0 ? Math.min((stats.totalCeHours / stats.requiredCeHours) * 100, 100) : 0;
 
   return (
     <div className="py-8 px-4">
@@ -219,6 +244,7 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
             </CardContent>
           </Card>
 
+          {/* Show CE hours stat only when user has CE courses, otherwise show total hours completed */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -226,13 +252,25 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   <TrendingUp className="h-6 w-6 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold" data-testid="stat-ce-hours">{stats.totalCeHours}/{stats.requiredCeHours}</p>
-                  <p className="text-sm text-muted-foreground">CE Hours</p>
+                  {hasCE ? (
+                    <>
+                      <p className="text-2xl font-bold" data-testid="stat-ce-hours">{stats.totalCeHours}/{stats.requiredCeHours}</p>
+                      <p className="text-sm text-muted-foreground">CE Hours</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-2xl font-bold" data-testid="stat-total-hours">
+                        {completedCourses.reduce((sum: number, e: any) => sum + (e.course?.hoursRequired || 0), 0)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Hours Earned</p>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          {/* Show deadline only for CE courses */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -240,8 +278,17 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                   <Calendar className="h-6 w-6 text-orange-500" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold" data-testid="stat-deadline">{stats.upcomingDeadline}</p>
-                  <p className="text-sm text-muted-foreground">Next Deadline</p>
+                  {hasCE ? (
+                    <>
+                      <p className="text-lg font-bold" data-testid="stat-deadline">{stats.upcomingDeadline}</p>
+                      <p className="text-sm text-muted-foreground">CE Deadline</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-lg font-bold" data-testid="stat-deadline">No Deadline</p>
+                      <p className="text-sm text-muted-foreground">Pre-Licensing</p>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -330,99 +377,211 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
           </div>
 
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">CE Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center mb-4">
-                  <div className="relative inline-flex items-center justify-center">
-                    <svg className="w-32 h-32 transform -rotate-90">
-                      <circle
-                        cx="64"
-                        cy="64"
-                        r="56"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        fill="none"
-                        className="text-muted"
-                      />
-                      <circle
-                        cx="64"
-                        cy="64"
-                        r="56"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        fill="none"
-                        strokeDasharray={`${ceProgress * 3.52} 352`}
-                        className="text-primary transition-all duration-500"
-                      />
-                    </svg>
-                    <div className="absolute text-center">
-                      <p className="text-3xl font-bold">{stats.totalCeHours}</p>
-                      <p className="text-xs text-muted-foreground">of {stats.requiredCeHours}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Required</span>
-                    <span className="font-medium">{stats.requiredCeHours} hours</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Completed</span>
-                    <span className="font-medium text-green-500">{stats.totalCeHours} hours</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Remaining</span>
-                    <span className="font-medium">{Math.max(0, stats.requiredCeHours - stats.totalCeHours)} hours</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {stats.totalCeHours < stats.requiredCeHours && (
-              <Card className="border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/20">
-                <CardContent className="pt-6">
-                  <div className="flex gap-3">
-                    <AlertTriangle className="h-5 w-5 text-orange-600 shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-orange-800 dark:text-orange-200 mb-1">
-                        Renewal Deadline Approaching
-                      </h4>
-                      <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
-                        Complete {stats.requiredCeHours - stats.totalCeHours} more CE hours by {stats.upcomingDeadline} to renew your license.
-                      </p>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="border-orange-300 dark:border-orange-800" 
-                        onClick={() => window.location.href = "/courses/fl"}
-                        data-testid="button-view-requirements"
-                      >
-                        View Courses
-                      </Button>
-                    </div>
-                  </div>
+            {/* Show Pre-Licensing Progress when user has pre-licensing enrollments */}
+            {hasPreLicensing && preLicensingInProgress.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Pre-Licensing Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {preLicensingInProgress.map((enrollment: any) => {
+                    const progress = enrollment.progress || 0;
+                    const hoursCompleted = enrollment.hoursCompleted || 0;
+                    const totalHours = enrollment.course?.hoursRequired || 63;
+                    return (
+                      <div key={enrollment.id} className="mb-4 last:mb-0">
+                        <p className="text-sm font-medium mb-2 line-clamp-1">{enrollment.course?.title}</p>
+                        <div className="text-center mb-4">
+                          <div className="relative inline-flex items-center justify-center">
+                            <svg className="w-32 h-32 transform -rotate-90">
+                              <circle
+                                cx="64"
+                                cy="64"
+                                r="56"
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                fill="none"
+                                className="text-muted"
+                              />
+                              <circle
+                                cx="64"
+                                cy="64"
+                                r="56"
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                fill="none"
+                                strokeDasharray={`${progress * 3.52} 352`}
+                                className="text-primary transition-all duration-500"
+                              />
+                            </svg>
+                            <div className="absolute text-center">
+                              <p className="text-3xl font-bold">{progress}%</p>
+                              <p className="text-xs text-muted-foreground">complete</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Course Hours</span>
+                            <span className="font-medium">{totalHours} hours</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Progress</span>
+                            <span className="font-medium text-blue-500">{hoursCompleted} hours completed</span>
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="w-full mt-4 gap-1" 
+                          onClick={() => window.location.href = `/course/${enrollment.courseId}/learn`}
+                          data-testid={`button-continue-learning-${enrollment.id}`}
+                        >
+                          Continue Learning
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </CardContent>
               </Card>
             )}
-            
-            {stats.totalCeHours >= stats.requiredCeHours && (
+
+            {/* Show completed pre-licensing message */}
+            {hasPreLicensing && preLicensingInProgress.length === 0 && preLicensingCompleted.length > 0 && (
               <Card className="border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
                 <CardContent className="pt-6">
                   <div className="flex gap-3">
                     <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
                     <div>
                       <h4 className="font-semibold text-green-800 dark:text-green-200 mb-1">
-                        CE Requirements Complete
+                        Pre-Licensing Complete
                       </h4>
                       <p className="text-sm text-green-700 dark:text-green-300">
-                        You have completed all required CE hours for this renewal period.
+                        You have completed your pre-licensing course. You're ready for the state exam!
                       </p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Show CE Progress only when user has CE enrollments */}
+            {hasCE && (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">CE Progress</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center mb-4">
+                      <div className="relative inline-flex items-center justify-center">
+                        <svg className="w-32 h-32 transform -rotate-90">
+                          <circle
+                            cx="64"
+                            cy="64"
+                            r="56"
+                            stroke="currentColor"
+                            strokeWidth="8"
+                            fill="none"
+                            className="text-muted"
+                          />
+                          <circle
+                            cx="64"
+                            cy="64"
+                            r="56"
+                            stroke="currentColor"
+                            strokeWidth="8"
+                            fill="none"
+                            strokeDasharray={`${ceProgress * 3.52} 352`}
+                            className="text-primary transition-all duration-500"
+                          />
+                        </svg>
+                        <div className="absolute text-center">
+                          <p className="text-3xl font-bold">{stats.totalCeHours}</p>
+                          <p className="text-xs text-muted-foreground">of {stats.requiredCeHours}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Required</span>
+                        <span className="font-medium">{stats.requiredCeHours} hours</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Completed</span>
+                        <span className="font-medium text-green-500">{stats.totalCeHours} hours</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Remaining</span>
+                        <span className="font-medium">{Math.max(0, stats.requiredCeHours - stats.totalCeHours)} hours</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {stats.totalCeHours < stats.requiredCeHours && (
+                  <Card className="border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-orange-950/20">
+                    <CardContent className="pt-6">
+                      <div className="flex gap-3">
+                        <AlertTriangle className="h-5 w-5 text-orange-600 shrink-0" />
+                        <div>
+                          <h4 className="font-semibold text-orange-800 dark:text-orange-200 mb-1">
+                            Renewal Deadline Approaching
+                          </h4>
+                          <p className="text-sm text-orange-700 dark:text-orange-300 mb-3">
+                            Complete {stats.requiredCeHours - stats.totalCeHours} more CE hours by {stats.upcomingDeadline} to renew your license.
+                          </p>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="border-orange-300 dark:border-orange-800" 
+                            onClick={() => window.location.href = "/courses/fl"}
+                            data-testid="button-view-requirements"
+                          >
+                            View Courses
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+                
+                {stats.totalCeHours >= stats.requiredCeHours && (
+                  <Card className="border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20">
+                    <CardContent className="pt-6">
+                      <div className="flex gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+                        <div>
+                          <h4 className="font-semibold text-green-800 dark:text-green-200 mb-1">
+                            CE Requirements Complete
+                          </h4>
+                          <p className="text-sm text-green-700 dark:text-green-300">
+                            You have completed all required CE hours for this renewal period.
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+
+            {/* Show nothing enrolled message when no courses */}
+            {!hasPreLicensing && !hasCE && (
+              <Card>
+                <CardContent className="pt-6 text-center">
+                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h4 className="font-semibold mb-2">No Courses Yet</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Get started by enrolling in a course.
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = "/courses/fl"}
+                    data-testid="button-browse-courses-sidebar"
+                  >
+                    Browse Courses
+                  </Button>
                 </CardContent>
               </Card>
             )}
