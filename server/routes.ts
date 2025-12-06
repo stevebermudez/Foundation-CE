@@ -1534,16 +1534,37 @@ export async function registerRoutes(
             // Unlock next unit
             await storage.unlockNextUnit(attempt.enrollmentId);
             
-            // Update enrollment current unit index
+            // Update enrollment current unit index and recalculate overall progress
             const enrollment = await storage.getEnrollmentById(attempt.enrollmentId);
             if (enrollment) {
               const units = await storage.getUnits(enrollment.courseId);
               const currentUnit = units.find(u => u.id === bank.unitId);
-              if (currentUnit) {
-                await storage.updateEnrollmentProgress(attempt.enrollmentId, {
-                  currentUnitIndex: currentUnit.unitNumber + 1
-                });
+              
+              // Recalculate overall progress based on completed lessons
+              let totalLessons = 0;
+              let completedLessons = 0;
+              
+              for (const u of units) {
+                const unitLessons = await storage.getLessons(u.id);
+                totalLessons += unitLessons.length;
+                
+                for (const l of unitLessons) {
+                  const lp = await storage.getLessonProgress(attempt.enrollmentId, l.id);
+                  if (lp?.completed) {
+                    completedLessons++;
+                  }
+                }
               }
+              
+              const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+              const course = await storage.getCourse(enrollment.courseId);
+              const hoursCompleted = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * (course?.hoursRequired || 63)) : 0;
+              
+              await storage.updateEnrollmentProgress(attempt.enrollmentId, {
+                currentUnitIndex: currentUnit ? currentUnit.unitNumber + 1 : 1,
+                progress: overallProgress,
+                hoursCompleted: hoursCompleted
+              });
             }
           }
         }
