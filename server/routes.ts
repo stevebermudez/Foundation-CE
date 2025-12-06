@@ -5,7 +5,7 @@ import { z } from "zod";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
-import { updateAllLessonContent } from "./updateLessonContent";
+import { updateAllLessonContent, fixQuestionBankSettings } from "./updateLessonContent";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
 import {
@@ -50,6 +50,9 @@ export async function registerRoutes(
     
     // Update lesson content with real FREC I educational material
     await updateAllLessonContent();
+    
+    // Fix question bank settings (ensure unit quizzes use 10 questions)
+    await fixQuestionBankSettings();
   } catch (err: any) {
     console.error("Error with FREC I seeding:", err);
   }

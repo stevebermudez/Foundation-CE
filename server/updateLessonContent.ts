@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { lessons, units } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { lessons, units, questionBanks } from "@shared/schema";
+import { eq, and, ne } from "drizzle-orm";
 import { getLessonContent } from "./lessonContent";
 
 const expectedLessonCounts: Record<number, number> = {
@@ -62,5 +62,27 @@ export async function updateAllLessonContent() {
   } catch (error) {
     console.error("Error updating lesson content:", error);
     throw error;
+  }
+}
+
+// Fix question bank settings to use 10 questions for unit quizzes (not the default 20)
+export async function fixQuestionBankSettings() {
+  try {
+    console.log("Checking question bank settings...");
+    
+    // Update all unit quizzes to use 10 questions per attempt
+    const result = await db
+      .update(questionBanks)
+      .set({ questionsPerAttempt: 10 })
+      .where(
+        and(
+          eq(questionBanks.bankType, "unit_quiz"),
+          ne(questionBanks.questionsPerAttempt, 10)
+        )
+      );
+    
+    console.log("Question bank settings verified - unit quizzes set to 10 questions");
+  } catch (error) {
+    console.error("Error fixing question bank settings:", error);
   }
 }
