@@ -4479,5 +4479,259 @@ segment1.ts
     }
   });
 
+  // ===== Admin Settings Routes =====
+  
+  // System Settings
+  app.get("/api/admin/settings", isAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getAllSystemSettings();
+      res.json(settings);
+    } catch (err) {
+      console.error("Error fetching settings:", err);
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  app.get("/api/admin/settings/:key", isAdmin, async (req, res) => {
+    try {
+      const value = await storage.getSystemSetting(req.params.key);
+      res.json({ key: req.params.key, value });
+    } catch (err) {
+      console.error("Error fetching setting:", err);
+      res.status(500).json({ error: "Failed to fetch setting" });
+    }
+  });
+
+  app.post("/api/admin/settings", isAdmin, async (req, res) => {
+    try {
+      const { key, value, category, label, description } = req.body;
+      const adminUserId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!key || value === undefined) {
+        return res.status(400).json({ error: "key and value are required" });
+      }
+      
+      const setting = await storage.setSystemSetting(key, value, category, label, description, adminUserId);
+      res.json(setting);
+    } catch (err) {
+      console.error("Error saving setting:", err);
+      res.status(500).json({ error: "Failed to save setting" });
+    }
+  });
+
+  app.get("/api/admin/settings/category/:category", isAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getSystemSettingsByCategory(req.params.category);
+      res.json(settings);
+    } catch (err) {
+      console.error("Error fetching settings by category:", err);
+      res.status(500).json({ error: "Failed to fetch settings" });
+    }
+  });
+
+  // Email Templates
+  app.get("/api/admin/email-templates", isAdmin, async (req, res) => {
+    try {
+      const templates = await storage.getAllEmailTemplates();
+      res.json(templates);
+    } catch (err) {
+      console.error("Error fetching email templates:", err);
+      res.status(500).json({ error: "Failed to fetch email templates" });
+    }
+  });
+
+  app.get("/api/admin/email-templates/:id", isAdmin, async (req, res) => {
+    try {
+      const template = await storage.getEmailTemplateById(req.params.id);
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.json(template);
+    } catch (err) {
+      console.error("Error fetching email template:", err);
+      res.status(500).json({ error: "Failed to fetch email template" });
+    }
+  });
+
+  app.post("/api/admin/email-templates", isAdmin, async (req, res) => {
+    try {
+      const { name, subject, body, category, variables } = req.body;
+      const adminUserId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!name || !subject || !body) {
+        return res.status(400).json({ error: "name, subject, and body are required" });
+      }
+      
+      const template = await storage.createEmailTemplate({ name, subject, body, category, variables, updatedBy: adminUserId });
+      res.status(201).json(template);
+    } catch (err) {
+      console.error("Error creating email template:", err);
+      res.status(500).json({ error: "Failed to create email template" });
+    }
+  });
+
+  app.patch("/api/admin/email-templates/:id", isAdmin, async (req, res) => {
+    try {
+      const adminUserId = (req.user as any)?.id || (req.session as any)?.userId;
+      const template = await storage.updateEmailTemplate(req.params.id, { ...req.body, updatedBy: adminUserId });
+      res.json(template);
+    } catch (err) {
+      console.error("Error updating email template:", err);
+      res.status(500).json({ error: "Failed to update email template" });
+    }
+  });
+
+  app.delete("/api/admin/email-templates/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteEmailTemplate(req.params.id);
+      res.json({ message: "Template deleted" });
+    } catch (err) {
+      console.error("Error deleting email template:", err);
+      res.status(500).json({ error: "Failed to delete email template" });
+    }
+  });
+
+  // User Roles
+  app.get("/api/admin/roles", isAdmin, async (req, res) => {
+    try {
+      const roles = await storage.getAllUserRoles();
+      res.json(roles);
+    } catch (err) {
+      console.error("Error fetching roles:", err);
+      res.status(500).json({ error: "Failed to fetch roles" });
+    }
+  });
+
+  app.get("/api/admin/roles/:id", isAdmin, async (req, res) => {
+    try {
+      const role = await storage.getUserRole(req.params.id);
+      if (!role) {
+        return res.status(404).json({ error: "Role not found" });
+      }
+      res.json(role);
+    } catch (err) {
+      console.error("Error fetching role:", err);
+      res.status(500).json({ error: "Failed to fetch role" });
+    }
+  });
+
+  app.post("/api/admin/roles", isAdmin, async (req, res) => {
+    try {
+      const { name, description, permissions } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: "name is required" });
+      }
+      
+      const existingRole = await storage.getUserRoleByName(name);
+      if (existingRole) {
+        return res.status(400).json({ error: "Role with this name already exists" });
+      }
+      
+      const role = await storage.createUserRole({ name, description, permissions });
+      res.status(201).json(role);
+    } catch (err) {
+      console.error("Error creating role:", err);
+      res.status(500).json({ error: "Failed to create role" });
+    }
+  });
+
+  app.patch("/api/admin/roles/:id", isAdmin, async (req, res) => {
+    try {
+      const role = await storage.getUserRole(req.params.id);
+      if (!role) {
+        return res.status(404).json({ error: "Role not found" });
+      }
+      
+      if (role.isSystem === 1) {
+        return res.status(400).json({ error: "Cannot modify system roles" });
+      }
+      
+      const updated = await storage.updateUserRole(req.params.id, req.body);
+      res.json(updated);
+    } catch (err) {
+      console.error("Error updating role:", err);
+      res.status(500).json({ error: "Failed to update role" });
+    }
+  });
+
+  app.delete("/api/admin/roles/:id", isAdmin, async (req, res) => {
+    try {
+      const role = await storage.getUserRole(req.params.id);
+      if (!role) {
+        return res.status(404).json({ error: "Role not found" });
+      }
+      
+      if (role.isSystem === 1) {
+        return res.status(400).json({ error: "Cannot delete system roles" });
+      }
+      
+      await storage.deleteUserRole(req.params.id);
+      res.json({ message: "Role deleted" });
+    } catch (err) {
+      console.error("Error deleting role:", err);
+      res.status(500).json({ error: "Failed to delete role" });
+    }
+  });
+
+  // Role Assignments
+  app.get("/api/admin/roles/:id/users", isAdmin, async (req, res) => {
+    try {
+      const users = await storage.getUsersWithRole(req.params.id);
+      res.json(users);
+    } catch (err) {
+      console.error("Error fetching role users:", err);
+      res.status(500).json({ error: "Failed to fetch role users" });
+    }
+  });
+
+  app.post("/api/admin/users/:userId/roles", isAdmin, async (req, res) => {
+    try {
+      const { roleId } = req.body;
+      const adminUserId = (req.user as any)?.id || (req.session as any)?.userId;
+      
+      if (!roleId) {
+        return res.status(400).json({ error: "roleId is required" });
+      }
+      
+      const assignment = await storage.assignUserRole(req.params.userId, roleId, adminUserId);
+      res.status(201).json(assignment);
+    } catch (err) {
+      console.error("Error assigning role:", err);
+      res.status(500).json({ error: "Failed to assign role" });
+    }
+  });
+
+  app.delete("/api/admin/users/:userId/roles/:roleId", isAdmin, async (req, res) => {
+    try {
+      await storage.removeUserRole(req.params.userId, req.params.roleId);
+      res.json({ message: "Role removed" });
+    } catch (err) {
+      console.error("Error removing role:", err);
+      res.status(500).json({ error: "Failed to remove role" });
+    }
+  });
+
+  app.get("/api/admin/users/:userId/roles", isAdmin, async (req, res) => {
+    try {
+      const assignments = await storage.getUserRoleAssignments(req.params.userId);
+      res.json(assignments);
+    } catch (err) {
+      console.error("Error fetching user roles:", err);
+      res.status(500).json({ error: "Failed to fetch user roles" });
+    }
+  });
+
+  // Supervisors (for user management)
+  app.get("/api/admin/supervisors", isAdmin, async (req, res) => {
+    try {
+      const supervisorList = await storage.getAllSupervisors();
+      res.json(supervisorList);
+    } catch (err) {
+      console.error("Error fetching supervisors:", err);
+      res.status(500).json({ error: "Failed to fetch supervisors" });
+    }
+  });
+
   return httpServer;
 }
