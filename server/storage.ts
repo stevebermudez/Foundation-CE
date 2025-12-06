@@ -130,10 +130,17 @@ export interface IStorage {
   // Question Bank Methods
   getQuestionBank(bankId: string): Promise<QuestionBank | undefined>;
   getQuestionBankByUnit(unitId: string): Promise<QuestionBank | undefined>;
+  getQuestionBanksByUnit(unitId: string): Promise<QuestionBank[]>;
+  getQuestionBanksByCourse(courseId: string): Promise<QuestionBank[]>;
   getFinalExamBank(courseId: string): Promise<QuestionBank | undefined>;
   createQuestionBank(data: Omit<QuestionBank, 'id' | 'createdAt' | 'updatedAt'>): Promise<QuestionBank>;
+  updateQuestionBank(bankId: string, data: Partial<QuestionBank>): Promise<QuestionBank>;
+  deleteQuestionBank(bankId: string): Promise<void>;
   getBankQuestions(bankId: string): Promise<BankQuestion[]>;
+  getBankQuestion(questionId: string): Promise<BankQuestion | undefined>;
   createBankQuestion(data: Omit<BankQuestion, 'id' | 'createdAt' | 'updatedAt'>): Promise<BankQuestion>;
+  updateBankQuestion(questionId: string, data: Partial<BankQuestion>): Promise<BankQuestion>;
+  deleteBankQuestion(questionId: string): Promise<void>;
   getRandomQuestions(bankId: string, count: number): Promise<BankQuestion[]>;
   
   // Quiz Attempt Methods
@@ -1886,6 +1893,26 @@ export class DatabaseStorage implements IStorage {
     return bank;
   }
 
+  async getQuestionBanksByUnit(unitId: string): Promise<QuestionBank[]> {
+    return await db.select()
+      .from(questionBanks)
+      .where(and(
+        eq(questionBanks.unitId, unitId),
+        eq(questionBanks.isActive, 1)
+      ))
+      .orderBy(questionBanks.createdAt);
+  }
+
+  async getQuestionBanksByCourse(courseId: string): Promise<QuestionBank[]> {
+    return await db.select()
+      .from(questionBanks)
+      .where(and(
+        eq(questionBanks.courseId, courseId),
+        eq(questionBanks.isActive, 1)
+      ))
+      .orderBy(questionBanks.createdAt);
+  }
+
   async getFinalExamBank(courseId: string): Promise<QuestionBank | undefined> {
     const [bank] = await db.select()
       .from(questionBanks)
@@ -1904,6 +1931,20 @@ export class DatabaseStorage implements IStorage {
     return bank;
   }
 
+  async updateQuestionBank(bankId: string, data: Partial<QuestionBank>): Promise<QuestionBank> {
+    const [updated] = await db.update(questionBanks)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(questionBanks.id, bankId))
+      .returning();
+    return updated;
+  }
+
+  async deleteQuestionBank(bankId: string): Promise<void> {
+    await db.update(questionBanks)
+      .set({ isActive: 0 })
+      .where(eq(questionBanks.id, bankId));
+  }
+
   async getBankQuestions(bankId: string): Promise<BankQuestion[]> {
     return await db.select()
       .from(bankQuestions)
@@ -1918,6 +1959,27 @@ export class DatabaseStorage implements IStorage {
       .values(data)
       .returning();
     return question;
+  }
+
+  async getBankQuestion(questionId: string): Promise<BankQuestion | undefined> {
+    const [question] = await db.select()
+      .from(bankQuestions)
+      .where(eq(bankQuestions.id, questionId));
+    return question;
+  }
+
+  async updateBankQuestion(questionId: string, data: Partial<BankQuestion>): Promise<BankQuestion> {
+    const [updated] = await db.update(bankQuestions)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(bankQuestions.id, questionId))
+      .returning();
+    return updated;
+  }
+
+  async deleteBankQuestion(questionId: string): Promise<void> {
+    await db.update(bankQuestions)
+      .set({ isActive: 0 })
+      .where(eq(bankQuestions.id, questionId));
   }
 
   async getRandomQuestions(bankId: string, count: number): Promise<BankQuestion[]> {
