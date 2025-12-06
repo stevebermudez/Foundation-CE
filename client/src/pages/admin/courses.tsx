@@ -39,6 +39,7 @@ interface CourseFormData {
   sku: string;
   renewalApplicable: string;
   renewalPeriodYears: string;
+  expirationMonths: string;
   providerNumber: string;
   courseOfferingNumber: string;
   instructorName: string;
@@ -62,6 +63,7 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
       sku: "",
       renewalApplicable: "1",
       renewalPeriodYears: "2",
+      expirationMonths: "6",
       providerNumber: "",
       courseOfferingNumber: "",
       instructorName: "",
@@ -82,6 +84,7 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
           price: priceInCents,
           renewalApplicable: data.renewalApplicable === "1" ? 1 : 0,
           renewalPeriodYears: parseInt(data.renewalPeriodYears),
+          expirationMonths: parseInt(data.expirationMonths) || 6,
         }),
       });
       if (!res.ok) {
@@ -405,6 +408,28 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
               </div>
 
               <div>
+                <Label htmlFor="expirationMonths">Enrollment Expiration (Months)</Label>
+                <Input
+                  id="expirationMonths"
+                  type="number"
+                  min="1"
+                  max="24"
+                  value={formData.expirationMonths}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      expirationMonths: e.target.value,
+                    })
+                  }
+                  placeholder="6"
+                  data-testid="input-expiration-months"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Students must complete the course within this time period
+                </p>
+              </div>
+
+              <div>
                 <Label htmlFor="providerNumber">Provider Number</Label>
                 <Input
                   id="providerNumber"
@@ -694,6 +719,7 @@ function EditCourseDialog({
     sku: course.sku || "",
     renewalApplicable: course.renewalApplicable ? "1" : "0",
     renewalPeriodYears: course.renewalPeriodYears?.toString() || "2",
+    expirationMonths: course.expirationMonths?.toString() || "6",
     providerNumber: course.providerNumber || "",
     courseOfferingNumber: course.courseOfferingNumber || "",
     instructorName: course.instructorName || "",
@@ -708,6 +734,7 @@ function EditCourseDialog({
       price: priceInCents,
       renewalApplicable: formData.renewalApplicable === "1" ? 1 : 0,
       renewalPeriodYears: parseInt(formData.renewalPeriodYears),
+      expirationMonths: parseInt(formData.expirationMonths) || 6,
     });
   };
 
@@ -864,6 +891,22 @@ function EditCourseDialog({
                     <SelectItem value="Classroom">Classroom</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-expiration-months">Enrollment Expiration (Months)</Label>
+                <Input
+                  id="edit-expiration-months"
+                  type="number"
+                  min="1"
+                  max="24"
+                  value={formData.expirationMonths}
+                  onChange={(e) => setFormData({ ...formData, expirationMonths: e.target.value })}
+                  data-testid="input-edit-expiration-months"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Students must complete within this time period
+                </p>
               </div>
             </div>
           </div>

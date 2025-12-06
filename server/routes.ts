@@ -1126,6 +1126,15 @@ export async function registerRoutes(
         return res.status(403).json({ error: "Not authorized" });
       }
       
+      // Check if enrollment is expired (blocks content access)
+      if (storage.isEnrollmentExpired(enrollment)) {
+        return res.status(403).json({ 
+          error: "Enrollment expired",
+          expired: true,
+          expiresAt: enrollment.expiresAt
+        });
+      }
+      
       // SECURITY: Verify the lesson belongs to a unit in the enrolled course
       const lesson = await storage.getLesson(lessonId);
       if (!lesson) {
@@ -1177,6 +1186,15 @@ export async function registerRoutes(
       const enrollment = await storage.getEnrollmentById(enrollmentId);
       if (!enrollment || enrollment.userId !== user.id) {
         return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      // Check if enrollment is expired (blocks content access)
+      if (storage.isEnrollmentExpired(enrollment)) {
+        return res.status(403).json({ 
+          error: "Enrollment expired",
+          expired: true,
+          expiresAt: enrollment.expiresAt
+        });
       }
       
       // SECURITY: Verify the lesson belongs to a unit in the enrolled course
@@ -1262,6 +1280,15 @@ export async function registerRoutes(
       const enrollment = await storage.getEnrollmentById(enrollmentId);
       if (!enrollment || enrollment.userId !== user.id) {
         return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      // Check if enrollment is expired (blocks quiz access)
+      if (storage.isEnrollmentExpired(enrollment)) {
+        return res.status(403).json({ 
+          error: "Enrollment expired",
+          expired: true,
+          expiresAt: enrollment.expiresAt
+        });
       }
       
       const bank = await storage.getQuestionBank(bankId);
@@ -1368,6 +1395,15 @@ export async function registerRoutes(
         return res.status(403).json({ error: "Not authorized" });
       }
       
+      // Check if enrollment is expired (blocks quiz access)
+      if (storage.isEnrollmentExpired(enrollment)) {
+        return res.status(403).json({ 
+          error: "Enrollment expired",
+          expired: true,
+          expiresAt: enrollment.expiresAt
+        });
+      }
+      
       const bank = await storage.getQuestionBank(attempt.bankId);
       if (!bank || bank.courseId !== enrollment.courseId) {
         return res.status(403).json({ error: "Quiz not available for this enrollment" });
@@ -1434,6 +1470,15 @@ export async function registerRoutes(
       const enrollment = await storage.getEnrollmentById(attempt.enrollmentId);
       if (!enrollment || enrollment.userId !== user.id) {
         return res.status(403).json({ error: "Not authorized" });
+      }
+      
+      // Check if enrollment is expired (blocks quiz access)
+      if (storage.isEnrollmentExpired(enrollment)) {
+        return res.status(403).json({ 
+          error: "Enrollment expired",
+          expired: true,
+          expiresAt: enrollment.expiresAt
+        });
       }
       
       const bank = await storage.getQuestionBank(attempt.bankId);
@@ -3614,6 +3659,17 @@ segment1.ts
   app.post("/api/admin/courses", isAdmin, async (req, res) => {
     try {
       const courseData = req.body;
+      // Validate and default expirationMonths
+      if (courseData.expirationMonths !== undefined) {
+        const months = parseInt(courseData.expirationMonths);
+        if (isNaN(months) || months < 1 || months > 24) {
+          courseData.expirationMonths = 6; // Default to 6 months if invalid
+        } else {
+          courseData.expirationMonths = months;
+        }
+      } else {
+        courseData.expirationMonths = 6; // Default to 6 months
+      }
       const course = await storage.createCourse?.(courseData);
       res.status(201).json(course);
     } catch (err) {
@@ -3635,7 +3691,19 @@ segment1.ts
   app.patch("/api/admin/courses/:courseId", isAdmin, async (req, res) => {
     try {
       const { courseId } = req.params;
-      const course = await storage.updateCourse?.(courseId, req.body);
+      const updateData = { ...req.body };
+      
+      // Validate expirationMonths if provided
+      if (updateData.expirationMonths !== undefined) {
+        const months = parseInt(updateData.expirationMonths);
+        if (isNaN(months) || months < 1 || months > 24) {
+          updateData.expirationMonths = 6; // Default to 6 months if invalid
+        } else {
+          updateData.expirationMonths = months;
+        }
+      }
+      
+      const course = await storage.updateCourse?.(courseId, updateData);
       if (!course) return res.status(404).json({ error: "Course not found" });
       res.json(course);
     } catch (err) {

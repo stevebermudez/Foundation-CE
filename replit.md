@@ -105,6 +105,23 @@ The platform implements comprehensive accessibility features to ensure ADA compl
   - `client/src/pages/accessibility.tsx` - Accessibility statement page
   - `client/src/index.css` - Focus indicators and reduced motion CSS utilities
 
+### Course Expiration Management
+The platform implements enrollment expiration to encourage timely course completion:
+- **Configurable Expiration**: Each course has an `expirationMonths` field (default 6 months, range 1-24)
+- **Expiration Tracking**: Enrollments have `expiresAt` date calculated at enrollment creation
+- **Completed Courses Never Expire**: Completed enrollments maintain certificate access indefinitely
+- **Content Access Blocking**: Expired enrollments cannot access lessons, quizzes, or exams
+- **Dashboard Display**: 
+  - Shows expiration date on enrollment cards
+  - Highlights courses expiring within 30 days (orange badge)
+  - Shows expired status with repurchase option
+- **Admin Configuration**: Expiration period configurable per course in admin courses UI
+- **Key Methods**:
+  - `storage.isEnrollmentExpired()` - Checks if non-completed enrollment is past expiration
+  - `storage.getActiveEnrollment()` - Returns enrollment only if not expired
+  - `storage.canRepurchaseCourse()` - Determines if user can repurchase after expiration
+- **API Protection**: Lesson/quiz routes return 403 with `expired: true` flag for expired enrollments
+
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Replit Auth (Google, GitHub, X, Apple)

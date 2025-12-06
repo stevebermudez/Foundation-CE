@@ -316,11 +316,22 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                     </Button>
                   </Card>
                 ) : (
-                  inProgressCourses.map((enrollment: any) => (
-                    <Card key={enrollment.id} className="overflow-hidden">
+                  inProgressCourses.map((enrollment: any) => {
+                    // Check if enrollment is expired
+                    const isExpired = enrollment.expiresAt && new Date(enrollment.expiresAt) < new Date() && !enrollment.completed;
+                    const expiresAt = enrollment.expiresAt ? new Date(enrollment.expiresAt) : null;
+                    const daysUntilExpiry = expiresAt ? Math.ceil((expiresAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
+                    const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry <= 30;
+                    
+                    return (
+                    <Card key={enrollment.id} className={`overflow-hidden ${isExpired ? 'border-destructive' : ''}`}>
                       <div className="flex flex-col sm:flex-row">
-                        <div className="sm:w-40 h-32 sm:h-auto shrink-0 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                          <BookOpen className="h-12 w-12 text-white/80" />
+                        <div className={`sm:w-40 h-32 sm:h-auto shrink-0 flex items-center justify-center ${isExpired ? 'bg-gradient-to-br from-red-500 to-red-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'}`}>
+                          {isExpired ? (
+                            <AlertTriangle className="h-12 w-12 text-white/80" />
+                          ) : (
+                            <BookOpen className="h-12 w-12 text-white/80" />
+                          )}
                         </div>
                         <CardContent className="flex-1 p-4">
                           <div className="flex flex-col h-full">
@@ -336,29 +347,63 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                                 <Badge variant="secondary" className="text-xs">
                                   {enrollment.course?.hoursRequired} CE Hours
                                 </Badge>
+                                {isExpired ? (
+                                  <Badge variant="destructive" className="text-xs gap-1">
+                                    <AlertTriangle className="h-3 w-3" />
+                                    Expired
+                                  </Badge>
+                                ) : isExpiringSoon ? (
+                                  <Badge variant="outline" className="text-xs gap-1 border-orange-500 text-orange-600">
+                                    <Calendar className="h-3 w-3" />
+                                    Expires in {daysUntilExpiry} days
+                                  </Badge>
+                                ) : expiresAt ? (
+                                  <Badge variant="outline" className="text-xs gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    Expires {expiresAt.toLocaleDateString()}
+                                  </Badge>
+                                ) : null}
                               </div>
                             </div>
-                            <div>
-                              <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-sm text-muted-foreground">Progress</span>
-                                <span className="text-sm font-medium">{enrollment.progress || 0}%</span>
+                            {isExpired ? (
+                              <div className="bg-destructive/10 rounded-md p-3 mb-3">
+                                <p className="text-sm text-destructive font-medium mb-2">
+                                  Your enrollment has expired. To continue learning, you'll need to repurchase this course.
+                                </p>
+                                <Button 
+                                  size="sm"
+                                  variant="destructive"
+                                  className="gap-1" 
+                                  onClick={() => window.location.href = `/courses/${enrollment.course?.state?.toLowerCase() || 'fl'}`}
+                                  data-testid={`button-repurchase-${enrollment.id}`}
+                                >
+                                  Repurchase Course
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
                               </div>
-                              <Progress value={enrollment.progress || 0} className="h-2 mb-3" />
-                              <Button 
-                                size="sm" 
-                                className="gap-1" 
-                                onClick={() => window.location.href = `/course/${enrollment.courseId}`}
-                                data-testid={`button-continue-${enrollment.id}`}
-                              >
-                                Continue
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
+                            ) : (
+                              <div>
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <span className="text-sm text-muted-foreground">Progress</span>
+                                  <span className="text-sm font-medium">{enrollment.progress || 0}%</span>
+                                </div>
+                                <Progress value={enrollment.progress || 0} className="h-2 mb-3" />
+                                <Button 
+                                  size="sm" 
+                                  className="gap-1" 
+                                  onClick={() => window.location.href = `/course/${enrollment.courseId}`}
+                                  data-testid={`button-continue-${enrollment.id}`}
+                                >
+                                  Continue
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </div>
                     </Card>
-                  ))
+                  );})
                 )}
               </TabsContent>
 
@@ -388,57 +433,101 @@ export default function Dashboard({ userName, selectedState }: DashboardProps) {
                     const progress = enrollment.progress || 0;
                     const hoursCompleted = enrollment.hoursCompleted || 0;
                     const totalHours = enrollment.course?.hoursRequired || 63;
+                    const isExpired = enrollment.expiresAt && new Date(enrollment.expiresAt) < new Date() && !enrollment.completed;
+                    const expiresAt = enrollment.expiresAt ? new Date(enrollment.expiresAt) : null;
+                    const daysUntilExpiry = expiresAt ? Math.ceil((expiresAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
+                    const isExpiringSoon = daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry <= 30;
+                    
                     return (
                       <div key={enrollment.id} className="mb-4 last:mb-0">
                         <p className="text-sm font-medium mb-2 line-clamp-1">{enrollment.course?.title}</p>
-                        <div className="text-center mb-4">
-                          <div className="relative inline-flex items-center justify-center">
-                            <svg className="w-32 h-32 transform -rotate-90">
-                              <circle
-                                cx="64"
-                                cy="64"
-                                r="56"
-                                stroke="currentColor"
-                                strokeWidth="8"
-                                fill="none"
-                                className="text-muted"
-                              />
-                              <circle
-                                cx="64"
-                                cy="64"
-                                r="56"
-                                stroke="currentColor"
-                                strokeWidth="8"
-                                fill="none"
-                                strokeDasharray={`${progress * 3.52} 352`}
-                                className="text-primary transition-all duration-500"
-                              />
-                            </svg>
-                            <div className="absolute text-center">
-                              <p className="text-3xl font-bold">{progress}%</p>
-                              <p className="text-xs text-muted-foreground">complete</p>
+                        
+                        {/* Expiration status */}
+                        {isExpired ? (
+                          <div className="bg-destructive/10 rounded-md p-3 mb-3 text-center">
+                            <Badge variant="destructive" className="mb-2">
+                              <AlertTriangle className="h-3 w-3 mr-1" />
+                              Expired
+                            </Badge>
+                            <p className="text-xs text-destructive">
+                              Repurchase to continue
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="text-center mb-4">
+                              <div className="relative inline-flex items-center justify-center">
+                                <svg className="w-32 h-32 transform -rotate-90">
+                                  <circle
+                                    cx="64"
+                                    cy="64"
+                                    r="56"
+                                    stroke="currentColor"
+                                    strokeWidth="8"
+                                    fill="none"
+                                    className="text-muted"
+                                  />
+                                  <circle
+                                    cx="64"
+                                    cy="64"
+                                    r="56"
+                                    stroke="currentColor"
+                                    strokeWidth="8"
+                                    fill="none"
+                                    strokeDasharray={`${progress * 3.52} 352`}
+                                    className="text-primary transition-all duration-500"
+                                  />
+                                </svg>
+                                <div className="absolute text-center">
+                                  <p className="text-3xl font-bold">{progress}%</p>
+                                  <p className="text-xs text-muted-foreground">complete</p>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Course Hours</span>
-                            <span className="font-medium">{totalHours} hours</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Progress</span>
-                            <span className="font-medium text-blue-500">{hoursCompleted} hours completed</span>
-                          </div>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          className="w-full mt-4 gap-1" 
-                          onClick={() => window.location.href = `/course/${enrollment.courseId}/learn`}
-                          data-testid={`button-continue-learning-${enrollment.id}`}
-                        >
-                          Continue Learning
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Course Hours</span>
+                                <span className="font-medium">{totalHours} hours</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground">Progress</span>
+                                <span className="font-medium text-blue-500">{hoursCompleted} hours completed</span>
+                              </div>
+                              {expiresAt && (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-muted-foreground">Expires</span>
+                                  <span className={`font-medium ${isExpiringSoon ? 'text-orange-500' : ''}`}>
+                                    {expiresAt.toLocaleDateString()}
+                                    {isExpiringSoon && ` (${daysUntilExpiry} days)`}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                        
+                        {isExpired ? (
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            className="w-full mt-4 gap-1" 
+                            onClick={() => window.location.href = `/courses/${enrollment.course?.state?.toLowerCase() || 'fl'}`}
+                            data-testid={`button-repurchase-learning-${enrollment.id}`}
+                          >
+                            Repurchase Course
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            className="w-full mt-4 gap-1" 
+                            onClick={() => window.location.href = `/course/${enrollment.courseId}/learn`}
+                            data-testid={`button-continue-learning-${enrollment.id}`}
+                          >
+                            Continue Learning
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     );
                   })}

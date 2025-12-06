@@ -8,6 +8,9 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   getEnrollment(userId: string, courseId: string): Promise<Enrollment | undefined>;
   createEnrollment(userId: string, courseId: string): Promise<Enrollment>;
+  isEnrollmentExpired(enrollment: Enrollment): boolean;
+  getActiveEnrollment(userId: string, courseId: string): Promise<Enrollment | undefined>;
+  canRepurchaseCourse(userId: string, courseId: string): Promise<{ canRepurchase: boolean; reason?: string; previousEnrollment?: Enrollment }>;
   getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
   getCourseBySku(sku: string): Promise<Course | undefined>;
@@ -248,11 +251,66 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createEnrollment(userId: string, courseId: string) {
+    // Get course to determine expiration period
+    const course = await this.getCourse(courseId);
+    const expirationMonths = course?.expirationMonths || 6; // Default to 6 months
+    
+    // Calculate expiration date
+    const enrolledAt = new Date();
+    const expiresAt = new Date(enrolledAt);
+    expiresAt.setMonth(expiresAt.getMonth() + expirationMonths);
+    
     const [enrollment] = await db
       .insert(enrollments)
-      .values({ userId, courseId })
+      .values({ 
+        userId, 
+        courseId,
+        enrolledAt,
+        expiresAt
+      })
       .returning();
     return enrollment;
+  }
+  
+  // Check if an enrollment is expired (but not completed)
+  isEnrollmentExpired(enrollment: Enrollment): boolean {
+    // Completed courses never expire (certificates remain accessible)
+    if (enrollment.completed) return false;
+    // If no expiration date set, not expired
+    if (!enrollment.expiresAt) return false;
+    // Check if current date is past expiration
+    return new Date() > new Date(enrollment.expiresAt);
+  }
+  
+  // Get active (non-expired) enrollment for a user and course
+  async getActiveEnrollment(userId: string, courseId: string): Promise<Enrollment | undefined> {
+    const enrollment = await this.getEnrollment(userId, courseId);
+    if (!enrollment) return undefined;
+    
+    // Return enrollment if completed or not expired
+    if (enrollment.completed || !this.isEnrollmentExpired(enrollment)) {
+      return enrollment;
+    }
+    return undefined;
+  }
+  
+  // Check if user can repurchase a course (has expired, non-completed enrollment)
+  async canRepurchaseCourse(userId: string, courseId: string): Promise<{ canRepurchase: boolean; reason?: string; previousEnrollment?: Enrollment }> {
+    const enrollment = await this.getEnrollment(userId, courseId);
+    
+    if (!enrollment) {
+      return { canRepurchase: true }; // Never enrolled, can purchase
+    }
+    
+    if (enrollment.completed) {
+      return { canRepurchase: false, reason: "Course already completed" };
+    }
+    
+    if (this.isEnrollmentExpired(enrollment)) {
+      return { canRepurchase: true, previousEnrollment: enrollment };
+    }
+    
+    return { canRepurchase: false, reason: "Active enrollment exists" };
   }
 
   async getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]> {

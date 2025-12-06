@@ -57,6 +57,7 @@ export const courses = pgTable("courses", {
   providerNumber: varchar("provider_number"), // DBPR provider/school number
   courseOfferingNumber: varchar("course_offering_number"), // DBPR course offering number
   instructorName: varchar("instructor_name"), // Course instructor (for regulatory reports)
+  expirationMonths: integer("expiration_months").default(6), // Months student has to complete course (default 6)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -68,6 +69,8 @@ export const enrollments = pgTable("enrollments", {
   userId: varchar("user_id").notNull(),
   courseId: varchar("course_id").notNull(),
   enrolledAt: timestamp("enrolled_at").defaultNow(),
+  expiresAt: timestamp("expires_at"), // When the enrollment expires (calculated from course.expirationMonths)
+  expiredAt: timestamp("expired_at"), // When the enrollment was marked as expired (null if not expired)
   progress: integer("progress").default(0),
   hoursCompleted: integer("hours_completed").default(0),
   completed: integer("completed").default(0),
