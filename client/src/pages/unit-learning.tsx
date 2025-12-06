@@ -107,7 +107,10 @@ export default function UnitLearningPage() {
   // Time tracking mutation
   const updateTimeMutation = useMutation({
     mutationFn: async ({ lessonId, secondsToAdd }: { lessonId: string; secondsToAdd: number }) => {
-      if (!progressData?.enrollmentId) return;
+      if (!progressData?.enrollmentId) {
+        console.warn("Time tracking skipped: enrollment data not loaded");
+        return null;
+      }
       
       const token = localStorage.getItem("authToken");
       const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -129,7 +132,9 @@ export default function UnitLearningPage() {
   // Lesson completion mutation
   const completeLessonMutation = useMutation({
     mutationFn: async (lessonId: string) => {
-      if (!progressData?.enrollmentId) return;
+      if (!progressData?.enrollmentId) {
+        throw new Error("Enrollment data not loaded. Please refresh the page.");
+      }
       
       const token = localStorage.getItem("authToken");
       const headers: Record<string, string> = { "Content-Type": "application/json" };
