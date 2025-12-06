@@ -45,6 +45,9 @@ import {
   X,
   Check,
   Eye,
+  HelpCircle,
+  ClipboardList,
+  Award,
 } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -89,6 +92,32 @@ interface MediaAsset {
   thumbnailUrl?: string;
 }
 
+interface QuestionBank {
+  id: string;
+  courseId: string;
+  unitId?: string | null;
+  bankType: string;
+  title: string;
+  description?: string | null;
+  questionsPerAttempt?: number | null;
+  passingScore?: number | null;
+  timeLimit?: number | null;
+  isActive?: number | null;
+}
+
+interface BankQuestion {
+  id: string;
+  bankId: string;
+  questionText: string;
+  questionType?: string | null;
+  options: string;
+  correctOption: number;
+  explanation: string;
+  difficulty?: string | null;
+  category?: string | null;
+  isActive?: number | null;
+}
+
 export default function ContentBuilderPage({ courseId }: { courseId?: string }) {
   const { toast } = useToast();
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId || null);
@@ -100,6 +129,14 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
   const [showLessonForm, setShowLessonForm] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [mediaSelectCallback, setMediaSelectCallback] = useState<((url: string) => void) | null>(null);
+  
+  // Quiz management state
+  const [showQuizManager, setShowQuizManager] = useState<string | null>(null);
+  const [showQuestionBankForm, setShowQuestionBankForm] = useState(false);
+  const [editingQuestionBank, setEditingQuestionBank] = useState<QuestionBank | null>(null);
+  const [selectedBankId, setSelectedBankId] = useState<string | null>(null);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<BankQuestion | null>(null);
 
   const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("adminToken");
@@ -314,6 +351,185 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
     },
   });
 
+  // Question bank queries
+  const { data: courseQuestionBanks = [] } = useQuery<QuestionBank[]>({
+    queryKey: ["/api/admin/courses", selectedCourseId, "question-banks"],
+    queryFn: async () => {
+      if (!selectedCourseId) return [];
+      const res = await fetch(`/api/admin/courses/${selectedCourseId}/question-banks`, {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!selectedCourseId,
+  });
+
+  const { data: selectedBankQuestions = [] } = useQuery<BankQuestion[]>({
+    queryKey: ["/api/admin/question-banks", selectedBankId, "questions"],
+    queryFn: async () => {
+      if (!selectedBankId) return [];
+      const res = await fetch(`/api/admin/question-banks/${selectedBankId}/questions`, {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!selectedBankId,
+  });
+
+  // Question bank mutations
+  const createQuestionBankMutation = useMutation({
+    mutationFn: async (data: Partial<QuestionBank>) => {
+      const res = await fetch("/api/admin/question-banks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to create question bank");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Question bank created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses", selectedCourseId, "question-banks"] });
+      setShowQuestionBankForm(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create question bank", variant: "destructive" });
+    },
+  });
+
+  const updateQuestionBankMutation = useMutation({
+    mutationFn: async ({ bankId, data }: { bankId: string; data: Partial<QuestionBank> }) => {
+      const res = await fetch(`/api/admin/question-banks/${bankId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to update question bank");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Question bank updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses", selectedCourseId, "question-banks"] });
+      setEditingQuestionBank(null);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update question bank", variant: "destructive" });
+    },
+  });
+
+  const deleteQuestionBankMutation = useMutation({
+    mutationFn: async (bankId: string) => {
+      const res = await fetch(`/api/admin/question-banks/${bankId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to delete question bank");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Question bank deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/courses", selectedCourseId, "question-banks"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete question bank", variant: "destructive" });
+    },
+  });
+
+  // Question mutations
+  const createQuestionMutation = useMutation({
+    mutationFn: async (data: Partial<BankQuestion> & { bankId: string }) => {
+      const res = await fetch(`/api/admin/question-banks/${data.bankId}/questions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to create question");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Question created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/question-banks", selectedBankId, "questions"] });
+      setShowQuestionForm(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to create question", variant: "destructive" });
+    },
+  });
+
+  const updateQuestionMutation = useMutation({
+    mutationFn: async ({ questionId, data }: { questionId: string; data: Partial<BankQuestion> }) => {
+      const res = await fetch(`/api/admin/questions/${questionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to update question");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Question updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/question-banks", selectedBankId, "questions"] });
+      setEditingQuestion(null);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update question", variant: "destructive" });
+    },
+  });
+
+  const deleteQuestionMutation = useMutation({
+    mutationFn: async (questionId: string) => {
+      const res = await fetch(`/api/admin/questions/${questionId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || "Failed to delete question");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Question deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/question-banks", selectedBankId, "questions"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete question", variant: "destructive" });
+    },
+  });
+
+  const getUnitQuestionBanks = (unitId: string) => {
+    return courseQuestionBanks.filter(bank => bank.unitId === unitId);
+  };
+
+  const getFinalExamBanks = () => {
+    return courseQuestionBanks.filter(bank => bank.bankType === "final_exam");
+  };
+
   const toggleUnit = (unitId: string) => {
     const newExpanded = new Set(expandedUnits);
     if (newExpanded.has(unitId)) {
@@ -484,6 +700,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
                 key={unit.id}
                 unit={unit}
                 lessons={allLessons[unit.id] || []}
+                questionBanks={getUnitQuestionBanks(unit.id)}
                 isExpanded={expandedUnits.has(unit.id)}
                 onToggle={() => toggleUnit(unit.id)}
                 onEdit={() => setEditingUnit(unit)}
@@ -498,6 +715,14 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
                   setMediaSelectCallback(() => callback);
                   setShowMediaLibrary(true);
                 }}
+                onManageQuiz={() => setShowQuizManager(unit.id)}
+                onAddQuestionBank={() => {
+                  setSelectedUnitId(unit.id);
+                  setShowQuestionBankForm(true);
+                }}
+                onEditQuestionBank={(bank) => setEditingQuestionBank(bank)}
+                onDeleteQuestionBank={(bankId) => deleteQuestionBankMutation.mutate(bankId)}
+                onManageQuestions={(bankId) => setSelectedBankId(bankId)}
               />
             ))}
         </div>
@@ -563,6 +788,66 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
         }}
         mediaAssets={mediaAssets}
       />
+
+      {/* Question Bank Form Dialog */}
+      <QuestionBankFormDialog
+        open={showQuestionBankForm}
+        onClose={() => {
+          setShowQuestionBankForm(false);
+          setSelectedUnitId(null);
+        }}
+        onSubmit={(data) => createQuestionBankMutation.mutate(data)}
+        isPending={createQuestionBankMutation.isPending}
+        courseId={selectedCourseId!}
+        unitId={selectedUnitId}
+      />
+
+      {/* Edit Question Bank Dialog */}
+      {editingQuestionBank && (
+        <QuestionBankFormDialog
+          open={true}
+          onClose={() => setEditingQuestionBank(null)}
+          onSubmit={(data) => updateQuestionBankMutation.mutate({ bankId: editingQuestionBank.id, data })}
+          isPending={updateQuestionBankMutation.isPending}
+          initialData={editingQuestionBank}
+          courseId={selectedCourseId!}
+          unitId={editingQuestionBank.unitId}
+        />
+      )}
+
+      {/* Question Manager Dialog */}
+      {selectedBankId && (
+        <QuestionManagerDialog
+          open={true}
+          onClose={() => setSelectedBankId(null)}
+          bankId={selectedBankId}
+          questions={selectedBankQuestions}
+          onAddQuestion={() => setShowQuestionForm(true)}
+          onEditQuestion={(question) => setEditingQuestion(question)}
+          onDeleteQuestion={(questionId) => deleteQuestionMutation.mutate(questionId)}
+        />
+      )}
+
+      {/* Question Form Dialog */}
+      <QuestionFormDialog
+        open={showQuestionForm}
+        onClose={() => setShowQuestionForm(false)}
+        onSubmit={(data) => createQuestionMutation.mutate(data)}
+        isPending={createQuestionMutation.isPending}
+        bankId={selectedBankId!}
+      />
+
+      {/* Edit Question Dialog */}
+      {editingQuestion && (
+        <QuestionFormDialog
+          open={true}
+          onClose={() => setEditingQuestion(null)}
+          onSubmit={(data) => updateQuestionMutation.mutate({ questionId: editingQuestion.id, data })}
+          isPending={updateQuestionMutation.isPending}
+          initialData={editingQuestion}
+          bankId={editingQuestion.bankId}
+        />
+      )}
     </div>
   );
 }
@@ -570,6 +855,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
 function UnitCard({
   unit,
   lessons,
+  questionBanks,
   isExpanded,
   onToggle,
   onEdit,
@@ -578,9 +864,15 @@ function UnitCard({
   onEditLesson,
   onDeleteLesson,
   onOpenMediaLibrary,
+  onManageQuiz,
+  onAddQuestionBank,
+  onEditQuestionBank,
+  onDeleteQuestionBank,
+  onManageQuestions,
 }: {
   unit: Unit;
   lessons: Lesson[];
+  questionBanks: QuestionBank[];
   isExpanded: boolean;
   onToggle: () => void;
   onEdit: () => void;
@@ -589,8 +881,14 @@ function UnitCard({
   onEditLesson: (lesson: Lesson) => void;
   onDeleteLesson: (lessonId: string) => void;
   onOpenMediaLibrary: (callback: (url: string) => void) => void;
+  onManageQuiz: () => void;
+  onAddQuestionBank: () => void;
+  onEditQuestionBank: (bank: QuestionBank) => void;
+  onDeleteQuestionBank: (bankId: string) => void;
+  onManageQuestions: (bankId: string) => void;
 }) {
   const sortedLessons = lessons.sort((a, b) => a.lessonNumber - b.lessonNumber);
+  const [showQuizSection, setShowQuizSection] = useState(false);
 
   return (
     <Card className="overflow-hidden" data-testid={`card-unit-${unit.id}`}>
@@ -648,6 +946,7 @@ function UnitCard({
 
       {isExpanded && (
         <div className="border-t bg-muted/30">
+          {/* Lessons Section */}
           {sortedLessons.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground text-sm">
               No lessons yet.{" "}
@@ -673,6 +972,96 @@ function UnitCard({
               </div>
             </div>
           )}
+
+          {/* Quiz Section */}
+          <div className="border-t">
+            <div 
+              className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 cursor-pointer hover:bg-muted/50"
+              onClick={() => setShowQuizSection(!showQuizSection)}
+            >
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                <span className="font-medium text-sm">Unit Quiz</span>
+                <Badge variant="outline" className="text-xs">
+                  {questionBanks.length} {questionBanks.length === 1 ? 'bank' : 'banks'}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={(e) => { e.stopPropagation(); onAddQuestionBank(); }}
+                  data-testid={`button-add-question-bank-${unit.id}`}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Question Bank
+                </Button>
+                {showQuizSection ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </div>
+            </div>
+
+            {showQuizSection && (
+              <div className="p-3 space-y-2 bg-muted/20">
+                {questionBanks.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground text-sm">
+                    <HelpCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>No question banks yet</p>
+                    <p className="text-xs mt-1">Create a question bank to add quiz questions for this unit</p>
+                  </div>
+                ) : (
+                  questionBanks.map((bank) => (
+                    <div 
+                      key={bank.id} 
+                      className="flex items-center justify-between p-3 bg-background rounded-lg border"
+                      data-testid={`question-bank-${bank.id}`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{bank.title}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {bank.questionsPerAttempt} questions
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {bank.passingScore}% to pass
+                          </Badge>
+                        </div>
+                        {bank.description && (
+                          <p className="text-xs text-muted-foreground mt-1">{bank.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => onManageQuestions(bank.id)}
+                          data-testid={`button-manage-questions-${bank.id}`}
+                        >
+                          <HelpCircle className="h-4 w-4 mr-1" />
+                          Questions
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          onClick={() => onEditQuestionBank(bank)}
+                          data-testid={`button-edit-bank-${bank.id}`}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="ghost" 
+                          onClick={() => onDeleteQuestionBank(bank.id)}
+                          data-testid={`button-delete-bank-${bank.id}`}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </Card>
@@ -1212,6 +1601,473 @@ function MediaLibraryDialog({
         <div className="flex justify-end">
           <Button variant="outline" onClick={onClose} data-testid="button-close-media-library">
             Cancel
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Question Bank Form Dialog
+function QuestionBankFormDialog({
+  open,
+  onClose,
+  onSubmit,
+  isPending,
+  initialData,
+  courseId,
+  unitId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: Partial<QuestionBank>) => void;
+  isPending: boolean;
+  initialData?: QuestionBank;
+  courseId: string;
+  unitId?: string | null;
+}) {
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [questionsPerAttempt, setQuestionsPerAttempt] = useState(initialData?.questionsPerAttempt?.toString() || "10");
+  const [passingScore, setPassingScore] = useState(initialData?.passingScore?.toString() || "70");
+  const [timeLimit, setTimeLimit] = useState(initialData?.timeLimit?.toString() || "");
+  const [bankType, setBankType] = useState(initialData?.bankType || "unit_quiz");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      courseId,
+      unitId: unitId || null,
+      bankType,
+      title,
+      description: description || null,
+      questionsPerAttempt: parseInt(questionsPerAttempt) || 10,
+      passingScore: parseInt(passingScore) || 70,
+      timeLimit: timeLimit ? parseInt(timeLimit) : null,
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{initialData ? "Edit Question Bank" : "Create Question Bank"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="bankTitle">Title *</Label>
+            <Input
+              id="bankTitle"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Unit 1 Quiz"
+              required
+              data-testid="input-bank-title"
+            />
+          </div>
+          <div>
+            <Label htmlFor="bankDescription">Description</Label>
+            <Textarea
+              id="bankDescription"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief description of this question bank"
+              rows={2}
+              data-testid="input-bank-description"
+            />
+          </div>
+          <div>
+            <Label htmlFor="bankType">Bank Type</Label>
+            <Select value={bankType} onValueChange={setBankType}>
+              <SelectTrigger data-testid="select-bank-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unit_quiz">Unit Quiz</SelectItem>
+                <SelectItem value="final_exam">Final Exam</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="questionsPerAttempt">Questions per Attempt</Label>
+              <Input
+                id="questionsPerAttempt"
+                type="number"
+                min="1"
+                value={questionsPerAttempt}
+                onChange={(e) => setQuestionsPerAttempt(e.target.value)}
+                data-testid="input-questions-per-attempt"
+              />
+            </div>
+            <div>
+              <Label htmlFor="passingScore">Passing Score (%)</Label>
+              <Input
+                id="passingScore"
+                type="number"
+                min="0"
+                max="100"
+                value={passingScore}
+                onChange={(e) => setPassingScore(e.target.value)}
+                data-testid="input-passing-score"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="timeLimit">Time Limit (minutes, optional)</Label>
+            <Input
+              id="timeLimit"
+              type="number"
+              min="1"
+              value={timeLimit}
+              onChange={(e) => setTimeLimit(e.target.value)}
+              placeholder="Leave empty for no limit"
+              data-testid="input-time-limit"
+            />
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onClose} data-testid="button-cancel-bank">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isPending || !title.trim()} data-testid="button-save-bank">
+              {isPending ? "Saving..." : "Save Question Bank"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Question Form Dialog
+function QuestionFormDialog({
+  open,
+  onClose,
+  onSubmit,
+  isPending,
+  initialData,
+  bankId,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (data: Partial<BankQuestion> & { bankId: string }) => void;
+  isPending: boolean;
+  initialData?: BankQuestion;
+  bankId: string;
+}) {
+  const [questionText, setQuestionText] = useState(initialData?.questionText || "");
+  const [questionType, setQuestionType] = useState(initialData?.questionType || "multiple_choice");
+  const [options, setOptions] = useState<string[]>(() => {
+    if (initialData?.options) {
+      try {
+        return JSON.parse(initialData.options);
+      } catch {
+        return ["", "", "", ""];
+      }
+    }
+    return ["", "", "", ""];
+  });
+  const [correctOption, setCorrectOption] = useState(initialData?.correctOption?.toString() || "0");
+  const [explanation, setExplanation] = useState(initialData?.explanation || "");
+  const [difficulty, setDifficulty] = useState(initialData?.difficulty || "medium");
+  const [category, setCategory] = useState(initialData?.category || "");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      bankId,
+      questionText,
+      questionType,
+      options: options.filter(o => o.trim() !== ""),
+      correctOption: parseInt(correctOption),
+      explanation,
+      difficulty,
+      category: category || null,
+    });
+  };
+
+  const updateOption = (index: number, value: string) => {
+    const newOptions = [...options];
+    newOptions[index] = value;
+    setOptions(newOptions);
+  };
+
+  const addOption = () => {
+    setOptions([...options, ""]);
+  };
+
+  const removeOption = (index: number) => {
+    if (options.length > 2) {
+      const newOptions = options.filter((_, i) => i !== index);
+      setOptions(newOptions);
+      if (parseInt(correctOption) >= index && parseInt(correctOption) > 0) {
+        setCorrectOption((parseInt(correctOption) - 1).toString());
+      }
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{initialData ? "Edit Question" : "Add Question"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="questionText">Question Text *</Label>
+            <Textarea
+              id="questionText"
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+              placeholder="Enter your question here..."
+              rows={3}
+              required
+              data-testid="input-question-text"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="questionType">Question Type</Label>
+              <Select value={questionType} onValueChange={setQuestionType}>
+                <SelectTrigger data-testid="select-question-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                  <SelectItem value="true_false">True/False</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="difficulty">Difficulty</Label>
+              <Select value={difficulty} onValueChange={setDifficulty}>
+                <SelectTrigger data-testid="select-difficulty">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">Easy</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label>Answer Options</Label>
+            <div className="space-y-2 mt-2">
+              {options.map((option, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="correctOption"
+                    checked={parseInt(correctOption) === index}
+                    onChange={() => setCorrectOption(index.toString())}
+                    className="h-4 w-4"
+                    data-testid={`radio-correct-option-${index}`}
+                  />
+                  <Input
+                    value={option}
+                    onChange={(e) => updateOption(index, e.target.value)}
+                    placeholder={`Option ${index + 1}`}
+                    className="flex-1"
+                    data-testid={`input-option-${index}`}
+                  />
+                  {options.length > 2 && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => removeOption(index)}
+                      data-testid={`button-remove-option-${index}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={addOption}
+              className="mt-2"
+              data-testid="button-add-option"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Option
+            </Button>
+            <p className="text-xs text-muted-foreground mt-1">
+              Select the radio button next to the correct answer
+            </p>
+          </div>
+
+          <div>
+            <Label htmlFor="explanation">Explanation *</Label>
+            <Textarea
+              id="explanation"
+              value={explanation}
+              onChange={(e) => setExplanation(e.target.value)}
+              placeholder="Explain why the correct answer is right..."
+              rows={3}
+              required
+              data-testid="input-explanation"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="category">Category (optional)</Label>
+            <Input
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="e.g., Agency Law, Property Rights"
+              data-testid="input-category"
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={onClose} data-testid="button-cancel-question">
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isPending || !questionText.trim() || !explanation.trim()} 
+              data-testid="button-save-question"
+            >
+              {isPending ? "Saving..." : "Save Question"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Question Manager Dialog (to view/edit questions in a bank)
+function QuestionManagerDialog({
+  open,
+  onClose,
+  bankId,
+  questions,
+  onAddQuestion,
+  onEditQuestion,
+  onDeleteQuestion,
+}: {
+  open: boolean;
+  onClose: () => void;
+  bankId: string;
+  questions: BankQuestion[];
+  onAddQuestion: () => void;
+  onEditQuestion: (question: BankQuestion) => void;
+  onDeleteQuestion: (questionId: string) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <HelpCircle className="h-5 w-5" />
+            Manage Questions
+            <Badge variant="secondary">{questions.length} questions</Badge>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={onAddQuestion} data-testid="button-add-question">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Question
+            </Button>
+          </div>
+
+          <div className="border rounded-lg max-h-[50vh] overflow-y-auto">
+            {questions.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <HelpCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No questions yet</p>
+                <p className="text-sm mt-1">Add questions to this bank</p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {questions.map((question, index) => {
+                  let parsedOptions: string[] = [];
+                  try {
+                    parsedOptions = JSON.parse(question.options);
+                  } catch {
+                    parsedOptions = [];
+                  }
+                  return (
+                    <div key={question.id} className="p-4 hover:bg-muted/50" data-testid={`question-row-${question.id}`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-xs">Q{index + 1}</Badge>
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-xs ${
+                                question.difficulty === 'easy' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                                question.difficulty === 'hard' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                ''
+                              }`}
+                            >
+                              {question.difficulty}
+                            </Badge>
+                            {question.category && (
+                              <Badge variant="outline" className="text-xs">{question.category}</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm font-medium mb-2">{question.questionText}</p>
+                          <div className="space-y-1">
+                            {parsedOptions.map((opt, optIndex) => (
+                              <div 
+                                key={optIndex}
+                                className={`text-xs px-2 py-1 rounded ${
+                                  optIndex === question.correctOption 
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' 
+                                    : 'text-muted-foreground'
+                                }`}
+                              >
+                                {String.fromCharCode(65 + optIndex)}. {opt}
+                                {optIndex === question.correctOption && (
+                                  <Check className="h-3 w-3 inline ml-1" />
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            onClick={() => onEditQuestion(question)}
+                            data-testid={`button-edit-question-${question.id}`}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            onClick={() => onDeleteQuestion(question.id)}
+                            data-testid={`button-delete-question-${question.id}`}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={onClose} data-testid="button-close-question-manager">
+            Close
           </Button>
         </div>
       </DialogContent>

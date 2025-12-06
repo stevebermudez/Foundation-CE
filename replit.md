@@ -143,6 +143,31 @@ Complete administrative settings infrastructure for system configuration, email 
   - `server/routes.ts` - API endpoint handlers
 - **Admin Authentication**: Uses ADMIN_PASSWORD secret for admin account (admin@foundationce.com)
 
+### Admin Quiz and Exam Management
+The content builder includes comprehensive quiz and exam management for creating assessments:
+- **Question Banks**: Reusable collections of questions that can be assigned to unit quizzes or final exams
+- **Bank Types**: "unit_quiz" for unit-level assessments, "final_exam" for course-level assessments
+- **Question Types**: Multiple choice, true/false with configurable options
+- **Configuration Options**:
+  - Questions per attempt: How many questions to pull from the bank for each quiz attempt
+  - Passing score: Percentage required to pass (default 70%)
+  - Time limit: Optional time constraint in minutes
+  - Difficulty levels: Easy, medium, hard
+  - Category tags: For organizing questions by topic
+- **UI Location**: Admin dashboard → Content tab → Expand any unit → Quiz section
+- **Database Tables**:
+  - `questionBanks` - Stores quiz/exam configurations with courseId and optional unitId
+  - `bankQuestions` - Individual questions with options, correct answer, and explanations
+- **API Routes**:
+  - `GET/POST /api/admin/question-banks` - Question bank CRUD
+  - `PATCH/DELETE /api/admin/question-banks/:bankId` - Update/delete banks
+  - `GET/POST /api/admin/question-banks/:bankId/questions` - Question CRUD
+  - `PATCH/DELETE /api/admin/questions/:questionId` - Update/delete questions
+- **Key Files**:
+  - `client/src/pages/admin/content-builder.tsx` - Quiz management UI (UnitCard, QuestionBankFormDialog, QuestionFormDialog, QuestionManagerDialog)
+  - `server/routes.ts` - API endpoints for question banks and questions
+  - `server/storage.ts` - Database operations for quizzes
+
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Replit Auth (Google, GitHub, X, Apple)
