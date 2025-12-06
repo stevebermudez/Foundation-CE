@@ -59,6 +59,19 @@ The LMS implements comprehensive server-side authorization to prevent client-sid
 - **Practice Exam Security**: All practice exam routes require authentication and verify attempt ownership
 - **Storage Methods**: `getUnit()` and `getLesson()` methods enable individual record validation for security checks
 
+### Admin Content Export
+Administrators can export course content to Word documents for offline review or distribution:
+- **Export Button**: Located in admin dashboard → Courses tab, each course card has a download icon button
+- **API Endpoint**: `GET /api/export/course/:courseId/content.docx` (requires admin authentication)
+- **Document Contents**:
+  - Course title, description, SKU, and total hours
+  - All units with unit number, title, description, and required hours
+  - Lessons table for each unit showing lesson number, title, duration, and video URL
+- **File Format**: Microsoft Word (.docx) with proper headings and formatted tables
+- **Key Files**:
+  - `server/storage.ts` - `exportCourseContentDocx()` method generates the document
+  - `client/src/pages/admin/courses.tsx` - Export button UI with FileDown icon
+
 ### Admin Financial Management
 Complete admin UI for managing user payments, refunds, and account credits:
 - **Finance Tab**: Located in admin dashboard (`/admin/dashboard` → Finance tab)

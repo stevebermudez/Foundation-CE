@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Edit2, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Edit2, Trash2, AlertCircle, FileDown } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -583,10 +583,31 @@ export default function AdminCoursesPage() {
                     <Button
                       size="icon"
                       variant="outline"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = `/api/export/course/${course.id}/content.docx`;
+                        link.download = `${course.title.replace(/[^a-z0-9]/gi, '-')}-content.docx`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        toast({
+                          title: "Export Started",
+                          description: "Your Word document is being downloaded.",
+                        });
+                      }}
+                      data-testid={`button-export-${course.id}`}
+                      aria-label={`Export ${course.title} to Word document`}
+                    >
+                      <FileDown className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
                       onClick={() => setEditingCourse(course)}
                       data-testid={`button-edit-${course.id}`}
+                      aria-label={`Edit ${course.title}`}
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     <Button
                       size="icon"
@@ -594,8 +615,9 @@ export default function AdminCoursesPage() {
                       onClick={() => deleteMutation.mutate(course.id)}
                       disabled={deleteMutation.isPending}
                       data-testid={`button-delete-${course.id}`}
+                      aria-label={`Delete ${course.title}`}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                 </div>
