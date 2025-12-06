@@ -193,7 +193,7 @@ export async function seedLMSContent() {
           bankType: "unit_quiz",
           title: `Unit ${unit.unitNumber} Quiz: ${unit.title}`,
           description: `Test your knowledge of Unit ${unit.unitNumber}`,
-          questionsPerAttempt: 20,
+          questionsPerAttempt: 10, // 10 random questions from bank of 20+
           passingScore: 70,
           isActive: 1,
         })
