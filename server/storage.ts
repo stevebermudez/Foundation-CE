@@ -99,6 +99,7 @@ export interface IStorage {
   deleteLesson(lessonId: string): Promise<void>;
   adminOverrideEnrollmentData(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment>;
   adminOverrideLessonProgress(lessonProgressId: string, data: Partial<LessonProgress>): Promise<LessonProgress>;
+  adminCreateLessonProgress(enrollmentId: string, lessonId: string, userId: string, completed?: boolean): Promise<LessonProgress>;
   adminOverrideExamAttempt(attemptId: string, score: number, passed: boolean): Promise<ExamAttempt>;
   adminOverrideUserData(userId: string, data: Partial<User>): Promise<User>;
   getVideos(courseId: string): Promise<Video[]>;
@@ -1241,7 +1242,56 @@ export class DatabaseStorage implements IStorage {
       ...data,
       updatedAt: new Date()
     }).where(eq(lessonProgress.id, lessonProgressId)).returning();
+    
+    // Sync unit_progress.lessonsCompleted when lesson completion changes
+    if (data.completed !== undefined) {
+      const lesson = await this.getLesson(updated.lessonId);
+      if (lesson) {
+        const unitLessons = await this.getLessons(lesson.unitId);
+        let completedCount = 0;
+        for (const l of unitLessons) {
+          const prog = await this.getLessonProgress(updated.enrollmentId, l.id);
+          if (prog?.completed) completedCount++;
+        }
+        const unitProg = await this.getUnitProgress(updated.enrollmentId, lesson.unitId);
+        if (unitProg) {
+          await db.update(unitProgress)
+            .set({ lessonsCompleted: completedCount, updatedAt: new Date() })
+            .where(eq(unitProgress.id, unitProg.id));
+        }
+      }
+    }
+    
     return updated;
+  }
+  
+  async adminCreateLessonProgress(enrollmentId: string, lessonId: string, userId: string, completed: boolean = true): Promise<LessonProgress> {
+    const [created] = await db.insert(lessonProgress).values({
+      enrollmentId,
+      lessonId,
+      userId,
+      completed: completed ? 1 : 0,
+      completedAt: completed ? new Date() : null
+    }).returning();
+    
+    // Sync unit_progress.lessonsCompleted
+    const lesson = await this.getLesson(lessonId);
+    if (lesson) {
+      const unitLessons = await this.getLessons(lesson.unitId);
+      let completedCount = 0;
+      for (const l of unitLessons) {
+        const prog = await this.getLessonProgress(enrollmentId, l.id);
+        if (prog?.completed) completedCount++;
+      }
+      const unitProg = await this.getUnitProgress(enrollmentId, lesson.unitId);
+      if (unitProg) {
+        await db.update(unitProgress)
+          .set({ lessonsCompleted: completedCount, updatedAt: new Date() })
+          .where(eq(unitProgress.id, unitProg.id));
+      }
+    }
+    
+    return created;
   }
 
   async adminOverrideExamAttempt(attemptId: string, score: number, passed: boolean): Promise<ExamAttempt> {

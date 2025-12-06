@@ -273,6 +273,27 @@ export default function AdminDashboardPage() {
     }
   });
 
+  // Create lesson progress (for lessons with no progress record)
+  const createLessonProgressMutation = useMutation({
+    mutationFn: async ({ enrollmentId, lessonId, userId }: { enrollmentId: string; lessonId: string; userId: string }) => {
+      const res = await fetch(`/api/admin/lesson-progress`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ enrollmentId, lessonId, userId, completed: true }),
+      });
+      if (!res.ok) throw new Error('Failed to create lesson progress');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "Success", description: data.message });
+      if (selectedEnrollment) fetchDetailedProgress(selectedEnrollment.id);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to mark lesson complete", variant: "destructive" });
+    }
+  });
+
   // Toggle unit expansion
   const toggleUnitExpansion = (unitId: string) => {
     setExpandedUnits(prev => ({ ...prev, [unitId]: !prev[unitId] }));
@@ -890,7 +911,7 @@ export default function AdminDashboardPage() {
                           <div className="p-3 space-y-2">
                             {unitData.progress && (
                               <div className="flex items-center gap-4 p-2 bg-muted/30 rounded text-sm mb-3">
-                                <span>Lessons: {unitData.progress.lessonsCompleted || 0}/{unitData.lessons.length}</span>
+                                <span>Lessons: {unitData.lessons.filter((l: any) => l.progress?.completed).length}/{unitData.lessons.length}</span>
                                 <span>Quiz: {unitData.progress.quizPassed ? 'Passed' : 'Not Passed'}</span>
                                 <span>Score: {unitData.progress.quizScore || 0}%</span>
                                 {unitData.progress.status !== "completed" && (
@@ -925,14 +946,24 @@ export default function AdminDashboardPage() {
                                     ) : (
                                       <X className="h-4 w-4 text-muted-foreground" />
                                     )}
-                                    {lessonData.progress && !lessonData.progress.completed && (
+                                    {!lessonData.progress?.completed && (
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        onClick={() => overrideLessonProgressMutation.mutate({
-                                          progressId: lessonData.progress.id,
-                                          data: { completed: true }
-                                        })}
+                                        onClick={() => {
+                                          if (lessonData.progress) {
+                                            overrideLessonProgressMutation.mutate({
+                                              progressId: lessonData.progress.id,
+                                              data: { completed: true }
+                                            });
+                                          } else {
+                                            createLessonProgressMutation.mutate({
+                                              enrollmentId: selectedEnrollment!.id,
+                                              lessonId: lessonData.lesson.id,
+                                              userId: selectedEnrollment!.userId
+                                            });
+                                          }
+                                        }}
                                         data-testid={`button-complete-lesson-${lessonData.lesson.id}`}
                                       >
                                         Complete

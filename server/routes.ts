@@ -2954,6 +2954,30 @@ segment1.ts
     },
   );
 
+  // Admin Create Lesson Progress - for marking lessons complete when no progress exists
+  app.post(
+    "/api/admin/lesson-progress",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { enrollmentId, lessonId, userId, completed } = req.body;
+        if (!enrollmentId || !lessonId || !userId) {
+          return res.status(400).json({ error: "enrollmentId, lessonId, and userId are required" });
+        }
+        const progress = await storage.adminCreateLessonProgress(
+          enrollmentId,
+          lessonId,
+          userId,
+          completed !== false
+        );
+        res.json({ message: "Lesson progress created", progress });
+      } catch (err) {
+        console.error("Error creating lesson progress:", err);
+        res.status(500).json({ error: "Failed to create lesson progress" });
+      }
+    },
+  );
+
   // Admin Unit Progress Override - allows admin to override unit completion status
   app.patch(
     "/api/admin/unit-progress/:progressId/data",
