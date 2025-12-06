@@ -44,10 +44,18 @@ export default function PagesManagerPage() {
   const [isDragging, setIsDragging] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
+  const getAuthHeaders = (): Record<string, string> => {
+    const token = localStorage.getItem("adminToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const { data: pageData, isLoading } = useQuery({
     queryKey: [`/api/admin/pages/${selectedPageSlug}`],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/pages/${selectedPageSlug}`, { credentials: 'include' });
+      const res = await fetch(`/api/admin/pages/${selectedPageSlug}`, { 
+        credentials: 'include',
+        headers: getAuthHeaders()
+      });
       if (res.status === 404) return { blocks: [] };
       if (!res.ok) throw new Error("Failed");
       return res.json();
@@ -58,7 +66,10 @@ export default function PagesManagerPage() {
     mutationFn: async () => {
       const res = await fetch(`/api/admin/pages/${selectedPageSlug}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...getAuthHeaders()
+        },
         credentials: 'include',
         body: JSON.stringify({ blocks }),
       });

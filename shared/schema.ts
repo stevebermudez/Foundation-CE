@@ -833,3 +833,18 @@ export type InsertVideo = z.infer<typeof insertVideoSchema>;
 
 export const updateVideoSchema = insertVideoSchema.partial();
 export type UpdateVideo = z.infer<typeof updateVideoSchema>;
+
+// Website Pages table for admin page editor
+export const websitePages = pgTable("website_pages", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  slug: varchar("slug").notNull().unique(),
+  title: varchar("title").notNull(),
+  blocks: text("blocks"), // JSON string of page blocks
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type WebsitePage = typeof websitePages.$inferSelect;
+export type InsertWebsitePage = typeof websitePages.$inferInsert;

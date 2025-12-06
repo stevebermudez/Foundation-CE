@@ -1720,18 +1720,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async savePage(slug: string, page: any): Promise<any> {
-    // Store pages in memory for now - can be extended to database
-    if (!this.pages) this.pages = {};
-    this.pages[slug] = page;
-    return page;
+    const { websitePages } = await import("@shared/schema");
+    const title = page.title || slug.charAt(0).toUpperCase() + slug.slice(1);
+    const blocksJson = JSON.stringify(page.blocks || []);
+    
+    // Check if page exists
+    const existing = await db.select().from(websitePages).where(eq(websitePages.slug, slug)).limit(1);
+    
+    if (existing.length > 0) {
+      // Update existing page
+      const [updated] = await db.update(websitePages)
+        .set({ blocks: blocksJson, updatedAt: new Date() })
+        .where(eq(websitePages.slug, slug))
+        .returning();
+      return { ...updated, blocks: JSON.parse(updated.blocks || '[]') };
+    } else {
+      // Create new page
+      const [created] = await db.insert(websitePages)
+        .values({ slug, title, blocks: blocksJson })
+        .returning();
+      return { ...created, blocks: JSON.parse(created.blocks || '[]') };
+    }
   }
 
   async getPage(slug: string): Promise<any> {
-    if (!this.pages) this.pages = {};
-    return this.pages[slug] || null;
+    const { websitePages } = await import("@shared/schema");
+    const [page] = await db.select().from(websitePages).where(eq(websitePages.slug, slug)).limit(1);
+    if (!page) return null;
+    return { ...page, blocks: JSON.parse(page.blocks || '[]') };
   }
-
-  private pages: Record<string, any> = {};
 
   // ============================================================
   // LMS Progress Tracking Methods
