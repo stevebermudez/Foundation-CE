@@ -1,22 +1,28 @@
-import { Shield, Users, Award, Star } from "lucide-react";
+import { Shield, Clock, Award, CheckCircle } from "lucide-react";
 
 const stats = [
   {
     icon: Award,
-    value: "150+",
-    label: "Approved Courses",
+    value: "State",
+    label: "Approved Provider",
     color: "from-blue-500 to-blue-600",
   },
   {
-    icon: Star,
-    value: "4.9/5",
-    label: "Student Rating",
+    icon: Clock,
+    value: "24/7",
+    label: "Online Access",
     color: "from-purple-500 to-purple-600",
   },
   {
+    icon: CheckCircle,
+    value: "Instant",
+    label: "Certificate Delivery",
+    color: "from-green-500 to-green-600",
+  },
+  {
     icon: Shield,
-    value: "100%",
-    label: "Compliance Verified",
+    value: "FREC",
+    label: "Approved Courses",
     color: "from-pink-500 to-pink-600",
   },
 ];
@@ -30,6 +36,7 @@ export default function TrustBadges() {
             <div
               key={index}
               className="relative group rounded-xl p-6 bg-gradient-to-br from-white/5 to-white/0 border border-white/10 hover:border-white/30 transition-all duration-300"
+              data-testid={`stat-card-${index}`}
             >
               <div className={`absolute inset-0 rounded-xl bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
               <div className="relative">
