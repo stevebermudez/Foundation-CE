@@ -41,8 +41,42 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
 - **Database**: Neon (PostgreSQL)
 - **Authentication**: Replit Auth (Google, GitHub, X, Apple)
 - **Payment Gateways**: Stripe, BTCPAY_SERVER, Coinbase
+- **Affiliate Marketing**: PromoteKit (Stripe-native affiliate tracking)
 - **UI Framework**: shadcn/ui
 - **Styling**: Tailwind CSS
 - **Mobile Development**: Expo/React Native
 - **ORM**: Drizzle ORM
 - **Government Portals**: Florida DBPR (for electronic reporting)
+
+## Affiliate Marketing (PromoteKit)
+
+### Overview
+The platform uses PromoteKit for affiliate marketing, which integrates directly with Stripe for tracking referrals and commissions.
+
+### Setup Instructions
+1. **Create PromoteKit Account**: Sign up at https://promotekit.com
+2. **Connect Stripe**: Link your Stripe account in PromoteKit dashboard
+3. **Configure Campaign**: Set commission rates, cookie duration, and payout terms
+4. **Update Script**: Replace the PromoteKit script in `client/index.html` with your account-specific script from PromoteKit setup
+
+### How It Works
+- PromoteKit script (`client/index.html`) tracks visitors who arrive via affiliate links
+- Referral ID stored in `window.promotekit_referral` cookie (60-day duration)
+- Checkout page (`client/src/pages/checkout.tsx`) passes referral to backend
+- Backend (`server/routes.ts`) includes `promotekit_referral` in Stripe checkout metadata
+- PromoteKit automatically tracks conversions via Stripe webhook integration
+
+### Files Involved
+- `client/index.html` - PromoteKit tracking script
+- `client/src/pages/checkout.tsx` - Passes referral ID to checkout API
+- `server/routes.ts` - Includes referral in Stripe metadata
+- `client/src/pages/affiliate-program.tsx` - Public affiliate program info page
+
+### Commission Structure (Configurable in PromoteKit)
+- Starter: 15% (0-10 sales/month)
+- Pro Partner: 20% (11-50 sales/month)
+- Elite Partner: 25% (50+ sales/month)
+
+### Pricing
+- Free tier: Up to 3 referrals
+- Pro: $29/month (up to $10K/month in affiliate revenue)

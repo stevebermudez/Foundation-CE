@@ -1708,7 +1708,7 @@ export async function registerRoutes(
   // Checkout - Create Stripe checkout session for a course
   app.post("/api/checkout/course", async (req, res) => {
     try {
-      const { courseId, email } = req.body;
+      const { courseId, email, referral } = req.body;
       if (!courseId || !email) {
         return res.status(400).json({ error: "courseId and email required" });
       }
@@ -1720,6 +1720,17 @@ export async function registerRoutes(
       const cancelUrl = `${req.headers.origin || process.env.CLIENT_URL || "http://localhost:5000"}/checkout/cancel`;
 
       const stripe = getStripeClient();
+      
+      // Build metadata with optional PromoteKit referral for affiliate tracking
+      const metadata: Record<string, string> = {
+        courseId,
+        email,
+      };
+      // Include referral if it's a non-empty string (PromoteKit referral IDs)
+      if (typeof referral === 'string' && referral.trim().length > 0) {
+        metadata.promotekit_referral = referral.trim();
+      }
+      
       const session = await stripe.checkout.sessions.create({
         line_items: [
           {
@@ -1738,10 +1749,7 @@ export async function registerRoutes(
         customer_email: email,
         success_url: successUrl + "&session_id={CHECKOUT_SESSION_ID}",
         cancel_url: cancelUrl,
-        metadata: {
-          courseId,
-          email,
-        },
+        metadata,
       });
 
       res.json({ url: session.url, sessionId: session.id });

@@ -37,6 +37,7 @@ import UnitLearningPage from "@/pages/unit-learning";
 import AccessibilityPage from "@/pages/accessibility";
 import PrivacyPolicyPage from "@/pages/privacy-policy";
 import LegalCompliancePage from "@/pages/legal-compliance";
+import AffiliateProgramPage from "@/pages/affiliate-program";
 import CookieConsent from "@/components/CookieConsent";
 
 function Router() {
@@ -70,6 +71,7 @@ function Router() {
           <Route path="/privacy" component={PrivacyPolicyPage} />
           <Route path="/legal-compliance" component={LegalCompliancePage} />
           <Route path="/security" component={LegalCompliancePage} />
+          <Route path="/affiliates" component={AffiliateProgramPage} />
           <Route path="/admin" component={AdminIndexPage} />
           <Route path="/admin/login" component={AdminLoginPage} />
           <Route path="/admin/dashboard" component={AdminDashboardPage} />

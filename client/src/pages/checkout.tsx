@@ -87,11 +87,19 @@ export default function CheckoutPage() {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
+      
+      // Get PromoteKit referral ID if available (set by PromoteKit script via cookie)
+      const promoteKitReferral = (window as any).promotekit_referral || null;
+      
       const response = await fetch("/api/checkout/course", {
         method: "POST",
         headers,
         credentials: "include",
-        body: JSON.stringify({ courseId: course.id, email }),
+        body: JSON.stringify({ 
+          courseId: course.id, 
+          email,
+          referral: promoteKitReferral 
+        }),
       });
 
       const data = await response.json();
