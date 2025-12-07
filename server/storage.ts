@@ -1808,14 +1808,19 @@ export class DatabaseStorage implements IStorage {
       // Quiz info with full questions - use practiceExams/examQuestions tables which have real content
       if (opts.includeQuizzes) {
         // Find practice exam for this unit by matching title pattern
-        const practiceExams = await this.getPracticeExams(courseId);
-        const unitExam = practiceExams.find(pe => 
-          pe.title.toLowerCase().includes(`unit ${unit.unitNumber} quiz`) ||
-          pe.title.toLowerCase().includes(`unit ${unit.unitNumber}:`)
+        const allPracticeExams = await this.getPracticeExams(courseId);
+        console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${allPracticeExams.length} practice exams for course ${courseId}`);
+        
+        // Match "Unit X Quiz" pattern (simple string matching)
+        const searchPattern = `Unit ${unit.unitNumber} Quiz`;
+        const unitExam = allPracticeExams.find(pe => 
+          pe.title.includes(searchPattern) || pe.title.startsWith(`Unit ${unit.unitNumber}:`)
         );
+        console.log(`[DOCX Export] Unit ${unit.unitNumber}: Looking for '${searchPattern}', matched: ${unitExam?.title || 'NONE'}`);
         
         if (unitExam) {
           const questions = await this.getExamQuestions(unitExam.id);
+          console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${questions.length} questions`);
           
           // Quiz header
           sections.push(
@@ -1901,9 +1906,9 @@ export class DatabaseStorage implements IStorage {
     
     // Final Exam (if exists and quizzes are included) - use practiceExams/examQuestions tables
     if (opts.includeQuizzes) {
-      const practiceExams = await this.getPracticeExams(courseId);
-      const finalExam = practiceExams.find(pe => 
-        pe.title.toLowerCase().includes('final exam')
+      const allPracticeExams = await this.getPracticeExams(courseId);
+      const finalExam = allPracticeExams.find(pe => 
+        /final\s*exam/i.test(pe.title)
       );
       
       if (finalExam) {
