@@ -1904,18 +1904,40 @@ export class DatabaseStorage implements IStorage {
       sections.push(new Paragraph({ text: "", spacing: { after: 300 } }));
     }
     
-    // Final Exam (if exists and quizzes are included) - use questionBanks/bankQuestions tables (real content)
+    // Final Exam (if exists and quizzes are included) - aggregate real questions from all unit quizzes
     if (opts.includeQuizzes) {
-      // Final exam real questions are in question_banks/bank_questions (not practice_exams)
+      // Get all question banks for this course
       const allQuestionBanks = await this.getQuestionBanksByCourse(courseId);
+      
+      // Aggregate ALL questions from unit quizzes to create comprehensive final exam
+      // This ensures we have 100 real questions (not placeholders)
+      const unitQuizBanks = allQuestionBanks.filter((qb: QuestionBank) => 
+        qb.bankType === 'unit_quiz' && qb.isActive === 1
+      );
+      console.log(`[DOCX Export] Final Exam: Found ${unitQuizBanks.length} unit quiz banks to aggregate`);
+      
+      // Collect questions from all unit quizzes
+      let allFinalQuestions: BankQuestion[] = [];
+      for (const bank of unitQuizBanks) {
+        const bankQuestions = await this.getBankQuestions(bank.id);
+        allFinalQuestions.push(...bankQuestions);
+      }
+      
+      // Also include any dedicated final exam questions
       const finalExamBank = allQuestionBanks.find((qb: QuestionBank) => 
         /final\s*exam/i.test(qb.title || '')
       );
-      console.log(`[DOCX Export] Final Exam: Found ${allQuestionBanks.length} question banks, matched: ${finalExamBank?.title || 'NONE'}`);
-      
       if (finalExamBank) {
-        const finalQuestions = await this.getBankQuestions(finalExamBank.id);
-        console.log(`[DOCX Export] Final Exam: Found ${finalQuestions.length} questions`);
+        const dedicatedFinalQuestions = await this.getBankQuestions(finalExamBank.id);
+        allFinalQuestions.push(...dedicatedFinalQuestions);
+      }
+      
+      // Shuffle and take 100 questions for the final exam
+      const shuffled = allFinalQuestions.sort(() => Math.random() - 0.5);
+      const finalQuestions = shuffled.slice(0, 100);
+      console.log(`[DOCX Export] Final Exam: Aggregated ${allFinalQuestions.length} total, using ${finalQuestions.length} for export`);
+      
+      if (finalQuestions.length > 0) {
         
         sections.push(
           new Paragraph({
@@ -1933,7 +1955,7 @@ export class DatabaseStorage implements IStorage {
         sections.push(
           new Paragraph({
             children: [
-              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: ${finalExamBank.passingScore || 70}%`, italics: true })
+              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: 70%`, italics: true })
             ],
             spacing: { after: 200 }
           })
