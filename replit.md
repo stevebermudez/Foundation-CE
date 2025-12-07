@@ -19,154 +19,23 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
 - **Payment Processing**: Stripe for credit card payments and Bitcoin integration (BTCPAY_SERVER or Coinbase).
 - **Course Classification**: A robust system categorizes courses by product type, state, license type, requirement cycle, and delivery method.
 - **Compliance & Reporting**: Includes electronic reporting to Florida DBPR and HTML certificate generation.
-- **Admin Content Builder**: A codeless LMS for managing course content, units, lessons, and media.
-
-### Feature Specifications
-- **Course Management**: Supports state-specific courses (CA/FL), filtering by license type, and requirement buckets (Core Law, Ethics, Electives).
-- **Practice Exams**: Auto-scoring, real-time explanations, and answer tracking.
-- **Supervisor Workflows**: Tools for CE review management and license expiration tracking.
-- **White-Label Support**: Designed for multi-tenant architecture.
-- **Email Campaigns**: Features for creating and tracking email blasts.
+- **Admin Content Builder**: A codeless LMS for managing course content, units, lessons, and media, including comprehensive quiz and exam management with question banks and configurable options.
+- **LMS Content Architecture**: Contains real FREC I educational content (63-hour Florida Sales Associate Pre-Licensing Course) with detailed lesson scripts and auto-update functionality.
+- **LMS Security Architecture**: Implements comprehensive server-side authorization including enrollment ownership, course matching, sequential unit locking, and attempt ownership verification.
+- **Admin Content Export**: Allows administrators to export course content to Microsoft Word documents for offline review.
+- **Admin Financial Management**: Provides a complete admin UI for managing user payments, refunds, and account credits.
+- **WCAG 2.1 Level AA Accessibility Compliance**: Implements features like Skip Navigation, ARIA Landmarks, high-visibility focus indicators, screen reader support, reduced motion, and form accessibility.
+- **Course Expiration Management**: Configurable enrollment expiration periods tracked per course, with content access blocking for expired non-completed enrollments.
+- **Admin Settings Management**: Infrastructure for system configuration, email templates, and user roles.
+- **Regulatory Compliance Infrastructure**: Includes privacy consent management (cookie banner, preference center), data subject rights (export, deletion, do not sell), FERPA educational records protection, SOC 2 audit logging, and dedicated legal compliance pages.
 
 ### System Design Choices
-- **Layered Storage Interface**: Data operations are abstracted through an `IStorage` interface, allowing for flexible storage implementation changes.
-- **Standardized Data Format**: Export APIs provide data in a consistent, versioned format for external system compatibility.
-- **RESTful API Design**: Adheres to REST conventions for easy consumption by external systems.
-- **Authentication Abstraction**: OAuth/authentication logic is separated for adaptability.
-- **LMS Integration**: Architected for seamless integration and potential migration to 3rd-party LMS systems like Moodle or Canvas via data export/import APIs and SCORM package conversion readiness.
-- **Real Estate Express Integration**: Dedicated APIs for exporting and importing enrollment data in Real Estate Express specific formats.
-
-### LMS Content Architecture
-The LMS now contains real FREC I educational content (63-hour Florida Sales Associate Pre-Licensing Course):
-- **Content Source**: Detailed lesson scripts extracted from uploaded course materials in attached_assets
-- **Coverage**: All 19 units have full educational content with learning objectives, key concepts, and exam preparation tips (60+ lessons total)
-- **Content File**: `server/lessonContent.ts` contains all lesson HTML content organized by unit and lesson number
-- **Auto-Update**: `server/updateLessonContent.ts` updates existing database lessons with real content on application startup
-- **Topics Covered**: 
-  - Units 1-3: Real estate business, license law, DBPR/FREC
-  - Units 4-6: Agency relationships, brokerage operations, violations/penalties
-  - Units 7-10: Fair housing, property rights, deeds, legal descriptions
-  - Units 11-13: Real estate contracts, mortgages, loan types
-  - Units 14-16: Closing procedures, market analysis, appraisal
-  - Units 17-19: Investments, taxes, planning/zoning
-
-### LMS Security Architecture
-The LMS implements comprehensive server-side authorization to prevent client-side bypass attempts:
-- **Enrollment Ownership**: All lesson, quiz, and exam routes verify the user owns the enrollment
-- **Course Matching**: Routes validate that units/lessons/question banks belong to the enrolled course
-- **Sequential Locking**: Unit progression is enforced server-side - locked units cannot be accessed even via direct API calls
-- **Attempt Ownership**: Quiz and exam attempt routes verify the attempt belongs to the authenticated user
-- **Practice Exam Security**: All practice exam routes require authentication and verify attempt ownership
-- **Storage Methods**: `getUnit()` and `getLesson()` methods enable individual record validation for security checks
-
-### Admin Content Export
-Administrators can export course content to Word documents for offline review or distribution:
-- **Export Button**: Located in admin dashboard → Courses tab, each course card has a download icon button
-- **API Endpoint**: `GET /api/export/course/:courseId/content.docx` (requires admin authentication)
-- **Document Contents**:
-  - Course title, description, SKU, and total hours
-  - All units with unit number, title, description, and required hours
-  - Lessons table for each unit showing lesson number, title, duration, and video URL
-- **File Format**: Microsoft Word (.docx) with proper headings and formatted tables
-- **Key Files**:
-  - `server/storage.ts` - `exportCourseContentDocx()` method generates the document
-  - `client/src/pages/admin/courses.tsx` - Export button UI with FileDown icon
-
-### Admin Financial Management
-Complete admin UI for managing user payments, refunds, and account credits:
-- **Finance Tab**: Located in admin dashboard (`/admin/dashboard` → Finance tab)
-- **Database Tables**: `purchases`, `refunds`, `accountCredits` track all financial transactions
-- **Features**:
-  - View all purchases with search/filter by user email
-  - Issue Stripe refunds (full or partial) with reason and notes
-  - Add manual account credits for adjustments, promotions, or compensation
-  - View user financial summaries with complete transaction history
-  - Revenue/refund/credit totals displayed in overview cards
-- **Validation**: Client-side validation ensures positive amounts, caps refunds to purchase amount
-- **API Routes**:
-  - `GET /api/admin/purchases` - List all purchases
-  - `GET /api/admin/refunds` - List all refunds
-  - `GET /api/admin/credits` - List all account credits
-  - `GET /api/admin/users/:userId/financial` - User financial summary
-  - `POST /api/admin/refunds` - Issue a refund
-  - `POST /api/admin/credits` - Add account credit
-
-### WCAG 2.1 Level AA Accessibility Compliance
-The platform implements comprehensive accessibility features to ensure ADA compliance and protect against potential litigation:
-- **Skip Navigation**: SkipLinks component allows keyboard users to bypass repetitive navigation and jump directly to main content
-- **ARIA Landmarks**: Proper roles assigned to header (role="banner"), main content (role="main"), footer (role="contentinfo"), and navigation areas
-- **Focus Indicators**: High-visibility focus outlines (2px solid ring) on all interactive elements for keyboard navigation
-- **Screen Reader Support**: All icon-only buttons include descriptive aria-label attributes; decorative icons marked with aria-hidden="true"
-- **Reduced Motion**: CSS media query @media (prefers-reduced-motion: reduce) disables animations for users with vestibular disorders
-- **Form Accessibility**: All form inputs have associated labels via htmlFor/id pairing
-- **Accessibility Statement**: Dedicated /accessibility page with compliance information and contact details for accessibility concerns
-- **Key Files**: 
-  - `client/src/components/SkipLinks.tsx` - Skip navigation component
-  - `client/src/pages/accessibility.tsx` - Accessibility statement page
-  - `client/src/index.css` - Focus indicators and reduced motion CSS utilities
-
-### Course Expiration Management
-The platform implements enrollment expiration to encourage timely course completion:
-- **Configurable Expiration**: Each course has an `expirationMonths` field (default 6 months, range 1-24)
-- **Expiration Tracking**: Enrollments have `expiresAt` date calculated at enrollment creation
-- **Completed Courses Never Expire**: Completed enrollments maintain certificate access indefinitely
-- **Content Access Blocking**: Expired enrollments cannot access lessons, quizzes, or exams
-- **Dashboard Display**: 
-  - Shows expiration date on enrollment cards
-  - Highlights courses expiring within 30 days (orange badge)
-  - Shows expired status with repurchase option
-- **Admin Configuration**: Expiration period configurable per course in admin courses UI
-- **Key Methods**:
-  - `storage.isEnrollmentExpired()` - Checks if non-completed enrollment is past expiration
-  - `storage.getActiveEnrollment()` - Returns enrollment only if not expired
-  - `storage.canRepurchaseCourse()` - Determines if user can repurchase after expiration
-- **API Protection**: Lesson/quiz routes return 403 with `expired: true` flag for expired enrollments
-
-### Admin Settings Management
-Complete administrative settings infrastructure for system configuration, email templates, and user roles:
-- **Settings Tab**: Located in admin dashboard (`/admin/dashboard` → Settings tab)
-- **Database Tables**: 
-  - `system_settings` - Key-value configuration with categories (general, email, payments, security, integrations)
-  - `email_templates` - Customizable email templates with variables support
-  - `user_roles` - Role management with JSON permissions
-- **Features**:
-  - System Configuration: Create/edit/delete key-value settings organized by category
-  - Email Templates: Manage email templates with name, subject, body, and variables
-  - User Roles: Define roles with descriptions and permission sets
-- **API Routes**:
-  - `GET/POST/PATCH/DELETE /api/admin/settings` - System settings CRUD
-  - `GET/POST/PATCH/DELETE /api/admin/email-templates` - Email template CRUD
-  - `GET/POST/PATCH/DELETE /api/admin/roles` - User role CRUD
-- **Key Files**:
-  - `client/src/pages/admin/settings.tsx` - Settings management UI
-  - `shared/schema.ts` - Database table definitions
-  - `server/routes.ts` - API endpoint handlers
-- **Admin Authentication**: Uses ADMIN_PASSWORD secret for admin account (admin@foundationce.com)
-
-### Admin Quiz and Exam Management
-The content builder includes comprehensive quiz and exam management for creating assessments:
-- **Question Banks**: Reusable collections of questions that can be assigned to unit quizzes or final exams
-- **Bank Types**: "unit_quiz" for unit-level assessments, "final_exam" for course-level assessments
-- **Question Types**: Multiple choice, true/false with configurable options
-- **Configuration Options**:
-  - Questions per attempt: How many questions to pull from the bank for each quiz attempt
-  - Passing score: Percentage required to pass (default 70%)
-  - Time limit: Optional time constraint in minutes
-  - Difficulty levels: Easy, medium, hard
-  - Category tags: For organizing questions by topic
-- **UI Location**: Admin dashboard → Content tab → Expand any unit → Quiz section
-- **Database Tables**:
-  - `questionBanks` - Stores quiz/exam configurations with courseId and optional unitId
-  - `bankQuestions` - Individual questions with options, correct answer, and explanations
-- **API Routes**:
-  - `GET/POST /api/admin/question-banks` - Question bank CRUD
-  - `PATCH/DELETE /api/admin/question-banks/:bankId` - Update/delete banks
-  - `GET/POST /api/admin/question-banks/:bankId/questions` - Question CRUD
-  - `PATCH/DELETE /api/admin/questions/:questionId` - Update/delete questions
-- **Key Files**:
-  - `client/src/pages/admin/content-builder.tsx` - Quiz management UI (UnitCard, QuestionBankFormDialog, QuestionFormDialog, QuestionManagerDialog)
-  - `server/routes.ts` - API endpoints for question banks and questions
-  - `server/storage.ts` - Database operations for quizzes
+- **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
+- **Standardized Data Format**: Export APIs provide consistent, versioned data.
+- **RESTful API Design**: Adheres to REST conventions.
+- **Authentication Abstraction**: OAuth/authentication logic is separated.
+- **LMS Integration**: Architected for seamless integration and potential migration to 3rd-party LMS systems via data export/import APIs and SCORM package conversion readiness.
+- **Real Estate Express Integration**: Dedicated APIs for exporting and importing enrollment data in specific formats.
 
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
@@ -176,5 +45,4 @@ The content builder includes comprehensive quiz and exam management for creating
 - **Styling**: Tailwind CSS
 - **Mobile Development**: Expo/React Native
 - **ORM**: Drizzle ORM
-- **Email Services**: Integrated for campaign management (specific provider not detailed, but functionality present)
 - **Government Portals**: Florida DBPR (for electronic reporting)

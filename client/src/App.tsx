@@ -37,6 +37,7 @@ import UnitLearningPage from "@/pages/unit-learning";
 import AccessibilityPage from "@/pages/accessibility";
 import PrivacyPolicyPage from "@/pages/privacy-policy";
 import LegalCompliancePage from "@/pages/legal-compliance";
+import CookieConsent from "@/components/CookieConsent";
 
 function Router() {
   return (
@@ -93,6 +94,7 @@ export default function App() {
         <TooltipProvider>
           <Router />
           <Toaster />
+          <CookieConsent />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

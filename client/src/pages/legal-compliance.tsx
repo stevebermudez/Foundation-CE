@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Lock, Globe, FileCheck, CheckCircle2, Building2, Scale, Users } from "lucide-react";
+import { Shield, Lock, Globe, FileCheck, CheckCircle2, Building2, Scale, Users, GraduationCap, BookOpen, UserCheck } from "lucide-react";
 import { Link } from "wouter";
 
 export default function LegalCompliance() {
@@ -18,7 +18,7 @@ export default function LegalCompliance() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-4 gap-6 mb-12">
           <Card className="text-center">
             <CardHeader>
               <div className="mx-auto p-3 bg-green-100 dark:bg-green-900/30 rounded-full w-fit mb-2">
@@ -55,6 +55,19 @@ export default function LegalCompliance() {
             </CardHeader>
             <CardContent>
               <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20">Active</Badge>
+            </CardContent>
+          </Card>
+
+          <Card className="text-center">
+            <CardHeader>
+              <div className="mx-auto p-3 bg-amber-100 dark:bg-amber-900/30 rounded-full w-fit mb-2">
+                <GraduationCap className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+              </div>
+              <CardTitle>FERPA</CardTitle>
+              <CardDescription>Compliant</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20">Active</Badge>
             </CardContent>
           </Card>
         </div>
@@ -301,6 +314,131 @@ export default function LegalCompliance() {
                 <h4 className="font-semibold mb-2">Submit a CCPA Request</h4>
                 <p className="text-muted-foreground text-sm">
                   To exercise your CCPA rights, email <a href="mailto:privacy@foundationce.com" className="text-primary hover:underline">privacy@foundationce.com</a> with your request. We will respond within 45 days.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card id="ferpa">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                  <GraduationCap className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <CardTitle>FERPA Compliance</CardTitle>
+                  <CardDescription>Family Educational Rights and Privacy Act</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <p className="text-muted-foreground">
+                As a continuing education provider, FoundationCE complies with the Family Educational Rights and Privacy Act (FERPA), a federal law that protects the privacy of student education records. FERPA applies to all educational institutions that receive federal funding and sets standards for the handling of personally identifiable information in education records.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold mb-3">Student Rights Under FERPA</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Right to inspect and review education records</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Right to request amendment of records</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Right to consent before disclosure</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Right to file complaints with the Department of Education</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Right to opt out of directory information disclosure</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-3">Our FERPA Commitments</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Written consent required for record disclosure</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Secure storage of all education records</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Limited access to authorized personnel only</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Training for all staff handling student records</span>
+                    </li>
+                    <li className="flex items-center gap-2 text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
+                      <span>Annual notification of FERPA rights</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h3 className="font-semibold mb-3">Education Records We Maintain</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <BookOpen className="h-5 w-5 text-amber-500 mb-2" />
+                    <h4 className="font-medium text-sm">Course Records</h4>
+                    <p className="text-xs text-muted-foreground">Enrollment, progress, completion dates</p>
+                  </div>
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <FileCheck className="h-5 w-5 text-amber-500 mb-2" />
+                    <h4 className="font-medium text-sm">Assessment Records</h4>
+                    <p className="text-xs text-muted-foreground">Quiz scores, exam results, certifications</p>
+                  </div>
+                  <div className="bg-muted/50 p-3 rounded-lg">
+                    <UserCheck className="h-5 w-5 text-amber-500 mb-2" />
+                    <h4 className="font-medium text-sm">Compliance Records</h4>
+                    <p className="text-xs text-muted-foreground">CE hours, license renewals, reporting</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Directory Information</h4>
+                <p className="text-muted-foreground text-sm mb-3">
+                  Directory information (name, email, enrollment status) may be disclosed without consent unless you opt out. To opt out of directory information disclosure, update your privacy settings in your account or contact us.
+                </p>
+                <Link href="/settings" className="text-primary hover:underline text-sm">
+                  Manage your privacy settings →
+                </Link>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Request Education Records</h4>
+                <p className="text-muted-foreground text-sm">
+                  To inspect, review, or request amendment of your education records, email <a href="mailto:records@foundationce.com" className="text-primary hover:underline">records@foundationce.com</a>. We will respond within 45 days as required by FERPA.
+                </p>
+              </div>
+
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">File a FERPA Complaint</h4>
+                <p className="text-muted-foreground text-sm">
+                  If you believe your FERPA rights have been violated, you may file a complaint with the U.S. Department of Education:
+                </p>
+                <p className="text-muted-foreground text-sm mt-2">
+                  <strong>Family Policy Compliance Office</strong><br />
+                  U.S. Department of Education<br />
+                  400 Maryland Avenue, SW<br />
+                  Washington, DC 20202
                 </p>
               </div>
             </CardContent>

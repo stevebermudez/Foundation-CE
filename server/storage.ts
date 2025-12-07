@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, privacyConsents, dataSubjectRequests, auditLogs, userPrivacyPreferences, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment, type PrivacyConsent, type DataSubjectRequest, type AuditLog, type UserPrivacyPreference } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -229,6 +229,20 @@ export interface IStorage {
   removeUserRole(userId: string, roleId: string): Promise<void>;
   getUsersWithRole(roleId: string): Promise<User[]>;
   getAllSupervisors(): Promise<Supervisor[]>;
+  
+  // Privacy/Compliance Methods (GDPR/CCPA/SOC 2)
+  savePrivacyConsent(visitorId: string, consents: Array<{ consentType: string; consented: number }>, source?: string, version?: string, userId?: string, ipAddress?: string, userAgent?: string): Promise<void>;
+  getPrivacyConsents(visitorId: string): Promise<any[]>;
+  getUserPrivacyPreferences(userId: string): Promise<any | undefined>;
+  updateUserPrivacyPreferences(userId: string, preferences: { doNotSell?: number; marketingEmails?: number; analyticsTracking?: number; functionalCookies?: number; thirdPartySharing?: number }): Promise<any>;
+  createDataSubjectRequest(userId: string, requestType: string, requestDetails?: string): Promise<any>;
+  getDataSubjectRequests(userId: string): Promise<any[]>;
+  getAllDataSubjectRequests(): Promise<any[]>;
+  updateDataSubjectRequest(requestId: string, data: { status?: string; responseDetails?: string; processedBy?: string }): Promise<any>;
+  createAuditLog(action: string, userId?: string, resourceType?: string, resourceId?: string, details?: string, severity?: string, ipAddress?: string, userAgent?: string): Promise<any>;
+  getAuditLogs(filters?: { userId?: string; action?: string; resourceType?: string; severity?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
+  exportUserData(userId: string): Promise<any>;
+  anonymizeUser(userId: string, processedBy: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2545,6 +2559,226 @@ export class DatabaseStorage implements IStorage {
 
   async getAllSupervisors(): Promise<Supervisor[]> {
     return await db.select().from(supervisors).orderBy(supervisors.createdAt);
+  }
+
+  // Privacy/Compliance Methods (GDPR/CCPA/SOC 2)
+  async savePrivacyConsent(
+    visitorId: string, 
+    consents: Array<{ consentType: string; consented: number }>, 
+    source?: string, 
+    version?: string, 
+    userId?: string, 
+    ipAddress?: string, 
+    userAgent?: string
+  ): Promise<void> {
+    for (const consent of consents) {
+      await db.insert(privacyConsents).values({
+        visitorId,
+        userId: userId || null,
+        consentType: consent.consentType,
+        consented: consent.consented,
+        ipAddress: ipAddress || null,
+        userAgent: userAgent || null,
+        source: source || "cookie_banner",
+        version: version || "1.0",
+      });
+    }
+  }
+
+  async getPrivacyConsents(visitorId: string): Promise<PrivacyConsent[]> {
+    return await db.select().from(privacyConsents)
+      .where(eq(privacyConsents.visitorId, visitorId))
+      .orderBy(desc(privacyConsents.createdAt));
+  }
+
+  async getUserPrivacyPreferences(userId: string): Promise<UserPrivacyPreference | undefined> {
+    const [prefs] = await db.select().from(userPrivacyPreferences)
+      .where(eq(userPrivacyPreferences.userId, userId));
+    return prefs;
+  }
+
+  async updateUserPrivacyPreferences(
+    userId: string, 
+    preferences: { doNotSell?: number; marketingEmails?: number; analyticsTracking?: number; functionalCookies?: number; thirdPartySharing?: number }
+  ): Promise<UserPrivacyPreference> {
+    const existing = await this.getUserPrivacyPreferences(userId);
+    if (existing) {
+      const [updated] = await db.update(userPrivacyPreferences)
+        .set({ ...preferences, updatedAt: new Date() })
+        .where(eq(userPrivacyPreferences.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(userPrivacyPreferences)
+        .values({ userId, ...preferences })
+        .returning();
+      return created;
+    }
+  }
+
+  async createDataSubjectRequest(userId: string, requestType: string, requestDetails?: string): Promise<DataSubjectRequest> {
+    const [request] = await db.insert(dataSubjectRequests).values({
+      userId,
+      requestType,
+      requestDetails: requestDetails || null,
+      status: "pending",
+    }).returning();
+    return request;
+  }
+
+  async getDataSubjectRequests(userId: string): Promise<DataSubjectRequest[]> {
+    return await db.select().from(dataSubjectRequests)
+      .where(eq(dataSubjectRequests.userId, userId))
+      .orderBy(desc(dataSubjectRequests.createdAt));
+  }
+
+  async getAllDataSubjectRequests(): Promise<DataSubjectRequest[]> {
+    return await db.select().from(dataSubjectRequests)
+      .orderBy(desc(dataSubjectRequests.createdAt));
+  }
+
+  async updateDataSubjectRequest(
+    requestId: string, 
+    data: { status?: string; responseDetails?: string; processedBy?: string }
+  ): Promise<DataSubjectRequest> {
+    const updateData: any = { ...data, updatedAt: new Date() };
+    if (data.status === "completed") {
+      updateData.completedAt = new Date();
+    }
+    const [updated] = await db.update(dataSubjectRequests)
+      .set(updateData)
+      .where(eq(dataSubjectRequests.id, requestId))
+      .returning();
+    return updated;
+  }
+
+  async createAuditLog(
+    action: string, 
+    userId?: string, 
+    resourceType?: string, 
+    resourceId?: string, 
+    details?: string, 
+    severity?: string, 
+    ipAddress?: string, 
+    userAgent?: string
+  ): Promise<AuditLog> {
+    const [log] = await db.insert(auditLogs).values({
+      action,
+      userId: userId || null,
+      resourceType: resourceType || null,
+      resourceId: resourceId || null,
+      details: details || null,
+      severity: severity || "info",
+      ipAddress: ipAddress || null,
+      userAgent: userAgent || null,
+    }).returning();
+    return log;
+  }
+
+  async getAuditLogs(filters?: { 
+    userId?: string; 
+    action?: string; 
+    resourceType?: string; 
+    severity?: string; 
+    startDate?: Date; 
+    endDate?: Date 
+  }): Promise<AuditLog[]> {
+    let query = db.select().from(auditLogs);
+    const conditions = [];
+    
+    if (filters?.userId) {
+      conditions.push(eq(auditLogs.userId, filters.userId));
+    }
+    if (filters?.action) {
+      conditions.push(eq(auditLogs.action, filters.action));
+    }
+    if (filters?.resourceType) {
+      conditions.push(eq(auditLogs.resourceType, filters.resourceType));
+    }
+    if (filters?.severity) {
+      conditions.push(eq(auditLogs.severity, filters.severity));
+    }
+    if (filters?.startDate) {
+      conditions.push(gte(auditLogs.createdAt, filters.startDate));
+    }
+    if (filters?.endDate) {
+      conditions.push(lt(auditLogs.createdAt, filters.endDate));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    return await query.orderBy(desc(auditLogs.createdAt)).limit(1000);
+  }
+
+  async exportUserData(userId: string): Promise<any> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    const userEnrollments = await this.getAllUserEnrollments(userId);
+    const userPurchases = await this.getPurchasesByUser(userId);
+    const userLicensesData = await this.getUserLicenses(userId);
+    const privacyPrefs = await this.getUserPrivacyPreferences(userId);
+    const dsrRequests = await this.getDataSubjectRequests(userId);
+    const consents = user.id ? await db.select().from(privacyConsents)
+      .where(eq(privacyConsents.userId, user.id)) : [];
+
+    return {
+      exportDate: new Date().toISOString(),
+      version: "1.0",
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        createdAt: user.createdAt,
+      },
+      enrollments: userEnrollments.map(e => ({
+        courseTitle: e.course.title,
+        enrolledAt: e.enrolledAt,
+        hoursCompleted: e.hoursCompleted,
+        completed: e.completed,
+        completedAt: e.completedAt,
+      })),
+      purchases: userPurchases.map(p => ({
+        amount: p.amount,
+        status: p.status,
+        createdAt: p.createdAt,
+      })),
+      licenses: userLicensesData.map(l => ({
+        state: l.state,
+        licenseNumber: l.licenseNumber,
+        licenseType: l.licenseType,
+        expirationDate: l.expirationDate,
+      })),
+      privacyPreferences: privacyPrefs,
+      consentHistory: consents,
+      dataSubjectRequests: dsrRequests,
+    };
+  }
+
+  async anonymizeUser(userId: string, processedBy: string): Promise<void> {
+    const anonymizedEmail = `deleted_${Date.now()}@anonymized.local`;
+    
+    await db.update(users).set({
+      email: anonymizedEmail,
+      firstName: "Deleted",
+      lastName: "User",
+      profileImageUrl: null,
+      passwordHash: null,
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId));
+
+    // Log the anonymization
+    await this.createAuditLog(
+      "user_anonymized",
+      processedBy,
+      "user",
+      userId,
+      JSON.stringify({ reason: "GDPR/CCPA deletion request" }),
+      "warning"
+    );
   }
 }
 

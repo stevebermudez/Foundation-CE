@@ -14,10 +14,11 @@ export default function PrivacyPolicy() {
             <h1 className="text-3xl font-bold" data-testid="text-privacy-title">Privacy Policy</h1>
           </div>
           <p className="text-muted-foreground">Last updated: December 6, 2025</p>
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-4">
             <Badge variant="outline">GDPR Compliant</Badge>
             <Badge variant="outline">CCPA Compliant</Badge>
             <Badge variant="outline">SOC 2 Type II</Badge>
+            <Badge variant="outline">FERPA Compliant</Badge>
           </div>
         </div>
 
@@ -34,7 +35,7 @@ export default function PrivacyPolicy() {
                 FoundationCE ("we," "our," or "us") is committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our continuing education platform for real estate and insurance professionals.
               </p>
               <p>
-                We comply with applicable data protection laws including the General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA), and maintain SOC 2 Type II certification for security controls.
+                We comply with applicable data protection laws including the General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA), Family Educational Rights and Privacy Act (FERPA), and maintain SOC 2 Type II certification for security controls.
               </p>
             </CardContent>
           </Card>
@@ -142,6 +143,24 @@ export default function PrivacyPolicy() {
                   <li>Right to withdraw consent at any time</li>
                   <li>Right to lodge a complaint with a supervisory authority</li>
                 </ul>
+              </div>
+              <Separator />
+              <div>
+                <h3 className="font-semibold mb-2">Student Rights Under FERPA</h3>
+                <p className="text-muted-foreground text-sm mb-2">
+                  As a continuing education provider, we protect your education records under FERPA:
+                </p>
+                <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
+                  <li>Right to inspect and review your education records</li>
+                  <li>Right to request amendment of inaccurate records</li>
+                  <li>Right to consent before disclosure of personally identifiable information</li>
+                  <li>Right to opt out of directory information disclosure</li>
+                  <li>Right to file complaints with the U.S. Department of Education</li>
+                </ul>
+                <p className="text-muted-foreground text-sm mt-2">
+                  Education records include course enrollments, grades, exam scores, certificates, and CE completion data. 
+                  To access or amend your records, contact <a href="mailto:records@foundationce.com" className="text-primary hover:underline">records@foundationce.com</a>.
+                </p>
               </div>
             </CardContent>
           </Card>

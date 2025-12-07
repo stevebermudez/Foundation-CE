@@ -914,3 +914,105 @@ export const userRoleAssignments = pgTable("user_role_assignments", {
 
 export type UserRoleAssignment = typeof userRoleAssignments.$inferSelect;
 export type InsertUserRoleAssignment = typeof userRoleAssignments.$inferInsert;
+
+// Privacy Consent Records - GDPR/CCPA compliance
+export const privacyConsents = pgTable("privacy_consents", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  visitorId: varchar("visitor_id").notNull(), // Anonymous visitor ID or user ID
+  userId: varchar("user_id"), // Linked user ID if logged in
+  consentType: varchar("consent_type").notNull(), // "necessary", "analytics", "marketing", "functional"
+  consented: integer("consented").notNull().default(0), // 1 = consented, 0 = declined
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  source: varchar("source").default("cookie_banner"), // "cookie_banner", "preference_center", "registration"
+  version: varchar("version").default("1.0"), // Policy version consented to
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type PrivacyConsent = typeof privacyConsents.$inferSelect;
+export type InsertPrivacyConsent = typeof privacyConsents.$inferInsert;
+
+// Data Subject Requests - GDPR/CCPA data access and deletion requests
+export const dataSubjectRequests = pgTable("data_subject_requests", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  requestType: varchar("request_type").notNull(), // "access", "deletion", "rectification", "portability", "do_not_sell"
+  status: varchar("status").notNull().default("pending"), // "pending", "processing", "completed", "denied"
+  requestDetails: text("request_details"), // JSON with specific request details
+  responseDetails: text("response_details"), // Admin response or processing notes
+  completedAt: timestamp("completed_at"),
+  processedBy: varchar("processed_by"), // Admin who processed the request
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type DataSubjectRequest = typeof dataSubjectRequests.$inferSelect;
+export type InsertDataSubjectRequest = typeof dataSubjectRequests.$inferInsert;
+
+// Audit Logs - SOC 2 compliance for security event tracking
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id"), // User who performed action (null for system actions)
+  action: varchar("action").notNull(), // "login", "logout", "password_change", "data_export", "account_deletion", etc.
+  resourceType: varchar("resource_type"), // "user", "course", "enrollment", etc.
+  resourceId: varchar("resource_id"), // ID of affected resource
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  details: text("details"), // JSON with additional context
+  severity: varchar("severity").default("info"), // "info", "warning", "error", "critical"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = typeof auditLogs.$inferInsert;
+
+// User Privacy Preferences - GDPR, CCPA, and FERPA compliance
+export const userPrivacyPreferences = pgTable("user_privacy_preferences", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(),
+  // CCPA preferences
+  doNotSell: integer("do_not_sell").default(0), // CCPA Do Not Sell flag
+  marketingEmails: integer("marketing_emails").default(1),
+  analyticsTracking: integer("analytics_tracking").default(1),
+  functionalCookies: integer("functional_cookies").default(1),
+  thirdPartySharing: integer("third_party_sharing").default(0),
+  // FERPA preferences
+  directoryInfoOptOut: integer("directory_info_opt_out").default(0), // Opt out of directory information disclosure
+  educationRecordsConsent: integer("education_records_consent").default(0), // Consent to share education records with third parties
+  transcriptSharingConsent: integer("transcript_sharing_consent").default(0), // Consent to share transcripts/certificates
+  regulatoryReportingConsent: integer("regulatory_reporting_consent").default(1), // Consent to report completions to regulatory bodies (default on)
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type UserPrivacyPreference = typeof userPrivacyPreferences.$inferSelect;
+export type InsertUserPrivacyPreference = typeof userPrivacyPreferences.$inferInsert;
+
+// Educational Records Request - FERPA access and amendment requests
+export const educationRecordsRequests = pgTable("education_records_requests", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  requestType: varchar("request_type").notNull(), // "access", "amendment", "disclosure_log"
+  status: varchar("status").notNull().default("pending"), // "pending", "processing", "completed", "denied"
+  requestDetails: text("request_details"), // JSON with specific request details
+  responseDetails: text("response_details"), // Admin response or processing notes
+  recordsRequested: text("records_requested"), // Specific records requested (course transcripts, certificates, etc.)
+  completedAt: timestamp("completed_at"),
+  processedBy: varchar("processed_by"), // Admin who processed the request
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type EducationRecordsRequest = typeof educationRecordsRequests.$inferSelect;
+export type InsertEducationRecordsRequest = typeof educationRecordsRequests.$inferInsert;

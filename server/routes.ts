@@ -4904,5 +4904,558 @@ segment1.ts
     }
   });
 
+  // ============ PRIVACY/COMPLIANCE API ROUTES (GDPR/CCPA/SOC 2) ============
+  
+  // Save cookie consent preferences (public endpoint)
+  app.post("/api/privacy/consent", async (req, res) => {
+    try {
+      const { visitorId, consents, source, version, userId } = req.body;
+      if (!visitorId || !consents || !Array.isArray(consents)) {
+        return res.status(400).json({ error: "visitorId and consents array required" });
+      }
+      
+      const ipAddress = req.ip || (req.headers['x-forwarded-for'] as string);
+      const userAgent = req.headers['user-agent'];
+      
+      await storage.savePrivacyConsent(
+        visitorId,
+        consents,
+        source || "cookie_banner",
+        version || "1.0",
+        userId,
+        ipAddress,
+        userAgent
+      );
+      
+      // Log consent for audit trail
+      await storage.createAuditLog(
+        "consent_recorded",
+        userId,
+        "privacy_consent",
+        visitorId,
+        JSON.stringify({ consents, source }),
+        "info",
+        ipAddress,
+        userAgent
+      );
+      
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error saving consent:", err);
+      res.status(500).json({ error: "Failed to save consent" });
+    }
+  });
+
+  // Get user's privacy preferences (authenticated) - includes CCPA and FERPA preferences
+  app.get("/api/privacy/preferences", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const preferences = await storage.getUserPrivacyPreferences(user.id);
+      res.json(preferences || {
+        // CCPA preferences
+        doNotSell: 0,
+        marketingEmails: 1,
+        analyticsTracking: 1,
+        functionalCookies: 1,
+        thirdPartySharing: 0,
+        // FERPA preferences
+        directoryInfoOptOut: 0,
+        educationRecordsConsent: 0,
+        transcriptSharingConsent: 0,
+        regulatoryReportingConsent: 1,
+      });
+    } catch (err) {
+      console.error("Error fetching privacy preferences:", err);
+      res.status(500).json({ error: "Failed to fetch preferences" });
+    }
+  });
+
+  // Get user's consent history (authenticated - for GDPR transparency)
+  app.get("/api/privacy/consent-history", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const db = (await import("./db")).db;
+      const { privacyConsents } = await import("@shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      
+      const consents = await db.select()
+        .from(privacyConsents)
+        .where(eq(privacyConsents.userId, user.id))
+        .orderBy(desc(privacyConsents.createdAt))
+        .limit(50);
+      
+      // Audit log for consent history access
+      await storage.createAuditLog(
+        "consent_history_accessed",
+        user.id,
+        "privacy_consent",
+        user.id,
+        JSON.stringify({ recordCount: consents.length }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(consents);
+    } catch (err) {
+      console.error("Error fetching consent history:", err);
+      res.status(500).json({ error: "Failed to fetch consent history" });
+    }
+  });
+
+  // Update user's privacy preferences (authenticated)
+  app.patch("/api/privacy/preferences", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const preferences = await storage.updateUserPrivacyPreferences(user.id, req.body);
+      
+      // Log preference change for audit trail
+      await storage.createAuditLog(
+        "privacy_preferences_updated",
+        user.id,
+        "user_privacy_preferences",
+        user.id,
+        JSON.stringify(req.body),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(preferences);
+    } catch (err) {
+      console.error("Error updating privacy preferences:", err);
+      res.status(500).json({ error: "Failed to update preferences" });
+    }
+  });
+
+  // Submit data subject request (authenticated)
+  app.post("/api/privacy/data-request", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const { requestType, requestDetails } = req.body;
+      if (!requestType || !["access", "deletion", "rectification", "portability", "do_not_sell"].includes(requestType)) {
+        return res.status(400).json({ error: "Valid requestType required" });
+      }
+      
+      const request = await storage.createDataSubjectRequest(user.id, requestType, requestDetails);
+      
+      // Log DSR for audit trail
+      await storage.createAuditLog(
+        "data_subject_request_created",
+        user.id,
+        "data_subject_request",
+        request.id,
+        JSON.stringify({ requestType }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(request);
+    } catch (err) {
+      console.error("Error creating data request:", err);
+      res.status(500).json({ error: "Failed to create data request" });
+    }
+  });
+
+  // Get user's data subject requests (authenticated)
+  app.get("/api/privacy/data-requests", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const requests = await storage.getDataSubjectRequests(user.id);
+      res.json(requests);
+    } catch (err) {
+      console.error("Error fetching data requests:", err);
+      res.status(500).json({ error: "Failed to fetch data requests" });
+    }
+  });
+
+  // Export user's own data (authenticated - GDPR right to access)
+  app.get("/api/privacy/export-my-data", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const exportData = await storage.exportUserData(user.id);
+      
+      // Log data export for audit trail
+      await storage.createAuditLog(
+        "data_export",
+        user.id,
+        "user",
+        user.id,
+        JSON.stringify({ exportedAt: new Date() }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="foundationce_data_export_${user.id}.json"`);
+      res.json(exportData);
+    } catch (err) {
+      console.error("Error exporting user data:", err);
+      res.status(500).json({ error: "Failed to export data" });
+    }
+  });
+
+  // Admin: Get all data subject requests
+  app.get("/api/admin/data-requests", isAdmin, async (req, res) => {
+    try {
+      const requests = await storage.getAllDataSubjectRequests();
+      res.json(requests);
+    } catch (err) {
+      console.error("Error fetching data requests:", err);
+      res.status(500).json({ error: "Failed to fetch data requests" });
+    }
+  });
+
+  // Admin: Update data subject request status
+  app.patch("/api/admin/data-requests/:id", isAdmin, async (req, res) => {
+    try {
+      const { status, responseDetails } = req.body;
+      const adminUser = (req as any).adminUser || { id: 'admin' };
+      
+      const updated = await storage.updateDataSubjectRequest(req.params.id, {
+        status,
+        responseDetails,
+        processedBy: adminUser.id || 'admin',
+      });
+      
+      // Log DSR update for audit trail
+      await storage.createAuditLog(
+        "data_subject_request_updated",
+        adminUser.id || 'admin',
+        "data_subject_request",
+        req.params.id,
+        JSON.stringify({ status, responseDetails }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(updated);
+    } catch (err) {
+      console.error("Error updating data request:", err);
+      res.status(500).json({ error: "Failed to update data request" });
+    }
+  });
+
+  // Admin: Get audit logs
+  app.get("/api/admin/audit-logs", isAdmin, async (req, res) => {
+    try {
+      const { userId, action, resourceType, severity, startDate, endDate } = req.query;
+      
+      const logs = await storage.getAuditLogs({
+        userId: userId as string,
+        action: action as string,
+        resourceType: resourceType as string,
+        severity: severity as string,
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined,
+      });
+      
+      res.json(logs);
+    } catch (err) {
+      console.error("Error fetching audit logs:", err);
+      res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  // Admin: Export user data (for DSR fulfillment)
+  app.get("/api/admin/users/:userId/export", isAdmin, async (req, res) => {
+    try {
+      const exportData = await storage.exportUserData(req.params.userId);
+      
+      // Log admin data export for audit trail
+      const adminUser = (req as any).adminUser || { id: 'admin' };
+      await storage.createAuditLog(
+        "admin_data_export",
+        adminUser.id || 'admin',
+        "user",
+        req.params.userId,
+        JSON.stringify({ exportedAt: new Date(), exportedBy: adminUser.id }),
+        "warning",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="user_data_export_${req.params.userId}.json"`);
+      res.json(exportData);
+    } catch (err) {
+      console.error("Error exporting user data:", err);
+      res.status(500).json({ error: "Failed to export user data" });
+    }
+  });
+
+  // Admin: Anonymize user (for GDPR/CCPA deletion)
+  app.post("/api/admin/users/:userId/anonymize", isAdmin, async (req, res) => {
+    try {
+      const adminUser = (req as any).adminUser || { id: 'admin' };
+      
+      await storage.anonymizeUser(req.params.userId, adminUser.id || 'admin');
+      
+      res.json({ success: true, message: "User data anonymized" });
+    } catch (err) {
+      console.error("Error anonymizing user:", err);
+      res.status(500).json({ error: "Failed to anonymize user" });
+    }
+  });
+
+  // ============ FERPA API ROUTES (Educational Records) ============
+  
+  // Submit FERPA education records request (authenticated)
+  app.post("/api/ferpa/records-request", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const { requestType, requestDetails, recordsRequested } = req.body;
+      if (!requestType || !["access", "amendment", "disclosure_log"].includes(requestType)) {
+        return res.status(400).json({ error: "Valid requestType required (access, amendment, disclosure_log)" });
+      }
+      
+      const db = (await import("./db")).db;
+      const { educationRecordsRequests } = await import("@shared/schema");
+      
+      const [request] = await db.insert(educationRecordsRequests).values({
+        userId: user.id,
+        requestType,
+        requestDetails,
+        recordsRequested,
+        status: "pending",
+      }).returning();
+      
+      // Log FERPA request for audit trail
+      await storage.createAuditLog(
+        "ferpa_records_request_created",
+        user.id,
+        "education_records_request",
+        request.id,
+        JSON.stringify({ requestType, recordsRequested }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(request);
+    } catch (err) {
+      console.error("Error creating FERPA request:", err);
+      res.status(500).json({ error: "Failed to create education records request" });
+    }
+  });
+
+  // Get user's FERPA requests (authenticated)
+  app.get("/api/ferpa/records-requests", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const db = (await import("./db")).db;
+      const { educationRecordsRequests } = await import("@shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      
+      const requests = await db.select()
+        .from(educationRecordsRequests)
+        .where(eq(educationRecordsRequests.userId, user.id))
+        .orderBy(desc(educationRecordsRequests.createdAt));
+      
+      // Audit log for FERPA request listing
+      await storage.createAuditLog(
+        "ferpa_requests_viewed",
+        user.id,
+        "education_records_request",
+        user.id,
+        JSON.stringify({ count: requests.length }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(requests);
+    } catch (err) {
+      console.error("Error fetching FERPA requests:", err);
+      res.status(500).json({ error: "Failed to fetch education records requests" });
+    }
+  });
+
+  // Get user's education records (authenticated - FERPA right to inspect)
+  app.get("/api/ferpa/my-records", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      // Gather all education records for the user
+      const enrollments = await storage.getEnrollmentsByUser(user.id);
+      const userInfo = await storage.getUser(user.id);
+      
+      const educationRecords = {
+        accessedAt: new Date().toISOString(),
+        studentInfo: {
+          id: userInfo?.id,
+          email: userInfo?.email,
+          firstName: userInfo?.firstName,
+          lastName: userInfo?.lastName,
+        },
+        enrollmentRecords: enrollments.map((e: any) => ({
+          courseTitle: e.course?.title,
+          enrolledAt: e.enrolledAt,
+          hoursCompleted: e.hoursCompleted,
+          completed: e.completed,
+          completedAt: e.completedAt,
+          certificateNumber: e.certificateNumber,
+        })),
+        totalCourses: enrollments.length,
+        completedCourses: enrollments.filter((e: any) => e.completed).length,
+      };
+      
+      // Log the records access for audit trail
+      await storage.createAuditLog(
+        "ferpa_records_accessed",
+        user.id,
+        "education_records",
+        user.id,
+        JSON.stringify({ accessedAt: new Date() }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(educationRecords);
+    } catch (err) {
+      console.error("Error fetching education records:", err);
+      res.status(500).json({ error: "Failed to fetch education records" });
+    }
+  });
+
+  // Update user's FERPA preferences (authenticated)
+  app.patch("/api/ferpa/preferences", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const { directoryInfoOptOut, educationRecordsConsent, transcriptSharingConsent, regulatoryReportingConsent } = req.body;
+      
+      const preferences = await storage.updateUserPrivacyPreferences(user.id, {
+        directoryInfoOptOut,
+        educationRecordsConsent,
+        transcriptSharingConsent,
+        regulatoryReportingConsent,
+      });
+      
+      // Log FERPA preference change for audit trail
+      await storage.createAuditLog(
+        "ferpa_preferences_updated",
+        user.id,
+        "user_privacy_preferences",
+        user.id,
+        JSON.stringify({ directoryInfoOptOut, educationRecordsConsent, transcriptSharingConsent }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(preferences);
+    } catch (err) {
+      console.error("Error updating FERPA preferences:", err);
+      res.status(500).json({ error: "Failed to update FERPA preferences" });
+    }
+  });
+
+  // Admin: Get all FERPA education records requests
+  app.get("/api/admin/ferpa-requests", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { educationRecordsRequests, users } = await import("@shared/schema");
+      const { desc, eq } = await import("drizzle-orm");
+      
+      const requests = await db.select({
+        request: educationRecordsRequests,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+        },
+      })
+        .from(educationRecordsRequests)
+        .leftJoin(users, eq(educationRecordsRequests.userId, users.id))
+        .orderBy(desc(educationRecordsRequests.createdAt));
+      
+      res.json(requests);
+    } catch (err) {
+      console.error("Error fetching FERPA requests:", err);
+      res.status(500).json({ error: "Failed to fetch FERPA requests" });
+    }
+  });
+
+  // Admin: Update FERPA education records request
+  app.patch("/api/admin/ferpa-requests/:id", isAdmin, async (req, res) => {
+    try {
+      const { status, responseDetails } = req.body;
+      const adminUser = (req as any).adminUser || { id: 'admin' };
+      
+      const db = (await import("./db")).db;
+      const { educationRecordsRequests } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const [updated] = await db.update(educationRecordsRequests).set({
+        status,
+        responseDetails,
+        processedBy: adminUser.id || 'admin',
+        completedAt: status === 'completed' || status === 'denied' ? new Date() : null,
+        updatedAt: new Date(),
+      }).where(eq(educationRecordsRequests.id, req.params.id)).returning();
+      
+      // Log FERPA request update for audit trail
+      await storage.createAuditLog(
+        "ferpa_request_updated",
+        adminUser.id || 'admin',
+        "education_records_request",
+        req.params.id,
+        JSON.stringify({ status, responseDetails }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(updated);
+    } catch (err) {
+      console.error("Error updating FERPA request:", err);
+      res.status(500).json({ error: "Failed to update FERPA request" });
+    }
+  });
+
   return httpServer;
 }
