@@ -1016,3 +1016,245 @@ export const educationRecordsRequests = pgTable("education_records_requests", {
 
 export type EducationRecordsRequest = typeof educationRecordsRequests.$inferSelect;
 export type InsertEducationRecordsRequest = typeof educationRecordsRequests.$inferInsert;
+
+// ============ AFFILIATE MARKETING TABLES ============
+
+// Affiliates - Partner accounts for referral marketing
+export const affiliates = pgTable("affiliates", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().unique(), // Links to users table
+  companyName: varchar("company_name"),
+  website: varchar("website"),
+  taxId: varchar("tax_id"), // For 1099 reporting (encrypted)
+  paypalEmail: varchar("paypal_email"), // PayPal payout email
+  bankAccountLast4: varchar("bank_account_last4"), // Last 4 digits of bank account
+  status: varchar("status").notNull().default("pending"), // "pending", "approved", "suspended", "rejected"
+  tier: varchar("tier").notNull().default("standard"), // "standard", "premium", "elite"
+  commissionRate: integer("commission_rate").notNull().default(20), // Default 20% commission
+  cookieDurationDays: integer("cookie_duration_days").notNull().default(30), // Tracking cookie duration
+  referralCode: varchar("referral_code").unique(), // Unique code like "JOHN20"
+  bio: text("bio"), // Affiliate description/bio
+  promotionalMethods: text("promotional_methods"), // How they plan to promote
+  approvedAt: timestamp("approved_at"),
+  approvedBy: varchar("approved_by"), // Admin who approved
+  rejectedReason: text("rejected_reason"),
+  totalReferrals: integer("total_referrals").default(0),
+  totalConversions: integer("total_conversions").default(0),
+  totalEarnings: integer("total_earnings").default(0), // In cents
+  totalPaidOut: integer("total_paid_out").default(0), // In cents
+  minimumPayout: integer("minimum_payout").default(5000), // Minimum payout threshold in cents ($50)
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type Affiliate = typeof affiliates.$inferSelect;
+export type InsertAffiliate = typeof affiliates.$inferInsert;
+export const insertAffiliateSchema = createInsertSchema(affiliates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  totalReferrals: true,
+  totalConversions: true,
+  totalEarnings: true,
+  totalPaidOut: true,
+});
+
+// Affiliate Referral Links - Trackable links for each affiliate
+export const affiliateLinks = pgTable("affiliate_links", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull(),
+  name: varchar("name").notNull(), // Link name for affiliate's reference
+  slug: varchar("slug").unique().notNull(), // URL slug (e.g., "john-summer-promo")
+  targetUrl: varchar("target_url"), // Optional specific landing page
+  courseId: varchar("course_id"), // Optional specific course
+  couponCode: varchar("coupon_code"), // Optional coupon to auto-apply
+  utmSource: varchar("utm_source"),
+  utmMedium: varchar("utm_medium"),
+  utmCampaign: varchar("utm_campaign"),
+  clicks: integer("clicks").default(0),
+  conversions: integer("conversions").default(0),
+  revenue: integer("revenue").default(0), // In cents
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type AffiliateLink = typeof affiliateLinks.$inferSelect;
+export type InsertAffiliateLink = typeof affiliateLinks.$inferInsert;
+export const insertAffiliateLinkSchema = createInsertSchema(affiliateLinks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  clicks: true,
+  conversions: true,
+  revenue: true,
+});
+
+// Affiliate Visits - Track all referral visits
+export const affiliateVisits = pgTable("affiliate_visits", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull(),
+  linkId: varchar("link_id"), // Optional - which specific link was used
+  visitorId: varchar("visitor_id").notNull(), // Anonymous visitor tracking ID
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  referrer: varchar("referrer"),
+  landingPage: varchar("landing_page"),
+  converted: integer("converted").default(0), // 1 if this visit led to conversion
+  conversionId: varchar("conversion_id"), // Links to affiliate_conversions
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AffiliateVisit = typeof affiliateVisits.$inferSelect;
+export type InsertAffiliateVisit = typeof affiliateVisits.$inferInsert;
+
+// Affiliate Conversions - Successful referral conversions
+export const affiliateConversions = pgTable("affiliate_conversions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull(),
+  linkId: varchar("link_id"), // Which link was used
+  userId: varchar("user_id").notNull(), // The converted customer
+  enrollmentId: varchar("enrollment_id"), // The enrollment that was purchased
+  courseId: varchar("course_id"),
+  orderAmount: integer("order_amount").notNull(), // Order total in cents
+  commissionRate: integer("commission_rate").notNull(), // Rate at time of conversion
+  commissionAmount: integer("commission_amount").notNull(), // Commission earned in cents
+  status: varchar("status").notNull().default("pending"), // "pending", "approved", "paid", "refunded", "disputed"
+  approvedAt: timestamp("approved_at"),
+  approvedBy: varchar("approved_by"),
+  refundedAt: timestamp("refunded_at"),
+  refundReason: text("refund_reason"),
+  payoutId: varchar("payout_id"), // Links to affiliate_payouts when paid
+  attributionType: varchar("attribution_type").default("last_click"), // "first_click", "last_click", "linear"
+  cookieAge: integer("cookie_age"), // Days since referral click
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type AffiliateConversion = typeof affiliateConversions.$inferSelect;
+export type InsertAffiliateConversion = typeof affiliateConversions.$inferInsert;
+
+// Affiliate Payouts - Payment transactions to affiliates
+export const affiliatePayouts = pgTable("affiliate_payouts", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull(),
+  amount: integer("amount").notNull(), // In cents
+  method: varchar("method").notNull(), // "paypal", "stripe", "bank_transfer", "check"
+  status: varchar("status").notNull().default("pending"), // "pending", "processing", "completed", "failed"
+  paypalTransactionId: varchar("paypal_transaction_id"),
+  stripeTransferId: varchar("stripe_transfer_id"),
+  notes: text("notes"),
+  processedAt: timestamp("processed_at"),
+  processedBy: varchar("processed_by"), // Admin who processed
+  failureReason: text("failure_reason"),
+  periodStart: timestamp("period_start"), // Commission period start
+  periodEnd: timestamp("period_end"), // Commission period end
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type AffiliatePayout = typeof affiliatePayouts.$inferSelect;
+export type InsertAffiliatePayout = typeof affiliatePayouts.$inferInsert;
+
+// Affiliate Coupons - Promotional discount codes for affiliates
+export const affiliateCoupons = pgTable("affiliate_coupons", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull(),
+  code: varchar("code").unique().notNull(), // Coupon code (e.g., "JOHN20OFF")
+  discountType: varchar("discount_type").notNull(), // "percentage", "fixed"
+  discountValue: integer("discount_value").notNull(), // Percentage or cents
+  maxUses: integer("max_uses"), // Null for unlimited
+  currentUses: integer("current_uses").default(0),
+  minOrderAmount: integer("min_order_amount"), // Minimum order in cents
+  courseId: varchar("course_id"), // Optional - specific course only
+  startsAt: timestamp("starts_at"),
+  expiresAt: timestamp("expires_at"),
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type AffiliateCoupon = typeof affiliateCoupons.$inferSelect;
+export type InsertAffiliateCoupon = typeof affiliateCoupons.$inferInsert;
+export const insertAffiliateCouponSchema = createInsertSchema(affiliateCoupons).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  currentUses: true,
+});
+
+// Affiliate Creatives - Marketing materials for affiliates
+export const affiliateCreatives = pgTable("affiliate_creatives", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: varchar("type").notNull(), // "banner", "email", "social", "text_link"
+  description: text("description"),
+  imageUrl: varchar("image_url"),
+  dimensions: varchar("dimensions"), // "300x250", "728x90", etc.
+  htmlCode: text("html_code"), // For banner embeds
+  textContent: text("text_content"), // For text/email templates
+  courseId: varchar("course_id"), // Optional - specific course
+  isActive: integer("is_active").default(1),
+  downloads: integer("downloads").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type AffiliateCreative = typeof affiliateCreatives.$inferSelect;
+export type InsertAffiliateCreative = typeof affiliateCreatives.$inferInsert;
+export const insertAffiliateCreativeSchema = createInsertSchema(affiliateCreatives).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  downloads: true,
+});
+
+// Affiliate Notifications - Communication history with affiliates
+export const affiliateNotifications = pgTable("affiliate_notifications", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull(),
+  type: varchar("type").notNull(), // "approval", "payout", "conversion", "announcement", "warning"
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  read: integer("read").default(0),
+  actionUrl: varchar("action_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AffiliateNotification = typeof affiliateNotifications.$inferSelect;
+export type InsertAffiliateNotification = typeof affiliateNotifications.$inferInsert;
+
+// Affiliate Commission Tiers - Multi-tier commission structures
+export const affiliateCommissionTiers = pgTable("affiliate_commission_tiers", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  minConversions: integer("min_conversions").default(0), // Min conversions to qualify
+  minRevenue: integer("min_revenue").default(0), // Min revenue to qualify (cents)
+  commissionRate: integer("commission_rate").notNull(), // Commission percentage
+  bonusAmount: integer("bonus_amount"), // One-time bonus when tier reached (cents)
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type AffiliateCommissionTier = typeof affiliateCommissionTiers.$inferSelect;
+export type InsertAffiliateCommissionTier = typeof affiliateCommissionTiers.$inferInsert;
