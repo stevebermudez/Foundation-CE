@@ -1722,118 +1722,224 @@ export class DatabaseStorage implements IStorage {
         })
       );
       
-      // Lessons table
+      // Lessons with full content
       if (opts.includeLessons) {
-        const lessons = await this.getLessons(unit.id);
+        const lessonList = await this.getLessons(unit.id);
         
-        if (lessons.length > 0) {
-          // Define column widths in twips (1 inch = 1440 twips, page width ~6.5 inches usable = 9360 twips)
-          const colWidths = opts.includeVideos 
-            ? [720, 4800, 900, 2940] // #, Title, Duration, URL
-            : [900, 6960, 1500]; // #, Title, Duration (no URL column)
-          
-          const headerCells = [
-            new TableCell({
-              children: [new Paragraph({ 
-                children: [new TextRun({ text: "#", bold: true })],
-                alignment: AlignmentType.CENTER
-              })],
-              shading: { fill: "E8E8E8" },
-              width: { size: colWidths[0], type: WidthType.DXA }
-            }),
-            new TableCell({
-              children: [new Paragraph({ children: [new TextRun({ text: "Lesson Title", bold: true })] })],
-              shading: { fill: "E8E8E8" },
-              width: { size: colWidths[1], type: WidthType.DXA }
-            }),
-            new TableCell({
-              children: [new Paragraph({ 
-                children: [new TextRun({ text: "Min", bold: true })],
-                alignment: AlignmentType.CENTER
-              })],
-              shading: { fill: "E8E8E8" },
-              width: { size: colWidths[2], type: WidthType.DXA }
+        for (const lesson of lessonList) {
+          // Lesson heading
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Lesson ${lesson.lessonNumber}: ${lesson.title}`,
+                  bold: true,
+                  size: 26 // 13pt
+                })
+              ],
+              spacing: { before: 250, after: 100 }
             })
-          ];
+          );
           
-          if (opts.includeVideos) {
-            headerCells.push(
-              new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text: "Video URL", bold: true })] })],
-                shading: { fill: "E8E8E8" },
-                width: { size: colWidths[3], type: WidthType.DXA }
+          // Duration and video URL if applicable
+          const metaParts = [];
+          if (lesson.durationMinutes) {
+            metaParts.push(`Duration: ${lesson.durationMinutes} minutes`);
+          }
+          if (opts.includeVideos && lesson.videoUrl) {
+            metaParts.push(`Video: ${lesson.videoUrl}`);
+          }
+          if (metaParts.length > 0) {
+            sections.push(
+              new Paragraph({
+                children: [new TextRun({ text: metaParts.join("  |  "), italics: true, size: 20 })],
+                spacing: { after: 100 }
               })
             );
           }
           
-          const rows = [
-            new TableRow({ children: headerCells, tableHeader: true })
-          ];
-          
-          lessons.forEach(lesson => {
-            const dataCells = [
-              new TableCell({
-                children: [new Paragraph({ 
-                  text: String(lesson.lessonNumber),
-                  alignment: AlignmentType.CENTER
-                })],
-                width: { size: colWidths[0], type: WidthType.DXA }
-              }),
-              new TableCell({
-                children: [new Paragraph({ text: lesson.title })],
-                width: { size: colWidths[1], type: WidthType.DXA }
-              }),
-              new TableCell({
-                children: [new Paragraph({ 
-                  text: lesson.durationMinutes ? String(lesson.durationMinutes) : "-",
-                  alignment: AlignmentType.CENTER
-                })],
-                width: { size: colWidths[2], type: WidthType.DXA }
-              })
-            ];
-            
-            if (opts.includeVideos) {
-              dataCells.push(
-                new TableCell({
-                  children: [new Paragraph({ 
-                    text: lesson.videoUrl || "-"
-                  })],
-                  width: { size: colWidths[3], type: WidthType.DXA }
+          // Lesson content (the actual script/text)
+          if (lesson.content) {
+            // Split content into paragraphs by double newlines
+            const contentParagraphs = lesson.content.split(/\n\n+/).filter(p => p.trim());
+            for (const para of contentParagraphs) {
+              sections.push(
+                new Paragraph({
+                  text: para.trim(),
+                  spacing: { after: 120 }
                 })
               );
             }
-            
-            rows.push(new TableRow({ children: dataCells }));
-          });
-          
-          sections.push(
-            new Table({
-              rows,
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              columnWidths: colWidths
-            })
-          );
+          } else {
+            sections.push(
+              new Paragraph({
+                children: [new TextRun({ text: "(No content available)", italics: true })],
+                spacing: { after: 100 }
+              })
+            );
+          }
         }
       }
       
-      // Quiz info
+      // Quiz info with full questions
       if (opts.includeQuizzes) {
         const questionBank = await this.getQuestionBankByUnit(unit.id);
         if (questionBank) {
           const questions = await this.getBankQuestions(questionBank.id);
+          
+          // Quiz header
           sections.push(
             new Paragraph({
               children: [
-                new TextRun({ text: "Quiz: ", bold: true }),
-                new TextRun({ text: `${questions.length} questions, ${questionBank.passingScore || 70}% to pass` })
+                new TextRun({ 
+                  text: `Unit ${unit.unitNumber} Quiz`,
+                  bold: true,
+                  size: 28
+                })
               ],
-              spacing: { before: 150, after: 100 }
+              spacing: { before: 300, after: 100 }
             })
           );
+          
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${questions.length} questions  |  Passing Score: ${questionBank.passingScore || 70}%`, italics: true })
+              ],
+              spacing: { after: 150 }
+            })
+          );
+          
+          // Each question with answers
+          questions.forEach((q, qIndex) => {
+            sections.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `${qIndex + 1}. `, bold: true }),
+                  new TextRun({ text: q.questionText || '' })
+                ],
+                spacing: { before: 150, after: 80 }
+              })
+            );
+            
+            // Answer options - parse JSON string if needed
+            let options: string[] = [];
+            try {
+              options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
+            } catch { options = []; }
+            
+            options.forEach((opt, optIndex) => {
+              const letter = String.fromCharCode(65 + optIndex); // A, B, C, D...
+              const isCorrect = q.correctOption === optIndex;
+              sections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ 
+                      text: `   ${letter}. ${opt}`,
+                      bold: isCorrect,
+                      color: isCorrect ? "008000" : undefined
+                    }),
+                    ...(isCorrect ? [new TextRun({ text: " (Correct)", bold: true, color: "008000" })] : [])
+                  ],
+                  spacing: { after: 40 }
+                })
+              );
+            });
+            
+            // Explanation if available
+            if (q.explanation) {
+              sections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: "   Explanation: ", italics: true, bold: true }),
+                    new TextRun({ text: q.explanation, italics: true })
+                  ],
+                  spacing: { before: 50, after: 100 }
+                })
+              );
+            }
+          });
         }
       }
       
       sections.push(new Paragraph({ text: "", spacing: { after: 300 } }));
+    }
+    
+    // Final Exam (if exists and quizzes are included)
+    if (opts.includeQuizzes) {
+      const finalExamBank = await this.getFinalExamBank(courseId);
+      if (finalExamBank) {
+        const finalQuestions = await this.getBankQuestions(finalExamBank.id);
+        
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({ 
+                text: "Course Final Exam",
+                bold: true,
+                size: 36
+              })
+            ],
+            spacing: { before: 500, after: 150 }
+          })
+        );
+        
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: ${finalExamBank.passingScore || 70}%`, italics: true })
+            ],
+            spacing: { after: 200 }
+          })
+        );
+        
+        finalQuestions.forEach((q, qIndex) => {
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${qIndex + 1}. `, bold: true }),
+                new TextRun({ text: q.questionText || '' })
+              ],
+              spacing: { before: 150, after: 80 }
+            })
+          );
+          
+          let options: string[] = [];
+          try {
+            options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
+          } catch { options = []; }
+          
+          options.forEach((opt, optIndex) => {
+            const letter = String.fromCharCode(65 + optIndex);
+            const isCorrect = q.correctOption === optIndex;
+            sections.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ 
+                    text: `   ${letter}. ${opt}`,
+                    bold: isCorrect,
+                    color: isCorrect ? "008000" : undefined
+                  }),
+                  ...(isCorrect ? [new TextRun({ text: " (Correct)", bold: true, color: "008000" })] : [])
+                ],
+                spacing: { after: 40 }
+              })
+            );
+          });
+          
+          if (q.explanation) {
+            sections.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: "   Explanation: ", italics: true, bold: true }),
+                  new TextRun({ text: q.explanation, italics: true })
+                ],
+                spacing: { before: 50, after: 100 }
+              })
+            );
+          }
+        });
+      }
     }
     
     // Export metadata footer
