@@ -72,6 +72,7 @@ function Router() {
           <Route path="/legal-compliance" component={LegalCompliancePage} />
           <Route path="/security" component={LegalCompliancePage} />
           <Route path="/affiliates" component={AffiliateProgramPage} />
+          <Route path="/affiliate-program" component={AffiliateProgramPage} />
           <Route path="/admin" component={AdminIndexPage} />
           <Route path="/admin/login" component={AdminLoginPage} />
           <Route path="/admin/dashboard" component={AdminDashboardPage} />
