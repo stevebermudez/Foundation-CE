@@ -5315,7 +5315,7 @@ segment1.ts
       }
       
       // Gather all education records for the user
-      const enrollments = await storage.getEnrollmentsByUser(user.id);
+      const enrollments = await storage.getAllUserEnrollments(user.id);
       const userInfo = await storage.getUser(user.id);
       
       const educationRecords = {
@@ -5454,6 +5454,606 @@ segment1.ts
     } catch (err) {
       console.error("Error updating FERPA request:", err);
       res.status(500).json({ error: "Failed to update FERPA request" });
+    }
+  });
+
+  // ============ AFFILIATE MARKETING API ROUTES ============
+
+  // Public: Track affiliate referral visit
+  app.get("/api/ref/:code", async (req, res) => {
+    try {
+      const affiliate = await storage.getAffiliateByReferralCode(req.params.code);
+      if (!affiliate || affiliate.status !== 'approved') {
+        return res.redirect('/courses');
+      }
+      
+      // Generate or get visitor ID from cookie
+      let visitorId = req.cookies?.affiliate_visitor;
+      if (!visitorId) {
+        visitorId = `v_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+      
+      // Record the visit
+      await storage.createAffiliateVisit({
+        affiliateId: affiliate.id,
+        visitorId,
+        ipAddress: req.ip || null,
+        userAgent: req.headers['user-agent'] || null,
+        referrer: req.headers['referer'] as string || null,
+        landingPage: req.query.to as string || '/courses',
+        converted: 0,
+        linkId: null,
+        conversionId: null,
+      });
+      
+      // Set cookies for tracking
+      res.cookie('affiliate_visitor', visitorId, { maxAge: affiliate.cookieDurationDays * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('affiliate_ref', affiliate.id, { maxAge: affiliate.cookieDurationDays * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('affiliate_code', req.params.code, { maxAge: affiliate.cookieDurationDays * 24 * 60 * 60 * 1000 });
+      
+      const targetUrl = req.query.to as string || '/courses';
+      res.redirect(targetUrl);
+    } catch (err) {
+      console.error("Error tracking referral:", err);
+      res.redirect('/courses');
+    }
+  });
+
+  // Public: Track affiliate link click
+  app.get("/api/affiliate/link/:slug", async (req, res) => {
+    try {
+      const link = await storage.getAffiliateLinkBySlug(req.params.slug);
+      if (!link || !link.isActive) {
+        return res.redirect('/courses');
+      }
+      
+      const affiliate = await storage.getAffiliate(link.affiliateId);
+      if (!affiliate || affiliate.status !== 'approved') {
+        return res.redirect('/courses');
+      }
+      
+      // Increment click count
+      await storage.incrementLinkClicks(link.id);
+      
+      // Generate or get visitor ID from cookie
+      let visitorId = req.cookies?.affiliate_visitor;
+      if (!visitorId) {
+        visitorId = `v_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      }
+      
+      // Record the visit
+      await storage.createAffiliateVisit({
+        affiliateId: affiliate.id,
+        linkId: link.id,
+        visitorId,
+        ipAddress: req.ip || null,
+        userAgent: req.headers['user-agent'] || null,
+        referrer: req.headers['referer'] as string || null,
+        landingPage: link.targetUrl || '/courses',
+        converted: 0,
+        conversionId: null,
+      });
+      
+      // Set cookies for tracking
+      res.cookie('affiliate_visitor', visitorId, { maxAge: affiliate.cookieDurationDays * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('affiliate_ref', affiliate.id, { maxAge: affiliate.cookieDurationDays * 24 * 60 * 60 * 1000, httpOnly: true });
+      res.cookie('affiliate_link', link.id, { maxAge: affiliate.cookieDurationDays * 24 * 60 * 60 * 1000, httpOnly: true });
+      
+      const targetUrl = link.targetUrl || '/courses';
+      res.redirect(targetUrl);
+    } catch (err) {
+      console.error("Error tracking affiliate link:", err);
+      res.redirect('/courses');
+    }
+  });
+
+  // Apply for affiliate program (authenticated)
+  app.post("/api/affiliate/apply", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      // Check if already an affiliate
+      const existing = await storage.getAffiliateByUserId(user.id);
+      if (existing) {
+        return res.status(400).json({ error: "You already have an affiliate account", affiliate: existing });
+      }
+      
+      const { companyName, website, bio, promotionalMethods, paypalEmail } = req.body;
+      
+      const affiliate = await storage.createAffiliate({
+        userId: user.id,
+        companyName,
+        website,
+        bio,
+        promotionalMethods,
+        paypalEmail,
+        status: 'pending',
+      });
+      
+      await storage.createAuditLog(
+        "affiliate_application_submitted",
+        user.id,
+        "affiliate",
+        affiliate.id,
+        JSON.stringify({ companyName, website }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(affiliate);
+    } catch (err) {
+      console.error("Error applying for affiliate:", err);
+      res.status(500).json({ error: "Failed to submit affiliate application" });
+    }
+  });
+
+  // Get current user's affiliate account
+  app.get("/api/affiliate/me", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(404).json({ error: "No affiliate account found" });
+      }
+      
+      res.json(affiliate);
+    } catch (err) {
+      console.error("Error fetching affiliate:", err);
+      res.status(500).json({ error: "Failed to fetch affiliate account" });
+    }
+  });
+
+  // Get affiliate dashboard stats
+  app.get("/api/affiliate/dashboard", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate || affiliate.status !== 'approved') {
+        return res.status(403).json({ error: "Active affiliate account required" });
+      }
+      
+      const stats = await storage.getAffiliateDashboardStats(affiliate.id);
+      res.json(stats);
+    } catch (err) {
+      console.error("Error fetching affiliate dashboard:", err);
+      res.status(500).json({ error: "Failed to fetch dashboard" });
+    }
+  });
+
+  // Get affiliate's referral links
+  app.get("/api/affiliate/links", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(403).json({ error: "Affiliate account required" });
+      }
+      
+      const links = await storage.getAffiliateLinks(affiliate.id);
+      res.json(links);
+    } catch (err) {
+      console.error("Error fetching affiliate links:", err);
+      res.status(500).json({ error: "Failed to fetch links" });
+    }
+  });
+
+  // Create new affiliate link
+  app.post("/api/affiliate/links", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate || affiliate.status !== 'approved') {
+        return res.status(403).json({ error: "Approved affiliate account required" });
+      }
+      
+      const { name, slug, targetUrl, courseId, utmSource, utmMedium, utmCampaign } = req.body;
+      if (!name || !slug) {
+        return res.status(400).json({ error: "Name and slug are required" });
+      }
+      
+      // Check if slug is unique
+      const existing = await storage.getAffiliateLinkBySlug(slug);
+      if (existing) {
+        return res.status(400).json({ error: "This slug is already taken" });
+      }
+      
+      const link = await storage.createAffiliateLink({
+        affiliateId: affiliate.id,
+        name,
+        slug,
+        targetUrl,
+        courseId,
+        utmSource,
+        utmMedium,
+        utmCampaign,
+        isActive: 1,
+      });
+      
+      res.json(link);
+    } catch (err) {
+      console.error("Error creating affiliate link:", err);
+      res.status(500).json({ error: "Failed to create link" });
+    }
+  });
+
+  // Delete affiliate link
+  app.delete("/api/affiliate/links/:id", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(403).json({ error: "Affiliate account required" });
+      }
+      
+      await storage.deleteAffiliateLink(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting affiliate link:", err);
+      res.status(500).json({ error: "Failed to delete link" });
+    }
+  });
+
+  // Get affiliate's conversions
+  app.get("/api/affiliate/conversions", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(403).json({ error: "Affiliate account required" });
+      }
+      
+      const conversions = await storage.getAffiliateConversions(affiliate.id);
+      res.json(conversions);
+    } catch (err) {
+      console.error("Error fetching conversions:", err);
+      res.status(500).json({ error: "Failed to fetch conversions" });
+    }
+  });
+
+  // Get affiliate's payouts
+  app.get("/api/affiliate/payouts", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(403).json({ error: "Affiliate account required" });
+      }
+      
+      const payouts = await storage.getAffiliatePayouts(affiliate.id);
+      res.json(payouts);
+    } catch (err) {
+      console.error("Error fetching payouts:", err);
+      res.status(500).json({ error: "Failed to fetch payouts" });
+    }
+  });
+
+  // Request payout
+  app.post("/api/affiliate/payouts/request", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate || affiliate.status !== 'approved') {
+        return res.status(403).json({ error: "Approved affiliate account required" });
+      }
+      
+      const stats = await storage.getAffiliateDashboardStats(affiliate.id);
+      if (stats.availableBalance < (affiliate.minimumPayout || 5000)) {
+        return res.status(400).json({ 
+          error: `Minimum payout is $${((affiliate.minimumPayout || 5000) / 100).toFixed(2)}. Your available balance is $${(stats.availableBalance / 100).toFixed(2)}.` 
+        });
+      }
+      
+      const { method } = req.body;
+      if (!method || !['paypal', 'stripe', 'bank_transfer'].includes(method)) {
+        return res.status(400).json({ error: "Valid payout method required" });
+      }
+      
+      const payout = await storage.createPayoutRequest(affiliate.id, stats.availableBalance, method);
+      
+      await storage.createAuditLog(
+        "affiliate_payout_requested",
+        user.id,
+        "affiliate_payout",
+        payout.id,
+        JSON.stringify({ amount: stats.availableBalance, method }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(payout);
+    } catch (err) {
+      console.error("Error requesting payout:", err);
+      res.status(500).json({ error: "Failed to request payout" });
+    }
+  });
+
+  // Get affiliate notifications
+  app.get("/api/affiliate/notifications", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(403).json({ error: "Affiliate account required" });
+      }
+      
+      const notifications = await storage.getAffiliateNotifications(affiliate.id);
+      res.json(notifications);
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.patch("/api/affiliate/notifications/:id/read", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      await storage.markAffiliateNotificationRead(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error marking notification read:", err);
+      res.status(500).json({ error: "Failed to update notification" });
+    }
+  });
+
+  // Get available marketing creatives
+  app.get("/api/affiliate/creatives", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const affiliate = await storage.getAffiliateByUserId(user.id);
+      if (!affiliate) {
+        return res.status(403).json({ error: "Affiliate account required" });
+      }
+      
+      const creatives = await storage.getAffiliateCreatives();
+      res.json(creatives);
+    } catch (err) {
+      console.error("Error fetching creatives:", err);
+      res.status(500).json({ error: "Failed to fetch creatives" });
+    }
+  });
+
+  // ============ ADMIN AFFILIATE ROUTES ============
+
+  // Get all affiliates
+  app.get("/api/admin/affiliates", isAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const affiliateList = await storage.getAffiliates(status);
+      res.json(affiliateList);
+    } catch (err) {
+      console.error("Error fetching affiliates:", err);
+      res.status(500).json({ error: "Failed to fetch affiliates" });
+    }
+  });
+
+  // Get single affiliate details
+  app.get("/api/admin/affiliates/:id", isAdmin, async (req, res) => {
+    try {
+      const affiliate = await storage.getAffiliate(req.params.id);
+      if (!affiliate) {
+        return res.status(404).json({ error: "Affiliate not found" });
+      }
+      
+      const user = await storage.getUser(affiliate.userId);
+      const stats = await storage.getAffiliateDashboardStats(affiliate.id);
+      const conversions = await storage.getAffiliateConversions(affiliate.id);
+      const payouts = await storage.getAffiliatePayouts(affiliate.id);
+      
+      res.json({ affiliate, user, stats, conversions, payouts });
+    } catch (err) {
+      console.error("Error fetching affiliate:", err);
+      res.status(500).json({ error: "Failed to fetch affiliate" });
+    }
+  });
+
+  // Approve affiliate
+  app.post("/api/admin/affiliates/:id/approve", isAdmin, async (req, res) => {
+    try {
+      const adminUser = (req as any).adminUser || { id: 'admin' };
+      const affiliate = await storage.approveAffiliate(req.params.id, adminUser.id || 'admin');
+      
+      await storage.createAuditLog(
+        "affiliate_approved",
+        adminUser.id || 'admin',
+        "affiliate",
+        req.params.id,
+        undefined,
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(affiliate);
+    } catch (err) {
+      console.error("Error approving affiliate:", err);
+      res.status(500).json({ error: "Failed to approve affiliate" });
+    }
+  });
+
+  // Reject affiliate
+  app.post("/api/admin/affiliates/:id/reject", isAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      if (!reason) {
+        return res.status(400).json({ error: "Rejection reason required" });
+      }
+      
+      const adminUser = (req as any).adminUser || { id: 'admin' };
+      const affiliate = await storage.rejectAffiliate(req.params.id, reason);
+      
+      await storage.createAuditLog(
+        "affiliate_rejected",
+        adminUser.id || 'admin',
+        "affiliate",
+        req.params.id,
+        JSON.stringify({ reason }),
+        "warning",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(affiliate);
+    } catch (err) {
+      console.error("Error rejecting affiliate:", err);
+      res.status(500).json({ error: "Failed to reject affiliate" });
+    }
+  });
+
+  // Update affiliate settings
+  app.patch("/api/admin/affiliates/:id", isAdmin, async (req, res) => {
+    try {
+      const { commissionRate, tier, minimumPayout, cookieDurationDays, status } = req.body;
+      
+      const affiliate = await storage.updateAffiliate(req.params.id, {
+        commissionRate,
+        tier,
+        minimumPayout,
+        cookieDurationDays,
+        status,
+      });
+      
+      res.json(affiliate);
+    } catch (err) {
+      console.error("Error updating affiliate:", err);
+      res.status(500).json({ error: "Failed to update affiliate" });
+    }
+  });
+
+  // Get pending payouts
+  app.get("/api/admin/affiliate-payouts", isAdmin, async (req, res) => {
+    try {
+      const payouts = await storage.getAllPendingPayouts();
+      res.json(payouts);
+    } catch (err) {
+      console.error("Error fetching payouts:", err);
+      res.status(500).json({ error: "Failed to fetch payouts" });
+    }
+  });
+
+  // Process payout
+  app.post("/api/admin/affiliate-payouts/:id/process", isAdmin, async (req, res) => {
+    try {
+      const { transactionId } = req.body;
+      const adminUser = (req as any).adminUser || { id: 'admin' };
+      
+      const payout = await storage.processPayoutComplete(req.params.id, adminUser.id || 'admin', transactionId);
+      
+      await storage.createAuditLog(
+        "affiliate_payout_processed",
+        adminUser.id || 'admin',
+        "affiliate_payout",
+        req.params.id,
+        JSON.stringify({ transactionId }),
+        "info",
+        req.ip,
+        req.headers['user-agent']
+      );
+      
+      res.json(payout);
+    } catch (err) {
+      console.error("Error processing payout:", err);
+      res.status(500).json({ error: "Failed to process payout" });
+    }
+  });
+
+  // Fail payout
+  app.post("/api/admin/affiliate-payouts/:id/fail", isAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      if (!reason) {
+        return res.status(400).json({ error: "Failure reason required" });
+      }
+      
+      const payout = await storage.failPayout(req.params.id, reason);
+      res.json(payout);
+    } catch (err) {
+      console.error("Error failing payout:", err);
+      res.status(500).json({ error: "Failed to update payout" });
+    }
+  });
+
+  // Create marketing creative
+  app.post("/api/admin/affiliate-creatives", isAdmin, async (req, res) => {
+    try {
+      const { name, type, description, imageUrl, dimensions, htmlCode, textContent, courseId } = req.body;
+      
+      const creative = await storage.createAffiliateCreative({
+        name,
+        type,
+        description,
+        imageUrl,
+        dimensions,
+        htmlCode,
+        textContent,
+        courseId,
+        isActive: 1,
+      });
+      
+      res.json(creative);
+    } catch (err) {
+      console.error("Error creating creative:", err);
+      res.status(500).json({ error: "Failed to create creative" });
+    }
+  });
+
+  // Get all creatives (admin)
+  app.get("/api/admin/affiliate-creatives", isAdmin, async (req, res) => {
+    try {
+      const creatives = await storage.getAffiliateCreatives();
+      res.json(creatives);
+    } catch (err) {
+      console.error("Error fetching creatives:", err);
+      res.status(500).json({ error: "Failed to fetch creatives" });
     }
   });
 

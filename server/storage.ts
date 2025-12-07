@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, privacyConsents, dataSubjectRequests, auditLogs, userPrivacyPreferences, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment, type PrivacyConsent, type DataSubjectRequest, type AuditLog, type UserPrivacyPreference } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, privacyConsents, dataSubjectRequests, auditLogs, userPrivacyPreferences, affiliates, affiliateLinks, affiliateVisits, affiliateConversions, affiliatePayouts, affiliateCoupons, affiliateCreatives, affiliateNotifications, affiliateCommissionTiers, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment, type PrivacyConsent, type DataSubjectRequest, type AuditLog, type UserPrivacyPreference, type Affiliate, type InsertAffiliate, type AffiliateLink, type InsertAffiliateLink, type AffiliateVisit, type AffiliateConversion, type AffiliatePayout, type AffiliateCoupon, type AffiliateCreative, type AffiliateNotification, type AffiliateCommissionTier } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -2599,7 +2599,17 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserPrivacyPreferences(
     userId: string, 
-    preferences: { doNotSell?: number; marketingEmails?: number; analyticsTracking?: number; functionalCookies?: number; thirdPartySharing?: number }
+    preferences: { 
+      doNotSell?: number; 
+      marketingEmails?: number; 
+      analyticsTracking?: number; 
+      functionalCookies?: number; 
+      thirdPartySharing?: number;
+      directoryInfoOptOut?: number;
+      educationRecordsConsent?: number;
+      transcriptSharingConsent?: number;
+      regulatoryReportingConsent?: number;
+    }
   ): Promise<UserPrivacyPreference> {
     const existing = await this.getUserPrivacyPreferences(userId);
     if (existing) {
@@ -2779,6 +2789,412 @@ export class DatabaseStorage implements IStorage {
       JSON.stringify({ reason: "GDPR/CCPA deletion request" }),
       "warning"
     );
+  }
+
+  // ============ AFFILIATE MARKETING METHODS ============
+
+  async createAffiliate(data: Omit<InsertAffiliate, 'id' | 'createdAt' | 'updatedAt'>): Promise<Affiliate> {
+    const referralCode = data.referralCode || this.generateReferralCode();
+    const [affiliate] = await db.insert(affiliates).values({
+      ...data,
+      referralCode,
+    }).returning();
+    return affiliate;
+  }
+
+  private generateReferralCode(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  async getAffiliate(id: string): Promise<Affiliate | undefined> {
+    const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.id, id));
+    return affiliate;
+  }
+
+  async getAffiliateByUserId(userId: string): Promise<Affiliate | undefined> {
+    const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.userId, userId));
+    return affiliate;
+  }
+
+  async getAffiliateByReferralCode(code: string): Promise<Affiliate | undefined> {
+    const [affiliate] = await db.select().from(affiliates).where(eq(affiliates.referralCode, code));
+    return affiliate;
+  }
+
+  async updateAffiliate(id: string, data: Partial<Affiliate>): Promise<Affiliate> {
+    const [updated] = await db.update(affiliates)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(affiliates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getAffiliates(status?: string): Promise<(Affiliate & { user: User })[]> {
+    const query = status 
+      ? db.select().from(affiliates).where(eq(affiliates.status, status))
+      : db.select().from(affiliates);
+    
+    const affiliateList = await query.orderBy(desc(affiliates.createdAt));
+    
+    const result = await Promise.all(affiliateList.map(async (aff) => {
+      const user = await this.getUser(aff.userId);
+      return { ...aff, user: user! };
+    }));
+    
+    return result.filter(r => r.user);
+  }
+
+  async approveAffiliate(id: string, approvedBy: string): Promise<Affiliate> {
+    const [updated] = await db.update(affiliates).set({
+      status: 'approved',
+      approvedAt: new Date(),
+      approvedBy,
+      updatedAt: new Date(),
+    }).where(eq(affiliates.id, id)).returning();
+    
+    // Create notification
+    await this.createAffiliateNotification(id, 'approval', 'Application Approved!', 
+      'Congratulations! Your affiliate application has been approved. You can now start earning commissions.', '/affiliate/dashboard');
+    
+    return updated;
+  }
+
+  async rejectAffiliate(id: string, reason: string): Promise<Affiliate> {
+    const [updated] = await db.update(affiliates).set({
+      status: 'rejected',
+      rejectedReason: reason,
+      updatedAt: new Date(),
+    }).where(eq(affiliates.id, id)).returning();
+    
+    await this.createAffiliateNotification(id, 'warning', 'Application Not Approved',
+      `Your affiliate application was not approved. Reason: ${reason}`);
+    
+    return updated;
+  }
+
+  // Affiliate Links
+  async createAffiliateLink(data: Omit<InsertAffiliateLink, 'id' | 'createdAt' | 'updatedAt'>): Promise<AffiliateLink> {
+    const [link] = await db.insert(affiliateLinks).values(data).returning();
+    return link;
+  }
+
+  async getAffiliateLinks(affiliateId: string): Promise<AffiliateLink[]> {
+    return db.select().from(affiliateLinks)
+      .where(eq(affiliateLinks.affiliateId, affiliateId))
+      .orderBy(desc(affiliateLinks.createdAt));
+  }
+
+  async getAffiliateLinkBySlug(slug: string): Promise<AffiliateLink | undefined> {
+    const [link] = await db.select().from(affiliateLinks).where(eq(affiliateLinks.slug, slug));
+    return link;
+  }
+
+  async updateAffiliateLink(id: string, data: Partial<AffiliateLink>): Promise<AffiliateLink> {
+    const [updated] = await db.update(affiliateLinks)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(affiliateLinks.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAffiliateLink(id: string): Promise<void> {
+    await db.delete(affiliateLinks).where(eq(affiliateLinks.id, id));
+  }
+
+  async incrementLinkClicks(id: string): Promise<void> {
+    await db.update(affiliateLinks).set({
+      clicks: sql`${affiliateLinks.clicks} + 1`,
+    }).where(eq(affiliateLinks.id, id));
+  }
+
+  // Affiliate Visits (Tracking)
+  async createAffiliateVisit(data: Omit<AffiliateVisit, 'id' | 'createdAt'>): Promise<AffiliateVisit> {
+    const [visit] = await db.insert(affiliateVisits).values(data).returning();
+    
+    // Also increment affiliate total referrals
+    await db.update(affiliates).set({
+      totalReferrals: sql`${affiliates.totalReferrals} + 1`,
+    }).where(eq(affiliates.id, data.affiliateId));
+    
+    return visit;
+  }
+
+  async getAffiliateVisitByVisitorId(visitorId: string, affiliateId: string): Promise<AffiliateVisit | undefined> {
+    const [visit] = await db.select().from(affiliateVisits)
+      .where(and(
+        eq(affiliateVisits.visitorId, visitorId),
+        eq(affiliateVisits.affiliateId, affiliateId)
+      ))
+      .orderBy(desc(affiliateVisits.createdAt))
+      .limit(1);
+    return visit;
+  }
+
+  async getRecentAffiliateVisit(visitorId: string, daysBack: number = 30): Promise<AffiliateVisit | undefined> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+    
+    const [visit] = await db.select().from(affiliateVisits)
+      .where(and(
+        eq(affiliateVisits.visitorId, visitorId),
+        gte(affiliateVisits.createdAt, cutoffDate),
+        eq(affiliateVisits.converted, 0)
+      ))
+      .orderBy(desc(affiliateVisits.createdAt))
+      .limit(1);
+    return visit;
+  }
+
+  // Affiliate Conversions
+  async createAffiliateConversion(data: Omit<AffiliateConversion, 'id' | 'createdAt' | 'updatedAt'>): Promise<AffiliateConversion> {
+    const [conversion] = await db.insert(affiliateConversions).values(data).returning();
+    
+    // Update affiliate stats
+    await db.update(affiliates).set({
+      totalConversions: sql`${affiliates.totalConversions} + 1`,
+      totalEarnings: sql`${affiliates.totalEarnings} + ${data.commissionAmount}`,
+    }).where(eq(affiliates.id, data.affiliateId));
+    
+    // Update link stats if applicable
+    if (data.linkId) {
+      await db.update(affiliateLinks).set({
+        conversions: sql`${affiliateLinks.conversions} + 1`,
+        revenue: sql`${affiliateLinks.revenue} + ${data.orderAmount}`,
+      }).where(eq(affiliateLinks.id, data.linkId));
+    }
+    
+    // Create notification
+    await this.createAffiliateNotification(data.affiliateId, 'conversion', 'New Conversion!',
+      `You earned a commission of $${(data.commissionAmount / 100).toFixed(2)} from a new referral!`, '/affiliate/dashboard');
+    
+    return conversion;
+  }
+
+  async getAffiliateConversions(affiliateId: string): Promise<AffiliateConversion[]> {
+    return db.select().from(affiliateConversions)
+      .where(eq(affiliateConversions.affiliateId, affiliateId))
+      .orderBy(desc(affiliateConversions.createdAt));
+  }
+
+  async approveConversion(id: string, approvedBy: string): Promise<AffiliateConversion> {
+    const [updated] = await db.update(affiliateConversions).set({
+      status: 'approved',
+      approvedAt: new Date(),
+      approvedBy,
+      updatedAt: new Date(),
+    }).where(eq(affiliateConversions.id, id)).returning();
+    return updated;
+  }
+
+  async refundConversion(id: string, reason: string): Promise<AffiliateConversion> {
+    const [conversion] = await db.select().from(affiliateConversions).where(eq(affiliateConversions.id, id));
+    
+    const [updated] = await db.update(affiliateConversions).set({
+      status: 'refunded',
+      refundedAt: new Date(),
+      refundReason: reason,
+      updatedAt: new Date(),
+    }).where(eq(affiliateConversions.id, id)).returning();
+    
+    // Deduct from affiliate earnings
+    await db.update(affiliates).set({
+      totalEarnings: sql`${affiliates.totalEarnings} - ${conversion.commissionAmount}`,
+    }).where(eq(affiliates.id, conversion.affiliateId));
+    
+    return updated;
+  }
+
+  // Affiliate Payouts
+  async createPayoutRequest(affiliateId: string, amount: number, method: string): Promise<AffiliatePayout> {
+    const [payout] = await db.insert(affiliatePayouts).values({
+      affiliateId,
+      amount,
+      method,
+      status: 'pending',
+    }).returning();
+    return payout;
+  }
+
+  async getAffiliatePayouts(affiliateId: string): Promise<AffiliatePayout[]> {
+    return db.select().from(affiliatePayouts)
+      .where(eq(affiliatePayouts.affiliateId, affiliateId))
+      .orderBy(desc(affiliatePayouts.createdAt));
+  }
+
+  async getAllPendingPayouts(): Promise<(AffiliatePayout & { affiliate: Affiliate })[]> {
+    const payouts = await db.select().from(affiliatePayouts)
+      .where(eq(affiliatePayouts.status, 'pending'))
+      .orderBy(desc(affiliatePayouts.createdAt));
+    
+    return Promise.all(payouts.map(async (p) => {
+      const affiliate = await this.getAffiliate(p.affiliateId);
+      return { ...p, affiliate: affiliate! };
+    }));
+  }
+
+  async processPayoutComplete(id: string, processedBy: string, transactionId?: string): Promise<AffiliatePayout> {
+    const [payout] = await db.select().from(affiliatePayouts).where(eq(affiliatePayouts.id, id));
+    
+    const [updated] = await db.update(affiliatePayouts).set({
+      status: 'completed',
+      processedAt: new Date(),
+      processedBy,
+      paypalTransactionId: transactionId,
+      updatedAt: new Date(),
+    }).where(eq(affiliatePayouts.id, id)).returning();
+    
+    // Update affiliate total paid out
+    await db.update(affiliates).set({
+      totalPaidOut: sql`${affiliates.totalPaidOut} + ${payout.amount}`,
+    }).where(eq(affiliates.id, payout.affiliateId));
+    
+    await this.createAffiliateNotification(payout.affiliateId, 'payout', 'Payout Sent!',
+      `Your payout of $${(payout.amount / 100).toFixed(2)} has been processed.`);
+    
+    return updated;
+  }
+
+  async failPayout(id: string, reason: string): Promise<AffiliatePayout> {
+    const [updated] = await db.update(affiliatePayouts).set({
+      status: 'failed',
+      failureReason: reason,
+      updatedAt: new Date(),
+    }).where(eq(affiliatePayouts.id, id)).returning();
+    return updated;
+  }
+
+  // Affiliate Coupons
+  async createAffiliateCoupon(data: Omit<AffiliateCoupon, 'id' | 'createdAt' | 'updatedAt' | 'currentUses'>): Promise<AffiliateCoupon> {
+    const [coupon] = await db.insert(affiliateCoupons).values(data).returning();
+    return coupon;
+  }
+
+  async getAffiliateCoupons(affiliateId: string): Promise<AffiliateCoupon[]> {
+    return db.select().from(affiliateCoupons)
+      .where(eq(affiliateCoupons.affiliateId, affiliateId))
+      .orderBy(desc(affiliateCoupons.createdAt));
+  }
+
+  async getAffiliateCouponByCode(code: string): Promise<AffiliateCoupon | undefined> {
+    const [coupon] = await db.select().from(affiliateCoupons)
+      .where(and(
+        eq(affiliateCoupons.code, code.toUpperCase()),
+        eq(affiliateCoupons.isActive, 1)
+      ));
+    return coupon;
+  }
+
+  async incrementCouponUsage(id: string): Promise<void> {
+    await db.update(affiliateCoupons).set({
+      currentUses: sql`${affiliateCoupons.currentUses} + 1`,
+    }).where(eq(affiliateCoupons.id, id));
+  }
+
+  // Affiliate Creatives
+  async getAffiliateCreatives(): Promise<AffiliateCreative[]> {
+    return db.select().from(affiliateCreatives)
+      .where(eq(affiliateCreatives.isActive, 1))
+      .orderBy(desc(affiliateCreatives.createdAt));
+  }
+
+  async createAffiliateCreative(data: Omit<AffiliateCreative, 'id' | 'createdAt' | 'updatedAt' | 'downloads'>): Promise<AffiliateCreative> {
+    const [creative] = await db.insert(affiliateCreatives).values(data).returning();
+    return creative;
+  }
+
+  async incrementCreativeDownloads(id: string): Promise<void> {
+    await db.update(affiliateCreatives).set({
+      downloads: sql`${affiliateCreatives.downloads} + 1`,
+    }).where(eq(affiliateCreatives.id, id));
+  }
+
+  // Affiliate Notifications
+  async createAffiliateNotification(affiliateId: string, type: string, title: string, message: string, actionUrl?: string): Promise<AffiliateNotification> {
+    const [notification] = await db.insert(affiliateNotifications).values({
+      affiliateId,
+      type,
+      title,
+      message,
+      actionUrl,
+    }).returning();
+    return notification;
+  }
+
+  async getAffiliateNotifications(affiliateId: string): Promise<AffiliateNotification[]> {
+    return db.select().from(affiliateNotifications)
+      .where(eq(affiliateNotifications.affiliateId, affiliateId))
+      .orderBy(desc(affiliateNotifications.createdAt))
+      .limit(50);
+  }
+
+  async markAffiliateNotificationRead(id: string): Promise<void> {
+    await db.update(affiliateNotifications).set({ read: 1 })
+      .where(eq(affiliateNotifications.id, id));
+  }
+
+  // Commission Tiers
+  async getCommissionTiers(): Promise<AffiliateCommissionTier[]> {
+    return db.select().from(affiliateCommissionTiers)
+      .where(eq(affiliateCommissionTiers.isActive, 1))
+      .orderBy(affiliateCommissionTiers.minConversions);
+  }
+
+  async getApplicableTier(conversions: number, revenue: number): Promise<AffiliateCommissionTier | undefined> {
+    const tiers = await this.getCommissionTiers();
+    let applicable: AffiliateCommissionTier | undefined;
+    
+    for (const tier of tiers) {
+      if (conversions >= (tier.minConversions || 0) && revenue >= (tier.minRevenue || 0)) {
+        applicable = tier;
+      }
+    }
+    
+    return applicable;
+  }
+
+  // Affiliate Dashboard Stats
+  async getAffiliateDashboardStats(affiliateId: string): Promise<{
+    totalClicks: number;
+    totalConversions: number;
+    conversionRate: number;
+    pendingEarnings: number;
+    approvedEarnings: number;
+    paidEarnings: number;
+    availableBalance: number;
+  }> {
+    const affiliate = await this.getAffiliate(affiliateId);
+    if (!affiliate) throw new Error('Affiliate not found');
+    
+    const conversions = await this.getAffiliateConversions(affiliateId);
+    
+    const pendingEarnings = conversions
+      .filter(c => c.status === 'pending')
+      .reduce((sum, c) => sum + c.commissionAmount, 0);
+    
+    const approvedEarnings = conversions
+      .filter(c => c.status === 'approved')
+      .reduce((sum, c) => sum + c.commissionAmount, 0);
+    
+    const paidEarnings = affiliate.totalPaidOut || 0;
+    const availableBalance = approvedEarnings; // Amount available for payout
+    
+    const links = await this.getAffiliateLinks(affiliateId);
+    const totalClicks = links.reduce((sum, l) => sum + (l.clicks || 0), 0);
+    
+    return {
+      totalClicks,
+      totalConversions: affiliate.totalConversions || 0,
+      conversionRate: totalClicks > 0 ? ((affiliate.totalConversions || 0) / totalClicks) * 100 : 0,
+      pendingEarnings,
+      approvedEarnings,
+      paidEarnings,
+      availableBalance,
+    };
   }
 }
 
