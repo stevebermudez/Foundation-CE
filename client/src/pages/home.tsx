@@ -5,7 +5,7 @@ import Hero from "@/components/Hero";
 import FeaturesSection from "@/components/FeaturesSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, Award, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import type { Course } from "@shared/schema";
 
 export default function HomePage() {
@@ -62,29 +62,6 @@ export default function HomePage() {
               </div>
             </CardHeader>
             <CardContent className="pt-8">
-              <div className="grid md:grid-cols-4 gap-6 mb-8">
-                <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <Clock className="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-1">Duration</p>
-                  <p className="text-2xl font-bold">{freci?.hoursRequired || 63} Hours</p>
-                </div>
-                <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                  <BookOpen className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-1">Units</p>
-                  <p className="text-2xl font-bold">19 Units</p>
-                </div>
-                <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
-                  <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-1">Practice Exams</p>
-                  <p className="text-2xl font-bold">380 Questions</p>
-                </div>
-                <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
-                  <Award className="h-8 w-8 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-1">Certificate</p>
-                  <p className="text-2xl font-bold">Instant</p>
-                </div>
-              </div>
-
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-8">
                 <h3 className="font-semibold mb-4 text-lg">What's Included:</h3>
                 <ul className="space-y-3">
