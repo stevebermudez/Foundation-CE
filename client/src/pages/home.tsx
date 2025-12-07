@@ -5,7 +5,7 @@ import Hero from "@/components/Hero";
 import FeaturesSection from "@/components/FeaturesSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, DollarSign, CheckCircle2 } from "lucide-react";
+import { BookOpen, Clock, Award, CheckCircle2 } from "lucide-react";
 import type { Course } from "@shared/schema";
 
 export default function HomePage() {
@@ -79,9 +79,9 @@ export default function HomePage() {
                   <p className="text-2xl font-bold">380 Questions</p>
                 </div>
                 <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
-                  <DollarSign className="h-8 w-8 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground mb-1">Final Exam</p>
-                  <p className="text-2xl font-bold">3 Hours</p>
+                  <Award className="h-8 w-8 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground mb-1">Certificate</p>
+                  <p className="text-2xl font-bold">Instant</p>
                 </div>
               </div>
 
