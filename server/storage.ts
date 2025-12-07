@@ -1805,11 +1805,17 @@ export class DatabaseStorage implements IStorage {
         }
       }
       
-      // Quiz info with full questions
+      // Quiz info with full questions - use practiceExams/examQuestions tables which have real content
       if (opts.includeQuizzes) {
-        const questionBank = await this.getQuestionBankByUnit(unit.id);
-        if (questionBank) {
-          const questions = await this.getBankQuestions(questionBank.id);
+        // Find practice exam for this unit by matching title pattern
+        const practiceExams = await this.getPracticeExams(courseId);
+        const unitExam = practiceExams.find(pe => 
+          pe.title.toLowerCase().includes(`unit ${unit.unitNumber} quiz`) ||
+          pe.title.toLowerCase().includes(`unit ${unit.unitNumber}:`)
+        );
+        
+        if (unitExam) {
+          const questions = await this.getExamQuestions(unitExam.id);
           
           // Quiz header
           sections.push(
@@ -1828,7 +1834,7 @@ export class DatabaseStorage implements IStorage {
           sections.push(
             new Paragraph({
               children: [
-                new TextRun({ text: `${questions.length} questions  |  Passing Score: ${questionBank.passingScore || 70}%`, italics: true })
+                new TextRun({ text: `${questions.length} questions  |  Passing Score: ${unitExam.passingScore || 70}%`, italics: true })
               ],
               spacing: { after: 150 }
             })
@@ -1852,14 +1858,18 @@ export class DatabaseStorage implements IStorage {
               options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
             } catch { options = []; }
             
-            options.forEach((opt, optIndex) => {
-              const letter = String.fromCharCode(65 + optIndex); // A, B, C, D...
-              const isCorrect = q.correctOption === optIndex;
+            // correctAnswer is stored as letter like "A", "B", "C", "D"
+            const correctLetter = q.correctAnswer?.toUpperCase() || '';
+            
+            options.forEach((opt) => {
+              // Options are stored as "A. answer text" format
+              const optLetter = opt.charAt(0).toUpperCase();
+              const isCorrect = optLetter === correctLetter;
               sections.push(
                 new Paragraph({
                   children: [
                     new TextRun({ 
-                      text: `   ${letter}. ${opt}`,
+                      text: `   ${opt}`,
                       bold: isCorrect,
                       color: isCorrect ? "008000" : undefined
                     }),
@@ -1889,11 +1899,15 @@ export class DatabaseStorage implements IStorage {
       sections.push(new Paragraph({ text: "", spacing: { after: 300 } }));
     }
     
-    // Final Exam (if exists and quizzes are included)
+    // Final Exam (if exists and quizzes are included) - use practiceExams/examQuestions tables
     if (opts.includeQuizzes) {
-      const finalExamBank = await this.getFinalExamBank(courseId);
-      if (finalExamBank) {
-        const finalQuestions = await this.getBankQuestions(finalExamBank.id);
+      const practiceExams = await this.getPracticeExams(courseId);
+      const finalExam = practiceExams.find(pe => 
+        pe.title.toLowerCase().includes('final exam')
+      );
+      
+      if (finalExam) {
+        const finalQuestions = await this.getExamQuestions(finalExam.id);
         
         sections.push(
           new Paragraph({
@@ -1911,7 +1925,7 @@ export class DatabaseStorage implements IStorage {
         sections.push(
           new Paragraph({
             children: [
-              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: ${finalExamBank.passingScore || 70}%`, italics: true })
+              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: ${finalExam.passingScore || 70}%`, italics: true })
             ],
             spacing: { after: 200 }
           })
@@ -1933,14 +1947,18 @@ export class DatabaseStorage implements IStorage {
             options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
           } catch { options = []; }
           
-          options.forEach((opt, optIndex) => {
-            const letter = String.fromCharCode(65 + optIndex);
-            const isCorrect = q.correctOption === optIndex;
+          // correctAnswer is stored as letter like "A", "B", "C", "D"
+          const correctLetter = q.correctAnswer?.toUpperCase() || '';
+          
+          options.forEach((opt) => {
+            // Options are stored as "A. answer text" format
+            const optLetter = opt.charAt(0).toUpperCase();
+            const isCorrect = optLetter === correctLetter;
             sections.push(
               new Paragraph({
                 children: [
                   new TextRun({ 
-                    text: `   ${letter}. ${opt}`,
+                    text: `   ${opt}`,
                     bold: isCorrect,
                     color: isCorrect ? "008000" : undefined
                   }),
