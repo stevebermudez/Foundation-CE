@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Shield, Lock, Eye, FileText, Mail, MapPin } from "lucide-react";
 import { Link } from "wouter";
@@ -13,13 +12,7 @@ export default function PrivacyPolicy() {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold" data-testid="text-privacy-title">Privacy Policy</h1>
           </div>
-          <p className="text-muted-foreground">Last updated: December 6, 2025</p>
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Badge variant="outline">GDPR Compliant</Badge>
-            <Badge variant="outline">CCPA Compliant</Badge>
-            <Badge variant="outline">SOC 2 Type II</Badge>
-            <Badge variant="outline">FERPA Compliant</Badge>
-          </div>
+          <p className="text-muted-foreground">Last updated: December 2024</p>
         </div>
 
         <div className="space-y-8">
@@ -32,10 +25,7 @@ export default function PrivacyPolicy() {
             </CardHeader>
             <CardContent className="prose dark:prose-invert max-w-none">
               <p>
-                FoundationCE ("we," "our," or "us") is committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our continuing education platform for real estate and insurance professionals.
-              </p>
-              <p>
-                We comply with applicable data protection laws including the General Data Protection Regulation (GDPR), California Consumer Privacy Act (CCPA), Family Educational Rights and Privacy Act (FERPA), and maintain SOC 2 Type II certification for security controls.
+                FoundationCE ("we," "our," or "us") is committed to protecting your privacy and the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our continuing education platform for real estate and insurance professionals.
               </p>
             </CardContent>
           </Card>
@@ -171,16 +161,13 @@ export default function PrivacyPolicy() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                We implement industry-standard security measures to protect your data:
+                We take reasonable measures to protect your personal information:
               </p>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>SOC 2 Type II certified security controls</li>
-                <li>256-bit SSL/TLS encryption for data in transit</li>
-                <li>AES-256 encryption for data at rest</li>
-                <li>Regular security audits and penetration testing</li>
-                <li>Multi-factor authentication options</li>
-                <li>Role-based access controls</li>
-                <li>Automated threat detection and monitoring</li>
+                <li>HTTPS encryption for all data transmitted to and from our website</li>
+                <li>Secure password storage using industry-standard hashing</li>
+                <li>Payment processing handled by Stripe, a PCI-compliant provider</li>
+                <li>Access to user data limited to authorized personnel</li>
               </ul>
             </CardContent>
           </Card>
@@ -228,8 +215,7 @@ export default function PrivacyPolicy() {
                 For privacy-related inquiries or to exercise your rights:
               </p>
               <div className="space-y-2 text-muted-foreground">
-                <p><strong>Email:</strong> privacy@foundationce.com</p>
-                <p><strong>Data Protection Officer:</strong> dpo@foundationce.com</p>
+                <p><strong>Email:</strong> <a href="mailto:privacy@foundationce.com" className="text-primary hover:underline">privacy@foundationce.com</a></p>
                 <p className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   <span>FoundationCE, LLC</span>

@@ -1,444 +1,189 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Lock, Globe, FileCheck, CheckCircle2, Building2, Scale, Users, GraduationCap, BookOpen, UserCheck } from "lucide-react";
+import { Shield, Lock, Globe, Scale, Users, GraduationCap, BookOpen, FileCheck, UserCheck } from "lucide-react";
 import { Link } from "wouter";
 
 export default function LegalCompliance() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
+      <div className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Shield className="h-10 w-10 text-primary" />
-            <h1 className="text-4xl font-bold" data-testid="text-legal-compliance-title">Compliance & Security</h1>
+            <h1 className="text-4xl font-bold" data-testid="text-legal-compliance-title">Privacy & Security</h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            FoundationCE maintains the highest standards of data protection, security, and regulatory compliance to protect your information and ensure trust.
+            FoundationCE is committed to protecting your personal information and maintaining the security of our platform.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <Card className="text-center">
-            <CardHeader>
-              <div className="mx-auto p-3 bg-green-100 dark:bg-green-900/30 rounded-full w-fit mb-2">
-                <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-              <CardTitle>SOC 2 Type II</CardTitle>
-              <CardDescription>Certified</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20">Active</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center">
-            <CardHeader>
-              <div className="mx-auto p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full w-fit mb-2">
-                <Globe className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <CardTitle>GDPR</CardTitle>
-              <CardDescription>Compliant</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20">Active</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center">
-            <CardHeader>
-              <div className="mx-auto p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full w-fit mb-2">
-                <Scale className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <CardTitle>CCPA</CardTitle>
-              <CardDescription>Compliant</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20">Active</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center">
-            <CardHeader>
-              <div className="mx-auto p-3 bg-amber-100 dark:bg-amber-900/30 rounded-full w-fit mb-2">
-                <GraduationCap className="h-8 w-8 text-amber-600 dark:text-amber-400" />
-              </div>
-              <CardTitle>FERPA</CardTitle>
-              <CardDescription>Compliant</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="bg-amber-50 dark:bg-amber-900/20">Active</Badge>
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="space-y-8">
-          <Card id="soc2">
+          <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                  <Lock className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Lock className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle>SOC 2 Type II Compliance</CardTitle>
-                  <CardDescription>Service Organization Control 2</CardDescription>
+                  <CardTitle>How We Protect Your Data</CardTitle>
+                  <CardDescription>Security practices we follow</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                FoundationCE has achieved SOC 2 Type II certification, demonstrating our commitment to maintaining the highest standards of security, availability, processing integrity, confidentiality, and privacy.
+                We take reasonable measures to protect the personal information you provide to us.
               </p>
               
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-3">Trust Service Criteria</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Security - Protection against unauthorized access</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Availability - System accessibility as committed</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Processing Integrity - Accurate and timely processing</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Confidentiality - Protected information handling</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Privacy - Personal information protection</span>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-3">Security Controls</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Encryption at rest and in transit (AES-256, TLS 1.3)</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Multi-factor authentication</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Role-based access controls</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Continuous monitoring and alerting</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span>Regular penetration testing</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Lock className="h-4 w-4 mt-1 text-primary shrink-0" />
+                  <span>HTTPS encryption for all data transmitted to and from our website</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Lock className="h-4 w-4 mt-1 text-primary shrink-0" />
+                  <span>Passwords are stored using secure hashing</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Lock className="h-4 w-4 mt-1 text-primary shrink-0" />
+                  <span>Payment processing handled by Stripe, a PCI-compliant provider</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Lock className="h-4 w-4 mt-1 text-primary shrink-0" />
+                  <span>Access to user data is limited to authorized personnel</span>
+                </li>
+              </ul>
             </CardContent>
           </Card>
 
-          <Card id="gdpr">
+          <Card id="privacy">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <Globe className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <CardTitle>GDPR Compliance</CardTitle>
-                  <CardDescription>General Data Protection Regulation (EU)</CardDescription>
+                  <CardTitle>Your Privacy Rights</CardTitle>
+                  <CardDescription>Rights available to our users</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                We comply with the European Union's General Data Protection Regulation (GDPR), ensuring that personal data of EU residents is processed lawfully, fairly, and transparently.
+                We respect your privacy and provide you with control over your personal information.
               </p>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-3">Data Subject Rights</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Right to access personal data</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Right to rectification</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Right to erasure ("right to be forgotten")</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Right to restrict processing</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Right to data portability</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Right to object to processing</span>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-3">Our Commitments</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Lawful basis for all data processing</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Data Protection Impact Assessments</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Designated Data Protection Officer</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>72-hour breach notification</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Privacy by design and default</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                      <span>Standard Contractual Clauses for transfers</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Users className="h-4 w-4 mt-1 text-blue-500 shrink-0" />
+                  <span>Request a copy of your personal data</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Users className="h-4 w-4 mt-1 text-blue-500 shrink-0" />
+                  <span>Request correction of inaccurate information</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Users className="h-4 w-4 mt-1 text-blue-500 shrink-0" />
+                  <span>Request deletion of your account and data</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Users className="h-4 w-4 mt-1 text-blue-500 shrink-0" />
+                  <span>Opt out of marketing communications</span>
+                </li>
+              </ul>
 
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">Data Protection Officer</h4>
                 <p className="text-muted-foreground text-sm">
-                  For GDPR-related inquiries, contact our DPO at <a href="mailto:dpo@foundationce.com" className="text-primary hover:underline">dpo@foundationce.com</a>
+                  To exercise any of these rights, please contact us at <a href="mailto:privacy@foundationce.com" className="text-primary hover:underline">privacy@foundationce.com</a>
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          <Card id="ccpa">
+          <Card id="california">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                   <Scale className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <CardTitle>CCPA Compliance</CardTitle>
-                  <CardDescription>California Consumer Privacy Act</CardDescription>
+                  <CardTitle>California Residents</CardTitle>
+                  <CardDescription>Additional rights under California law</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                We comply with the California Consumer Privacy Act (CCPA), providing California residents with specific rights regarding their personal information.
+                If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA).
               </p>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-3">Your CCPA Rights</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-purple-500" />
-                      <span>Right to know what data is collected</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-purple-500" />
-                      <span>Right to know if data is sold or disclosed</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-purple-500" />
-                      <span>Right to opt-out of data sale</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-purple-500" />
-                      <span>Right to request deletion</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-purple-500" />
-                      <span>Right to non-discrimination</span>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-3">Categories of Data Collected</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <Users className="h-4 w-4 text-purple-500" />
-                      <span>Identifiers (name, email, license numbers)</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <FileCheck className="h-4 w-4 text-purple-500" />
-                      <span>Professional information</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <Building2 className="h-4 w-4 text-purple-500" />
-                      <span>Commercial information (purchases)</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <Globe className="h-4 w-4 text-purple-500" />
-                      <span>Internet activity (course progress)</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">Do Not Sell My Personal Information</h4>
-                <p className="text-muted-foreground text-sm mb-3">
-                  FoundationCE does not sell personal information. However, California residents can submit a "Do Not Sell" request.
-                </p>
-                <Link href="/privacy-policy" className="text-primary hover:underline text-sm">
-                  Learn more about your rights →
-                </Link>
-              </div>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Scale className="h-4 w-4 mt-1 text-purple-500 shrink-0" />
+                  <span>Right to know what personal information we collect</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Scale className="h-4 w-4 mt-1 text-purple-500 shrink-0" />
+                  <span>Right to request deletion of your information</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Scale className="h-4 w-4 mt-1 text-purple-500 shrink-0" />
+                  <span>Right to opt out of the sale of personal information (we do not sell your data)</span>
+                </li>
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <Scale className="h-4 w-4 mt-1 text-purple-500 shrink-0" />
+                  <span>Right to non-discrimination for exercising your rights</span>
+                </li>
+              </ul>
 
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">Submit a CCPA Request</h4>
+                <h4 className="font-semibold mb-2">We Do Not Sell Your Data</h4>
                 <p className="text-muted-foreground text-sm">
-                  To exercise your CCPA rights, email <a href="mailto:privacy@foundationce.com" className="text-primary hover:underline">privacy@foundationce.com</a> with your request. We will respond within 45 days.
+                  FoundationCE does not sell personal information to third parties.
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          <Card id="ferpa">
+          <Card id="education-records">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                   <GraduationCap className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <CardTitle>FERPA Compliance</CardTitle>
-                  <CardDescription>Family Educational Rights and Privacy Act</CardDescription>
+                  <CardTitle>Education Records</CardTitle>
+                  <CardDescription>How we handle your course and learning data</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                As a continuing education provider, FoundationCE complies with the Family Educational Rights and Privacy Act (FERPA), a federal law that protects the privacy of student education records. FERPA applies to all educational institutions that receive federal funding and sets standards for the handling of personally identifiable information in education records.
+                We maintain records of your course enrollments, progress, and completions to provide our services and meet state continuing education reporting requirements.
               </p>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-3">Student Rights Under FERPA</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Right to inspect and review education records</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Right to request amendment of records</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Right to consent before disclosure</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Right to file complaints with the Department of Education</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Right to opt out of directory information disclosure</span>
-                    </li>
-                  </ul>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-muted/50 p-3 rounded-lg">
+                  <BookOpen className="h-5 w-5 text-amber-500 mb-2" />
+                  <h4 className="font-medium text-sm">Course Records</h4>
+                  <p className="text-xs text-muted-foreground">Enrollment, progress, completion dates</p>
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-3">Our FERPA Commitments</h3>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Written consent required for record disclosure</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Secure storage of all education records</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Limited access to authorized personnel only</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Training for all staff handling student records</span>
-                    </li>
-                    <li className="flex items-center gap-2 text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-amber-500" />
-                      <span>Annual notification of FERPA rights</span>
-                    </li>
-                  </ul>
+                <div className="bg-muted/50 p-3 rounded-lg">
+                  <FileCheck className="h-5 w-5 text-amber-500 mb-2" />
+                  <h4 className="font-medium text-sm">Assessment Records</h4>
+                  <p className="text-xs text-muted-foreground">Quiz scores, exam results, certificates</p>
                 </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="font-semibold mb-3">Education Records We Maintain</h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    <BookOpen className="h-5 w-5 text-amber-500 mb-2" />
-                    <h4 className="font-medium text-sm">Course Records</h4>
-                    <p className="text-xs text-muted-foreground">Enrollment, progress, completion dates</p>
-                  </div>
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    <FileCheck className="h-5 w-5 text-amber-500 mb-2" />
-                    <h4 className="font-medium text-sm">Assessment Records</h4>
-                    <p className="text-xs text-muted-foreground">Quiz scores, exam results, certifications</p>
-                  </div>
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    <UserCheck className="h-5 w-5 text-amber-500 mb-2" />
-                    <h4 className="font-medium text-sm">Compliance Records</h4>
-                    <p className="text-xs text-muted-foreground">CE hours, license renewals, reporting</p>
-                  </div>
+                <div className="bg-muted/50 p-3 rounded-lg">
+                  <UserCheck className="h-5 w-5 text-amber-500 mb-2" />
+                  <h4 className="font-medium text-sm">Reporting Records</h4>
+                  <p className="text-xs text-muted-foreground">CE hours submitted to state agencies</p>
                 </div>
-              </div>
-
-              <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">Directory Information</h4>
-                <p className="text-muted-foreground text-sm mb-3">
-                  Directory information (name, email, enrollment status) may be disclosed without consent unless you opt out. To opt out of directory information disclosure, update your privacy settings in your account or contact us.
-                </p>
-                <Link href="/settings" className="text-primary hover:underline text-sm">
-                  Manage your privacy settings →
-                </Link>
               </div>
 
               <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">Request Education Records</h4>
+                <h4 className="font-semibold mb-2">Request Your Records</h4>
                 <p className="text-muted-foreground text-sm">
-                  To inspect, review, or request amendment of your education records, email <a href="mailto:records@foundationce.com" className="text-primary hover:underline">records@foundationce.com</a>. We will respond within 45 days as required by FERPA.
-                </p>
-              </div>
-
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">File a FERPA Complaint</h4>
-                <p className="text-muted-foreground text-sm">
-                  If you believe your FERPA rights have been violated, you may file a complaint with the U.S. Department of Education:
-                </p>
-                <p className="text-muted-foreground text-sm mt-2">
-                  <strong>Family Policy Compliance Office</strong><br />
-                  U.S. Department of Education<br />
-                  400 Maryland Avenue, SW<br />
-                  Washington, DC 20202
+                  To request a copy of your education records, email <a href="mailto:records@foundationce.com" className="text-primary hover:underline">records@foundationce.com</a>
                 </p>
               </div>
             </CardContent>
@@ -446,41 +191,26 @@ export default function LegalCompliance() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Additional Security Measures</CardTitle>
+              <CardTitle>Contact Us</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="mx-auto p-3 bg-muted rounded-full w-fit mb-3">
-                    <Lock className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-semibold mb-1">Encryption</h3>
-                  <p className="text-sm text-muted-foreground">AES-256 at rest, TLS 1.3 in transit</p>
-                </div>
-                <div className="text-center">
-                  <div className="mx-auto p-3 bg-muted rounded-full w-fit mb-3">
-                    <Shield className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-semibold mb-1">Monitoring</h3>
-                  <p className="text-sm text-muted-foreground">24/7 security monitoring and alerting</p>
-                </div>
-                <div className="text-center">
-                  <div className="mx-auto p-3 bg-muted rounded-full w-fit mb-3">
-                    <FileCheck className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-semibold mb-1">Audits</h3>
-                  <p className="text-sm text-muted-foreground">Annual third-party security audits</p>
-                </div>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                If you have questions about our privacy practices or want to exercise your rights, please contact us:
+              </p>
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-muted-foreground">
+                  Email: <a href="mailto:privacy@foundationce.com" className="text-primary hover:underline">privacy@foundationce.com</a>
+                </p>
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          <div className="text-center text-muted-foreground">
-            <p className="mb-4">For compliance inquiries or to request documentation:</p>
-            <p><strong>Email:</strong> compliance@foundationce.com</p>
-          </div>
+        <Separator className="my-12" />
 
-          <div className="flex justify-center gap-4 text-sm text-muted-foreground">
+        <div className="text-center text-sm text-muted-foreground">
+          <p>Last updated: December 2024</p>
+          <div className="flex flex-wrap justify-center gap-4 mt-4">
             <Link href="/privacy-policy" className="hover:underline">Privacy Policy</Link>
             <Link href="/terms" className="hover:underline">Terms of Service</Link>
             <Link href="/accessibility" className="hover:underline">Accessibility</Link>
