@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { usePageMeta } from "@/hooks/use-page-meta";
 import Hero from "@/components/Hero";
 import FeaturesSection from "@/components/FeaturesSection";
-import TrustBadges from "@/components/TrustBadges";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, DollarSign, CheckCircle2 } from "lucide-react";
@@ -34,7 +33,6 @@ export default function HomePage() {
         onBrowseCourses={() => setLocation("/courses/fl")}
         onGetStarted={() => freci && handleBuyNow(freci.id)}
       />
-      <TrustBadges />
 
       {/* Featured Course Section */}
       <section className="py-24 px-4 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950">

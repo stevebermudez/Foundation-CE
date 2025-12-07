@@ -70,18 +70,22 @@ export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
             </Button>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-white/80 text-sm sm:text-base">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-white/90 text-sm sm:text-base">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-emerald-400 flex-shrink-0" />
-              <span className="font-medium">Instant certificates</span>
+              <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+              <span>FREC Approved</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-emerald-400 flex-shrink-0" />
-              <span className="font-medium">Auto-reporting</span>
+              <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+              <span>Study Anytime</span>
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-emerald-400 flex-shrink-0" />
-              <span className="font-medium">Learn anytime</span>
+              <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+              <span>Instant Certificates</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+              <span>Secure Checkout</span>
             </div>
           </div>
         </div>
