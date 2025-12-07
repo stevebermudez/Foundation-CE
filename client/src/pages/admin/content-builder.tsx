@@ -1766,17 +1766,19 @@ function QuestionBankFormDialog({
               data-testid="input-bank-description"
             />
           </div>
+          {/* Bank type is auto-determined based on context - show read-only badge */}
           <div>
-            <Label htmlFor="bankType">Bank Type</Label>
-            <Select value={bankType} onValueChange={setBankType}>
-              <SelectTrigger data-testid="select-bank-type">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unit_quiz">Unit Quiz</SelectItem>
-                <SelectItem value="final_exam">Final Exam</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Bank Type</Label>
+            <div className="mt-1 p-2 bg-muted rounded-md">
+              <Badge variant={bankType === "final_exam" ? "default" : "secondary"}>
+                {bankType === "final_exam" ? "Final Exam" : "Unit Quiz"}
+              </Badge>
+              <p className="text-xs text-muted-foreground mt-1">
+                {bankType === "final_exam" 
+                  ? "This question bank is for the course final exam" 
+                  : "This question bank is for a unit quiz"}
+              </p>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
