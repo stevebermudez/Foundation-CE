@@ -1904,15 +1904,18 @@ export class DatabaseStorage implements IStorage {
       sections.push(new Paragraph({ text: "", spacing: { after: 300 } }));
     }
     
-    // Final Exam (if exists and quizzes are included) - use practiceExams/examQuestions tables
+    // Final Exam (if exists and quizzes are included) - use questionBanks/bankQuestions tables (real content)
     if (opts.includeQuizzes) {
-      const allPracticeExams = await this.getPracticeExams(courseId);
-      const finalExam = allPracticeExams.find(pe => 
-        /final\s*exam/i.test(pe.title)
+      // Final exam real questions are in question_banks/bank_questions (not practice_exams)
+      const allQuestionBanks = await this.getQuestionBanksByCourse(courseId);
+      const finalExamBank = allQuestionBanks.find((qb: QuestionBank) => 
+        /final\s*exam/i.test(qb.title || '')
       );
+      console.log(`[DOCX Export] Final Exam: Found ${allQuestionBanks.length} question banks, matched: ${finalExamBank?.title || 'NONE'}`);
       
-      if (finalExam) {
-        const finalQuestions = await this.getExamQuestions(finalExam.id);
+      if (finalExamBank) {
+        const finalQuestions = await this.getBankQuestions(finalExamBank.id);
+        console.log(`[DOCX Export] Final Exam: Found ${finalQuestions.length} questions`);
         
         sections.push(
           new Paragraph({
@@ -1930,7 +1933,7 @@ export class DatabaseStorage implements IStorage {
         sections.push(
           new Paragraph({
             children: [
-              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: ${finalExam.passingScore || 70}%`, italics: true })
+              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: ${finalExamBank.passingScore || 70}%`, italics: true })
             ],
             spacing: { after: 200 }
           })
@@ -1952,18 +1955,19 @@ export class DatabaseStorage implements IStorage {
             options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
           } catch { options = []; }
           
-          // correctAnswer is stored as letter like "A", "B", "C", "D"
-          const correctLetter = q.correctAnswer?.toUpperCase() || '';
+          // bank_questions uses correctOption (index 0-3), not correctAnswer (letter A-D)
+          const correctIndex = q.correctOption ?? 0;
           
-          options.forEach((opt) => {
-            // Options are stored as "A. answer text" format
-            const optLetter = opt.charAt(0).toUpperCase();
-            const isCorrect = optLetter === correctLetter;
+          const letterLabels = ['A', 'B', 'C', 'D'];
+          options.forEach((opt, optIdx) => {
+            // Options are stored as plain text, add letter labels
+            const isCorrect = optIdx === correctIndex;
+            const label = letterLabels[optIdx] || String(optIdx + 1);
             sections.push(
               new Paragraph({
                 children: [
                   new TextRun({ 
-                    text: `   ${opt}`,
+                    text: `   ${label}. ${opt}`,
                     bold: isCorrect,
                     color: isCorrect ? "008000" : undefined
                   }),
