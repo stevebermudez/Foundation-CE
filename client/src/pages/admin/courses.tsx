@@ -20,9 +20,117 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Edit2, Trash2, AlertCircle, FileDown } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Edit2, Trash2, AlertCircle, FileDown, Download } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+interface ExportOptions {
+  includeLessons: boolean;
+  includeQuizzes: boolean;
+  includeVideos: boolean;
+  includeDescriptions: boolean;
+}
+
+function ExportDialog({ course, onClose }: { course: any; onClose: () => void }) {
+  const { toast } = useToast();
+  const [options, setOptions] = useState<ExportOptions>({
+    includeLessons: true,
+    includeQuizzes: true,
+    includeVideos: false,
+    includeDescriptions: true,
+  });
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const token = localStorage.getItem("adminToken");
+      const params = new URLSearchParams();
+      if (!options.includeLessons) params.set('includeLessons', 'false');
+      if (!options.includeQuizzes) params.set('includeQuizzes', 'false');
+      if (!options.includeVideos) params.set('includeVideos', 'false');
+      if (!options.includeDescriptions) params.set('includeDescriptions', 'false');
+      
+      const url = `/api/export/course/${course.id}/content.docx${params.toString() ? '?' + params.toString() : ''}`;
+      const res = await fetch(url, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (!res.ok) {
+        throw new Error("Failed to download");
+      }
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${course.title.replace(/[^a-z0-9]/gi, '-')}-content.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      toast({
+        title: "Export Complete",
+        description: "Your Word document has been downloaded.",
+      });
+      onClose();
+    } catch (err) {
+      toast({
+        title: "Export Failed",
+        description: "Could not download course content.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="includeLessons"
+            checked={options.includeLessons}
+            onCheckedChange={(checked) => setOptions(prev => ({ ...prev, includeLessons: !!checked }))}
+          />
+          <Label htmlFor="includeLessons">Include lesson tables</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="includeQuizzes"
+            checked={options.includeQuizzes}
+            onCheckedChange={(checked) => setOptions(prev => ({ ...prev, includeQuizzes: !!checked }))}
+          />
+          <Label htmlFor="includeQuizzes">Include quiz info</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="includeDescriptions"
+            checked={options.includeDescriptions}
+            onCheckedChange={(checked) => setOptions(prev => ({ ...prev, includeDescriptions: !!checked }))}
+          />
+          <Label htmlFor="includeDescriptions">Include descriptions</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="includeVideos"
+            checked={options.includeVideos}
+            onCheckedChange={(checked) => setOptions(prev => ({ ...prev, includeVideos: !!checked }))}
+          />
+          <Label htmlFor="includeVideos">Include video URLs (adds column to tables)</Label>
+        </div>
+      </div>
+      <div className="flex gap-2 justify-end pt-4">
+        <Button variant="outline" onClick={onClose}>Cancel</Button>
+        <Button onClick={handleExport} disabled={isExporting}>
+          <Download className="h-4 w-4 mr-2" />
+          {isExporting ? "Exporting..." : "Export to Word"}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 interface CourseFormData {
   title: string;
@@ -505,6 +613,7 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
 
 export default function AdminCoursesPage() {
   const [editingCourse, setEditingCourse] = useState<any | null>(null);
+  const [exportingCourse, setExportingCourse] = useState<any | null>(null);
   
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["/api/admin/courses"],
@@ -622,37 +731,7 @@ export default function AdminCoursesPage() {
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={async () => {
-                        try {
-                          const token = localStorage.getItem("adminToken");
-                          const res = await fetch(`/api/export/course/${course.id}/content.docx`, {
-                            credentials: 'include',
-                            headers: token ? { Authorization: `Bearer ${token}` } : {}
-                          });
-                          if (!res.ok) {
-                            throw new Error("Failed to download");
-                          }
-                          const blob = await res.blob();
-                          const url = window.URL.createObjectURL(blob);
-                          const link = document.createElement('a');
-                          link.href = url;
-                          link.download = `${course.title.replace(/[^a-z0-9]/gi, '-')}-content.docx`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                          window.URL.revokeObjectURL(url);
-                          toast({
-                            title: "Export Complete",
-                            description: "Your Word document has been downloaded.",
-                          });
-                        } catch (err) {
-                          toast({
-                            title: "Export Failed",
-                            description: "Could not download course content.",
-                            variant: "destructive"
-                          });
-                        }
-                      }}
+                      onClick={() => setExportingCourse(course)}
                       data-testid={`button-export-${course.id}`}
                       aria-label={`Export ${course.title} to Word document`}
                     >
@@ -721,6 +800,20 @@ export default function AdminCoursesPage() {
           onSave={(data) => updateCourseMutation.mutate({ courseId: editingCourse.id, data })}
           isPending={updateCourseMutation.isPending}
         />
+      )}
+      
+      {exportingCourse && (
+        <Dialog open={!!exportingCourse} onOpenChange={(open) => !open && setExportingCourse(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Course Content</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground mb-4">
+              Choose what to include in your Word document export for "{exportingCourse.title}"
+            </p>
+            <ExportDialog course={exportingCourse} onClose={() => setExportingCourse(null)} />
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

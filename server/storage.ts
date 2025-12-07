@@ -115,7 +115,13 @@ export interface IStorage {
   exportRealEstateExpressFormat(enrollmentId: string): Promise<any>;
   exportCourseContentJSON(courseId: string): Promise<string>;
   exportCourseContentCSV(courseId: string): Promise<string>;
-  exportCourseContentDocx(courseId: string): Promise<Buffer>;
+  exportCourseContentDocx(courseId: string, options?: {
+    includeLessons?: boolean;
+    includeQuizzes?: boolean;
+    includeVideos?: boolean;
+    includeDescriptions?: boolean;
+    unitNumbers?: number[];
+  }): Promise<Buffer>;
   exportAllUsersData(): Promise<string>;
   exportAllUsersDataCSV(): Promise<string>;
   exportEmailCampaignData(): Promise<string>;
@@ -1619,25 +1625,49 @@ export class DatabaseStorage implements IStorage {
     return csv;
   }
 
-  async exportCourseContentDocx(courseId: string): Promise<Buffer> {
-    const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, BorderStyle } = await import("docx");
+  async exportCourseContentDocx(courseId: string, options?: {
+    includeLessons?: boolean;
+    includeQuizzes?: boolean;
+    includeVideos?: boolean;
+    includeDescriptions?: boolean;
+    unitNumbers?: number[];
+  }): Promise<Buffer> {
+    const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, WidthType, AlignmentType, convertInchesToTwip } = await import("docx");
+    
+    const opts = {
+      includeLessons: options?.includeLessons !== false,
+      includeQuizzes: options?.includeQuizzes !== false,
+      includeVideos: options?.includeVideos !== false,
+      includeDescriptions: options?.includeDescriptions !== false,
+      unitNumbers: options?.unitNumbers || []
+    };
     
     const course = await this.getCourse(courseId);
-    const unitList = await this.getUnits(courseId);
+    let unitList = await this.getUnits(courseId);
+    
+    // Filter units if specific ones requested
+    if (opts.unitNumbers.length > 0) {
+      unitList = unitList.filter(u => opts.unitNumbers.includes(u.unitNumber));
+    }
     
     const sections: any[] = [];
     
-    // Title
+    // Title - larger and bold
     sections.push(
       new Paragraph({
-        text: course?.title || "Course Content",
-        heading: HeadingLevel.HEADING_1,
-        spacing: { after: 200 }
+        children: [
+          new TextRun({
+            text: course?.title || "Course Content",
+            bold: true,
+            size: 48 // 24pt
+          })
+        ],
+        spacing: { after: 300 }
       })
     );
     
     // Course Info
-    if (course?.description) {
+    if (opts.includeDescriptions && course?.description) {
       sections.push(
         new Paragraph({
           text: course.description,
@@ -1648,7 +1678,12 @@ export class DatabaseStorage implements IStorage {
     
     sections.push(
       new Paragraph({
-        text: `Course Code: ${course?.sku || "N/A"} | Total Hours: ${course?.hoursRequired || 0}`,
+        children: [
+          new TextRun({ text: "Course Code: ", bold: true }),
+          new TextRun({ text: course?.sku || "N/A" }),
+          new TextRun({ text: "  |  Total Hours: ", bold: true }),
+          new TextRun({ text: String(course?.hoursRequired || 0) })
+        ],
         spacing: { after: 400 }
       })
     );
@@ -1657,13 +1692,18 @@ export class DatabaseStorage implements IStorage {
     for (const unit of unitList) {
       sections.push(
         new Paragraph({
-          text: `Unit ${unit.unitNumber}: ${unit.title}`,
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 200, after: 100 }
+          children: [
+            new TextRun({
+              text: `Unit ${unit.unitNumber}: ${unit.title}`,
+              bold: true,
+              size: 32 // 16pt
+            })
+          ],
+          spacing: { before: 400, after: 150 }
         })
       );
       
-      if (unit.description) {
+      if (opts.includeDescriptions && unit.description) {
         sections.push(
           new Paragraph({
             text: unit.description,
@@ -1674,72 +1714,155 @@ export class DatabaseStorage implements IStorage {
       
       sections.push(
         new Paragraph({
-          text: `Required Hours: ${unit.hoursRequired || 3}`,
+          children: [
+            new TextRun({ text: "Required Hours: ", italics: true }),
+            new TextRun({ text: String(unit.hoursRequired || 3), italics: true })
+          ],
           spacing: { after: 200 }
         })
       );
       
-      const lessons = await this.getLessons(unit.id);
-      
-      if (lessons.length > 0) {
-        const rows = [
-          new TableRow({
-            children: [
-              new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text: "Lesson", bold: true })] })],
-                shading: { fill: "D3D3D3" }
-              }),
-              new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text: "Title", bold: true })] })],
-                shading: { fill: "D3D3D3" }
-              }),
-              new TableCell({
-                children: [new Paragraph({ children: [new TextRun({ text: "Duration (min)", bold: true })] })],
-                shading: { fill: "D3D3D3" }
-              }),
+      // Lessons table
+      if (opts.includeLessons) {
+        const lessons = await this.getLessons(unit.id);
+        
+        if (lessons.length > 0) {
+          // Define column widths in twips (1 inch = 1440 twips, page width ~6.5 inches usable = 9360 twips)
+          const colWidths = opts.includeVideos 
+            ? [720, 4800, 900, 2940] // #, Title, Duration, URL
+            : [900, 6960, 1500]; // #, Title, Duration (no URL column)
+          
+          const headerCells = [
+            new TableCell({
+              children: [new Paragraph({ 
+                children: [new TextRun({ text: "#", bold: true })],
+                alignment: AlignmentType.CENTER
+              })],
+              shading: { fill: "E8E8E8" },
+              width: { size: colWidths[0], type: WidthType.DXA }
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Lesson Title", bold: true })] })],
+              shading: { fill: "E8E8E8" },
+              width: { size: colWidths[1], type: WidthType.DXA }
+            }),
+            new TableCell({
+              children: [new Paragraph({ 
+                children: [new TextRun({ text: "Min", bold: true })],
+                alignment: AlignmentType.CENTER
+              })],
+              shading: { fill: "E8E8E8" },
+              width: { size: colWidths[2], type: WidthType.DXA }
+            })
+          ];
+          
+          if (opts.includeVideos) {
+            headerCells.push(
               new TableCell({
                 children: [new Paragraph({ children: [new TextRun({ text: "Video URL", bold: true })] })],
-                shading: { fill: "D3D3D3" }
+                shading: { fill: "E8E8E8" },
+                width: { size: colWidths[3], type: WidthType.DXA }
               })
-            ]
-          })
-        ];
-        
-        lessons.forEach(lesson => {
-          rows.push(
-            new TableRow({
-              children: [
+            );
+          }
+          
+          const rows = [
+            new TableRow({ children: headerCells, tableHeader: true })
+          ];
+          
+          lessons.forEach(lesson => {
+            const dataCells = [
+              new TableCell({
+                children: [new Paragraph({ 
+                  text: String(lesson.lessonNumber),
+                  alignment: AlignmentType.CENTER
+                })],
+                width: { size: colWidths[0], type: WidthType.DXA }
+              }),
+              new TableCell({
+                children: [new Paragraph({ text: lesson.title })],
+                width: { size: colWidths[1], type: WidthType.DXA }
+              }),
+              new TableCell({
+                children: [new Paragraph({ 
+                  text: lesson.durationMinutes ? String(lesson.durationMinutes) : "-",
+                  alignment: AlignmentType.CENTER
+                })],
+                width: { size: colWidths[2], type: WidthType.DXA }
+              })
+            ];
+            
+            if (opts.includeVideos) {
+              dataCells.push(
                 new TableCell({
-                  children: [new Paragraph({ text: lesson.lessonNumber.toString() })]
-                }),
-                new TableCell({
-                  children: [new Paragraph({ text: lesson.title })]
-                }),
-                new TableCell({
-                  children: [new Paragraph({ text: (lesson.durationMinutes || "").toString() })]
-                }),
-                new TableCell({
-                  children: [new Paragraph({ text: lesson.videoUrl || "N/A" })]
+                  children: [new Paragraph({ 
+                    text: lesson.videoUrl || "-"
+                  })],
+                  width: { size: colWidths[3], type: WidthType.DXA }
                 })
-              ]
+              );
+            }
+            
+            rows.push(new TableRow({ children: dataCells }));
+          });
+          
+          sections.push(
+            new Table({
+              rows,
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              columnWidths: colWidths
             })
           );
-        });
-        
-        sections.push(
-          new Table({
-            rows,
-            width: { size: 100, type: "pct" }
-          })
-        );
+        }
+      }
+      
+      // Quiz info
+      if (opts.includeQuizzes) {
+        const questionBank = await this.getQuestionBankByUnit(unit.id);
+        if (questionBank) {
+          const questions = await this.getBankQuestions(questionBank.id);
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: "Quiz: ", bold: true }),
+                new TextRun({ text: `${questions.length} questions, ${questionBank.passingScore || 70}% to pass` })
+              ],
+              spacing: { before: 150, after: 100 }
+            })
+          );
+        }
       }
       
       sections.push(new Paragraph({ text: "", spacing: { after: 300 } }));
     }
     
+    // Export metadata footer
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({ 
+            text: `Exported on ${new Date().toLocaleDateString()} from FoundationCE`,
+            italics: true,
+            size: 18
+          })
+        ],
+        spacing: { before: 600 }
+      })
+    );
+    
     const doc = new Document({
       sections: [
         {
+          properties: {
+            page: {
+              margin: {
+                top: convertInchesToTwip(1),
+                right: convertInchesToTwip(1),
+                bottom: convertInchesToTwip(1),
+                left: convertInchesToTwip(1)
+              }
+            }
+          },
           children: sections
         }
       ]

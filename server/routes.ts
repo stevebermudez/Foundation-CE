@@ -3459,8 +3459,20 @@ segment1.ts
     isAdmin,
     async (req, res) => {
       try {
+        // Parse export options from query params
+        const options = {
+          includeLessons: req.query.includeLessons !== 'false',
+          includeQuizzes: req.query.includeQuizzes !== 'false',
+          includeVideos: req.query.includeVideos !== 'false',
+          includeDescriptions: req.query.includeDescriptions !== 'false',
+          unitNumbers: req.query.units 
+            ? String(req.query.units).split(',').map(n => parseInt(n, 10)).filter(n => !isNaN(n))
+            : []
+        };
+        
         const docxBuffer = await storage.exportCourseContentDocx(
           req.params.courseId,
+          options
         );
         res.setHeader(
           "Content-Type",
