@@ -18,7 +18,7 @@ const stats = [
   },
   {
     icon: Shield,
-    label: "Money-Back Guarantee",
+    label: "Secure Checkout",
     color: "from-pink-500 to-pink-600",
   },
 ];
