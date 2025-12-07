@@ -1634,6 +1634,28 @@ export class DatabaseStorage implements IStorage {
   }): Promise<Buffer> {
     const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, WidthType, AlignmentType, convertInchesToTwip } = await import("docx");
     
+    // Helper function to strip HTML tags and convert to plain text
+    const stripHtml = (html: string): string => {
+      if (!html) return '';
+      return html
+        // Replace block elements with line breaks
+        .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/ul>|<\/ol>/gi, '\n')
+        // Remove all remaining HTML tags
+        .replace(/<[^>]+>/g, '')
+        // Decode common HTML entities
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        // Clean up multiple newlines
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    };
+    
     const opts = {
       includeLessons: options?.includeLessons !== false,
       includeQuizzes: options?.includeQuizzes !== false,
@@ -1670,7 +1692,7 @@ export class DatabaseStorage implements IStorage {
     if (opts.includeDescriptions && course?.description) {
       sections.push(
         new Paragraph({
-          text: course.description,
+          text: stripHtml(course.description),
           spacing: { after: 200 }
         })
       );
@@ -1706,7 +1728,7 @@ export class DatabaseStorage implements IStorage {
       if (opts.includeDescriptions && unit.description) {
         sections.push(
           new Paragraph({
-            text: unit.description,
+            text: stripHtml(unit.description),
             spacing: { after: 100 }
           })
         );
@@ -1760,8 +1782,10 @@ export class DatabaseStorage implements IStorage {
           
           // Lesson content (the actual script/text)
           if (lesson.content) {
+            // Strip HTML tags and convert to plain text
+            const cleanContent = stripHtml(lesson.content);
             // Split content into paragraphs by double newlines
-            const contentParagraphs = lesson.content.split(/\n\n+/).filter(p => p.trim());
+            const contentParagraphs = cleanContent.split(/\n\n+/).filter(p => p.trim());
             for (const para of contentParagraphs) {
               sections.push(
                 new Paragraph({
