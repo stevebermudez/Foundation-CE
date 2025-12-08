@@ -3504,6 +3504,115 @@ segment1.ts
     },
   );
 
+  // Florida Regulatory Compliance - Answer Key Export with Page References
+  app.get(
+    "/api/export/course/:courseId/answer-key.docx",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const examForm = req.query.form as 'A' | 'B' | undefined;
+        const docxBuffer = await storage.exportAnswerKey(req.params.courseId, examForm);
+        const formSuffix = examForm ? `-form-${examForm.toLowerCase()}` : '';
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="answer-key${formSuffix}-${req.params.courseId}.docx"`
+        );
+        res.send(docxBuffer);
+      } catch (err) {
+        console.error("Error exporting answer key:", err);
+        res.status(500).json({ error: "Failed to export answer key" });
+      }
+    }
+  );
+
+  // Florida Regulatory Compliance - Get Final Exam Forms A and B
+  app.get(
+    "/api/courses/:courseId/final-exams",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const exams = await storage.getFinalExamsByForm(req.params.courseId);
+        res.json(exams);
+      } catch (err) {
+        console.error("Error fetching final exam forms:", err);
+        res.status(500).json({ error: "Failed to fetch final exam forms" });
+      }
+    }
+  );
+
+  // Florida Regulatory Compliance - Create Final Exam Form A or B
+  app.post(
+    "/api/courses/:courseId/final-exam/:form",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const form = req.params.form.toUpperCase() as 'A' | 'B';
+        if (form !== 'A' && form !== 'B') {
+          return res.status(400).json({ error: "Form must be 'A' or 'B'" });
+        }
+        const { questionIds } = req.body;
+        if (!questionIds || !Array.isArray(questionIds) || questionIds.length === 0) {
+          return res.status(400).json({ error: "questionIds array is required" });
+        }
+        const exam = await storage.createFinalExamForm(req.params.courseId, form, questionIds);
+        res.json(exam);
+      } catch (err) {
+        console.error("Error creating final exam form:", err);
+        res.status(500).json({ error: "Failed to create final exam form" });
+      }
+    }
+  );
+
+  // Florida Regulatory Compliance - Export Final Exam Form A
+  app.get(
+    "/api/export/course/:courseId/final-exam-a.docx",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { formA } = await storage.exportFinalExamForms(req.params.courseId);
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="final-exam-form-a-${req.params.courseId}.docx"`
+        );
+        res.send(formA);
+      } catch (err) {
+        console.error("Error exporting final exam form A:", err);
+        res.status(500).json({ error: "Failed to export final exam form A" });
+      }
+    }
+  );
+
+  // Florida Regulatory Compliance - Export Final Exam Form B
+  app.get(
+    "/api/export/course/:courseId/final-exam-b.docx",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { formB } = await storage.exportFinalExamForms(req.params.courseId);
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="final-exam-form-b-${req.params.courseId}.docx"`
+        );
+        res.send(formB);
+      } catch (err) {
+        console.error("Error exporting final exam form B:", err);
+        res.status(500).json({ error: "Failed to export final exam form B" });
+      }
+    }
+  );
+
   // All Users Data Export
   app.get("/api/export/users/data.json", isAdmin, async (req, res) => {
     try {

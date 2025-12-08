@@ -127,6 +127,12 @@ export interface IStorage {
   exportEmailCampaignData(): Promise<string>;
   exportEmailCampaignDataCSV(): Promise<string>;
   
+  // Florida Regulatory Compliance Export Methods
+  exportAnswerKey(courseId: string, examForm?: 'A' | 'B'): Promise<Buffer>;
+  exportFinalExamForms(courseId: string): Promise<{ formA: Buffer; formB: Buffer }>;
+  getFinalExamsByForm(courseId: string): Promise<{ formA: any; formB: any }>;
+  createFinalExamForm(courseId: string, form: 'A' | 'B', questions: any[]): Promise<any>;
+  
   // LMS Progress Tracking Methods
   getUnitProgress(enrollmentId: string, unitId: string): Promise<UnitProgress | undefined>;
   createUnitProgress(enrollmentId: string, unitId: string, userId: string): Promise<UnitProgress>;
@@ -2201,6 +2207,315 @@ export class DatabaseStorage implements IStorage {
     }
     
     return csv;
+  }
+
+  // ============================================================
+  // Florida Regulatory Compliance Export Methods
+  // ============================================================
+
+  async exportAnswerKey(courseId: string, examForm?: 'A' | 'B'): Promise<Buffer> {
+    const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, WidthType, AlignmentType, BorderStyle } = await import("docx");
+    
+    const course = await this.getCourse(courseId);
+    
+    // Get final exams - filter by form if specified
+    const allExams = await this.getPracticeExams(courseId);
+    const finalExams = allExams.filter(e => e.isFinalExam === 1);
+    
+    // If form specified, filter; otherwise get all final exam questions
+    let targetExams = finalExams;
+    if (examForm) {
+      targetExams = finalExams.filter(e => e.examForm === examForm);
+    }
+    
+    // If no final exams found, aggregate from unit quizzes
+    let questions: any[] = [];
+    if (targetExams.length > 0) {
+      for (const exam of targetExams) {
+        const examQs = await this.getExamQuestions(exam.id);
+        questions.push(...examQs);
+      }
+    } else {
+      // Aggregate from unit quizzes for answer key
+      const allQuestionBanks = await this.getQuestionBanksByCourse(courseId);
+      const unitQuizBanks = allQuestionBanks.filter((qb: QuestionBank) => 
+        qb.bankType === 'unit_quiz' && qb.isActive === 1
+      );
+      for (const bank of unitQuizBanks) {
+        const bankQuestions = await this.getBankQuestions(bank.id);
+        questions.push(...bankQuestions.map(q => ({
+          ...q,
+          examId: bank.id,
+          correctAnswer: ['A', 'B', 'C', 'D'][q.correctOption || 0]
+        })));
+      }
+    }
+    
+    const sections: any[] = [];
+    
+    // Title
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Answer Key with Page References`,
+            bold: true,
+            size: 48
+          })
+        ],
+        spacing: { after: 200 }
+      })
+    );
+    
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: course?.title || "Course",
+            size: 32
+          }),
+          ...(examForm ? [new TextRun({ text: ` - Form ${examForm}`, bold: true, size: 32 })] : [])
+        ],
+        spacing: { after: 100 }
+      })
+    );
+    
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: `Florida DBPR Regulatory Compliance Document`, italics: true }),
+        ],
+        spacing: { after: 300 }
+      })
+    );
+    
+    // Create answer key table
+    const tableRows = [
+      // Header row
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Q#", bold: true })] })], width: { size: 8, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Correct Answer", bold: true })] })], width: { size: 15, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Page Reference", bold: true })] })], width: { size: 15, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Unit/Lesson Reference", bold: true })] })], width: { size: 25, type: WidthType.PERCENTAGE } }),
+          new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Question Summary", bold: true })] })], width: { size: 37, type: WidthType.PERCENTAGE } }),
+        ]
+      })
+    ];
+    
+    // Question rows
+    questions.forEach((q, idx) => {
+      const letterLabels = ['A', 'B', 'C', 'D'];
+      let correctLetter = q.correctAnswer || letterLabels[q.correctOption || 0] || 'A';
+      // Normalize to just the letter
+      if (correctLetter.length > 1 && correctLetter.includes('.')) {
+        correctLetter = correctLetter.charAt(0);
+      }
+      
+      const questionSummary = (q.questionText || '').substring(0, 80) + ((q.questionText || '').length > 80 ? '...' : '');
+      
+      tableRows.push(
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ text: String(idx + 1) })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: correctLetter, bold: true })] })] }),
+            new TableCell({ children: [new Paragraph({ text: q.pageReference || '(Not set)' })] }),
+            new TableCell({ children: [new Paragraph({ text: q.unitReference || '(Not set)' })] }),
+            new TableCell({ children: [new Paragraph({ text: questionSummary })] }),
+          ]
+        })
+      );
+    });
+    
+    sections.push(
+      new Table({
+        rows: tableRows,
+        width: { size: 100, type: WidthType.PERCENTAGE }
+      })
+    );
+    
+    // Footer note
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `\nTotal Questions: ${questions.length}`,
+            italics: true
+          })
+        ],
+        spacing: { before: 200 }
+      })
+    );
+    
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `Generated: ${new Date().toLocaleDateString()}`,
+            italics: true
+          })
+        ]
+      })
+    );
+    
+    const doc = new Document({
+      sections: [{
+        children: sections
+      }]
+    });
+    
+    return await Packer.toBuffer(doc);
+  }
+
+  async getFinalExamsByForm(courseId: string): Promise<{ formA: any; formB: any }> {
+    const allExams = await this.getPracticeExams(courseId);
+    const formA = allExams.find(e => e.isFinalExam === 1 && e.examForm === 'A') || null;
+    const formB = allExams.find(e => e.isFinalExam === 1 && e.examForm === 'B') || null;
+    return { formA, formB };
+  }
+
+  async createFinalExamForm(courseId: string, form: 'A' | 'B', questionIds: string[]): Promise<any> {
+    const course = await this.getCourse(courseId);
+    const title = `${course?.title || 'Course'} - Final Exam Form ${form}`;
+    
+    // Create the practice exam entry
+    const [newExam] = await db.insert(practiceExams)
+      .values({
+        courseId,
+        title,
+        description: `Final Examination Form ${form} for Florida DBPR compliance`,
+        totalQuestions: questionIds.length,
+        passingScore: 70,
+        timeLimit: 180, // 3 hours for final exam
+        isActive: 1,
+        isFinalExam: 1,
+        examForm: form
+      })
+      .returning();
+    
+    // Copy questions from source to new exam
+    for (let i = 0; i < questionIds.length; i++) {
+      const sourceQuestion = await db.select().from(examQuestions).where(eq(examQuestions.id, questionIds[i])).limit(1);
+      if (sourceQuestion.length > 0) {
+        const q = sourceQuestion[0];
+        await db.insert(examQuestions).values({
+          examId: newExam.id,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          correctAnswer: q.correctAnswer,
+          explanation: q.explanation,
+          options: q.options,
+          sequence: i + 1,
+          pageReference: q.pageReference,
+          unitReference: q.unitReference
+        });
+      }
+    }
+    
+    return newExam;
+  }
+
+  async exportFinalExamForms(courseId: string): Promise<{ formA: Buffer; formB: Buffer }> {
+    const { Document, Packer, Paragraph, TextRun } = await import("docx");
+    
+    const course = await this.getCourse(courseId);
+    const { formA, formB } = await this.getFinalExamsByForm(courseId);
+    
+    const generateExamDoc = async (exam: any, formLabel: string): Promise<Buffer> => {
+      const sections: any[] = [];
+      
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `Final Examination - Form ${formLabel}`,
+              bold: true,
+              size: 48
+            })
+          ],
+          spacing: { after: 200 }
+        })
+      );
+      
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: course?.title || "Course", size: 32 })
+          ],
+          spacing: { after: 100 }
+        })
+      );
+      
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: `Passing Score: ${exam?.passingScore || 70}%  |  Time Limit: ${exam?.timeLimit || 180} minutes`, italics: true })
+          ],
+          spacing: { after: 300 }
+        })
+      );
+      
+      if (exam) {
+        const questions = await this.getExamQuestions(exam.id);
+        const letterLabels = ['A', 'B', 'C', 'D'];
+        
+        questions.forEach((q, idx) => {
+          sections.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${idx + 1}. `, bold: true }),
+                new TextRun({ text: q.questionText || '' })
+              ],
+              spacing: { before: 200, after: 100 }
+            })
+          );
+          
+          let options: string[] = [];
+          try {
+            options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
+          } catch { options = []; }
+          
+          options.forEach((opt, optIdx) => {
+            const hasLetterPrefix = /^[A-D]\./.test(opt);
+            const optionText = hasLetterPrefix ? opt : `${letterLabels[optIdx]}. ${opt}`;
+            sections.push(
+              new Paragraph({
+                text: `   ${optionText}`,
+                spacing: { after: 50 }
+              })
+            );
+          });
+        });
+        
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `\nTotal Questions: ${questions.length}`, italics: true })
+            ],
+            spacing: { before: 300 }
+          })
+        );
+      } else {
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `No Form ${formLabel} examination has been created yet.`, italics: true })
+            ]
+          })
+        );
+      }
+      
+      const doc = new Document({
+        sections: [{ children: sections }]
+      });
+      
+      return await Packer.toBuffer(doc);
+    };
+    
+    const formABuffer = await generateExamDoc(formA, 'A');
+    const formBBuffer = await generateExamDoc(formB, 'B');
+    
+    return { formA: formABuffer, formB: formBBuffer };
   }
 
   async savePage(slug: string, page: any): Promise<any> {
