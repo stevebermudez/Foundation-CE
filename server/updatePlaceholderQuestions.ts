@@ -152,6 +152,10 @@ export async function updatePlaceholderQuestions() {
       }
     }
     
+    // Sync quiz questions from exam_questions to bank_questions for admin console
+    const { syncQuizQuestions } = await import("./syncQuizQuestions");
+    await syncQuizQuestions();
+    
   } catch (error) {
     console.error("Error updating placeholder questions:", error);
   }
