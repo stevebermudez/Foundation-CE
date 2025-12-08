@@ -24,6 +24,12 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
+// Simple health check endpoint that responds immediately (no DB queries)
+// This helps deployment readiness checks succeed quickly
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok", timestamp: Date.now() });
+});
+
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -62,7 +68,7 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  await ensureAdminExists();
+  // Setup auth and routes first (required for server to handle requests)
   await setupAuth(app);
   await registerRoutes(httpServer, app);
 
@@ -97,6 +103,16 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+      
+      // Run non-critical initialization tasks AFTER server is listening
+      // This allows health checks to succeed quickly during deployment
+      setImmediate(async () => {
+        try {
+          await ensureAdminExists();
+        } catch (err) {
+          console.error("Error in deferred initialization:", err);
+        }
+      });
     },
   );
 })();

@@ -26,36 +26,39 @@ export async function registerRoutes(
   // Serve static course viewer files from /public directory
   const publicPath = path.resolve(process.cwd(), "public");
   app.use("/course-viewer", express.static(publicPath));
-  // Seed FREC I course on startup if not already present
-  try {
-    const db = (await import("./db")).db;
-    const { courses } = await import("@shared/schema");
-    const { eq } = await import("drizzle-orm");
+  // Defer seeding operations to run asynchronously AFTER routes are registered
+  // This allows the server to start faster and pass deployment health checks
+  setImmediate(async () => {
+    try {
+      const db = (await import("./db")).db;
+      const { courses } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
 
-    const existing = await db
-      .select()
-      .from(courses)
-      .where(eq(courses.sku, "FL-RE-PL-SA-FRECI-63"))
-      .limit(1);
+      const existing = await db
+        .select()
+        .from(courses)
+        .where(eq(courses.sku, "FL-RE-PL-SA-FRECI-63"))
+        .limit(1);
 
-    if (existing.length === 0) {
-      await seedFRECIPrelicensing();
-      console.log("✓ FREC I course seeded successfully");
-    } else {
-      console.log("✓ FREC I course already exists");
+      if (existing.length === 0) {
+        await seedFRECIPrelicensing();
+        console.log("✓ FREC I course seeded successfully");
+      } else {
+        console.log("✓ FREC I course already exists");
+      }
+      
+      // Seed LMS content (units, lessons, question banks)
+      await seedLMSContent();
+      
+      // Update lesson content with real FREC I educational material
+      await updateAllLessonContent();
+      
+      // Fix question bank settings (ensure unit quizzes use 10 questions)
+      await fixQuestionBankSettings();
+    } catch (err: any) {
+      console.error("Error with FREC I seeding:", err);
     }
-    
-    // Seed LMS content (units, lessons, question banks)
-    await seedLMSContent();
-    
-    // Update lesson content with real FREC I educational material
-    await updateAllLessonContent();
-    
-    // Fix question bank settings (ensure unit quizzes use 10 questions)
-    await fixQuestionBankSettings();
-  } catch (err: any) {
-    console.error("Error with FREC I seeding:", err);
-  }
+  });
   // Auth Routes - JWT or Passport
   const authMiddleware = async (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
