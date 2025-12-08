@@ -6,6 +6,7 @@ import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./str
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
 import { updateAllLessonContent, fixQuestionBankSettings } from "./updateLessonContent";
+import { migrateQuizDataToCanonicalSchema, checkMigrationNeeded } from "./migrateQuizData";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
 import {
@@ -55,6 +56,16 @@ export async function registerRoutes(
       
       // Fix question bank settings (ensure unit quizzes use 10 questions)
       await fixQuestionBankSettings();
+      
+      // Migrate quiz data from question_banks to practice_exams (canonical schema)
+      // This ensures both tables have the same real questions
+      const needsMigration = await checkMigrationNeeded();
+      if (needsMigration) {
+        console.log("Quiz data migration needed - syncing to canonical schema...");
+        await migrateQuizDataToCanonicalSchema();
+      } else {
+        console.log("✓ Quiz data already in canonical schema");
+      }
     } catch (err: any) {
       console.error("Error with FREC I seeding:", err);
     }
