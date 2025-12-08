@@ -18,6 +18,7 @@ import {
 import { submitToDBPR, validateDBPRData, generateDBPRBatchFile } from "./dbprService";
 import { generateCertificateHTML, generateCertificateFileName, CertificateData } from "./certificates";
 import { sendContactFormEmail, sendEnrollmentConfirmationEmail, sendCertificateEmail } from "./emailService";
+import { generateSCORMManifest, generateQTIAssessment, generateQuestionBankQTI, exportCourseData } from "./lmsExportService";
 import express from "express";
 import path from "path";
 
@@ -3583,6 +3584,88 @@ segment1.ts
     }
   );
 
+  // ===== LMS Standards Export Routes (SCORM, QTI, xAPI) =====
+  
+  // SCORM 1.2 Package Manifest Export
+  app.get(
+    "/api/export/course/:courseId/scorm-manifest.xml",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const manifest = await generateSCORMManifest(req.params.courseId);
+        res.setHeader("Content-Type", "application/xml");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="imsmanifest-${req.params.courseId}.xml"`
+        );
+        res.send(manifest);
+      } catch (err) {
+        console.error("Error generating SCORM manifest:", err);
+        res.status(500).json({ error: "Failed to generate SCORM manifest" });
+      }
+    }
+  );
+
+  // QTI 2.1 Assessment Export for Exams
+  app.get(
+    "/api/export/exam/:examId/qti.xml",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const qti = await generateQTIAssessment(req.params.examId);
+        res.setHeader("Content-Type", "application/xml");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="exam-${req.params.examId}-qti.xml"`
+        );
+        res.send(qti);
+      } catch (err) {
+        console.error("Error generating QTI assessment:", err);
+        res.status(500).json({ error: "Failed to generate QTI assessment" });
+      }
+    }
+  );
+
+  // QTI 2.1 Export for Question Banks
+  app.get(
+    "/api/export/question-bank/:bankId/qti.xml",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const qti = await generateQuestionBankQTI(req.params.bankId);
+        res.setHeader("Content-Type", "application/xml");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="bank-${req.params.bankId}-qti.xml"`
+        );
+        res.send(qti);
+      } catch (err) {
+        console.error("Error generating question bank QTI:", err);
+        res.status(500).json({ error: "Failed to generate QTI for question bank" });
+      }
+    }
+  );
+
+  // Course Data Export (JSON with full structure)
+  app.get(
+    "/api/export/course/:courseId/full-export.json",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const data = await exportCourseData(req.params.courseId);
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="course-full-${req.params.courseId}.json"`
+        );
+        res.json(data);
+      } catch (err) {
+        console.error("Error exporting full course data:", err);
+        res.status(500).json({ error: "Failed to export course data" });
+      }
+    }
+  );
+
   // Florida Regulatory Compliance - Get Final Exam Forms A and B
   app.get(
     "/api/courses/:courseId/final-exams",
@@ -6604,6 +6687,450 @@ segment1.ts
     } catch (err) {
       console.error("Error fetching creatives:", err);
       res.status(500).json({ error: "Failed to fetch creatives" });
+    }
+  });
+
+  // ===== State Configuration Routes =====
+  
+  // Get all state configurations
+  app.get("/api/admin/state-configurations", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { stateConfigurations } = await import("@shared/schema");
+      const states = await db.select().from(stateConfigurations);
+      res.json(states);
+    } catch (err) {
+      console.error("Error fetching state configurations:", err);
+      res.status(500).json({ error: "Failed to fetch state configurations" });
+    }
+  });
+
+  // Get single state configuration
+  app.get("/api/admin/state-configurations/:stateCode", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { stateConfigurations } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const state = await db.select().from(stateConfigurations)
+        .where(eq(stateConfigurations.stateCode, req.params.stateCode.toUpperCase()))
+        .limit(1);
+      if (!state.length) {
+        return res.status(404).json({ error: "State configuration not found" });
+      }
+      res.json(state[0]);
+    } catch (err) {
+      console.error("Error fetching state configuration:", err);
+      res.status(500).json({ error: "Failed to fetch state configuration" });
+    }
+  });
+
+  // Create state configuration
+  app.post("/api/admin/state-configurations", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { stateConfigurations } = await import("@shared/schema");
+      const { stateCode, stateName, ...rest } = req.body;
+      
+      if (!stateCode || !stateName) {
+        return res.status(400).json({ error: "stateCode and stateName are required" });
+      }
+      
+      const newState = await db.insert(stateConfigurations).values({
+        stateCode: stateCode.toUpperCase(),
+        stateName,
+        ...rest,
+      }).returning();
+      
+      res.status(201).json(newState[0]);
+    } catch (err) {
+      console.error("Error creating state configuration:", err);
+      res.status(500).json({ error: "Failed to create state configuration" });
+    }
+  });
+
+  // Update state configuration
+  app.patch("/api/admin/state-configurations/:stateCode", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { stateConfigurations } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const updated = await db.update(stateConfigurations)
+        .set({ ...req.body, updatedAt: new Date() })
+        .where(eq(stateConfigurations.stateCode, req.params.stateCode.toUpperCase()))
+        .returning();
+      
+      if (!updated.length) {
+        return res.status(404).json({ error: "State configuration not found" });
+      }
+      res.json(updated[0]);
+    } catch (err) {
+      console.error("Error updating state configuration:", err);
+      res.status(500).json({ error: "Failed to update state configuration" });
+    }
+  });
+
+  // Delete state configuration
+  app.delete("/api/admin/state-configurations/:stateCode", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { stateConfigurations } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      await db.delete(stateConfigurations)
+        .where(eq(stateConfigurations.stateCode, req.params.stateCode.toUpperCase()));
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting state configuration:", err);
+      res.status(500).json({ error: "Failed to delete state configuration" });
+    }
+  });
+
+  // ===== Learning Analytics Routes =====
+  
+  // Track learning event
+  app.post("/api/analytics/event", async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { learningAnalytics } = await import("@shared/schema");
+      
+      const event = await db.insert(learningAnalytics).values({
+        ...req.body,
+        ipAddress: req.ip,
+        createdAt: new Date(),
+      }).returning();
+      
+      res.status(201).json(event[0]);
+    } catch (err) {
+      console.error("Error tracking learning event:", err);
+      res.status(500).json({ error: "Failed to track event" });
+    }
+  });
+
+  // Get analytics summary for admin dashboard
+  app.get("/api/admin/analytics/summary", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { learningAnalytics, enrollments, users } = await import("@shared/schema");
+      const { sql, count, desc, eq } = await import("drizzle-orm");
+      
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const totalUsers = await db.select({ count: count() }).from(users);
+      const totalEnrollments = await db.select({ count: count() }).from(enrollments);
+      const completedEnrollments = await db.select({ count: count() })
+        .from(enrollments)
+        .where(eq(enrollments.completed, 1));
+      
+      const recentEvents = await db.select()
+        .from(learningAnalytics)
+        .orderBy(desc(learningAnalytics.createdAt))
+        .limit(100);
+      
+      const eventsByType = await db.select({
+        eventType: learningAnalytics.eventType,
+        count: count(),
+      })
+        .from(learningAnalytics)
+        .groupBy(learningAnalytics.eventType);
+      
+      res.json({
+        totalUsers: totalUsers[0]?.count || 0,
+        totalEnrollments: totalEnrollments[0]?.count || 0,
+        completedEnrollments: completedEnrollments[0]?.count || 0,
+        completionRate: totalEnrollments[0]?.count 
+          ? Math.round((completedEnrollments[0]?.count || 0) / totalEnrollments[0].count * 100)
+          : 0,
+        recentEvents: recentEvents.slice(0, 20),
+        eventsByType,
+      });
+    } catch (err) {
+      console.error("Error fetching analytics summary:", err);
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Get user learning progress
+  app.get("/api/analytics/user/:userId", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { learningAnalytics, enrollments } = await import("@shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      
+      const userEnrollments = await db.select()
+        .from(enrollments)
+        .where(eq(enrollments.userId, req.params.userId));
+      
+      const userEvents = await db.select()
+        .from(learningAnalytics)
+        .where(eq(learningAnalytics.userId, req.params.userId))
+        .orderBy(desc(learningAnalytics.createdAt))
+        .limit(50);
+      
+      res.json({
+        enrollments: userEnrollments,
+        recentActivity: userEvents,
+      });
+    } catch (err) {
+      console.error("Error fetching user analytics:", err);
+      res.status(500).json({ error: "Failed to fetch user analytics" });
+    }
+  });
+
+  // ===== Notification Routes =====
+  
+  // Get user notifications
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      
+      const db = (await import("./db")).db;
+      const { notifications } = await import("@shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      
+      const userNotifications = await db.select()
+        .from(notifications)
+        .where(eq(notifications.userId, user.id))
+        .orderBy(desc(notifications.createdAt))
+        .limit(50);
+      
+      res.json(userNotifications);
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user) return res.status(401).json({ error: "Unauthorized" });
+      
+      const db = (await import("./db")).db;
+      const { notifications } = await import("@shared/schema");
+      const { eq, and } = await import("drizzle-orm");
+      
+      const updated = await db.update(notifications)
+        .set({ read: true })
+        .where(and(
+          eq(notifications.id, req.params.id),
+          eq(notifications.userId, user.id)
+        ))
+        .returning();
+      
+      if (!updated.length) {
+        return res.status(404).json({ error: "Notification not found" });
+      }
+      res.json(updated[0]);
+    } catch (err) {
+      console.error("Error marking notification as read:", err);
+      res.status(500).json({ error: "Failed to update notification" });
+    }
+  });
+
+  // ===== Achievement Routes =====
+  
+  // Get all achievements
+  app.get("/api/achievements", async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { achievements } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const allAchievements = await db.select()
+        .from(achievements)
+        .where(eq(achievements.isActive, 1));
+      
+      res.json(allAchievements);
+    } catch (err) {
+      console.error("Error fetching achievements:", err);
+      res.status(500).json({ error: "Failed to fetch achievements" });
+    }
+  });
+
+  // Get user achievements
+  app.get("/api/user/:userId/achievements", async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { userAchievements, achievements } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const earned = await db.select({
+        achievement: achievements,
+        earnedAt: userAchievements.earnedAt,
+      })
+        .from(userAchievements)
+        .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+        .where(eq(userAchievements.userId, req.params.userId));
+      
+      res.json(earned);
+    } catch (err) {
+      console.error("Error fetching user achievements:", err);
+      res.status(500).json({ error: "Failed to fetch user achievements" });
+    }
+  });
+
+  // Admin: Create achievement
+  app.post("/api/admin/achievements", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { achievements } = await import("@shared/schema");
+      
+      const { name, description, iconUrl, badgeColor, category, criteria, points } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: "Achievement name is required" });
+      }
+      
+      const newAchievement = await db.insert(achievements).values({
+        name,
+        description,
+        iconUrl,
+        badgeColor: badgeColor || "gold",
+        category,
+        criteria: criteria ? JSON.stringify(criteria) : null,
+        points: points || 0,
+        isActive: 1,
+      }).returning();
+      
+      res.status(201).json(newAchievement[0]);
+    } catch (err) {
+      console.error("Error creating achievement:", err);
+      res.status(500).json({ error: "Failed to create achievement" });
+    }
+  });
+
+  // Admin: Award achievement to user
+  app.post("/api/admin/users/:userId/achievements/:achievementId", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { userAchievements } = await import("@shared/schema");
+      
+      const awarded = await db.insert(userAchievements).values({
+        userId: req.params.userId,
+        achievementId: req.params.achievementId,
+        earnedAt: new Date(),
+        notified: 0,
+      }).returning();
+      
+      res.status(201).json(awarded[0]);
+    } catch (err) {
+      console.error("Error awarding achievement:", err);
+      res.status(500).json({ error: "Failed to award achievement" });
+    }
+  });
+
+  // ===== Learning Path Routes =====
+  
+  // Get all learning paths
+  app.get("/api/learning-paths", async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { learningPaths } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const paths = await db.select()
+        .from(learningPaths)
+        .where(eq(learningPaths.isActive, 1));
+      
+      res.json(paths);
+    } catch (err) {
+      console.error("Error fetching learning paths:", err);
+      res.status(500).json({ error: "Failed to fetch learning paths" });
+    }
+  });
+
+  // Get learning path with courses
+  app.get("/api/learning-paths/:pathId", async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { learningPaths, learningPathItems, courses } = await import("@shared/schema");
+      const { eq, asc } = await import("drizzle-orm");
+      
+      const path = await db.select()
+        .from(learningPaths)
+        .where(eq(learningPaths.id, req.params.pathId))
+        .limit(1);
+      
+      if (!path.length) {
+        return res.status(404).json({ error: "Learning path not found" });
+      }
+      
+      const items = await db.select({
+        item: learningPathItems,
+        course: courses,
+      })
+        .from(learningPathItems)
+        .innerJoin(courses, eq(learningPathItems.courseId, courses.id))
+        .where(eq(learningPathItems.learningPathId, req.params.pathId))
+        .orderBy(asc(learningPathItems.sequence));
+      
+      res.json({
+        ...path[0],
+        courses: items.map(i => ({ ...i.item, course: i.course })),
+      });
+    } catch (err) {
+      console.error("Error fetching learning path:", err);
+      res.status(500).json({ error: "Failed to fetch learning path" });
+    }
+  });
+
+  // Admin: Create learning path
+  app.post("/api/admin/learning-paths", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { learningPaths } = await import("@shared/schema");
+      
+      const { name, description, productType, state, licenseType, estimatedHours } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ error: "Learning path name is required" });
+      }
+      
+      const newPath = await db.insert(learningPaths).values({
+        name,
+        description,
+        productType,
+        state,
+        licenseType,
+        estimatedHours,
+        isActive: 1,
+        sortOrder: 0,
+      }).returning();
+      
+      res.status(201).json(newPath[0]);
+    } catch (err) {
+      console.error("Error creating learning path:", err);
+      res.status(500).json({ error: "Failed to create learning path" });
+    }
+  });
+
+  // Admin: Add course to learning path
+  app.post("/api/admin/learning-paths/:pathId/courses", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { learningPathItems } = await import("@shared/schema");
+      
+      const { courseId, sequence, isRequired } = req.body;
+      
+      if (!courseId) {
+        return res.status(400).json({ error: "courseId is required" });
+      }
+      
+      const newItem = await db.insert(learningPathItems).values({
+        learningPathId: req.params.pathId,
+        courseId,
+        sequence: sequence || 0,
+        isRequired: isRequired !== undefined ? isRequired : 1,
+      }).returning();
+      
+      res.status(201).json(newItem[0]);
+    } catch (err) {
+      console.error("Error adding course to learning path:", err);
+      res.status(500).json({ error: "Failed to add course to learning path" });
     }
   });
 
