@@ -4346,6 +4346,267 @@ segment1.ts
     }
   });
 
+  // ===== CMS Site Pages Management Routes =====
+  
+  // Get all site pages
+  app.get("/api/admin/site-pages", isAdmin, async (req, res) => {
+    try {
+      const pages = await storage.getSitePages();
+      res.json(pages);
+    } catch (err) {
+      console.error("Error fetching site pages:", err);
+      res.status(500).json({ error: "Failed to fetch site pages" });
+    }
+  });
+
+  // Get single site page with sections and blocks
+  app.get("/api/admin/site-pages/:id", isAdmin, async (req, res) => {
+    try {
+      const page = await storage.getSitePage(req.params.id);
+      if (!page) {
+        return res.status(404).json({ error: "Page not found" });
+      }
+      
+      const sections = await storage.getPageSections(page.id);
+      const sectionsWithBlocks = await Promise.all(
+        sections.map(async (section) => ({
+          ...section,
+          blocks: await storage.getSectionBlocks(section.id),
+        }))
+      );
+      
+      res.json({ page, sections: sectionsWithBlocks });
+    } catch (err) {
+      console.error("Error fetching site page:", err);
+      res.status(500).json({ error: "Failed to fetch site page" });
+    }
+  });
+
+  // Create new site page
+  app.post("/api/admin/site-pages", isAdmin, async (req, res) => {
+    try {
+      const { slug, title, description, isPublished, metaTitle, metaKeywords, ogImage } = req.body;
+      
+      // Check if slug already exists
+      const existing = await storage.getSitePageBySlug(slug);
+      if (existing) {
+        return res.status(400).json({ error: "A page with this URL slug already exists" });
+      }
+      
+      const page = await storage.createSitePage({
+        slug,
+        title,
+        description,
+        isPublished: isPublished || 0,
+        metaTitle,
+        metaKeywords,
+        ogImage,
+      });
+      res.json(page);
+    } catch (err) {
+      console.error("Error creating site page:", err);
+      res.status(500).json({ error: "Failed to create site page" });
+    }
+  });
+
+  // Update site page
+  app.patch("/api/admin/site-pages/:id", isAdmin, async (req, res) => {
+    try {
+      const page = await storage.updateSitePage(req.params.id, req.body);
+      res.json(page);
+    } catch (err) {
+      console.error("Error updating site page:", err);
+      res.status(500).json({ error: "Failed to update site page" });
+    }
+  });
+
+  // Delete site page
+  app.delete("/api/admin/site-pages/:id", isAdmin, async (req, res) => {
+    try {
+      const page = await storage.getSitePage(req.params.id);
+      if (!page) {
+        return res.status(404).json({ error: "Page not found" });
+      }
+      if (page.isSystemPage) {
+        return res.status(400).json({ error: "Cannot delete system pages" });
+      }
+      await storage.deleteSitePage(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting site page:", err);
+      res.status(500).json({ error: "Failed to delete site page" });
+    }
+  });
+
+  // Create page section
+  app.post("/api/admin/site-pages/:pageId/sections", isAdmin, async (req, res) => {
+    try {
+      const { sectionType, title, backgroundColor, backgroundImage, padding, sortOrder, settings } = req.body;
+      const section = await storage.createPageSection({
+        pageId: req.params.pageId,
+        sectionType,
+        title,
+        backgroundColor,
+        backgroundImage,
+        padding,
+        sortOrder: sortOrder || 0,
+        settings: settings ? JSON.stringify(settings) : undefined,
+      });
+      res.json(section);
+    } catch (err) {
+      console.error("Error creating page section:", err);
+      res.status(500).json({ error: "Failed to create page section" });
+    }
+  });
+
+  // Update page section
+  app.patch("/api/admin/sections/:id", isAdmin, async (req, res) => {
+    try {
+      const data = { ...req.body };
+      if (data.settings && typeof data.settings === 'object') {
+        data.settings = JSON.stringify(data.settings);
+      }
+      const section = await storage.updatePageSection(req.params.id, data);
+      res.json(section);
+    } catch (err) {
+      console.error("Error updating page section:", err);
+      res.status(500).json({ error: "Failed to update page section" });
+    }
+  });
+
+  // Delete page section
+  app.delete("/api/admin/sections/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deletePageSection(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting page section:", err);
+      res.status(500).json({ error: "Failed to delete page section" });
+    }
+  });
+
+  // Reorder page sections
+  app.post("/api/admin/site-pages/:pageId/sections/reorder", isAdmin, async (req, res) => {
+    try {
+      const { sectionIds } = req.body;
+      await storage.reorderPageSections(req.params.pageId, sectionIds);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error reordering sections:", err);
+      res.status(500).json({ error: "Failed to reorder sections" });
+    }
+  });
+
+  // Create section block
+  app.post("/api/admin/sections/:sectionId/blocks", isAdmin, async (req, res) => {
+    try {
+      const { blockType, content, mediaUrl, mediaAlt, linkUrl, linkTarget, alignment, size, sortOrder, settings } = req.body;
+      const block = await storage.createSectionBlock({
+        sectionId: req.params.sectionId,
+        blockType,
+        content,
+        mediaUrl,
+        mediaAlt,
+        linkUrl,
+        linkTarget,
+        alignment,
+        size,
+        sortOrder: sortOrder || 0,
+        settings: settings ? JSON.stringify(settings) : undefined,
+      });
+      res.json(block);
+    } catch (err) {
+      console.error("Error creating section block:", err);
+      res.status(500).json({ error: "Failed to create section block" });
+    }
+  });
+
+  // Update section block
+  app.patch("/api/admin/blocks/:id", isAdmin, async (req, res) => {
+    try {
+      const data = { ...req.body };
+      if (data.settings && typeof data.settings === 'object') {
+        data.settings = JSON.stringify(data.settings);
+      }
+      const block = await storage.updateSectionBlock(req.params.id, data);
+      res.json(block);
+    } catch (err) {
+      console.error("Error updating section block:", err);
+      res.status(500).json({ error: "Failed to update section block" });
+    }
+  });
+
+  // Delete section block
+  app.delete("/api/admin/blocks/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteSectionBlock(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting section block:", err);
+      res.status(500).json({ error: "Failed to delete section block" });
+    }
+  });
+
+  // Reorder section blocks
+  app.post("/api/admin/sections/:sectionId/blocks/reorder", isAdmin, async (req, res) => {
+    try {
+      const { blockIds } = req.body;
+      await storage.reorderSectionBlocks(req.params.sectionId, blockIds);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error reordering blocks:", err);
+      res.status(500).json({ error: "Failed to reorder blocks" });
+    }
+  });
+
+  // Public endpoint: Get page by slug for frontend rendering
+  app.get("/api/pages/:slug", async (req, res) => {
+    try {
+      const pageData = await storage.getFullPageData(req.params.slug);
+      if (!pageData) {
+        return res.status(404).json({ error: "Page not found" });
+      }
+      // Only return published pages to public
+      if (!pageData.page.isPublished) {
+        return res.status(404).json({ error: "Page not found" });
+      }
+      res.json(pageData);
+    } catch (err) {
+      console.error("Error fetching page:", err);
+      res.status(500).json({ error: "Failed to fetch page" });
+    }
+  });
+
+  // Seed initial pages endpoint
+  app.post("/api/admin/seed-pages", isAdmin, async (req, res) => {
+    try {
+      const existingPages = await storage.getSitePages();
+      if (existingPages.length > 0) {
+        return res.json({ message: "Pages already exist", pages: existingPages });
+      }
+
+      // Create default system pages
+      const defaultPages = [
+        { slug: "home", title: "Home", isSystemPage: 1, isPublished: 1, sortOrder: 0 },
+        { slug: "about", title: "About Us", isSystemPage: 0, isPublished: 1, sortOrder: 1 },
+        { slug: "courses", title: "Courses", isSystemPage: 1, isPublished: 1, sortOrder: 2 },
+        { slug: "contact", title: "Contact", isSystemPage: 0, isPublished: 1, sortOrder: 3 },
+        { slug: "pricing", title: "Pricing", isSystemPage: 0, isPublished: 1, sortOrder: 4 },
+      ];
+
+      const createdPages = [];
+      for (const pageData of defaultPages) {
+        const page = await storage.createSitePage(pageData);
+        createdPages.push(page);
+      }
+
+      res.json({ success: true, pages: createdPages });
+    } catch (err) {
+      console.error("Error seeding pages:", err);
+      res.status(500).json({ error: "Failed to seed pages" });
+    }
+  });
+
   // ===== Media Asset Management Routes =====
   app.get("/api/admin/media", isAdmin, async (req, res) => {
     try {
