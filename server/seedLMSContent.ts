@@ -693,20 +693,9 @@ function getUnitQuestions(unitNumber: number): Array<{
     // Add more questions for other units as needed
   };
 
-  // Default questions for units without specific questions
-  const defaultQuestions = Array.from({ length: 25 }, (_, i) => ({
-    text: `Sample question ${i + 1} for this unit covering key concepts and terminology.`,
-    options: [
-      "Option A - First possible answer",
-      "Option B - Second possible answer",
-      "Option C - Third possible answer",
-      "Option D - Fourth possible answer"
-    ],
-    correctOption: i % 4,
-    explanation: `This is the explanation for question ${i + 1}. The correct answer demonstrates understanding of the material.`
-  }));
-
-  return questionsByUnit[unitNumber] || defaultQuestions;
+  // Return questions only if they exist - no placeholder fallback
+  // Real questions come from seedFRECIPrelicensing.ts
+  return questionsByUnit[unitNumber] || [];
 }
 
 function getFinalExamQuestions(): Array<{
