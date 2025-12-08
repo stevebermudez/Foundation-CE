@@ -1527,30 +1527,6 @@ export const userLearningPaths = pgTable("user_learning_paths", {
 export type UserLearningPath = typeof userLearningPaths.$inferSelect;
 export type InsertUserLearningPath = typeof userLearningPaths.$inferInsert;
 
-// Notifications - User notification system
-export const notifications = pgTable("notifications", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
-  type: varchar("type").notNull(), // "enrollment", "deadline", "achievement", "system", "marketing"
-  title: varchar("title").notNull(),
-  message: text("message").notNull(),
-  actionUrl: varchar("action_url"), // Link for the notification
-  isRead: integer("is_read").default(0),
-  readAt: timestamp("read_at"),
-  expiresAt: timestamp("expires_at"), // Auto-delete after this date
-  metadata: text("metadata"), // JSON for additional data
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export type Notification = typeof notifications.$inferSelect;
-export type InsertNotification = typeof notifications.$inferInsert;
-export const insertNotificationSchema = createInsertSchema(notifications).omit({
-  id: true,
-  createdAt: true,
-});
-
 // Achievements/Badges - Gamification
 export const achievements = pgTable("achievements", {
   id: varchar("id")
