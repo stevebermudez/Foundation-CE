@@ -156,6 +156,10 @@ export async function updatePlaceholderQuestions() {
     const { addUnitQuestions } = await import("./addUnitQuestions");
     await addUnitQuestions();
     
+    // Remove questions that aren't specifically covered in lesson content
+    const { removeUncoveredQuestions } = await import("./removeUncoveredQuestions");
+    await removeUncoveredQuestions();
+    
     // Sync quiz questions from exam_questions to bank_questions for admin console
     const { syncQuizQuestions } = await import("./syncQuizQuestions");
     await syncQuizQuestions();
