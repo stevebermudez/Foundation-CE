@@ -4412,7 +4412,18 @@ segment1.ts
   // Update site page
   app.patch("/api/admin/site-pages/:id", isAdmin, async (req, res) => {
     try {
-      const page = await storage.updateSitePage(req.params.id, req.body);
+      // Filter out read-only and auto-generated fields
+      const { id, createdAt, updatedAt, ...updateData } = req.body;
+      
+      // Convert isPublished boolean to integer if needed
+      if (typeof updateData.isPublished === 'boolean') {
+        updateData.isPublished = updateData.isPublished ? 1 : 0;
+      }
+      
+      const page = await storage.updateSitePage(req.params.id, updateData);
+      if (!page) {
+        return res.status(404).json({ error: "Page not found" });
+      }
       res.json(page);
     } catch (err) {
       console.error("Error updating site page:", err);
