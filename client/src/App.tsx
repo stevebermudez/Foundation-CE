@@ -39,6 +39,7 @@ import PrivacyPolicyPage from "@/pages/privacy-policy";
 import LegalCompliancePage from "@/pages/legal-compliance";
 import AffiliateProgramPage from "@/pages/affiliate-program";
 import CookieConsent from "@/components/CookieConsent";
+import CMSPage from "@/components/CMSPage";
 
 function Router() {
   return (
@@ -83,6 +84,7 @@ function Router() {
           <Route path="/admin/finance" component={AdminFinancePage} />
           <Route path="/admin/settings" component={AdminSettingsPage} />
           <Route path="/checkout"><CheckoutPage /></Route>
+          <Route path="/p/:slug">{(params) => <CMSPage slug={params.slug} />}</Route>
           <Route component={NotFound} />
         </Switch>
       </main>
