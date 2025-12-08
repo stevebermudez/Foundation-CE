@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -771,6 +771,9 @@ export default function PagesManagerPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingPage?.id ? "Edit Page" : "Create New Page"}</DialogTitle>
+            <DialogDescription>
+              {editingPage?.id ? "Update the page settings below." : "Configure your new page settings."}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -835,6 +838,9 @@ export default function PagesManagerPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingSection?.id ? "Edit Section" : "Add Section"}</DialogTitle>
+            <DialogDescription>
+              {editingSection?.id ? "Update the section settings." : "Choose a section type and configure it."}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -908,6 +914,9 @@ export default function PagesManagerPage() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingBlock?.id ? "Edit Block" : "Add Block"}</DialogTitle>
+            <DialogDescription>
+              {editingBlock?.id ? "Update the block content." : "Choose a block type and add content."}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>

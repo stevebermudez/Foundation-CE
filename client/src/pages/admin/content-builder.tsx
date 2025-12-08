@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -1329,6 +1330,9 @@ function UnitFormDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{initialData ? "Edit Unit" : "Add New Unit"}</DialogTitle>
+          <DialogDescription>
+            {initialData ? "Update the unit details below." : "Enter the details for the new unit."}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -1423,6 +1427,9 @@ function LessonFormDialog({
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{initialData ? "Edit Lesson" : "Add New Lesson"}</DialogTitle>
+          <DialogDescription>
+            {initialData ? "Update the lesson details below." : "Enter the details for the new lesson."}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -1662,6 +1669,7 @@ function MediaLibraryDialog({
       <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
           <DialogTitle>Media Library</DialogTitle>
+          <DialogDescription>Select or upload media for your content.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -1809,6 +1817,9 @@ function QuestionBankFormDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{initialData ? "Edit Question Bank" : "Create Question Bank"}</DialogTitle>
+          <DialogDescription>
+            {initialData ? "Update the question bank settings." : "Configure your new question bank."}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -1970,6 +1981,9 @@ function QuestionFormDialog({
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{initialData ? "Edit Question" : "Add Question"}</DialogTitle>
+          <DialogDescription>
+            {initialData ? "Update the question details." : "Add a new question to the bank."}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -2132,6 +2146,7 @@ function QuestionManagerDialog({
             Manage Questions
             <Badge variant="secondary">{questions.length} questions</Badge>
           </DialogTitle>
+          <DialogDescription>Add, edit, or remove questions from this bank.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

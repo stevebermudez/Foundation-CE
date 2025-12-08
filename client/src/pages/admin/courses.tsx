@@ -391,6 +391,9 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
           <DialogTitle>
             {initialData ? "Edit Course" : "Create New Course"}
           </DialogTitle>
+          <DialogDescription>
+            {initialData ? "Update the course details below." : "Fill in the details to create a new course."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
