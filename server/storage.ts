@@ -1805,23 +1805,52 @@ export class DatabaseStorage implements IStorage {
         }
       }
       
-      // Quiz info with full questions - use practiceExams/examQuestions tables which have real content
+      // Quiz info with full questions - try both data sources for compatibility
       if (opts.includeQuizzes) {
-        // Find practice exam for this unit by matching title pattern
-        const allPracticeExams = await this.getPracticeExams(courseId);
-        console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${allPracticeExams.length} practice exams for course ${courseId}`);
-        
-        // Match "Unit X Quiz" pattern (simple string matching)
         const searchPattern = `Unit ${unit.unitNumber} Quiz`;
+        let quizQuestions: Array<{questionText: string | null; options: unknown; correctAnswer?: string; correctOption?: number | null; explanation: string | null}> = [];
+        let passingScore = 70;
+        let useIndexBasedCorrect = false;
+        
+        // First try practice_exams/exam_questions (development data)
+        const allPracticeExams = await this.getPracticeExams(courseId);
         const unitExam = allPracticeExams.find(pe => 
           pe.title.includes(searchPattern) || pe.title.startsWith(`Unit ${unit.unitNumber}:`)
         );
-        console.log(`[DOCX Export] Unit ${unit.unitNumber}: Looking for '${searchPattern}', matched: ${unitExam?.title || 'NONE'}`);
         
         if (unitExam) {
-          const questions = await this.getExamQuestions(unitExam.id);
-          console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${questions.length} questions`);
+          const examQuestions = await this.getExamQuestions(unitExam.id);
+          if (examQuestions.length > 0) {
+            quizQuestions = examQuestions;
+            passingScore = unitExam.passingScore || 70;
+            console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${examQuestions.length} questions from practice_exams`);
+          }
+        }
+        
+        // Fallback to question_banks/bank_questions if no questions found
+        if (quizQuestions.length === 0) {
+          const allQuestionBanks = await this.getQuestionBanksByCourse(courseId);
+          const unitBank = allQuestionBanks.find((qb: QuestionBank) => 
+            (qb.title?.includes(searchPattern) || qb.title?.startsWith(`Unit ${unit.unitNumber}:`)) &&
+            qb.bankType === 'unit_quiz'
+          );
           
+          if (unitBank) {
+            const bankQuestions = await this.getBankQuestions(unitBank.id);
+            if (bankQuestions.length > 0) {
+              quizQuestions = bankQuestions;
+              passingScore = unitBank.passingScore || 70;
+              useIndexBasedCorrect = true;
+              console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${bankQuestions.length} questions from question_banks`);
+            }
+          }
+        }
+        
+        if (quizQuestions.length === 0) {
+          console.log(`[DOCX Export] Unit ${unit.unitNumber}: No questions found in either source`);
+        }
+        
+        if (quizQuestions.length > 0) {
           // Quiz header
           sections.push(
             new Paragraph({
@@ -1839,14 +1868,14 @@ export class DatabaseStorage implements IStorage {
           sections.push(
             new Paragraph({
               children: [
-                new TextRun({ text: `${questions.length} questions  |  Passing Score: ${unitExam.passingScore || 70}%`, italics: true })
+                new TextRun({ text: `${quizQuestions.length} questions  |  Passing Score: ${passingScore}%`, italics: true })
               ],
               spacing: { after: 150 }
             })
           );
           
           // Each question with answers
-          questions.forEach((q, qIndex) => {
+          quizQuestions.forEach((q, qIndex) => {
             sections.push(
               new Paragraph({
                 children: [
@@ -1863,18 +1892,27 @@ export class DatabaseStorage implements IStorage {
               options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
             } catch { options = []; }
             
-            // correctAnswer is stored as letter like "A", "B", "C", "D"
-            const correctLetter = q.correctAnswer?.toUpperCase() || '';
-            
-            options.forEach((opt) => {
-              // Options are stored as "A. answer text" format
-              const optLetter = opt.charAt(0).toUpperCase();
-              const isCorrect = optLetter === correctLetter;
+            const letterLabels = ['A', 'B', 'C', 'D'];
+            options.forEach((opt, optIdx) => {
+              let isCorrect = false;
+              if (useIndexBasedCorrect) {
+                // bank_questions uses correctOption (index 0-3)
+                isCorrect = optIdx === (q.correctOption ?? 0);
+              } else {
+                // exam_questions uses correctAnswer letter and options have "A. text" format
+                const correctLetter = (q.correctAnswer || '').toUpperCase();
+                const optLetter = opt.charAt(0).toUpperCase();
+                isCorrect = optLetter === correctLetter;
+              }
+              
+              // Format option text
+              const optionText = useIndexBasedCorrect ? `${letterLabels[optIdx]}. ${opt}` : opt;
+              
               sections.push(
                 new Paragraph({
                   children: [
                     new TextRun({ 
-                      text: `   ${opt}`,
+                      text: `   ${optionText}`,
                       bold: isCorrect,
                       color: isCorrect ? "008000" : undefined
                     }),
