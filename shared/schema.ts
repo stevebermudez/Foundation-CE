@@ -294,6 +294,8 @@ export const practiceExams = pgTable("practice_exams", {
   passingScore: integer("passing_score").default(70), // percentage
   timeLimit: integer("time_limit"), // in minutes, optional
   isActive: integer("is_active").default(1),
+  isFinalExam: integer("is_final_exam").default(0), // 1 for final exam, 0 for unit quiz
+  examForm: varchar("exam_form"), // "A", "B" for Florida dual exam requirement
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -310,6 +312,8 @@ export const examQuestions = pgTable("exam_questions", {
   explanation: text("explanation"), // shown after answer
   options: text("options").notNull(), // JSON array of options
   sequence: integer("sequence").default(0),
+  pageReference: varchar("page_reference"), // Florida requirement: page number where answer is found
+  unitReference: varchar("unit_reference"), // Reference to unit/lesson for the answer
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
