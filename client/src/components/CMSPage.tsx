@@ -2,8 +2,9 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import NotFound from "@/pages/not-found";
 
 interface SectionBlock {
   id: string;
@@ -450,11 +451,11 @@ export default function CMSPage({ slug }: CMSPageProps) {
   }
 
   if (error || !data) {
-    return null;
+    return <NotFound />;
   }
 
   if (!data.page.isPublished) {
-    return null;
+    return <NotFound />;
   }
 
   return (

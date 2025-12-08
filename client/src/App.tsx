@@ -84,7 +84,7 @@ function Router() {
           <Route path="/admin/finance" component={AdminFinancePage} />
           <Route path="/admin/settings" component={AdminSettingsPage} />
           <Route path="/checkout"><CheckoutPage /></Route>
-          <Route path="/p/:slug">{(params) => <CMSPage slug={params.slug} />}</Route>
+          <Route path="/:slug">{(params) => <CMSPage slug={params.slug} />}</Route>
           <Route component={NotFound} />
         </Switch>
       </main>
