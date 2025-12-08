@@ -118,6 +118,16 @@ interface BankQuestion {
   isActive?: number | null;
 }
 
+interface FinalExam {
+  id: string;
+  courseId: string;
+  title: string;
+  totalQuestions: number;
+  passingScore: number;
+  timeLimit?: number | null;
+  isFinalExam: number;
+}
+
 export default function ContentBuilderPage({ courseId }: { courseId?: string }) {
   const { toast } = useToast();
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId || null);
@@ -357,6 +367,21 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
     queryFn: async () => {
       if (!selectedCourseId) return [];
       const res = await fetch(`/api/admin/courses/${selectedCourseId}/question-banks`, {
+        headers: getAuthHeaders(),
+        credentials: 'include'
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: !!selectedCourseId,
+  });
+
+  // Fetch final exams (Form A / Form B) from practice_exams table
+  const { data: courseFinalExams = [] } = useQuery<FinalExam[]>({
+    queryKey: ["/api/admin/courses", selectedCourseId, "final-exams"],
+    queryFn: async () => {
+      if (!selectedCourseId) return [];
+      const res = await fetch(`/api/admin/courses/${selectedCourseId}/final-exams`, {
         headers: getAuthHeaders(),
         credentials: 'include'
       });
@@ -734,7 +759,12 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              <CardTitle className="text-lg">Course Final Exam</CardTitle>
+              <CardTitle className="text-lg">Course Final Exams</CardTitle>
+              {courseFinalExams.length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {courseFinalExams.length} exam{courseFinalExams.length > 1 ? 's' : ''}
+                </Badge>
+              )}
             </div>
             <Button 
               size="sm" 
@@ -751,14 +781,51 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
           </div>
         </CardHeader>
         <CardContent>
-          {getFinalExamBanks().length === 0 ? (
+          {/* Show active final exams (Form A / Form B) from practice_exams */}
+          {courseFinalExams.length > 0 && (
+            <div className="space-y-3 mb-4">
+              <p className="text-sm font-medium text-muted-foreground">Active Final Exams (Student-Facing)</p>
+              {courseFinalExams.map((exam) => (
+                <div 
+                  key={exam.id} 
+                  className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg"
+                  data-testid={`card-active-final-exam-${exam.id}`}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      <span className="font-medium">{exam.title}</span>
+                      <Badge variant="default" className="text-xs bg-amber-600">
+                        {exam.totalQuestions} questions
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {exam.passingScore}% to pass
+                      </Badge>
+                      {exam.timeLimit && (
+                        <Badge variant="outline" className="text-xs">
+                          {exam.timeLimit} min limit
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {exam.title.includes('Form A') ? 'Used for attempts 1 and 3' : 'Used for attempt 2'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Show question banks for final exam content building */}
+          {getFinalExamBanks().length === 0 && courseFinalExams.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               <FileText className="h-10 w-10 mx-auto mb-2 opacity-50" />
               <p>No final exam configured</p>
               <p className="text-xs mt-1">Add a final exam question bank to enable end-of-course assessment</p>
             </div>
-          ) : (
+          ) : getFinalExamBanks().length > 0 && (
             <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">Question Banks (Admin Content)</p>
               {getFinalExamBanks().map((bank) => (
                 <div 
                   key={bank.id} 

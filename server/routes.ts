@@ -4107,6 +4107,18 @@ segment1.ts
     }
   });
 
+  // Get final exams (practice_exams) for a course - for admin content builder
+  app.get("/api/admin/courses/:courseId/final-exams", isAdmin, async (req, res) => {
+    try {
+      const allExams = await storage.getPracticeExams(req.params.courseId);
+      const finalExams = allExams.filter(e => e.isFinalExam === 1);
+      res.json(finalExams);
+    } catch (err) {
+      console.error("Error fetching final exams:", err);
+      res.status(500).json({ error: "Failed to fetch final exams" });
+    }
+  });
+
   // Get question banks for a specific unit
   app.get("/api/admin/units/:unitId/question-banks", isAdmin, async (req, res) => {
     try {
