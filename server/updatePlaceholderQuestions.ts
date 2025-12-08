@@ -20,22 +20,27 @@ export async function updatePlaceholderQuestions() {
     const course = courseResult[0];
     
     // First, aggressively delete ALL placeholder questions from both tables
-    const placeholderPatterns = [
-      "Sample question",
-      "for this unit covering key concepts",
-      "Option A - First possible answer",
-      "Option A - First possible",
-      "What is 2 + 2"
-    ];
+    // But NOT final exam questions - those are handled separately
     
-    // Delete from exam_questions
+    // Get final exam ID to exclude it
+    const finalExamResult = await db
+      .select()
+      .from(practiceExams)
+      .where(sql`title LIKE '%Final Exam%' AND course_id = ${course.id}`)
+      .limit(1);
+    
+    const finalExamId = finalExamResult.length > 0 ? finalExamResult[0].id : null;
+    
+    // Delete placeholder questions from unit quizzes only (not final exam)
     const examDeleteResult = await db.execute(sql`
       DELETE FROM exam_questions 
-      WHERE question_text LIKE '%Sample question%' 
-         OR question_text LIKE '%for this unit covering key concepts%'
-         OR question_text LIKE '%What is 2 + 2%'
-         OR options LIKE '%Option A - First possible%'
-         OR LENGTH(question_text) < 25
+      WHERE (
+        question_text LIKE '%Sample question%' 
+        OR question_text LIKE '%for this unit covering key concepts%'
+        OR question_text LIKE '%What is 2 + 2%'
+        OR options LIKE '%Option A - First possible%'
+      )
+      AND exam_id NOT IN (SELECT id FROM practice_exams WHERE title LIKE '%Final Exam%')
     `);
     
     // Delete from bank_questions
@@ -121,6 +126,80 @@ export async function updatePlaceholderQuestions() {
     }
     
     console.log(`✓ Cleanup complete - removed duplicates: ${duplicatesRemoved}`);
+    
+    // Now ensure final exam has 100 questions
+    if (finalExamId) {
+      const finalExamQuestions = await db
+        .select()
+        .from(examQuestions)
+        .where(eq(examQuestions.examId, finalExamId));
+      
+      const currentCount = finalExamQuestions.length;
+      console.log(`Final exam has ${currentCount} questions`);
+      
+      if (currentCount < 100) {
+        console.log(`Populating final exam to 100 questions from unit quizzes...`);
+        
+        // Collect all real questions from unit quizzes
+        const allUnitQuestions: Array<{
+          questionText: string | null;
+          options: string | null;
+          correctAnswer: string | null;
+          explanation: string | null;
+          questionType: string | null;
+        }> = [];
+        
+        for (const exam of allExams) {
+          if (exam.title?.includes('Final Exam')) continue;
+          
+          const questions = await db
+            .select()
+            .from(examQuestions)
+            .where(eq(examQuestions.examId, exam.id));
+          
+          for (const q of questions) {
+            if (q.questionText && !q.questionText.includes('Sample question')) {
+              allUnitQuestions.push({
+                questionText: q.questionText,
+                options: q.options,
+                correctAnswer: q.correctAnswer,
+                explanation: q.explanation,
+                questionType: q.questionType
+              });
+            }
+          }
+        }
+        
+        console.log(`Found ${allUnitQuestions.length} real questions from unit quizzes`);
+        
+        // Get existing final exam question texts to avoid duplicates
+        const existingTexts = new Set(finalExamQuestions.map(q => q.questionText));
+        
+        // Shuffle and add questions until we reach 100
+        const shuffled = allUnitQuestions.sort(() => Math.random() - 0.5);
+        let added = 0;
+        
+        for (const q of shuffled) {
+          if (currentCount + added >= 100) break;
+          if (!q.questionText || existingTexts.has(q.questionText)) continue;
+          
+          await db.insert(examQuestions).values({
+            examId: finalExamId,
+            questionText: q.questionText,
+            options: q.options || '[]',
+            correctAnswer: q.correctAnswer || 'A',
+            explanation: q.explanation,
+            questionType: q.questionType || 'multiple_choice',
+            sequence: currentCount + added
+          });
+          
+          existingTexts.add(q.questionText);
+          added++;
+        }
+        
+        console.log(`Added ${added} questions to final exam. Total: ${currentCount + added}`);
+      }
+    }
     
   } catch (error) {
     console.error("Error updating placeholder questions:", error);
