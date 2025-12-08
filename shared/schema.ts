@@ -1262,3 +1262,88 @@ export const affiliateCommissionTiers = pgTable("affiliate_commission_tiers", {
 
 export type AffiliateCommissionTier = typeof affiliateCommissionTiers.$inferSelect;
 export type InsertAffiliateCommissionTier = typeof affiliateCommissionTiers.$inferInsert;
+
+// ============================================================
+// CMS Page Builder Tables
+// ============================================================
+
+// Site Pages - Marketing/static pages (Home, About, Contact, etc.)
+export const sitePages = pgTable("site_pages", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  slug: varchar("slug").unique().notNull(), // URL path (e.g., "home", "about", "contact")
+  title: varchar("title").notNull(), // Page title for display and SEO
+  description: text("description"), // Meta description for SEO
+  isPublished: integer("is_published").default(0), // 1 = live, 0 = draft
+  isSystemPage: integer("is_system_page").default(0), // 1 = cannot delete (Home, etc.)
+  sortOrder: integer("sort_order").default(0), // Order in navigation
+  metaTitle: varchar("meta_title"), // Custom SEO title
+  metaKeywords: varchar("meta_keywords"), // SEO keywords
+  ogImage: varchar("og_image"), // Open Graph image URL
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type SitePage = typeof sitePages.$inferSelect;
+export type InsertSitePage = typeof sitePages.$inferInsert;
+export const insertSitePageSchema = createInsertSchema(sitePages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Page Sections - Container sections within a page (Hero, Features, CTA, etc.)
+export const pageSections = pgTable("page_sections", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  pageId: varchar("page_id").notNull(), // References sitePages.id
+  sectionType: varchar("section_type").notNull(), // "hero", "text", "features", "cta", "gallery", "columns", "custom"
+  title: varchar("title"), // Optional section title
+  backgroundColor: varchar("background_color"), // Custom background color
+  backgroundImage: varchar("background_image"), // Background image URL
+  padding: varchar("padding").default("normal"), // "none", "small", "normal", "large"
+  sortOrder: integer("sort_order").default(0), // Order within page
+  isVisible: integer("is_visible").default(1), // Toggle visibility without deleting
+  settings: text("settings"), // JSON for additional section-specific settings
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type PageSection = typeof pageSections.$inferSelect;
+export type InsertPageSection = typeof pageSections.$inferInsert;
+export const insertPageSectionSchema = createInsertSchema(pageSections).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Section Blocks - Individual content blocks within sections
+export const sectionBlocks = pgTable("section_blocks", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  sectionId: varchar("section_id").notNull(), // References pageSections.id
+  blockType: varchar("block_type").notNull(), // "heading", "text", "image", "video", "button", "spacer", "divider", "html"
+  content: text("content"), // Main content (text, HTML, or markdown)
+  mediaUrl: varchar("media_url"), // Image/video URL
+  mediaAlt: varchar("media_alt"), // Alt text for images
+  linkUrl: varchar("link_url"), // For buttons/links
+  linkTarget: varchar("link_target").default("_self"), // "_self", "_blank"
+  alignment: varchar("alignment").default("left"), // "left", "center", "right"
+  size: varchar("size").default("medium"), // "small", "medium", "large", "full"
+  sortOrder: integer("sort_order").default(0), // Order within section
+  isVisible: integer("is_visible").default(1), // Toggle visibility
+  settings: text("settings"), // JSON for block-specific styling/settings
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type SectionBlock = typeof sectionBlocks.$inferSelect;
+export type InsertSectionBlock = typeof sectionBlocks.$inferInsert;
+export const insertSectionBlockSchema = createInsertSchema(sectionBlocks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
