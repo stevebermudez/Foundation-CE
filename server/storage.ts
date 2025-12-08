@@ -1807,32 +1807,56 @@ export class DatabaseStorage implements IStorage {
       
       // Quiz info with full questions - try both data sources for compatibility
       if (opts.includeQuizzes) {
-        const searchPattern = `Unit ${unit.unitNumber} Quiz`;
+        const unitNum = unit.unitNumber;
         let quizQuestions: Array<{questionText: string | null; options: unknown; correctAnswer?: string; correctOption?: number | null; explanation: string | null}> = [];
         let passingScore = 70;
         let useIndexBasedCorrect = false;
         
-        // First try practice_exams/exam_questions (development data)
+        // Flexible matching function for unit quiz titles
+        const matchesUnitQuiz = (title: string | null | undefined, num: number): boolean => {
+          if (!title) return false;
+          const t = title.toLowerCase();
+          // Match patterns: "Unit 1 Quiz", "Unit 1:", "unit_1", "Unit1", etc.
+          const patterns = [
+            `unit ${num} quiz`,
+            `unit ${num}:`,
+            `unit_${num}`,
+            `unit${num}`,
+            new RegExp(`\\bunit\\s*${num}\\b`, 'i')
+          ];
+          return patterns.some(p => typeof p === 'string' ? t.includes(p) : p.test(title));
+        };
+        
+        // First try practice_exams/exam_questions
         const allPracticeExams = await this.getPracticeExams(courseId);
-        const unitExam = allPracticeExams.find(pe => 
-          pe.title.includes(searchPattern) || pe.title.startsWith(`Unit ${unit.unitNumber}:`)
-        );
+        console.log(`[DOCX Export] Unit ${unitNum}: Checking ${allPracticeExams.length} practice_exams`);
+        
+        const unitExam = allPracticeExams.find(pe => matchesUnitQuiz(pe.title, unitNum));
         
         if (unitExam) {
           const examQuestions = await this.getExamQuestions(unitExam.id);
-          if (examQuestions.length > 0) {
-            quizQuestions = examQuestions;
+          // Filter out placeholder questions (contain "[Comprehensive content" or generic text)
+          const realQuestions = examQuestions.filter(q => 
+            q.questionText && 
+            !q.questionText.includes('[Comprehensive content') &&
+            !q.questionText.includes('Plausible distractor')
+          );
+          if (realQuestions.length > 0) {
+            quizQuestions = realQuestions;
             passingScore = unitExam.passingScore || 70;
-            console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${examQuestions.length} questions from practice_exams`);
+            console.log(`[DOCX Export] Unit ${unitNum}: Found ${realQuestions.length} real questions from practice_exams (${unitExam.title})`);
+          } else {
+            console.log(`[DOCX Export] Unit ${unitNum}: Found practice_exam "${unitExam.title}" but ${examQuestions.length} questions are placeholders`);
           }
         }
         
         // Fallback to question_banks/bank_questions if no questions found
         if (quizQuestions.length === 0) {
           const allQuestionBanks = await this.getQuestionBanksByCourse(courseId);
+          console.log(`[DOCX Export] Unit ${unitNum}: Checking ${allQuestionBanks.length} question_banks`);
+          
           const unitBank = allQuestionBanks.find((qb: QuestionBank) => 
-            (qb.title?.includes(searchPattern) || qb.title?.startsWith(`Unit ${unit.unitNumber}:`)) &&
-            qb.bankType === 'unit_quiz'
+            matchesUnitQuiz(qb.title, unitNum) && qb.bankType === 'unit_quiz'
           );
           
           if (unitBank) {
@@ -1841,13 +1865,17 @@ export class DatabaseStorage implements IStorage {
               quizQuestions = bankQuestions;
               passingScore = unitBank.passingScore || 70;
               useIndexBasedCorrect = true;
-              console.log(`[DOCX Export] Unit ${unit.unitNumber}: Found ${bankQuestions.length} questions from question_banks`);
+              console.log(`[DOCX Export] Unit ${unitNum}: Found ${bankQuestions.length} questions from question_banks (${unitBank.title})`);
             }
+          } else {
+            // List available banks for debugging
+            const availableBanks = allQuestionBanks.filter((qb: QuestionBank) => qb.bankType === 'unit_quiz').map((qb: QuestionBank) => qb.title);
+            console.log(`[DOCX Export] Unit ${unitNum}: No matching question_bank found. Available: ${availableBanks.slice(0, 5).join(', ')}...`);
           }
         }
         
         if (quizQuestions.length === 0) {
-          console.log(`[DOCX Export] Unit ${unit.unitNumber}: No questions found in either source`);
+          console.log(`[DOCX Export] Unit ${unitNum}: No questions found in either source`);
         }
         
         if (quizQuestions.length > 0) {
@@ -1895,18 +1923,34 @@ export class DatabaseStorage implements IStorage {
             const letterLabels = ['A', 'B', 'C', 'D'];
             options.forEach((opt, optIdx) => {
               let isCorrect = false;
-              if (useIndexBasedCorrect) {
+              
+              // Determine correct answer - handle both letter-based and index-based formats
+              if (useIndexBasedCorrect || q.correctOption !== undefined) {
                 // bank_questions uses correctOption (index 0-3)
-                isCorrect = optIdx === (q.correctOption ?? 0);
-              } else {
-                // exam_questions uses correctAnswer letter and options have "A. text" format
-                const correctLetter = (q.correctAnswer || '').toUpperCase();
-                const optLetter = opt.charAt(0).toUpperCase();
-                isCorrect = optLetter === correctLetter;
+                const correctIdx = q.correctOption ?? 0;
+                isCorrect = optIdx === correctIdx;
+              } else if (q.correctAnswer) {
+                // exam_questions uses correctAnswer - can be letter (A,B,C,D) or index (0,1,2,3)
+                const ans = q.correctAnswer.toString().toUpperCase().trim();
+                if (/^[0-3]$/.test(ans)) {
+                  // Numeric index
+                  isCorrect = optIdx === parseInt(ans, 10);
+                } else if (/^[A-D]$/.test(ans)) {
+                  // Letter - check if option starts with letter or compare index
+                  const optLetter = opt.charAt(0).toUpperCase();
+                  if (/^[A-D]\./.test(opt)) {
+                    // Option has "A. text" format
+                    isCorrect = optLetter === ans;
+                  } else {
+                    // Option is plain text, use letter position
+                    isCorrect = letterLabels[optIdx] === ans;
+                  }
+                }
               }
               
-              // Format option text
-              const optionText = useIndexBasedCorrect ? `${letterLabels[optIdx]}. ${opt}` : opt;
+              // Format option text - add letter labels if not already present
+              const hasLetterPrefix = /^[A-D]\./.test(opt);
+              const optionText = hasLetterPrefix ? opt : `${letterLabels[optIdx]}. ${opt}`;
               
               sections.push(
                 new Paragraph({
