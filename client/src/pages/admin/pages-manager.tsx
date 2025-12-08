@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,354 +6,1041 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, GripVertical, Image as ImageIcon, Video as VideoIcon, Type, Save } from "lucide-react";
-import { queryClient } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Plus, Trash2, GripVertical, Image as ImageIcon, Video as VideoIcon, 
+  Type, Save, FileText, Settings, Eye, EyeOff, ChevronUp, ChevronDown,
+  Layout, Columns, Square, LayoutGrid, Heading1, AlignLeft, MousePointer,
+  ExternalLink, Minus, Code, RefreshCw, Globe
+} from "lucide-react";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-interface PageBlock {
+interface SectionBlock {
   id: string;
-  type: "text" | "image" | "video";
-  content: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  sectionId: string;
+  blockType: string;
+  content: string | null;
+  mediaUrl: string | null;
+  mediaAlt: string | null;
+  linkUrl: string | null;
+  linkTarget: string | null;
+  alignment: string | null;
+  size: string | null;
+  sortOrder: number;
+  isVisible: number | null;
+  settings: string | null;
 }
 
-interface PageData {
+interface PageSection {
+  id: string;
+  pageId: string;
+  sectionType: string;
+  title: string | null;
+  backgroundColor: string | null;
+  backgroundImage: string | null;
+  padding: string | null;
+  sortOrder: number;
+  isVisible: number | null;
+  settings: string | null;
+  blocks: SectionBlock[];
+}
+
+interface SitePage {
   id: string;
   slug: string;
   title: string;
-  blocks: PageBlock[];
-  updatedAt: string;
+  description: string | null;
+  isPublished: number | null;
+  isSystemPage: number | null;
+  sortOrder: number;
+  metaTitle: string | null;
+  metaKeywords: string | null;
+  ogImage: string | null;
 }
 
-const DEFAULT_PAGES = [
-  { slug: "home", title: "Home" },
-  { slug: "about", title: "About Us" },
-  { slug: "courses", title: "Courses" },
-  { slug: "contact", title: "Contact" },
-  { slug: "pricing", title: "Pricing" },
+const SECTION_TYPES = [
+  { value: "hero", label: "Hero Banner", icon: Layout },
+  { value: "text", label: "Text Content", icon: AlignLeft },
+  { value: "features", label: "Features Grid", icon: LayoutGrid },
+  { value: "cta", label: "Call to Action", icon: MousePointer },
+  { value: "columns", label: "Column Layout", icon: Columns },
+  { value: "gallery", label: "Image Gallery", icon: ImageIcon },
+  { value: "custom", label: "Custom HTML", icon: Code },
+];
+
+const BLOCK_TYPES = [
+  { value: "heading", label: "Heading", icon: Heading1 },
+  { value: "text", label: "Text", icon: Type },
+  { value: "image", label: "Image", icon: ImageIcon },
+  { value: "video", label: "Video", icon: VideoIcon },
+  { value: "button", label: "Button", icon: MousePointer },
+  { value: "spacer", label: "Spacer", icon: Minus },
+  { value: "divider", label: "Divider", icon: Minus },
+  { value: "html", label: "HTML", icon: Code },
 ];
 
 export default function PagesManagerPage() {
   const { toast } = useToast();
-  const [selectedPageSlug, setSelectedPageSlug] = useState<string>("home");
-  const [blocks, setBlocks] = useState<PageBlock[]>([]);
-  const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const [showPageDialog, setShowPageDialog] = useState(false);
+  const [showSectionDialog, setShowSectionDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [editingPage, setEditingPage] = useState<Partial<SitePage> | null>(null);
+  const [editingSection, setEditingSection] = useState<Partial<PageSection> | null>(null);
+  const [editingBlock, setEditingBlock] = useState<Partial<SectionBlock> | null>(null);
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
 
   const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("adminToken");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  const { data: pageData, isLoading } = useQuery({
-    queryKey: [`/api/admin/pages/${selectedPageSlug}`],
+  // Fetch all pages
+  const { data: pages = [], isLoading: pagesLoading, refetch: refetchPages } = useQuery<SitePage[]>({
+    queryKey: ["/api/admin/site-pages"],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/pages/${selectedPageSlug}`, { 
-        credentials: 'include',
-        headers: getAuthHeaders()
+      const res = await fetch("/api/admin/site-pages", {
+        credentials: "include",
+        headers: getAuthHeaders(),
       });
-      if (res.status === 404) return { blocks: [] };
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) throw new Error("Failed to fetch pages");
       return res.json();
     },
   });
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`/api/admin/pages/${selectedPageSlug}`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          ...getAuthHeaders()
-        },
-        credentials: 'include',
-        body: JSON.stringify({ blocks }),
+  // Fetch selected page with sections and blocks
+  const { data: pageData, isLoading: pageLoading, refetch: refetchPage } = useQuery<{
+    page: SitePage;
+    sections: PageSection[];
+  }>({
+    queryKey: ["/api/admin/site-pages", selectedPageId],
+    queryFn: async () => {
+      if (!selectedPageId) return null;
+      const res = await fetch(`/api/admin/site-pages/${selectedPageId}`, {
+        credentials: "include",
+        headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) throw new Error("Failed to fetch page");
+      return res.json();
+    },
+    enabled: !!selectedPageId,
+  });
+
+  // Auto-select first page
+  useEffect(() => {
+    if (pages.length > 0 && !selectedPageId) {
+      setSelectedPageId(pages[0].id);
+    }
+  }, [pages, selectedPageId]);
+
+  // Seed pages mutation
+  const seedPagesMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/admin/seed-pages", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+      });
+      if (!res.ok) throw new Error("Failed to seed pages");
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Saved", description: "Page saved successfully" });
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/pages/${selectedPageSlug}`] });
+      toast({ title: "Success", description: "Default pages created" });
+      refetchPages();
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to save page", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to create pages", variant: "destructive" });
     },
   });
 
-  const handleAddBlock = (type: "text" | "image" | "video") => {
-    const newBlock: PageBlock = {
-      id: Math.random().toString(),
-      type,
-      content: type === "text" ? "Click to edit" : "",
-      x: 50,
-      y: 50 + blocks.length * 80,
-      width: type === "video" ? 400 : 300,
-      height: type === "video" ? 225 : type === "image" ? 200 : 100,
-    };
-    setBlocks([...blocks, newBlock]);
+  // Create page mutation
+  const createPageMutation = useMutation({
+    mutationFn: async (data: Partial<SitePage>) => {
+      const res = await fetch("/api/admin/site-pages", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to create page");
+      }
+      return res.json();
+    },
+    onSuccess: (newPage) => {
+      toast({ title: "Success", description: "Page created" });
+      refetchPages();
+      setSelectedPageId(newPage.id);
+      setShowPageDialog(false);
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Update page mutation
+  const updatePageMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<SitePage> }) => {
+      const res = await fetch(`/api/admin/site-pages/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update page");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Saved", description: "Page updated" });
+      refetchPages();
+      refetchPage();
+      setShowPageDialog(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update page", variant: "destructive" });
+    },
+  });
+
+  // Delete page mutation
+  const deletePageMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/site-pages/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to delete page");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Deleted", description: "Page deleted" });
+      setSelectedPageId(null);
+      refetchPages();
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
+  // Create section mutation
+  const createSectionMutation = useMutation({
+    mutationFn: async (data: Partial<PageSection>) => {
+      const res = await fetch(`/api/admin/site-pages/${selectedPageId}/sections`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create section");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Section added" });
+      refetchPage();
+      setShowSectionDialog(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add section", variant: "destructive" });
+    },
+  });
+
+  // Update section mutation
+  const updateSectionMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<PageSection> }) => {
+      const res = await fetch(`/api/admin/sections/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update section");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Saved", description: "Section updated" });
+      refetchPage();
+      setShowSectionDialog(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update section", variant: "destructive" });
+    },
+  });
+
+  // Delete section mutation
+  const deleteSectionMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/sections/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Failed to delete section");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Deleted", description: "Section removed" });
+      refetchPage();
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete section", variant: "destructive" });
+    },
+  });
+
+  // Create block mutation
+  const createBlockMutation = useMutation({
+    mutationFn: async ({ sectionId, data }: { sectionId: string; data: Partial<SectionBlock> }) => {
+      const res = await fetch(`/api/admin/sections/${sectionId}/blocks`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create block");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Block added" });
+      refetchPage();
+      setShowBlockDialog(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add block", variant: "destructive" });
+    },
+  });
+
+  // Update block mutation
+  const updateBlockMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<SectionBlock> }) => {
+      const res = await fetch(`/api/admin/blocks/${id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update block");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Saved", description: "Block updated" });
+      refetchPage();
+      setShowBlockDialog(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update block", variant: "destructive" });
+    },
+  });
+
+  // Delete block mutation
+  const deleteBlockMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/admin/blocks/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error("Failed to delete block");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Deleted", description: "Block removed" });
+      refetchPage();
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to delete block", variant: "destructive" });
+    },
+  });
+
+  // Reorder sections
+  const reorderSectionsMutation = useMutation({
+    mutationFn: async (sectionIds: string[]) => {
+      const res = await fetch(`/api/admin/site-pages/${selectedPageId}/sections/reorder`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ sectionIds }),
+      });
+      if (!res.ok) throw new Error("Failed to reorder sections");
+      return res.json();
+    },
+    onSuccess: () => {
+      refetchPage();
+    },
+  });
+
+  const moveSectionUp = (index: number) => {
+    if (!pageData?.sections || index === 0) return;
+    const newOrder = [...pageData.sections];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index], newOrder[index - 1]];
+    reorderSectionsMutation.mutate(newOrder.map((s) => s.id));
   };
 
-  const handleDeleteBlock = (id: string) => {
-    setBlocks(blocks.filter((b) => b.id !== id));
-    setSelectedBlock(null);
+  const moveSectionDown = (index: number) => {
+    if (!pageData?.sections || index === pageData.sections.length - 1) return;
+    const newOrder = [...pageData.sections];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    reorderSectionsMutation.mutate(newOrder.map((s) => s.id));
   };
 
-  const handleMouseDown = (e: React.MouseEvent, blockId: string) => {
-    const block = blocks.find((b) => b.id === blockId);
-    if (!block) return;
-    setIsDragging(blockId);
-    setDragOffset({ x: e.clientX - block.x, y: e.clientY - block.y });
-    setSelectedBlock(blockId);
+  const handleSavePage = () => {
+    if (!editingPage) return;
+    if (editingPage.id) {
+      updatePageMutation.mutate({ id: editingPage.id, data: editingPage });
+    } else {
+      createPageMutation.mutate(editingPage);
+    }
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
-    const newX = e.clientX - rect.left - dragOffset.x;
-    const newY = e.clientY - rect.top - dragOffset.y;
+  const handleSaveSection = () => {
+    if (!editingSection) return;
+    if (editingSection.id) {
+      updateSectionMutation.mutate({ id: editingSection.id, data: editingSection });
+    } else {
+      createSectionMutation.mutate(editingSection);
+    }
+  };
 
-    setBlocks(
-      blocks.map((b) =>
-        b.id === isDragging ? { ...b, x: Math.max(0, newX), y: Math.max(0, newY) } : b
-      )
+  const handleSaveBlock = () => {
+    if (!editingBlock || !selectedSectionId) return;
+    if (editingBlock.id) {
+      updateBlockMutation.mutate({ id: editingBlock.id, data: editingBlock });
+    } else {
+      createBlockMutation.mutate({ sectionId: selectedSectionId, data: editingBlock });
+    }
+  };
+
+  const renderBlockContent = (block: SectionBlock) => {
+    switch (block.blockType) {
+      case "heading":
+        return <h3 className="text-lg font-bold">{block.content || "Heading"}</h3>;
+      case "text":
+        return <p className="text-sm text-muted-foreground">{block.content || "Text content..."}</p>;
+      case "image":
+        return block.mediaUrl ? (
+          <img src={block.mediaUrl} alt={block.mediaAlt || ""} className="max-h-24 object-cover rounded" />
+        ) : (
+          <div className="h-16 bg-muted rounded flex items-center justify-center text-muted-foreground">
+            <ImageIcon className="h-6 w-6" />
+          </div>
+        );
+      case "video":
+        return (
+          <div className="h-16 bg-muted rounded flex items-center justify-center text-muted-foreground">
+            <VideoIcon className="h-6 w-6" />
+            {block.mediaUrl && <span className="ml-2 text-xs truncate max-w-32">{block.mediaUrl}</span>}
+          </div>
+        );
+      case "button":
+        return (
+          <Button size="sm" variant="outline">
+            {block.content || "Button"}
+          </Button>
+        );
+      case "spacer":
+        return <div className="h-8 border-2 border-dashed border-muted rounded" />;
+      case "divider":
+        return <hr className="border-muted" />;
+      case "html":
+        return <div className="text-xs font-mono bg-muted p-2 rounded">&lt;HTML&gt;</div>;
+      default:
+        return <span>{block.blockType}</span>;
+    }
+  };
+
+  if (pagesLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
     );
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(null);
-  };
-
-  const updateBlock = (id: string, content: string) => {
-    setBlocks(blocks.map((b) => (b.id === id ? { ...b, content } : b)));
-  };
-
-  // Load page blocks when page changes
-  if (pageData && pageData.blocks && JSON.stringify(pageData.blocks) !== JSON.stringify(blocks) && blocks.length === 0) {
-    setBlocks(pageData.blocks);
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">Website Pages Editor</h2>
-        <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="gap-2">
-          <Save className="h-4 w-4" />
-          {saveMutation.isPending ? "Saving..." : "Save Changes"}
-        </Button>
+        <div>
+          <h2 className="text-3xl font-bold">Website Pages Editor</h2>
+          <p className="text-muted-foreground">Build and customize your website pages visually</p>
+        </div>
+        <div className="flex gap-2">
+          {pages.length === 0 && (
+            <Button
+              onClick={() => seedPagesMutation.mutate()}
+              disabled={seedPagesMutation.isPending}
+              variant="outline"
+              className="gap-2"
+              data-testid="button-seed-pages"
+            >
+              <RefreshCw className={`h-4 w-4 ${seedPagesMutation.isPending ? "animate-spin" : ""}`} />
+              Create Default Pages
+            </Button>
+          )}
+          <Button
+            onClick={() => {
+              setEditingPage({ slug: "", title: "", isPublished: 0 });
+              setShowPageDialog(true);
+            }}
+            className="gap-2"
+            data-testid="button-add-page"
+          >
+            <Plus className="h-4 w-4" />
+            New Page
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-4">
-        {/* Pages List */}
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-sm">Pages</CardTitle>
+      <div className="grid gap-6 lg:grid-cols-4">
+        {/* Pages List Sidebar */}
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Pages
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {DEFAULT_PAGES.map((page) => (
-              <button
-                key={page.slug}
-                onClick={() => {
-                  setSelectedPageSlug(page.slug);
-                  setBlocks([]);
-                  setSelectedBlock(null);
-                }}
-                className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                  selectedPageSlug === page.slug
-                    ? "bg-blue-500 text-white"
-                    : "bg-muted hover:bg-muted/80"
-                }`}
-                data-testid={`button-page-${page.slug}`}
-              >
-                {page.title}
-              </button>
-            ))}
+          <CardContent className="p-0">
+            <ScrollArea className="h-[calc(100vh-300px)]">
+              <div className="space-y-1 p-3">
+                {pages.map((page) => (
+                  <button
+                    key={page.id}
+                    onClick={() => setSelectedPageId(page.id)}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between group ${
+                      selectedPageId === page.id
+                        ? "bg-primary text-primary-foreground"
+                        : "hover-elevate"
+                    }`}
+                    data-testid={`button-page-${page.slug}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      <span className="font-medium">{page.title}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {page.isPublished ? (
+                        <Eye className="h-3 w-3" />
+                      ) : (
+                        <EyeOff className="h-3 w-3 opacity-50" />
+                      )}
+                      {page.isSystemPage ? (
+                        <Badge variant="secondary" className="text-xs px-1">System</Badge>
+                      ) : null}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
 
-        {/* Editor */}
-        <div className="md:col-span-3 space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">
-                  {DEFAULT_PAGES.find((p) => p.slug === selectedPageSlug)?.title || "Page"}
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={() => handleAddBlock("text")} variant="outline" className="gap-2">
-                    <Type className="h-3 w-3" />
-                    Text
-                  </Button>
-                  <Button size="sm" onClick={() => handleAddBlock("image")} variant="outline" className="gap-2">
-                    <ImageIcon className="h-3 w-3" />
-                    Image
-                  </Button>
-                  <Button size="sm" onClick={() => handleAddBlock("video")} variant="outline" className="gap-2">
-                    <VideoIcon className="h-3 w-3" />
-                    Video
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div
-                className="relative w-full border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg overflow-hidden"
-                style={{ minHeight: "600px" }}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-              >
-                {blocks.map((block) => (
-                  <BlockElement
-                    key={block.id}
-                    block={block}
-                    isSelected={selectedBlock === block.id}
-                    onSelect={() => setSelectedBlock(block.id)}
-                    onDelete={() => handleDeleteBlock(block.id)}
-                    onMouseDown={(e) => handleMouseDown(e, block.id)}
-                  />
-                ))}
-                {blocks.length === 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                    <p className="text-center">
-                      Click buttons above to add text, images, or videos<br />
-                      <span className="text-sm">Then drag to position elements</span>
-                    </p>
+        {/* Page Editor */}
+        <div className="lg:col-span-3 space-y-4">
+          {selectedPageId && pageData ? (
+            <>
+              {/* Page Header */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {pageData.page.title}
+                        {pageData.page.isPublished ? (
+                          <Badge className="bg-green-500">Published</Badge>
+                        ) : (
+                          <Badge variant="secondary">Draft</Badge>
+                        )}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">/{pageData.page.slug}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingPage(pageData.page);
+                          setShowPageDialog(true);
+                        }}
+                        data-testid="button-edit-page"
+                      >
+                        <Settings className="h-4 w-4 mr-1" />
+                        Settings
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(`/${pageData.page.slug === "home" ? "" : pageData.page.slug}`, "_blank")}
+                        data-testid="button-preview-page"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" />
+                        Preview
+                      </Button>
+                      {!pageData.page.isSystemPage && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            if (confirm("Delete this page?")) {
+                              deletePageMutation.mutate(pageData.page.id);
+                            }
+                          }}
+                          data-testid="button-delete-page"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                )}
+                </CardHeader>
+              </Card>
+
+              {/* Sections */}
+              <div className="space-y-4">
+                {pageData.sections.map((section, index) => (
+                  <Card key={section.id} className="relative">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="flex flex-col gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => moveSectionUp(index)}
+                              disabled={index === 0}
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-6 w-6"
+                              onClick={() => moveSectionDown(index)}
+                              disabled={index === pageData.sections.length - 1}
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div>
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <Badge variant="outline">{section.sectionType}</Badge>
+                              {section.title || `Section ${index + 1}`}
+                            </CardTitle>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {section.blocks.length} block{section.blocks.length !== 1 ? "s" : ""}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedSectionId(section.id);
+                              setEditingBlock({ blockType: "text", content: "", alignment: "left", size: "medium" });
+                              setShowBlockDialog(true);
+                            }}
+                            data-testid={`button-add-block-${section.id}`}
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Block
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditingSection(section);
+                              setShowSectionDialog(true);
+                            }}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              if (confirm("Delete this section and all its content?")) {
+                                deleteSectionMutation.mutate(section.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      {section.blocks.length === 0 ? (
+                        <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center text-muted-foreground">
+                          <p>No blocks in this section</p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="mt-2"
+                            onClick={() => {
+                              setSelectedSectionId(section.id);
+                              setEditingBlock({ blockType: "text", content: "", alignment: "left", size: "medium" });
+                              setShowBlockDialog(true);
+                            }}
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Block
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {section.blocks.map((block) => (
+                            <div
+                              key={block.id}
+                              className="flex items-center gap-3 p-3 border rounded-lg group hover-elevate"
+                            >
+                              <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                              <Badge variant="secondary" className="text-xs">
+                                {block.blockType}
+                              </Badge>
+                              <div className="flex-1 min-w-0">{renderBlockContent(block)}</div>
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7"
+                                  onClick={() => {
+                                    setSelectedSectionId(section.id);
+                                    setEditingBlock(block);
+                                    setShowBlockDialog(true);
+                                  }}
+                                >
+                                  <Settings className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7"
+                                  onClick={() => {
+                                    if (confirm("Delete this block?")) {
+                                      deleteBlockMutation.mutate(block.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {/* Add Section Button */}
+                <Button
+                  variant="outline"
+                  className="w-full h-16 border-2 border-dashed"
+                  onClick={() => {
+                    setEditingSection({ sectionType: "text", title: "", padding: "normal" });
+                    setShowSectionDialog(true);
+                  }}
+                  data-testid="button-add-section"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Section
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          {selectedBlock && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Edit Element</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {(() => {
-                  const block = blocks.find((b) => b.id === selectedBlock);
-                  if (!block) return null;
-
-                  if (block.type === "text") {
-                    return (
-                      <div className="space-y-2">
-                        <Label className="text-sm">Content</Label>
-                        <Textarea
-                          value={block.content}
-                          onChange={(e) => updateBlock(block.id, e.target.value)}
-                          placeholder="Enter text..."
-                          rows={3}
-                        />
-                      </div>
-                    );
-                  }
-
-                  if (block.type === "image") {
-                    return (
-                      <div className="space-y-2">
-                        <Label className="text-sm">Image URL</Label>
-                        <Input
-                          value={block.content}
-                          onChange={(e) => updateBlock(block.id, e.target.value)}
-                          placeholder="https://example.com/image.jpg"
-                          type="url"
-                        />
-                      </div>
-                    );
-                  }
-
-                  if (block.type === "video") {
-                    return (
-                      <div className="space-y-2">
-                        <Label className="text-sm">Video URL</Label>
-                        <Input
-                          value={block.content}
-                          onChange={(e) => updateBlock(block.id, e.target.value)}
-                          placeholder="https://example.com/video.mp4"
-                          type="url"
-                        />
-                      </div>
-                    );
-                  }
-                })()}
-              </CardContent>
+            </>
+          ) : (
+            <Card className="h-64 flex items-center justify-center">
+              <div className="text-center text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Select a page to edit</p>
+              </div>
             </Card>
           )}
         </div>
       </div>
-    </div>
-  );
-}
 
-function BlockElement({
-  block,
-  isSelected,
-  onSelect,
-  onDelete,
-  onMouseDown,
-}: {
-  block: PageBlock;
-  isSelected: boolean;
-  onSelect: () => void;
-  onDelete: () => void;
-  onMouseDown: (e: React.MouseEvent) => void;
-}) {
-  return (
-    <div
-      className={`absolute cursor-move transition-all ${
-        isSelected ? "ring-2 ring-blue-500 ring-offset-2" : "hover:ring-1 hover:ring-gray-400"
-      } rounded-lg group`}
-      style={{
-        left: `${block.x}px`,
-        top: `${block.y}px`,
-        width: `${block.width}px`,
-        height: `${block.height}px`,
-      }}
-      onClick={onSelect}
-      onMouseDown={onMouseDown}
-      data-testid={`block-${block.id}`}
-    >
-      {block.type === "text" && (
-        <div className="w-full h-full bg-white border border-gray-200 p-3 rounded-lg flex items-center justify-center overflow-hidden">
-          <p className="text-sm font-medium text-gray-700 line-clamp-3">{block.content || "Text..."}</p>
-        </div>
-      )}
-      {block.type === "image" && (
-        <div className="w-full h-full bg-gray-100 border border-gray-200 rounded-lg flex items-center justify-center">
-          {block.content ? (
-            <img src={block.content} alt="page content" className="w-full h-full object-cover rounded-lg" />
-          ) : (
-            <ImageIcon className="h-8 w-8 text-gray-400" />
-          )}
-        </div>
-      )}
-      {block.type === "video" && (
-        <div className="w-full h-full bg-black border border-gray-200 rounded-lg flex items-center justify-center">
-          {block.content ? (
-            <video src={block.content} className="w-full h-full object-cover rounded-lg" controls />
-          ) : (
-            <VideoIcon className="h-8 w-8 text-gray-600" />
-          )}
-        </div>
-      )}
-      {isSelected && (
-        <button
-          className="absolute -top-8 left-0 p-1 bg-red-500 text-white rounded hover:bg-red-600"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          data-testid={`button-delete-block-${block.id}`}
-        >
-          <Trash2 className="h-3 w-3" />
-        </button>
-      )}
+      {/* Page Dialog */}
+      <Dialog open={showPageDialog} onOpenChange={setShowPageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingPage?.id ? "Edit Page" : "Create New Page"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="page-title">Page Title</Label>
+              <Input
+                id="page-title"
+                value={editingPage?.title || ""}
+                onChange={(e) => setEditingPage({ ...editingPage, title: e.target.value })}
+                placeholder="About Us"
+                data-testid="input-page-title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="page-slug">URL Slug</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">/</span>
+                <Input
+                  id="page-slug"
+                  value={editingPage?.slug || ""}
+                  onChange={(e) => setEditingPage({ ...editingPage, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })}
+                  placeholder="about-us"
+                  data-testid="input-page-slug"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="page-description">Description (SEO)</Label>
+              <Textarea
+                id="page-description"
+                value={editingPage?.description || ""}
+                onChange={(e) => setEditingPage({ ...editingPage, description: e.target.value })}
+                placeholder="Brief description for search engines..."
+                data-testid="input-page-description"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="page-published"
+                checked={!!editingPage?.isPublished}
+                onCheckedChange={(checked) => setEditingPage({ ...editingPage, isPublished: checked ? 1 : 0 })}
+              />
+              <Label htmlFor="page-published">Published</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPageDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSavePage}
+              disabled={!editingPage?.title || !editingPage?.slug}
+              data-testid="button-save-page"
+            >
+              {editingPage?.id ? "Update" : "Create"} Page
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Section Dialog */}
+      <Dialog open={showSectionDialog} onOpenChange={setShowSectionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingSection?.id ? "Edit Section" : "Add Section"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Section Type</Label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {SECTION_TYPES.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setEditingSection({ ...editingSection, sectionType: type.value })}
+                    className={`p-3 rounded-lg border-2 text-center transition-colors ${
+                      editingSection?.sectionType === type.value
+                        ? "border-primary bg-primary/10"
+                        : "border-muted hover-elevate"
+                    }`}
+                  >
+                    <type.icon className="h-5 w-5 mx-auto mb-1" />
+                    <span className="text-xs">{type.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="section-title">Section Title (optional)</Label>
+              <Input
+                id="section-title"
+                value={editingSection?.title || ""}
+                onChange={(e) => setEditingSection({ ...editingSection, title: e.target.value })}
+                placeholder="Our Features"
+              />
+            </div>
+            <div>
+              <Label htmlFor="section-padding">Padding</Label>
+              <Select
+                value={editingSection?.padding || "normal"}
+                onValueChange={(val) => setEditingSection({ ...editingSection, padding: val })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="small">Small</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="large">Large</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="section-bg">Background Color (optional)</Label>
+              <Input
+                id="section-bg"
+                value={editingSection?.backgroundColor || ""}
+                onChange={(e) => setEditingSection({ ...editingSection, backgroundColor: e.target.value })}
+                placeholder="#f5f5f5"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSectionDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSection} disabled={!editingSection?.sectionType}>
+              {editingSection?.id ? "Update" : "Add"} Section
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block Dialog */}
+      <Dialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingBlock?.id ? "Edit Block" : "Add Block"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Block Type</Label>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {BLOCK_TYPES.map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setEditingBlock({ ...editingBlock, blockType: type.value })}
+                    className={`p-2 rounded-lg border-2 text-center transition-colors ${
+                      editingBlock?.blockType === type.value
+                        ? "border-primary bg-primary/10"
+                        : "border-muted hover-elevate"
+                    }`}
+                  >
+                    <type.icon className="h-4 w-4 mx-auto mb-1" />
+                    <span className="text-xs">{type.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(editingBlock?.blockType === "heading" || editingBlock?.blockType === "text" || editingBlock?.blockType === "button" || editingBlock?.blockType === "html") && (
+              <div>
+                <Label htmlFor="block-content">
+                  {editingBlock.blockType === "heading" ? "Heading Text" : 
+                   editingBlock.blockType === "button" ? "Button Text" :
+                   editingBlock.blockType === "html" ? "HTML Code" : "Content"}
+                </Label>
+                {editingBlock.blockType === "text" || editingBlock.blockType === "html" ? (
+                  <Textarea
+                    id="block-content"
+                    value={editingBlock?.content || ""}
+                    onChange={(e) => setEditingBlock({ ...editingBlock, content: e.target.value })}
+                    placeholder={editingBlock.blockType === "html" ? "<div>...</div>" : "Enter text..."}
+                    rows={4}
+                  />
+                ) : (
+                  <Input
+                    id="block-content"
+                    value={editingBlock?.content || ""}
+                    onChange={(e) => setEditingBlock({ ...editingBlock, content: e.target.value })}
+                    placeholder={editingBlock.blockType === "heading" ? "Enter heading..." : "Button text"}
+                  />
+                )}
+              </div>
+            )}
+
+            {(editingBlock?.blockType === "image" || editingBlock?.blockType === "video") && (
+              <>
+                <div>
+                  <Label htmlFor="block-media-url">
+                    {editingBlock.blockType === "image" ? "Image URL" : "Video URL"}
+                  </Label>
+                  <Input
+                    id="block-media-url"
+                    value={editingBlock?.mediaUrl || ""}
+                    onChange={(e) => setEditingBlock({ ...editingBlock, mediaUrl: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                {editingBlock.blockType === "image" && (
+                  <div>
+                    <Label htmlFor="block-media-alt">Alt Text (accessibility)</Label>
+                    <Input
+                      id="block-media-alt"
+                      value={editingBlock?.mediaAlt || ""}
+                      onChange={(e) => setEditingBlock({ ...editingBlock, mediaAlt: e.target.value })}
+                      placeholder="Description of image"
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+            {editingBlock?.blockType === "button" && (
+              <div>
+                <Label htmlFor="block-link-url">Link URL</Label>
+                <Input
+                  id="block-link-url"
+                  value={editingBlock?.linkUrl || ""}
+                  onChange={(e) => setEditingBlock({ ...editingBlock, linkUrl: e.target.value })}
+                  placeholder="/courses or https://..."
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Alignment</Label>
+                <Select
+                  value={editingBlock?.alignment || "left"}
+                  onValueChange={(val) => setEditingBlock({ ...editingBlock, alignment: val })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Left</SelectItem>
+                    <SelectItem value="center">Center</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Size</Label>
+                <Select
+                  value={editingBlock?.size || "medium"}
+                  onValueChange={(val) => setEditingBlock({ ...editingBlock, size: val })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                    <SelectItem value="full">Full Width</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBlockDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveBlock} disabled={!editingBlock?.blockType}>
+              {editingBlock?.id ? "Update" : "Add"} Block
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
