@@ -4265,6 +4265,41 @@ segment1.ts
     }
   });
 
+  // Admin endpoint to manually trigger quiz question import
+  app.post("/api/admin/import-quiz-questions", isAdmin, async (req, res) => {
+    try {
+      console.log("Manual quiz import triggered by admin");
+      const { importAllUnitQuizzes } = await import("./importAllUnitQuizzes");
+      await importAllUnitQuizzes();
+      res.json({ success: true, message: "Successfully imported 380 unit quiz questions (20 per unit x 19 units)" });
+    } catch (err) {
+      console.error("Error importing quiz questions:", err);
+      res.status(500).json({ error: "Failed to import quiz questions" });
+    }
+  });
+
+  // Admin endpoint to manually trigger final exam import
+  app.post("/api/admin/import-final-exams", isAdmin, async (req, res) => {
+    try {
+      console.log("Manual final exam import triggered by admin");
+      const db = (await import("./db")).db;
+      const { courses } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const courseResult = await db.select().from(courses).where(eq(courses.sku, "FL-RE-PL-SA-FRECI-63")).limit(1);
+      if (courseResult.length === 0) {
+        return res.status(404).json({ error: "FREC I course not found" });
+      }
+      
+      const { importFinalExams } = await import("./importFinalExams");
+      await importFinalExams(courseResult[0].id);
+      res.json({ success: true, message: "Successfully imported final exams (Form A: 100, Form B: 100)" });
+    } catch (err) {
+      console.error("Error importing final exams:", err);
+      res.status(500).json({ error: "Failed to import final exams" });
+    }
+  });
+
   // ===== Media Asset Management Routes =====
   app.get("/api/admin/media", isAdmin, async (req, res) => {
     try {
