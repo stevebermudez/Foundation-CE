@@ -41,6 +41,13 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Questions include detailed explanations and subunit references
   - Each question is specifically covered in the corresponding unit's lesson content
   - Import script: `server/importAllUnitQuizzes.ts` replaces all unit quiz questions
+- **Visual Page Builder (CMS)**: Squarespace-style drag-and-drop page editor for managing marketing pages without code:
+  - Database tables: `site_pages`, `page_sections`, `section_blocks` with hierarchical structure
+  - Section types: Hero, Text Content, Features Grid, Call to Action, Column Layout, Image Gallery, Custom HTML
+  - Block types: Heading, Text, Image, Video, Button, Spacer, Divider, HTML
+  - Full CRUD operations via admin API endpoints at `/api/admin/site-pages`
+  - PageRenderer component for displaying dynamic CMS content on frontend
+  - Supports page publishing/drafts, SEO metadata, section reordering, and block alignment/sizing
 
 ### System Design Choices
 - **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
