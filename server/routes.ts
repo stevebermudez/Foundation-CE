@@ -3586,7 +3586,7 @@ segment1.ts
 
   // ===== LMS Standards Export Routes (SCORM, QTI, xAPI) =====
   
-  // SCORM 1.2 Package Manifest Export
+  // SCORM 1.2 Package Manifest Export (XML only)
   app.get(
     "/api/export/course/:courseId/scorm-manifest.xml",
     isAdmin,
@@ -3602,6 +3602,35 @@ segment1.ts
       } catch (err) {
         console.error("Error generating SCORM manifest:", err);
         res.status(500).json({ error: "Failed to generate SCORM manifest" });
+      }
+    }
+  );
+
+  // SCORM 1.2 Complete Package Download (ZIP with all content)
+  app.get(
+    "/api/export/course/:courseId/scorm-package.zip",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { generateSCORMPackage, generateSCORMPackageWithExam } = await import("./lmsExportService");
+        const examId = req.query.examId as string | undefined;
+        
+        let zipBuffer: Buffer;
+        if (examId) {
+          zipBuffer = await generateSCORMPackageWithExam(req.params.courseId, examId);
+        } else {
+          zipBuffer = await generateSCORMPackage(req.params.courseId);
+        }
+        
+        res.setHeader("Content-Type", "application/zip");
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="scorm-course-${req.params.courseId}.zip"`
+        );
+        res.send(zipBuffer);
+      } catch (err) {
+        console.error("Error generating SCORM package:", err);
+        res.status(500).json({ error: "Failed to generate SCORM package" });
       }
     }
   );

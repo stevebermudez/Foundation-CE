@@ -59,6 +59,21 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
 - **Authentication Abstraction**: OAuth/authentication logic is separated.
 - **LMS Integration**: Architected for seamless integration and potential migration to 3rd-party LMS systems via data export/import APIs and SCORM package conversion readiness.
 - **Real Estate Express Integration**: Dedicated APIs for exporting and importing enrollment data in specific formats.
+- **LMS Standards Export (SCORM/QTI)**: Complete support for industry-standard content packaging:
+  - SCORM 1.2 package export with full ZIP files containing HTML lessons, SCORM API adapter, and manifest
+  - QTI 2.1 export for exams and question banks
+  - xAPI statement generation for learning analytics
+  - Export endpoints at `/api/export/course/:courseId/scorm-package.zip` and `/api/export/exam/:examId/qti.xml`
+- **Multi-State Configuration**: State-specific regulatory requirements abstraction with:
+  - State configuration database table with licensing types, CE hours, renewal periods
+  - CRUD API routes at `/api/admin/state-configurations`
+  - Seeded configurations for FL (active), CA, and TX (ready for expansion)
+  - Seed script: `server/seedStateConfigs.ts`
+- **Learning Analytics & Gamification**:
+  - Analytics event tracking and summary dashboard
+  - Achievement/badge system with user awards
+  - Notifications system with read status
+  - Learning paths with course sequences
 
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
