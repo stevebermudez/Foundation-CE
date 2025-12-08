@@ -225,6 +225,30 @@ export async function updatePlaceholderQuestions() {
       }
     }
     
+    // Auto-normalize quiz settings on every startup
+    // This ensures all unit quizzes show 10 questions in student view
+    console.log("Normalizing unit quiz settings to 10 questions per attempt...");
+    try {
+      // Update practice_exams (student LMS) to show 10 questions per unit quiz
+      await db.execute(sql`
+        UPDATE practice_exams 
+        SET total_questions = 10 
+        WHERE is_final_exam = 0 
+        AND title LIKE '%Unit%Quiz%'
+      `);
+      
+      // Update question_banks (admin console) to use 10 questions per attempt
+      await db.execute(sql`
+        UPDATE question_banks 
+        SET questions_per_attempt = 10 
+        WHERE bank_type = 'unit_quiz'
+      `);
+      
+      console.log("✓ Unit quiz settings normalized to 10 questions per attempt");
+    } catch (normalizeError) {
+      console.error("Failed to normalize quiz settings:", normalizeError);
+    }
+    
   } catch (error) {
     console.error("Error updating placeholder questions:", error);
   }
