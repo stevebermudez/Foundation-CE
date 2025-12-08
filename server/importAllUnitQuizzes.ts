@@ -501,7 +501,7 @@ function convertAnswerToIndex(answer: string): number {
   return map[answer.toUpperCase()] || 0;
 }
 
-async function importAllUnitQuizzes() {
+export async function importAllUnitQuizzes() {
   console.log("Starting comprehensive import of all 19 unit quizzes (380 questions)...\n");
 
   const allUnits = await db.select().from(units);
@@ -565,12 +565,15 @@ async function importAllUnitQuizzes() {
   console.log("=".repeat(60));
 }
 
-importAllUnitQuizzes()
-  .then(() => {
-    console.log("\nAll unit quizzes imported successfully!");
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("Error importing quizzes:", error);
-    process.exit(1);
-  });
+// Only run when executed directly (not when imported)
+if (process.argv[1]?.includes('importAllUnitQuizzes')) {
+  importAllUnitQuizzes()
+    .then(() => {
+      console.log("\nAll unit quizzes imported successfully!");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("Error importing quizzes:", error);
+      process.exit(1);
+    });
+}

@@ -43,14 +43,14 @@ export async function updatePlaceholderQuestions() {
       AND exam_id NOT IN (SELECT id FROM practice_exams WHERE title LIKE '%Final Exam%')
     `);
     
-    // Delete from bank_questions
+    // Delete from bank_questions - only delete obvious placeholder patterns
+    // NOTE: Do NOT delete by length - professional questions can have short texts like "Steering is:"
     const bankDeleteResult = await db.execute(sql`
       DELETE FROM bank_questions 
       WHERE question_text LIKE '%Sample question%' 
          OR question_text LIKE '%for this unit covering key concepts%'
          OR question_text LIKE '%What is 2 + 2%'
          OR options LIKE '%Option A - First possible%'
-         OR LENGTH(question_text) < 25
     `);
     
     // Delete test quizzes and question banks
@@ -152,40 +152,77 @@ export async function updatePlaceholderQuestions() {
       }
     }
     
-    // Check if unit quiz banks have professionally-written questions (with explanations containing "Unit")
-    // If they do, skip the addUnitQuestions and syncQuizQuestions steps to preserve the curated content
+    // Check if unit quiz banks have professionally-written questions
+    // Robust detection: verify all 19 banks have exactly 20 questions with professional markers
     const allQuestionBanks = await db.select().from(questionBanks).where(eq(questionBanks.courseId, course.id));
     const unitQuizBanks = allQuestionBanks.filter(qb => qb.bankType === 'unit_quiz');
     
-    // Check if any bank has professionally-imported questions (they have explanations with "Unit" references)
     let hasProfessionalQuestions = false;
     if (unitQuizBanks.length === 19) {
-      const firstBank = unitQuizBanks[0];
-      const sampleQs = await db.select().from(bankQuestions).where(and(
-        eq(bankQuestions.bankId, firstBank.id),
-        eq(bankQuestions.isActive, 1)
-      )).limit(5);
+      // Check ALL banks for proper question counts and professional markers
+      // Do NOT break early - scan all banks to determine if reimport is needed
+      let allBanksValid = true;
+      let totalQuestions = 0;
+      let invalidBanks: string[] = [];
       
-      // Professional questions have explanations with unit/subunit references
-      hasProfessionalQuestions = sampleQs.some(q => 
-        q.explanation && (q.explanation.includes('Unit') || q.explanation.includes('Subunit'))
-      );
+      for (const bank of unitQuizBanks) {
+        const questions = await db.select().from(bankQuestions).where(and(
+          eq(bankQuestions.bankId, bank.id),
+          eq(bankQuestions.isActive, 1)
+        ));
+        
+        totalQuestions += questions.length;
+        
+        // Each bank should have exactly 20 questions
+        if (questions.length !== 20) {
+          invalidBanks.push(`${bank.title}: ${questions.length} questions (expected 20)`);
+          allBanksValid = false;
+          continue; // Don't break - continue checking all banks
+        }
+        
+        // Check that at least one question has professional explanation markers
+        const hasProfessionalMarker = questions.some(q => 
+          q.explanation && (q.explanation.includes('Unit') || q.explanation.includes('Subunit'))
+        );
+        
+        if (!hasProfessionalMarker) {
+          invalidBanks.push(`${bank.title}: missing professional markers`);
+          allBanksValid = false;
+          // Continue checking all banks, don't break
+        }
+      }
+      
+      if (allBanksValid && totalQuestions === 380) {
+        hasProfessionalQuestions = true;
+        console.log(`✓ All 19 unit quiz banks verified (${totalQuestions} questions total)`);
+      } else if (invalidBanks.length > 0) {
+        console.log(`Found ${invalidBanks.length} invalid banks:`);
+        invalidBanks.forEach(msg => console.log(`  - ${msg}`));
+      }
     }
     
     if (hasProfessionalQuestions) {
-      console.log("✓ Professional unit quiz questions detected - skipping addUnitQuestions/syncQuizQuestions to preserve curated content");
+      console.log("✓ Professional unit quiz questions detected - preserving curated content");
     } else {
-      // Add additional questions to units 9-19 (which are short)
-      const { addUnitQuestions } = await import("./addUnitQuestions");
-      await addUnitQuestions();
-      
-      // Remove questions that aren't specifically covered in lesson content
-      const { removeUncoveredQuestions } = await import("./removeUncoveredQuestions");
-      await removeUncoveredQuestions();
-      
-      // Sync quiz questions from exam_questions to bank_questions for admin console
-      const { syncQuizQuestions } = await import("./syncQuizQuestions");
-      await syncQuizQuestions();
+      // No professional questions found - import them automatically
+      console.log("📚 Professional unit quiz questions not found - importing 380 curated questions...");
+      try {
+        const { importAllUnitQuizzes } = await import("./importAllUnitQuizzes");
+        await importAllUnitQuizzes();
+        console.log("✓ Successfully imported 380 unit quiz questions (20 per unit x 19 units)");
+      } catch (importError) {
+        console.error("Failed to import unit quiz questions:", importError);
+        // Fallback to legacy system if import fails
+        console.log("Falling back to legacy question system...");
+        const { addUnitQuestions } = await import("./addUnitQuestions");
+        await addUnitQuestions();
+        
+        const { removeUncoveredQuestions } = await import("./removeUncoveredQuestions");
+        await removeUncoveredQuestions();
+        
+        const { syncQuizQuestions } = await import("./syncQuizQuestions");
+        await syncQuizQuestions();
+      }
     }
     
   } catch (error) {
