@@ -16,6 +16,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -964,10 +965,10 @@ export default function AdminCoursesPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Export Course Content</DialogTitle>
+              <DialogDescription>
+                Choose what to include in your Word document export for "{exportingCourse.title}"
+              </DialogDescription>
             </DialogHeader>
-            <p className="text-sm text-muted-foreground mb-4">
-              Choose what to include in your Word document export for "{exportingCourse.title}"
-            </p>
             <ExportDialog course={exportingCourse} onClose={() => setExportingCourse(null)} />
           </DialogContent>
         </Dialog>
@@ -978,6 +979,9 @@ export default function AdminCoursesPage() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Florida DBPR Regulatory Compliance</DialogTitle>
+              <DialogDescription>
+                Export compliance documents required for Florida distance education course approval.
+              </DialogDescription>
             </DialogHeader>
             <FloridaComplianceDialog 
               course={floridaComplianceCourse} 

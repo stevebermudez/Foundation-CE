@@ -43,6 +43,11 @@ export default function CookieConsent() {
   });
 
   useEffect(() => {
+    // Don't show cookie consent on admin pages
+    if (window.location.pathname.startsWith('/admin')) {
+      return;
+    }
+    
     const storedConsent = localStorage.getItem(CONSENT_STORAGE_KEY);
     if (!storedConsent) {
       const timer = setTimeout(() => setShowBanner(true), 1000);
