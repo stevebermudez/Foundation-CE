@@ -1345,6 +1345,26 @@ export async function registerRoutes(
             return res.status(403).json({ error: "Complete all units and pass all quizzes before the final exam" });
           }
         }
+        
+        // Atomically increment attempt counter and check limits
+        // This prevents race conditions from concurrent requests
+        const maxAttempts = 3;
+        const incrementResult = await storage.incrementFinalExamAttempts(enrollmentId, maxAttempts);
+        
+        if (!incrementResult.success) {
+          // Re-fetch enrollment to get current state for error message
+          const currentEnrollment = await storage.getEnrollmentById(enrollmentId);
+          
+          if (currentEnrollment?.finalExamPassed === 1) {
+            return res.status(400).json({ error: "You have already passed the final exam" });
+          }
+          
+          return res.status(403).json({ 
+            error: "Maximum attempts reached. You have used all 3 final exam attempts.",
+            attemptsUsed: currentEnrollment?.finalExamAttempts || maxAttempts,
+            maxAttempts
+          });
+        }
       }
       
       // Get random questions for this attempt
@@ -1674,7 +1694,11 @@ export async function registerRoutes(
     }
   });
 
-  // Get final exam info for a course
+  // Get final exam info for a course (with Form A/B version logic)
+  // Students get 3 total attempts: 
+  // - Attempt 1: Form A
+  // - Attempt 2: Form B (if failed attempt 1)
+  // - Attempt 3: Form A (if failed attempt 2)
   app.get("/api/courses/:courseId/final-exam", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
@@ -1685,9 +1709,29 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Not enrolled in this course" });
       }
       
-      const bank = await storage.getFinalExamBank(courseId);
-      if (!bank) {
+      // Get both exam forms
+      const { formA, formB } = await storage.getFinalExamsByForm(courseId);
+      
+      // Fall back to legacy single final exam if no Form A/B
+      let currentExam = formA || await storage.getFinalExamBank(courseId);
+      if (!currentExam) {
         return res.status(404).json({ error: "No final exam found for this course" });
+      }
+      
+      const attempts = enrollment.finalExamAttempts || 0;
+      const maxAttempts = 3;
+      const attemptsRemaining = Math.max(0, maxAttempts - attempts);
+      
+      // Determine which form to show based on attempt count
+      // Attempt 1 (attempts=0): Form A
+      // Attempt 2 (attempts=1): Form B
+      // Attempt 3 (attempts=2): Form A
+      if (formA && formB) {
+        if (attempts === 1) {
+          currentExam = formB; // Switch to Form B for second attempt
+        } else {
+          currentExam = formA; // Form A for first and third attempts
+        }
       }
       
       // Check if all units are complete
@@ -1702,16 +1746,22 @@ export async function registerRoutes(
       }
       
       res.json({
-        bankId: bank.id,
-        title: bank.title,
-        description: bank.description,
-        questionsPerAttempt: bank.questionsPerAttempt,
-        passingScore: bank.passingScore,
-        timeLimit: bank.timeLimit,
+        bankId: currentExam.id,
+        examId: currentExam.id,
+        title: currentExam.title,
+        description: currentExam.description,
+        questionsPerAttempt: currentExam.questionsPerAttempt || currentExam.totalQuestions,
+        totalQuestions: currentExam.totalQuestions,
+        passingScore: currentExam.passingScore,
+        timeLimit: currentExam.timeLimit,
+        examForm: currentExam.examForm || "A",
         isUnlocked: allUnitsComplete,
         alreadyPassed: enrollment.finalExamPassed === 1,
         bestScore: enrollment.finalExamScore,
-        attempts: enrollment.finalExamAttempts || 0
+        attempts,
+        maxAttempts,
+        attemptsRemaining,
+        canRetake: attemptsRemaining > 0 && enrollment.finalExamPassed !== 1
       });
     } catch (err) {
       console.error("Error fetching final exam:", err);

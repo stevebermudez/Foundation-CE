@@ -169,6 +169,7 @@ export interface IStorage {
   updateLessonTimeSpent(enrollmentId: string, lessonId: string, secondsToAdd: number): Promise<LessonProgress>;
   completeLesson(enrollmentId: string, lessonId: string, userId: string): Promise<LessonProgress>;
   updateEnrollmentProgress(enrollmentId: string, data: Partial<Enrollment>): Promise<Enrollment>;
+  incrementFinalExamAttempts(enrollmentId: string, maxAttempts: number): Promise<{ success: boolean; newAttemptCount: number }>;
   checkUnitCompletion(enrollmentId: string, unitId: string): Promise<{ lessonsComplete: boolean; quizPassed: boolean }>;
   unlockNextUnit(enrollmentId: string): Promise<UnitProgress | undefined>;
   getEnrollmentById(enrollmentId: string): Promise<Enrollment | undefined>;
@@ -2844,6 +2845,29 @@ export class DatabaseStorage implements IStorage {
       .where(eq(enrollments.id, enrollmentId))
       .returning();
     return updated;
+  }
+
+  async incrementFinalExamAttempts(enrollmentId: string, maxAttempts: number): Promise<{ success: boolean; newAttemptCount: number }> {
+    // Atomic increment with WHERE clause to prevent race conditions
+    // Only increments if current attempts < maxAttempts
+    const result = await db.execute(sql`
+      UPDATE enrollments 
+      SET final_exam_attempts = COALESCE(final_exam_attempts, 0) + 1
+      WHERE id = ${enrollmentId} 
+        AND COALESCE(final_exam_attempts, 0) < ${maxAttempts}
+        AND (final_exam_passed IS NULL OR final_exam_passed = 0)
+      RETURNING final_exam_attempts
+    `);
+    
+    if (result.rows && result.rows.length > 0) {
+      return { 
+        success: true, 
+        newAttemptCount: result.rows[0].final_exam_attempts as number 
+      };
+    }
+    
+    // If no rows updated, either max attempts reached or already passed
+    return { success: false, newAttemptCount: -1 };
   }
 
   async checkUnitCompletion(enrollmentId: string, unitId: string): Promise<{ lessonsComplete: boolean; quizPassed: boolean }> {

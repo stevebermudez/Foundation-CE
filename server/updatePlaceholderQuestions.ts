@@ -127,77 +127,28 @@ export async function updatePlaceholderQuestions() {
     
     console.log(`✓ Cleanup complete - removed duplicates: ${duplicatesRemoved}`);
     
-    // Now ensure final exam has 100 questions
-    if (finalExamId) {
-      const finalExamQuestions = await db
-        .select()
-        .from(examQuestions)
-        .where(eq(examQuestions.examId, finalExamId));
+    // Import the proper 100-question final exams (Form A and Form B)
+    // This is now handled by the importFinalExams function
+    // Check if we need to import (if there are no Form A/B exams)
+    const formAExam = allExams.find(e => e.isFinalExam === 1 && e.examForm === 'A');
+    const formBExam = allExams.find(e => e.isFinalExam === 1 && e.examForm === 'B');
+    
+    if (!formAExam || !formBExam) {
+      console.log("Final exam forms A/B not found - importing...");
+      const { importFinalExams } = await import("./importFinalExams");
+      await importFinalExams(course.id);
+    } else {
+      // Check if both forms have 100 questions
+      const formAQuestions = await db.select().from(examQuestions).where(eq(examQuestions.examId, formAExam.id));
+      const formBQuestions = await db.select().from(examQuestions).where(eq(examQuestions.examId, formBExam.id));
       
-      const currentCount = finalExamQuestions.length;
-      console.log(`Final exam has ${currentCount} questions`);
+      console.log(`Final Exam Form A: ${formAQuestions.length} questions`);
+      console.log(`Final Exam Form B: ${formBQuestions.length} questions`);
       
-      if (currentCount < 100) {
-        console.log(`Populating final exam to 100 questions from unit quizzes...`);
-        
-        // Collect all real questions from unit quizzes
-        const allUnitQuestions: Array<{
-          questionText: string | null;
-          options: string | null;
-          correctAnswer: string | null;
-          explanation: string | null;
-          questionType: string | null;
-        }> = [];
-        
-        for (const exam of allExams) {
-          if (exam.title?.includes('Final Exam')) continue;
-          
-          const questions = await db
-            .select()
-            .from(examQuestions)
-            .where(eq(examQuestions.examId, exam.id));
-          
-          for (const q of questions) {
-            if (q.questionText && !q.questionText.includes('Sample question')) {
-              allUnitQuestions.push({
-                questionText: q.questionText,
-                options: q.options,
-                correctAnswer: q.correctAnswer,
-                explanation: q.explanation,
-                questionType: q.questionType
-              });
-            }
-          }
-        }
-        
-        console.log(`Found ${allUnitQuestions.length} real questions from unit quizzes`);
-        
-        // Get existing final exam question texts to avoid duplicates
-        const existingTexts = new Set(finalExamQuestions.map(q => q.questionText));
-        
-        // Shuffle and add questions until we reach 100
-        const shuffled = allUnitQuestions.sort(() => Math.random() - 0.5);
-        let added = 0;
-        
-        for (const q of shuffled) {
-          if (currentCount + added >= 100) break;
-          if (!q.questionText || existingTexts.has(q.questionText)) continue;
-          
-          await db.insert(examQuestions).values({
-            examId: finalExamId,
-            questionText: q.questionText,
-            options: q.options || '[]',
-            correctAnswer: q.correctAnswer || 'A',
-            explanation: q.explanation,
-            questionType: q.questionType || 'multiple_choice',
-            sequence: currentCount + added
-          });
-          
-          existingTexts.add(q.questionText);
-          added++;
-        }
-        
-        console.log(`Added ${added} questions to final exam. Total: ${currentCount + added}`);
+      if (formAQuestions.length < 100 || formBQuestions.length < 100) {
+        console.log("Final exams incomplete - reimporting...");
+        const { importFinalExams } = await import("./importFinalExams");
+        await importFinalExams(course.id);
       }
     }
     
