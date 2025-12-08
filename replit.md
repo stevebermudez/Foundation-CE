@@ -33,6 +33,10 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Dual end-of-course examinations (Form A and Form B) for pre-licensing and post-licensing courses
   - Export capabilities for regulatory submission
   - Page reference and unit reference fields in exam questions schema
+- **Automated Placeholder Cleanup**: The `updatePlaceholderQuestions.ts` script runs on every server restart to:
+  - Detect and remove duplicate quizzes (keeping those with real content)
+  - Replace placeholder questions with real content from question banks
+  - Ensure all unit quizzes contain authentic educational content
 
 ### System Design Choices
 - **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
