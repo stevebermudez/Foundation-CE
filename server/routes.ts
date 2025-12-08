@@ -7,6 +7,7 @@ import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
 import { updateAllLessonContent, fixQuestionBankSettings } from "./updateLessonContent";
 import { migrateQuizDataToCanonicalSchema, checkMigrationNeeded } from "./migrateQuizData";
+import { updatePlaceholderQuestions } from "./updatePlaceholderQuestions";
 import { isAuthenticated, isAdmin } from "./oauthAuth";
 import { jwtAuth } from "./jwtAuth";
 import {
@@ -66,6 +67,9 @@ export async function registerRoutes(
       } else {
         console.log("✓ Quiz data already in canonical schema");
       }
+      
+      // Update any placeholder questions with real content
+      await updatePlaceholderQuestions();
     } catch (err: any) {
       console.error("Error with FREC I seeding:", err);
     }
