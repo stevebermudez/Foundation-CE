@@ -37,6 +37,10 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Detect and remove duplicate quizzes (keeping those with real content)
   - Replace placeholder questions with real content from question banks
   - Ensure all unit quizzes contain authentic educational content
+- **Unit Quiz Question Banks**: All 19 units contain exactly 20 professionally-written quiz questions each (380 total):
+  - Questions include detailed explanations and subunit references
+  - Each question is specifically covered in the corresponding unit's lesson content
+  - Import script: `server/importAllUnitQuizzes.ts` replaces all unit quiz questions
 
 ### System Design Choices
 - **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
