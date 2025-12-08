@@ -21,7 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Edit2, Trash2, AlertCircle, FileDown, Download } from "lucide-react";
+import { Plus, Edit2, Trash2, AlertCircle, FileDown, Download, FileText, ClipboardList } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -127,6 +127,150 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
           <Download className="h-4 w-4 mr-2" />
           {isExporting ? "Exporting..." : "Export to Word"}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function FloridaComplianceDialog({ course, onClose }: { course: any; onClose: () => void }) {
+  const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState<string | null>(null);
+
+  const handleExport = async (exportType: 'answer-key' | 'final-exam-a' | 'final-exam-b', formParam?: 'A' | 'B') => {
+    setIsExporting(exportType);
+    try {
+      const token = localStorage.getItem("adminToken");
+      let url = '';
+      let filename = '';
+      
+      if (exportType === 'answer-key') {
+        const params = formParam ? `?form=${formParam}` : '';
+        url = `/api/export/course/${course.id}/answer-key.docx${params}`;
+        filename = formParam 
+          ? `answer-key-form-${formParam.toLowerCase()}-${course.title.replace(/[^a-z0-9]/gi, '-')}.docx`
+          : `answer-key-${course.title.replace(/[^a-z0-9]/gi, '-')}.docx`;
+      } else if (exportType === 'final-exam-a') {
+        url = `/api/export/course/${course.id}/final-exam-a.docx`;
+        filename = `final-exam-form-a-${course.title.replace(/[^a-z0-9]/gi, '-')}.docx`;
+      } else if (exportType === 'final-exam-b') {
+        url = `/api/export/course/${course.id}/final-exam-b.docx`;
+        filename = `final-exam-form-b-${course.title.replace(/[^a-z0-9]/gi, '-')}.docx`;
+      }
+      
+      const res = await fetch(url, {
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      if (!res.ok) {
+        throw new Error("Failed to download");
+      }
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+      toast({
+        title: "Export Complete",
+        description: `Your ${exportType.replace(/-/g, ' ')} document has been downloaded.`,
+      });
+    } catch (err) {
+      toast({
+        title: "Export Failed",
+        description: "Could not download the document.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Florida DBPR requires an answer key with page references and two end-of-course examinations 
+        (Form A and Form B) for distance pre-licensing and post-licensing education courses.
+      </p>
+      
+      <div className="space-y-3">
+        <div className="border rounded-lg p-4">
+          <h4 className="font-medium mb-2 flex items-center gap-2">
+            <ClipboardList className="h-4 w-4" />
+            Answer Key with Page References
+          </h4>
+          <p className="text-sm text-muted-foreground mb-3">
+            Exports a table with question numbers, correct answers, and page references where 
+            the information for each question can be found.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleExport('answer-key')}
+              disabled={isExporting === 'answer-key'}
+              data-testid="button-export-answer-key"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting === 'answer-key' ? "Exporting..." : "Export All Questions"}
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleExport('answer-key', 'A')}
+              disabled={isExporting === 'answer-key'}
+              data-testid="button-export-answer-key-a"
+            >
+              Form A Key
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleExport('answer-key', 'B')}
+              disabled={isExporting === 'answer-key'}
+              data-testid="button-export-answer-key-b"
+            >
+              Form B Key
+            </Button>
+          </div>
+        </div>
+        
+        <div className="border rounded-lg p-4">
+          <h4 className="font-medium mb-2 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            End-of-Course Examinations
+          </h4>
+          <p className="text-sm text-muted-foreground mb-3">
+            Florida requires two separate final examinations (Form A and Form B) for distance 
+            education courses.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              size="sm"
+              onClick={() => handleExport('final-exam-a')}
+              disabled={isExporting === 'final-exam-a'}
+              data-testid="button-export-exam-a"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting === 'final-exam-a' ? "Exporting..." : "Export Form A"}
+            </Button>
+            <Button 
+              size="sm"
+              onClick={() => handleExport('final-exam-b')}
+              disabled={isExporting === 'final-exam-b'}
+              data-testid="button-export-exam-b"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting === 'final-exam-b' ? "Exporting..." : "Export Form B"}
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      <div className="flex gap-2 justify-end pt-4 border-t">
+        <Button variant="outline" onClick={onClose}>Close</Button>
       </div>
     </div>
   );
@@ -614,6 +758,7 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
 export default function AdminCoursesPage() {
   const [editingCourse, setEditingCourse] = useState<any | null>(null);
   const [exportingCourse, setExportingCourse] = useState<any | null>(null);
+  const [floridaComplianceCourse, setFloridaComplianceCourse] = useState<any | null>(null);
   
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["/api/admin/courses"],
@@ -737,6 +882,18 @@ export default function AdminCoursesPage() {
                     >
                       <FileDown className="h-4 w-4" aria-hidden="true" />
                     </Button>
+                    {course.state === 'FL' && (
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => setFloridaComplianceCourse(course)}
+                        data-testid={`button-florida-compliance-${course.id}`}
+                        aria-label={`Florida DBPR compliance exports for ${course.title}`}
+                        title="Florida DBPR Compliance"
+                      >
+                        <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    )}
                     <Button
                       size="icon"
                       variant="outline"
@@ -812,6 +969,20 @@ export default function AdminCoursesPage() {
               Choose what to include in your Word document export for "{exportingCourse.title}"
             </p>
             <ExportDialog course={exportingCourse} onClose={() => setExportingCourse(null)} />
+          </DialogContent>
+        </Dialog>
+      )}
+      
+      {floridaComplianceCourse && (
+        <Dialog open={!!floridaComplianceCourse} onOpenChange={(open) => !open && setFloridaComplianceCourse(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Florida DBPR Regulatory Compliance</DialogTitle>
+            </DialogHeader>
+            <FloridaComplianceDialog 
+              course={floridaComplianceCourse} 
+              onClose={() => setFloridaComplianceCourse(null)} 
+            />
           </DialogContent>
         </Dialog>
       )}

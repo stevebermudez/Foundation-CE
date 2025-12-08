@@ -28,6 +28,11 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
 - **Course Expiration Management**: Configurable enrollment expiration periods tracked per course, with content access blocking for expired non-completed enrollments.
 - **Admin Settings Management**: Infrastructure for system configuration, email templates, and user roles.
 - **Regulatory Compliance Infrastructure**: Includes privacy consent management (cookie banner, preference center), data subject rights (export, deletion, do not sell), FERPA educational records protection, SOC 2 audit logging, and dedicated legal compliance pages.
+- **Florida DBPR Regulatory Compliance**: Complete support for Florida distance education course approval requirements including:
+  - Answer key export with page number references for final exam questions
+  - Dual end-of-course examinations (Form A and Form B) for pre-licensing and post-licensing courses
+  - Export capabilities for regulatory submission
+  - Page reference and unit reference fields in exam questions schema
 
 ### System Design Choices
 - **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
