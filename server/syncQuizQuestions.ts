@@ -35,12 +35,9 @@ export async function syncQuizQuestions() {
     // Skip final exam banks
     if (bank.title?.includes('Final Exam')) continue;
     
-    // Check if bank already has questions
+    // Get existing questions in bank to check for missing ones
     const existingQuestions = await db.select().from(bankQuestions).where(eq(bankQuestions.bankId, bank.id));
-    if (existingQuestions.length > 0) {
-      console.log(`${bank.title}: already has ${existingQuestions.length} questions, skipping`);
-      continue;
-    }
+    const existingTexts = new Set(existingQuestions.map(q => q.questionText?.substring(0, 50)));
     
     // Find matching practice exam by unit number (extract from title like "Unit X Quiz:")
     const unitMatch = bank.title?.match(/Unit\s+(\d+)/i);
@@ -69,9 +66,15 @@ export async function syncQuizQuestions() {
       continue;
     }
     
-    // Copy questions to the question bank
+    // Copy only questions not already in the bank
     let copied = 0;
     for (const q of examQs) {
+      // Skip if question already exists (check by first 50 chars)
+      const textStart = q.questionText?.substring(0, 50) || '';
+      if (existingTexts.has(textStart)) {
+        continue;
+      }
+      
       // Convert letter answer (A, B, C, D) to 0-based index
       const answerMap: Record<string, number> = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
       const correctOptionIndex = answerMap[q.correctAnswer || 'A'] ?? 0;
@@ -87,7 +90,11 @@ export async function syncQuizQuestions() {
       copied++;
     }
     
-    console.log(`${bank.title}: synced ${copied} questions from practice exam`);
+    if (copied > 0) {
+      console.log(`${bank.title}: added ${copied} new questions (${existingQuestions.length + copied} total)`);
+    } else if (existingQuestions.length > 0) {
+      console.log(`${bank.title}: already synced (${existingQuestions.length} questions)`);
+    }
     totalSynced += copied;
   }
   

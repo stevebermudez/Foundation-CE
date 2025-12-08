@@ -152,6 +152,10 @@ export async function updatePlaceholderQuestions() {
       }
     }
     
+    // Add additional questions to units 9-19 (which are short)
+    const { addUnitQuestions } = await import("./addUnitQuestions");
+    await addUnitQuestions();
+    
     // Sync quiz questions from exam_questions to bank_questions for admin console
     const { syncQuizQuestions } = await import("./syncQuizQuestions");
     await syncQuizQuestions();
