@@ -1347,3 +1347,239 @@ export const insertSectionBlockSchema = createInsertSchema(sectionBlocks).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+// ============================================================
+// WHITE-LABEL LMS INFRASTRUCTURE
+// ============================================================
+
+// State Regulatory Configurations - Supports multi-state compliance
+export const stateConfigurations = pgTable("state_configurations", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  stateCode: varchar("state_code").unique().notNull(), // "FL", "CA", "TX", etc.
+  stateName: varchar("state_name").notNull(), // "Florida", "California", "Texas"
+  isActive: integer("is_active").default(1), // Whether state is available for courses
+  regulatoryBody: varchar("regulatory_body"), // "DBPR", "DRE", etc.
+  regulatoryUrl: varchar("regulatory_url"), // Link to regulatory body
+  providerNumber: varchar("provider_number"), // Platform's provider number for this state
+  licenseTypes: text("license_types"), // JSON array of supported license types
+  requirementCycles: text("requirement_cycles"), // JSON array of requirement cycles
+  renewalPeriodYears: integer("renewal_period_years").default(2), // Default renewal period
+  ceHoursRequired: integer("ce_hours_required"), // CE hours required for renewal
+  preLicenseHoursRequired: integer("pre_license_hours_required"), // Pre-license hours
+  postLicenseHoursRequired: integer("post_license_hours_required"), // Post-license hours
+  electronicReporting: integer("electronic_reporting").default(0), // 1 if supports e-reporting
+  reportingFormat: varchar("reporting_format"), // "DBPR", "DRE", custom format name
+  certificateTemplate: text("certificate_template"), // HTML template for certificates
+  specialRequirements: text("special_requirements"), // JSON for state-specific rules
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type StateConfiguration = typeof stateConfigurations.$inferSelect;
+export type InsertStateConfiguration = typeof stateConfigurations.$inferInsert;
+export const insertStateConfigurationSchema = createInsertSchema(stateConfigurations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// LMS Content Packages - Tracks SCORM/xAPI exports
+export const contentPackages = pgTable("content_packages", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id").notNull(),
+  packageType: varchar("package_type").notNull(), // "scorm12", "scorm2004", "xapi", "qti", "commonCartridge"
+  version: varchar("version").default("1.0"),
+  filename: varchar("filename").notNull(),
+  fileUrl: varchar("file_url"),
+  fileSize: integer("file_size"), // In bytes
+  manifest: text("manifest"), // XML/JSON manifest content
+  metadata: text("metadata"), // Additional package metadata as JSON
+  status: varchar("status").default("draft"), // "draft", "published", "archived"
+  exportedBy: varchar("exported_by"), // Admin who created the export
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type ContentPackage = typeof contentPackages.$inferSelect;
+export type InsertContentPackage = typeof contentPackages.$inferInsert;
+export const insertContentPackageSchema = createInsertSchema(contentPackages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Learning Analytics - Tracks detailed learner activity
+export const learningAnalytics = pgTable("learning_analytics", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  enrollmentId: varchar("enrollment_id"),
+  courseId: varchar("course_id"),
+  unitId: varchar("unit_id"),
+  lessonId: varchar("lesson_id"),
+  eventType: varchar("event_type").notNull(), // "lesson_start", "lesson_complete", "quiz_attempt", "video_play", etc.
+  eventData: text("event_data"), // JSON with event-specific data
+  duration: integer("duration"), // Event duration in seconds
+  score: integer("score"), // For quiz/exam events
+  maxScore: integer("max_score"),
+  sessionId: varchar("session_id"), // Group events by learning session
+  deviceType: varchar("device_type"), // "desktop", "mobile", "tablet"
+  browser: varchar("browser"),
+  ipAddress: varchar("ip_address"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type LearningAnalytic = typeof learningAnalytics.$inferSelect;
+export type InsertLearningAnalytic = typeof learningAnalytics.$inferInsert;
+export const insertLearningAnalyticSchema = createInsertSchema(learningAnalytics).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Competency Tracking - Tracks skill/competency development
+export const competencies = pgTable("competencies", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category"), // "technical", "regulatory", "ethics", etc.
+  level: varchar("level"), // "beginner", "intermediate", "advanced"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Competency = typeof competencies.$inferSelect;
+export type InsertCompetency = typeof competencies.$inferInsert;
+
+// User Competency Progress
+export const userCompetencies = pgTable("user_competencies", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  competencyId: varchar("competency_id").notNull(),
+  level: integer("level").default(0), // 0-100 mastery level
+  assessedAt: timestamp("assessed_at").defaultNow(),
+  sourceType: varchar("source_type"), // "quiz", "exam", "lesson", "manual"
+  sourceId: varchar("source_id"), // ID of quiz/exam/lesson that assessed this
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UserCompetency = typeof userCompetencies.$inferSelect;
+export type InsertUserCompetency = typeof userCompetencies.$inferInsert;
+
+// Learning Paths - Structured course sequences
+export const learningPaths = pgTable("learning_paths", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  productType: varchar("product_type"), // "RealEstate", "Insurance"
+  state: varchar("state"), // Optional state restriction
+  licenseType: varchar("license_type"), // Target license type
+  estimatedHours: integer("estimated_hours"),
+  isActive: integer("is_active").default(1),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type LearningPath = typeof learningPaths.$inferSelect;
+export type InsertLearningPath = typeof learningPaths.$inferInsert;
+
+// Learning Path Items - Courses in a learning path
+export const learningPathItems = pgTable("learning_path_items", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  learningPathId: varchar("learning_path_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  sequence: integer("sequence").default(0),
+  isRequired: integer("is_required").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type LearningPathItem = typeof learningPathItems.$inferSelect;
+export type InsertLearningPathItem = typeof learningPathItems.$inferInsert;
+
+// User Learning Path Progress
+export const userLearningPaths = pgTable("user_learning_paths", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  learningPathId: varchar("learning_path_id").notNull(),
+  status: varchar("status").default("in_progress"), // "not_started", "in_progress", "completed"
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  progress: integer("progress").default(0), // 0-100 percentage
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type UserLearningPath = typeof userLearningPaths.$inferSelect;
+export type InsertUserLearningPath = typeof userLearningPaths.$inferInsert;
+
+// Notifications - User notification system
+export const notifications = pgTable("notifications", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  type: varchar("type").notNull(), // "enrollment", "deadline", "achievement", "system", "marketing"
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  actionUrl: varchar("action_url"), // Link for the notification
+  isRead: integer("is_read").default(0),
+  readAt: timestamp("read_at"),
+  expiresAt: timestamp("expires_at"), // Auto-delete after this date
+  metadata: text("metadata"), // JSON for additional data
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Achievements/Badges - Gamification
+export const achievements = pgTable("achievements", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  iconUrl: varchar("icon_url"),
+  badgeColor: varchar("badge_color").default("gold"),
+  category: varchar("category"), // "completion", "streak", "performance", "engagement"
+  criteria: text("criteria"), // JSON criteria for earning
+  points: integer("points").default(0), // Points awarded
+  isActive: integer("is_active").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = typeof achievements.$inferInsert;
+
+// User Achievements
+export const userAchievements = pgTable("user_achievements", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  achievementId: varchar("achievement_id").notNull(),
+  earnedAt: timestamp("earned_at").defaultNow(),
+  notified: integer("notified").default(0),
+});
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
