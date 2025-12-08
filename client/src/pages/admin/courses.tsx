@@ -499,6 +499,9 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="Prelicensing">
+                      Prelicensing
+                    </SelectItem>
                     <SelectItem value="Post-Licensing">
                       Post-Licensing
                     </SelectItem>
@@ -1133,6 +1136,7 @@ function EditCourseDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="Prelicensing">Prelicensing</SelectItem>
                     <SelectItem value="Post-Licensing">Post-Licensing</SelectItem>
                     <SelectItem value="Continuing Education (Renewal)">Continuing Education (Renewal)</SelectItem>
                   </SelectContent>

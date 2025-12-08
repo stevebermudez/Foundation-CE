@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, privacyConsents, dataSubjectRequests, auditLogs, userPrivacyPreferences, affiliates, affiliateLinks, affiliateVisits, affiliateConversions, affiliatePayouts, affiliateCoupons, affiliateCreatives, affiliateNotifications, affiliateCommissionTiers, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment, type PrivacyConsent, type DataSubjectRequest, type AuditLog, type UserPrivacyPreference, type Affiliate, type InsertAffiliate, type AffiliateLink, type InsertAffiliateLink, type AffiliateVisit, type AffiliateConversion, type AffiliatePayout, type AffiliateCoupon, type AffiliateCreative, type AffiliateNotification, type AffiliateCommissionTier } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, privacyConsents, dataSubjectRequests, auditLogs, userPrivacyPreferences, affiliates, affiliateLinks, affiliateVisits, affiliateConversions, affiliatePayouts, affiliateCoupons, affiliateCreatives, affiliateNotifications, affiliateCommissionTiers, sitePages, pageSections, sectionBlocks, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment, type PrivacyConsent, type DataSubjectRequest, type AuditLog, type UserPrivacyPreference, type Affiliate, type InsertAffiliate, type AffiliateLink, type InsertAffiliateLink, type AffiliateVisit, type AffiliateConversion, type AffiliatePayout, type AffiliateCoupon, type AffiliateCreative, type AffiliateNotification, type SitePage, type InsertSitePage, type PageSection, type InsertPageSection, type SectionBlock, type InsertSectionBlock, type AffiliateCommissionTier } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -256,6 +256,33 @@ export interface IStorage {
   getAuditLogs(filters?: { userId?: string; action?: string; resourceType?: string; severity?: string; startDate?: Date; endDate?: Date }): Promise<any[]>;
   exportUserData(userId: string): Promise<any>;
   anonymizeUser(userId: string, processedBy: string): Promise<void>;
+  
+  // CMS Site Pages Methods
+  getSitePages(): Promise<SitePage[]>;
+  getSitePage(id: string): Promise<SitePage | undefined>;
+  getSitePageBySlug(slug: string): Promise<SitePage | undefined>;
+  createSitePage(data: InsertSitePage): Promise<SitePage>;
+  updateSitePage(id: string, data: Partial<SitePage>): Promise<SitePage>;
+  deleteSitePage(id: string): Promise<void>;
+  
+  // CMS Page Sections Methods
+  getPageSections(pageId: string): Promise<PageSection[]>;
+  getPageSection(id: string): Promise<PageSection | undefined>;
+  createPageSection(data: InsertPageSection): Promise<PageSection>;
+  updatePageSection(id: string, data: Partial<PageSection>): Promise<PageSection>;
+  deletePageSection(id: string): Promise<void>;
+  reorderPageSections(pageId: string, sectionIds: string[]): Promise<void>;
+  
+  // CMS Section Blocks Methods
+  getSectionBlocks(sectionId: string): Promise<SectionBlock[]>;
+  getSectionBlock(id: string): Promise<SectionBlock | undefined>;
+  createSectionBlock(data: InsertSectionBlock): Promise<SectionBlock>;
+  updateSectionBlock(id: string, data: Partial<SectionBlock>): Promise<SectionBlock>;
+  deleteSectionBlock(id: string): Promise<void>;
+  reorderSectionBlocks(sectionId: string, blockIds: string[]): Promise<void>;
+  
+  // CMS Full Page Data
+  getFullPageData(slug: string): Promise<{ page: SitePage; sections: (PageSection & { blocks: SectionBlock[] })[] } | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3918,6 +3945,139 @@ export class DatabaseStorage implements IStorage {
       paidEarnings,
       availableBalance,
     };
+  }
+
+  // ============================================================
+  // CMS Site Pages Methods
+  // ============================================================
+  
+  async getSitePages(): Promise<SitePage[]> {
+    return db.select().from(sitePages).orderBy(sitePages.sortOrder);
+  }
+
+  async getSitePage(id: string): Promise<SitePage | undefined> {
+    const [page] = await db.select().from(sitePages).where(eq(sitePages.id, id));
+    return page;
+  }
+
+  async getSitePageBySlug(slug: string): Promise<SitePage | undefined> {
+    const [page] = await db.select().from(sitePages).where(eq(sitePages.slug, slug));
+    return page;
+  }
+
+  async createSitePage(data: InsertSitePage): Promise<SitePage> {
+    const [page] = await db.insert(sitePages).values(data).returning();
+    return page;
+  }
+
+  async updateSitePage(id: string, data: Partial<SitePage>): Promise<SitePage> {
+    const [page] = await db.update(sitePages)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(sitePages.id, id))
+      .returning();
+    return page;
+  }
+
+  async deleteSitePage(id: string): Promise<void> {
+    // Delete all sections and blocks for this page first
+    const sections = await this.getPageSections(id);
+    for (const section of sections) {
+      await db.delete(sectionBlocks).where(eq(sectionBlocks.sectionId, section.id));
+    }
+    await db.delete(pageSections).where(eq(pageSections.pageId, id));
+    await db.delete(sitePages).where(eq(sitePages.id, id));
+  }
+
+  // CMS Page Sections Methods
+  async getPageSections(pageId: string): Promise<PageSection[]> {
+    return db.select().from(pageSections)
+      .where(eq(pageSections.pageId, pageId))
+      .orderBy(pageSections.sortOrder);
+  }
+
+  async getPageSection(id: string): Promise<PageSection | undefined> {
+    const [section] = await db.select().from(pageSections).where(eq(pageSections.id, id));
+    return section;
+  }
+
+  async createPageSection(data: InsertPageSection): Promise<PageSection> {
+    const [section] = await db.insert(pageSections).values(data).returning();
+    return section;
+  }
+
+  async updatePageSection(id: string, data: Partial<PageSection>): Promise<PageSection> {
+    const [section] = await db.update(pageSections)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(pageSections.id, id))
+      .returning();
+    return section;
+  }
+
+  async deletePageSection(id: string): Promise<void> {
+    // Delete all blocks in this section first
+    await db.delete(sectionBlocks).where(eq(sectionBlocks.sectionId, id));
+    await db.delete(pageSections).where(eq(pageSections.id, id));
+  }
+
+  async reorderPageSections(pageId: string, sectionIds: string[]): Promise<void> {
+    for (let i = 0; i < sectionIds.length; i++) {
+      await db.update(pageSections)
+        .set({ sortOrder: i, updatedAt: new Date() })
+        .where(and(eq(pageSections.id, sectionIds[i]), eq(pageSections.pageId, pageId)));
+    }
+  }
+
+  // CMS Section Blocks Methods
+  async getSectionBlocks(sectionId: string): Promise<SectionBlock[]> {
+    return db.select().from(sectionBlocks)
+      .where(eq(sectionBlocks.sectionId, sectionId))
+      .orderBy(sectionBlocks.sortOrder);
+  }
+
+  async getSectionBlock(id: string): Promise<SectionBlock | undefined> {
+    const [block] = await db.select().from(sectionBlocks).where(eq(sectionBlocks.id, id));
+    return block;
+  }
+
+  async createSectionBlock(data: InsertSectionBlock): Promise<SectionBlock> {
+    const [block] = await db.insert(sectionBlocks).values(data).returning();
+    return block;
+  }
+
+  async updateSectionBlock(id: string, data: Partial<SectionBlock>): Promise<SectionBlock> {
+    const [block] = await db.update(sectionBlocks)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(sectionBlocks.id, id))
+      .returning();
+    return block;
+  }
+
+  async deleteSectionBlock(id: string): Promise<void> {
+    await db.delete(sectionBlocks).where(eq(sectionBlocks.id, id));
+  }
+
+  async reorderSectionBlocks(sectionId: string, blockIds: string[]): Promise<void> {
+    for (let i = 0; i < blockIds.length; i++) {
+      await db.update(sectionBlocks)
+        .set({ sortOrder: i, updatedAt: new Date() })
+        .where(and(eq(sectionBlocks.id, blockIds[i]), eq(sectionBlocks.sectionId, sectionId)));
+    }
+  }
+
+  // CMS Full Page Data - Get page with all sections and blocks
+  async getFullPageData(slug: string): Promise<{ page: SitePage; sections: (PageSection & { blocks: SectionBlock[] })[] } | undefined> {
+    const page = await this.getSitePageBySlug(slug);
+    if (!page) return undefined;
+
+    const sections = await this.getPageSections(page.id);
+    const sectionsWithBlocks = await Promise.all(
+      sections.map(async (section) => ({
+        ...section,
+        blocks: await this.getSectionBlocks(section.id),
+      }))
+    );
+
+    return { page, sections: sectionsWithBlocks };
   }
 }
 
