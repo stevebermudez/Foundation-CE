@@ -46,8 +46,11 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Section types: Hero, Text Content, Features Grid, Call to Action, Column Layout, Image Gallery, Custom HTML
   - Block types: Heading, Text, Image, Video, Button, Spacer, Divider, HTML
   - Full CRUD operations via admin API endpoints at `/api/admin/site-pages`
-  - PageRenderer component for displaying dynamic CMS content on frontend
-  - Supports page publishing/drafts, SEO metadata, section reordering, and block alignment/sizing
+  - PageRenderer and CMSPage components for displaying dynamic CMS content on frontend
+  - Direct slug-based routing at `/:slug` with SEO metadata propagation (document.title, meta description, OG tags)
+  - Publish-state enforcement: unpublished pages return 404 to public visitors
+  - Complex responsive layouts: columns auto-stack on mobile, features grid, gallery with hover effects
+  - Admin access at `/admin/pages` or `/admin/pages-manager`
 
 ### System Design Choices
 - **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
