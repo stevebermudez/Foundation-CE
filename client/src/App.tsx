@@ -79,6 +79,7 @@ function Router() {
           <Route path="/admin/courses" component={AdminCoursesPage} />
           <Route path="/admin/content-builder">{() => <AdminContentBuilderPage />}</Route>
           <Route path="/admin/pages-manager" component={AdminPagesManagerPage} />
+          <Route path="/admin/pages" component={AdminPagesManagerPage} />
           <Route path="/admin/finance" component={AdminFinancePage} />
           <Route path="/admin/settings" component={AdminSettingsPage} />
           <Route path="/checkout"><CheckoutPage /></Route>
