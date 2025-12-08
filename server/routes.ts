@@ -4300,6 +4300,40 @@ segment1.ts
     }
   });
 
+  // Admin endpoint to normalize all unit quiz question counts to 10
+  app.post("/api/admin/normalize-quiz-settings", isAdmin, async (req, res) => {
+    try {
+      console.log("Normalizing unit quiz settings...");
+      const db = (await import("./db")).db;
+      const { practiceExams, questionBanks } = await import("@shared/schema");
+      const { eq, and, sql } = await import("drizzle-orm");
+      
+      // Update all unit quizzes in practice_exams to show 10 questions
+      const examResult = await db.execute(sql`
+        UPDATE practice_exams 
+        SET total_questions = 10 
+        WHERE is_final_exam = 0 
+        AND title LIKE '%Unit%Quiz%'
+      `);
+      
+      // Update all unit quiz banks in question_banks to use 10 questions per attempt
+      const bankResult = await db.execute(sql`
+        UPDATE question_banks 
+        SET questions_per_attempt = 10 
+        WHERE bank_type = 'unit_quiz'
+      `);
+      
+      console.log("Quiz settings normalized to 10 questions per unit quiz");
+      res.json({ 
+        success: true, 
+        message: "All unit quizzes normalized to 10 questions per attempt"
+      });
+    } catch (err) {
+      console.error("Error normalizing quiz settings:", err);
+      res.status(500).json({ error: "Failed to normalize quiz settings" });
+    }
+  });
+
   // ===== Media Asset Management Routes =====
   app.get("/api/admin/media", isAdmin, async (req, res) => {
     try {
