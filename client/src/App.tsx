@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { SkipLinks } from "@/components/SkipLinks";
+import { initAnalytics } from "@/lib/analytics";
+import { useAnalytics } from "@/hooks/use-analytics";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import NotFound from "@/pages/not-found";
@@ -42,6 +45,9 @@ import CookieConsent from "@/components/CookieConsent";
 import CMSPage from "@/components/CMSPage";
 
 function Router() {
+  // Track page views for analytics
+  useAnalytics();
+  
   return (
     <div className="flex flex-col min-h-screen">
       <SkipLinks />
@@ -94,6 +100,11 @@ function Router() {
 }
 
 export default function App() {
+  // Initialize analytics (Google Analytics + Facebook Pixel) on app load
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
