@@ -19,7 +19,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useTheme } from "./ThemeProvider";
-import logoImage from "@assets/IMG_6802_1764527356008.png";
 import {
   GraduationCap,
   Menu,
@@ -209,13 +208,15 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-2">
         <div className="flex h-16 items-center justify-between gap-1">
           <div className="flex items-center gap-1 flex-shrink-0 mr-auto">
-            <Link href="/" className="flex items-center gap-1 hover-elevate rounded-md px-1 py-1 -ml-1" aria-label="FoundationCE - Go to homepage">
-              <img src={logoImage} alt="" className="h-10 w-10" aria-hidden="true" />
+            <Link href="/" className="flex items-center gap-2 hover-elevate rounded-md px-1 py-1 -ml-1" aria-label="FoundationCE - Go to homepage">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary" aria-hidden="true">
+                <GraduationCap className="h-4 w-4 text-primary-foreground" />
+              </div>
               <span 
-                className="font-black text-sm text-blue-600 whitespace-nowrap" 
+                className="font-semibold text-lg whitespace-nowrap" 
                 data-testid="text-logo"
               >
-                Foundation CE
+                FoundationCE
               </span>
             </Link>
           </div>
