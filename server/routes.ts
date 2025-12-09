@@ -2442,7 +2442,14 @@ segment1.ts
         state: req.query.state as string,
         licenseType: req.query.licenseType as string,
       });
-      res.json(bundles);
+      // Include courses for each bundle
+      const bundlesWithCourses = await Promise.all(
+        bundles.map(async (bundle) => {
+          const courses = await storage.getBundleCourses(bundle.id);
+          return { ...bundle, courses };
+        })
+      );
+      res.json(bundlesWithCourses);
     } catch (err) {
       console.error("Error fetching bundles:", err);
       res.status(500).json({ error: "Failed to fetch bundles" });
