@@ -4356,6 +4356,158 @@ segment1.ts
     }
   });
 
+  // ===== AI Course Generation Routes =====
+  
+  // Generate course outline using AI
+  app.post("/api/admin/ai/generate-course-outline", isAdmin, async (req, res) => {
+    try {
+      const { generateCourseOutline } = await import("./ai-services");
+      const { title, description, hoursRequired, targetAudience, learningObjectives, state, licenseType } = req.body;
+      
+      if (!title || !hoursRequired) {
+        return res.status(400).json({ error: "title and hoursRequired are required" });
+      }
+      
+      const outline = await generateCourseOutline({
+        title,
+        description,
+        hoursRequired,
+        targetAudience,
+        learningObjectives,
+        state,
+        licenseType,
+      });
+      
+      res.json(outline);
+    } catch (err) {
+      console.error("Error generating course outline:", err);
+      res.status(500).json({ error: "Failed to generate course outline" });
+    }
+  });
+
+  // Generate quiz questions from lesson content using AI
+  app.post("/api/admin/ai/generate-quiz", isAdmin, async (req, res) => {
+    try {
+      const { generateQuizFromContent } = await import("./ai-services");
+      const { lessonContent, lessonTitle, unitTitle, numberOfQuestions } = req.body;
+      
+      if (!lessonContent || !lessonTitle) {
+        return res.status(400).json({ error: "lessonContent and lessonTitle are required" });
+      }
+      
+      const quiz = await generateQuizFromContent({
+        lessonContent,
+        lessonTitle,
+        unitTitle,
+        numberOfQuestions: numberOfQuestions || 5,
+      });
+      
+      res.json(quiz);
+    } catch (err) {
+      console.error("Error generating quiz:", err);
+      res.status(500).json({ error: "Failed to generate quiz" });
+    }
+  });
+
+  // Generate lesson content blocks using AI
+  app.post("/api/admin/ai/generate-lesson-content", isAdmin, async (req, res) => {
+    try {
+      const { generateLessonContent } = await import("./ai-services");
+      const { lessonTitle, lessonDescription, unitTitle, courseTitle, keyTopics, targetDurationMinutes } = req.body;
+      
+      if (!lessonTitle || !keyTopics || !targetDurationMinutes) {
+        return res.status(400).json({ error: "lessonTitle, keyTopics, and targetDurationMinutes are required" });
+      }
+      
+      const content = await generateLessonContent({
+        lessonTitle,
+        lessonDescription: lessonDescription || lessonTitle,
+        unitTitle,
+        courseTitle,
+        keyTopics,
+        targetDurationMinutes,
+      });
+      
+      res.json(content);
+    } catch (err) {
+      console.error("Error generating lesson content:", err);
+      res.status(500).json({ error: "Failed to generate lesson content" });
+    }
+  });
+
+  // Apply generated course outline - creates units and lessons in database
+  app.post("/api/admin/ai/apply-course-outline", isAdmin, async (req, res) => {
+    try {
+      const { courseId, outline } = req.body;
+      
+      if (!courseId || !outline || !outline.units) {
+        return res.status(400).json({ error: "courseId and outline with units are required" });
+      }
+      
+      const createdUnits = [];
+      
+      for (const unitData of outline.units) {
+        const unit = await storage.createUnit(
+          courseId,
+          unitData.unitNumber,
+          unitData.title,
+          unitData.description,
+          unitData.hoursRequired
+        );
+        
+        const createdLessons = [];
+        for (const lessonData of unitData.lessons) {
+          const lesson = await storage.createLesson(
+            unit.id,
+            lessonData.lessonNumber,
+            lessonData.title,
+            undefined, // videoUrl
+            lessonData.durationMinutes,
+            lessonData.description, // content
+            undefined // imageUrl
+          );
+          createdLessons.push(lesson);
+        }
+        
+        createdUnits.push({ unit, lessons: createdLessons });
+      }
+      
+      res.json({ success: true, units: createdUnits });
+    } catch (err) {
+      console.error("Error applying course outline:", err);
+      res.status(500).json({ error: "Failed to apply course outline" });
+    }
+  });
+
+  // Apply generated content blocks to a lesson
+  app.post("/api/admin/ai/apply-lesson-content", isAdmin, async (req, res) => {
+    try {
+      const { lessonId, blocks } = req.body;
+      
+      if (!lessonId || !blocks || !Array.isArray(blocks)) {
+        return res.status(400).json({ error: "lessonId and blocks array are required" });
+      }
+      
+      const createdBlocks = [];
+      for (const blockData of blocks) {
+        const block = await storage.createContentBlock({
+          lessonId,
+          blockType: blockData.blockType,
+          sortOrder: blockData.sortOrder,
+          content: JSON.stringify(blockData.content),
+          settings: blockData.settings ? JSON.stringify(blockData.settings) : null,
+          isVisible: 1,
+        });
+        createdBlocks.push(block);
+      }
+      
+      res.json({ success: true, blocks: createdBlocks });
+    } catch (err) {
+      console.error("Error applying lesson content:", err);
+      res.status(500).json({ error: "Failed to apply lesson content" });
+    }
+  });
+
   // ===== Question Bank Management Routes =====
   
   // Get all question banks for a course
