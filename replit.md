@@ -51,6 +51,15 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Publish-state enforcement: unpublished pages return 404 to public visitors
   - Complex responsive layouts: columns auto-stack on mobile, features grid, gallery with hover effects
   - Admin access at `/admin/pages` or `/admin/pages-manager`
+- **Coursebox-style Block Editor**: Advanced block-based content builder for lesson content:
+  - Database table: `content_blocks` with lessonId, blockType, content (JSON), settings, sortOrder, isVisible
+  - 11 block types: text, heading, image, video, flashcard, accordion, tabs, callout, divider, code, embed
+  - BlockEditor component with drag-drop reordering, visibility toggles, duplication, and type-specific edit forms
+  - ContentBlockRenderer for learner view with interactive elements (flashcard flip animations, collapsible accordions, tabbed content)
+  - Admin API endpoints at `/api/admin/lessons/:lessonId/blocks` and `/api/admin/blocks/:blockId`
+  - Learner API at `/api/lessons/:lessonId/blocks` (returns only visible blocks)
+  - Zod validation with insertContentBlockSchema
+  - Full admin JWT authentication on all write operations
 
 ### System Design Choices
 - **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
