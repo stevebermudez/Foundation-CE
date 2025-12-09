@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,14 @@ interface ExportOptions {
   includeQuizzes: boolean;
   includeVideos: boolean;
   includeDescriptions: boolean;
+  selectedExamForms: string[];
+}
+
+interface ExamFormInfo {
+  form: string;
+  id: string;
+  title: string;
+  questionCount: number;
 }
 
 function ExportDialog({ course, onClose }: { course: any; onClose: () => void }) {
@@ -40,8 +48,44 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
     includeQuizzes: true,
     includeVideos: false,
     includeDescriptions: true,
+    selectedExamForms: [],
   });
   const [isExporting, setIsExporting] = useState(false);
+  const [examForms, setExamForms] = useState<ExamFormInfo[]>([]);
+  const [loadingForms, setLoadingForms] = useState(true);
+
+  // Fetch available final exam forms
+  useEffect(() => {
+    const fetchExamForms = async () => {
+      try {
+        const token = localStorage.getItem("adminToken");
+        const res = await fetch(`/api/export/course/${course.id}/exam-forms`, {
+          credentials: 'include',
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (res.ok) {
+          const forms = await res.json();
+          setExamForms(forms);
+          // Default: select all forms
+          setOptions(prev => ({ ...prev, selectedExamForms: forms.map((f: ExamFormInfo) => f.form) }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch exam forms:", err);
+      } finally {
+        setLoadingForms(false);
+      }
+    };
+    fetchExamForms();
+  }, [course.id]);
+
+  const toggleExamForm = (form: string) => {
+    setOptions(prev => ({
+      ...prev,
+      selectedExamForms: prev.selectedExamForms.includes(form)
+        ? prev.selectedExamForms.filter(f => f !== form)
+        : [...prev.selectedExamForms, form]
+    }));
+  };
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -52,6 +96,13 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
       if (!options.includeQuizzes) params.set('includeQuizzes', 'false');
       if (!options.includeVideos) params.set('includeVideos', 'false');
       if (!options.includeDescriptions) params.set('includeDescriptions', 'false');
+      
+      // Add exam forms selection
+      if (examForms.length > 0 && options.selectedExamForms.length > 0) {
+        params.set('examForms', options.selectedExamForms.join(','));
+      } else if (examForms.length > 0 && options.selectedExamForms.length === 0) {
+        params.set('examForms', ''); // Empty means no exams
+      }
       
       const url = `/api/export/course/${course.id}/content.docx${params.toString() ? '?' + params.toString() : ''}`;
       const res = await fetch(url, {
@@ -121,10 +172,39 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
           />
           <Label htmlFor="includeVideos">Include video URLs (adds column to tables)</Label>
         </div>
+        
+        {/* Final Exam Forms Selection */}
+        {!loadingForms && examForms.length > 0 && (
+          <div className="border-t pt-3 mt-3">
+            <Label className="text-sm font-medium mb-2 block">Final Exam Versions</Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Select which final exam versions to include in the export
+            </p>
+            <div className="space-y-2 pl-2">
+              {examForms.map((form) => (
+                <div key={form.form} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`examForm-${form.form}`}
+                    checked={options.selectedExamForms.includes(form.form)}
+                    onCheckedChange={() => toggleExamForm(form.form)}
+                    data-testid={`checkbox-exam-form-${form.form.toLowerCase()}`}
+                  />
+                  <Label htmlFor={`examForm-${form.form}`} className="text-sm">
+                    Form {form.form} ({form.questionCount} questions)
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {loadingForms && (
+          <div className="text-sm text-muted-foreground">Loading exam forms...</div>
+        )}
       </div>
       <div className="flex gap-2 justify-end pt-4">
         <Button variant="outline" onClick={onClose}>Cancel</Button>
-        <Button onClick={handleExport} disabled={isExporting}>
+        <Button onClick={handleExport} disabled={isExporting} data-testid="button-export-docx">
           <Download className="h-4 w-4 mr-2" />
           {isExporting ? "Exporting..." : "Export to Word"}
         </Button>
