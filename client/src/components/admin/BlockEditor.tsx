@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Plus, 
@@ -30,7 +31,10 @@ import {
   ArrowUp,
   ArrowDown,
   Save,
-  X
+  X,
+  FolderOpen,
+  Link,
+  Check
 } from "lucide-react";
 
 interface ContentBlock {
@@ -506,6 +510,8 @@ function AddBlockDialog({ onSelect, onClose }: { onSelect: (type: string) => voi
 function EditBlockDialog({ block, onSave, onClose }: { block: ContentBlock; onSave: (data: any) => void; onClose: () => void }) {
   const content = block.content ? JSON.parse(block.content) : {};
   const [formData, setFormData] = useState(content);
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
 
   const handleSave = () => {
     onSave({ content: formData });
@@ -513,6 +519,19 @@ function EditBlockDialog({ block, onSave, onClose }: { block: ContentBlock; onSa
 
   const updateFormData = (key: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [key]: value }));
+  };
+
+  const openMediaLibrary = (type: "image" | "video") => {
+    setMediaType(type);
+    setShowMediaLibrary(true);
+  };
+
+  const handleMediaSelect = (url: string, alt?: string) => {
+    updateFormData("url", url);
+    if (alt && mediaType === "image") {
+      updateFormData("alt", alt);
+    }
+    setShowMediaLibrary(false);
   };
 
   return (
@@ -568,13 +587,34 @@ function EditBlockDialog({ block, onSave, onClose }: { block: ContentBlock; onSa
             <>
               <div>
                 <Label>Image URL</Label>
-                <Input
-                  value={formData.url || ""}
-                  onChange={(e) => updateFormData("url", e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  data-testid="input-image-url"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.url || ""}
+                    onChange={(e) => updateFormData("url", e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    data-testid="input-image-url"
+                    className="flex-1"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => openMediaLibrary("image")}
+                    data-testid="button-browse-images"
+                  >
+                    <FolderOpen className="w-4 h-4 mr-1" /> Browse
+                  </Button>
+                </div>
               </div>
+              {formData.url && (
+                <div className="border rounded-lg p-2">
+                  <img 
+                    src={formData.url} 
+                    alt={formData.alt || "Preview"} 
+                    className="max-h-32 mx-auto rounded"
+                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                  />
+                </div>
+              )}
               <div>
                 <Label>Alt Text (for accessibility)</Label>
                 <Input
@@ -600,12 +640,26 @@ function EditBlockDialog({ block, onSave, onClose }: { block: ContentBlock; onSa
             <>
               <div>
                 <Label>Video URL</Label>
-                <Input
-                  value={formData.url || ""}
-                  onChange={(e) => updateFormData("url", e.target.value)}
-                  placeholder="https://youtube.com/watch?v=..."
-                  data-testid="input-video-url"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.url || ""}
+                    onChange={(e) => updateFormData("url", e.target.value)}
+                    placeholder="https://youtube.com/watch?v=..."
+                    data-testid="input-video-url"
+                    className="flex-1"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => openMediaLibrary("video")}
+                    data-testid="button-browse-videos"
+                  >
+                    <FolderOpen className="w-4 h-4 mr-1" /> Browse
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Supports YouTube, Vimeo, or direct video URLs
+                </p>
               </div>
               <div>
                 <Label>Caption (optional)</Label>
@@ -734,6 +788,14 @@ function EditBlockDialog({ block, onSave, onClose }: { block: ContentBlock; onSa
             <Save className="w-4 h-4 mr-2" /> Save Changes
           </Button>
         </div>
+
+        {showMediaLibrary && (
+          <MediaLibraryDialog
+            mediaType={mediaType}
+            onSelect={handleMediaSelect}
+            onClose={() => setShowMediaLibrary(false)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -911,5 +973,186 @@ function TabsEditor({ tabs, onChange }: { tabs: any[]; onChange: (tabs: any[]) =
         </Card>
       ))}
     </div>
+  );
+}
+
+interface MediaAsset {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  mimeType: string | null;
+  thumbnailUrl: string | null;
+  altText: string | null;
+  createdAt: string;
+}
+
+function MediaLibraryDialog({ 
+  onSelect, 
+  onClose, 
+  mediaType = "image" 
+}: { 
+  onSelect: (url: string, alt?: string) => void; 
+  onClose: () => void;
+  mediaType?: "image" | "video";
+}) {
+  const [newUrl, setNewUrl] = useState("");
+  const [newAlt, setNewAlt] = useState("");
+  const [selectedAsset, setSelectedAsset] = useState<MediaAsset | null>(null);
+  const { toast } = useToast();
+
+  const { data: assets = [], isLoading } = useQuery<MediaAsset[]>({
+    queryKey: ["/api/admin/media"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/media", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const addMediaMutation = useMutation({
+    mutationFn: async (data: { fileName: string; fileUrl: string; fileType: string; altText?: string }) => {
+      const res = await fetch("/api/admin/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to add media");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/media"] });
+      toast({ title: "Success", description: "Media added to library" });
+    },
+  });
+
+  const filteredAssets = assets.filter(a => 
+    mediaType === "image" 
+      ? a.fileType === "image" || a.mimeType?.startsWith("image/")
+      : a.fileType === "video" || a.mimeType?.startsWith("video/")
+  );
+
+  const handleAddUrl = () => {
+    if (!newUrl) return;
+    const fileName = newUrl.split("/").pop() || "media";
+    addMediaMutation.mutate({
+      fileName,
+      fileUrl: newUrl,
+      fileType: mediaType,
+      altText: newAlt,
+    });
+    onSelect(newUrl, newAlt);
+  };
+
+  const handleSelectAsset = () => {
+    if (selectedAsset) {
+      onSelect(selectedAsset.fileUrl, selectedAsset.altText || "");
+    }
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FolderOpen className="w-5 h-5" />
+            Media Library - {mediaType === "image" ? "Images" : "Videos"}
+          </DialogTitle>
+          <DialogDescription>
+            Select from your library or add a new URL
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden">
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">
+              <Link className="w-4 h-4" /> Add from URL
+            </Label>
+            <Input
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              placeholder={mediaType === "image" ? "https://example.com/image.jpg" : "https://youtube.com/watch?v=..."}
+              data-testid="input-media-url"
+            />
+            {mediaType === "image" && (
+              <Input
+                value={newAlt}
+                onChange={(e) => setNewAlt(e.target.value)}
+                placeholder="Alt text (for accessibility)"
+                data-testid="input-media-alt"
+              />
+            )}
+            <Button 
+              onClick={handleAddUrl} 
+              disabled={!newUrl || addMediaMutation.isPending}
+              className="w-full"
+              data-testid="button-add-media-url"
+            >
+              <Plus className="w-4 h-4 mr-2" /> Add & Select
+            </Button>
+          </div>
+
+          <div className="flex flex-col">
+            <Label className="mb-2">Library ({filteredAssets.length})</Label>
+            <ScrollArea className="flex-1 border rounded-lg p-2">
+              {isLoading ? (
+                <p className="text-center text-muted-foreground py-4">Loading...</p>
+              ) : filteredAssets.length === 0 ? (
+                <p className="text-center text-muted-foreground py-4">
+                  No {mediaType}s in library yet
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 gap-2">
+                  {filteredAssets.map((asset) => (
+                    <div
+                      key={asset.id}
+                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-colors ${
+                        selectedAsset?.id === asset.id ? "border-primary" : "border-transparent hover:border-muted-foreground"
+                      }`}
+                      onClick={() => setSelectedAsset(asset)}
+                      data-testid={`media-asset-${asset.id}`}
+                    >
+                      {mediaType === "image" ? (
+                        <img
+                          src={asset.thumbnailUrl || asset.fileUrl}
+                          alt={asset.altText || asset.fileName}
+                          className="w-full h-16 object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-16 bg-muted flex items-center justify-center">
+                          <Video className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      {selectedAsset?.id === asset.id && (
+                        <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                          <Check className="w-6 h-6 text-primary" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSelectAsset} 
+            disabled={!selectedAsset}
+            data-testid="button-select-media"
+          >
+            <Check className="w-4 h-4 mr-2" /> Select
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
