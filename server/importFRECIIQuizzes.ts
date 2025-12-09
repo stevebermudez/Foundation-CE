@@ -1,7 +1,6 @@
 /**
  * Import FREC II Quiz Questions from Document
  * Parses quiz questions from the CLAUD_FLORIDA_REAL_ESTATE_BROKER_PRE document
- * and inserts them into the question_banks and bank_questions tables
  */
 
 import { db } from './db';
@@ -16,6 +15,7 @@ interface ParsedQuestion {
   questionText: string;
   options: string[];
   correctOption: number;
+  explanation: string;
 }
 
 interface ParsedQuiz {
@@ -33,35 +33,28 @@ async function extractDocumentContent(): Promise<string> {
 function parseQuizzes(text: string): ParsedQuiz[] {
   const quizzes: ParsedQuiz[] = [];
   
-  // Find all quiz blocks using exec loop
-  const quizPattern = /QUIZ (\d+)-(\d+): ([^\n]+)\n([\s\S]*?)(?=QUIZ \d+-\d+:|SESSION \d+:|FINAL EXAM|$)/g;
-  let quizMatch: RegExpExecArray | null;
+  // Split by quiz headers
+  const quizSections = text.split(/(?=QUIZ \d+-\d+:)/);
   
-  while ((quizMatch = quizPattern.exec(text)) !== null) {
-    const sessionNumber = parseInt(quizMatch[1]);
-    const quizNumber = parseInt(quizMatch[2]);
-    const title = quizMatch[3].trim();
-    const content = quizMatch[4];
+  for (const section of quizSections) {
+    const headerMatch = section.match(/^QUIZ (\d+)-(\d+):\s*([^\n]+)/);
+    if (!headerMatch) continue;
     
-    const questions: ParsedQuestion[] = [];
+    const sessionNumber = parseInt(headerMatch[1]);
+    const quizNumber = parseInt(headerMatch[2]);
+    const title = headerMatch[3].trim();
     
-    // Pattern: Question text followed by a. b. c. d. options
-    const questionPattern = /([A-Z][^?]+\?)\s*a\.\s*([^b]+)b\.\s*([^c]+)c\.\s*([^d]+)d\.\s*([^\n]+)/g;
-    let qMatch: RegExpExecArray | null;
+    // Get content after header, before answer key
+    let content = section.substring(headerMatch[0].length);
+    const answerKeyIndex = content.search(/Answer Key - Quiz/i);
     
-    while ((qMatch = questionPattern.exec(content)) !== null) {
-      const opts = [
-        qMatch[2].trim(),
-        qMatch[3].trim(),
-        qMatch[4].trim(),
-        qMatch[5].trim(),
-      ];
-      questions.push({
-        questionText: qMatch[1].trim(),
-        options: opts,
-        correctOption: 2, // Default to 'c' (index 2) - will be updated from answer key
-      });
+    let answerContent = '';
+    if (answerKeyIndex > 0) {
+      answerContent = content.substring(answerKeyIndex);
+      content = content.substring(0, answerKeyIndex);
     }
+    
+    const questions = parseQuestionsV2(content, answerContent);
     
     if (questions.length > 0) {
       quizzes.push({
@@ -76,39 +69,125 @@ function parseQuizzes(text: string): ParsedQuiz[] {
   return quizzes;
 }
 
-function parseAnswerKey(text: string): Map<string, number[]> {
-  const answerKeys = new Map<string, number[]>();
+function parseQuestionsV2(questionContent: string, answerContent: string): ParsedQuestion[] {
+  const questions: ParsedQuestion[] = [];
   
-  // Find answer key sections
-  const keyPattern = /QUIZ (\d+)-(\d+) ANSWER KEY\n([\s\S]*?)(?=QUIZ \d+-\d+ ANSWER KEY|SESSION \d+:|FINAL EXAM|$)/g;
-  let keyMatch: RegExpExecArray | null;
+  // Find all questions: text ending with ? followed by options
+  // Split by question mark followed by space and lowercase 'a.'
+  const questionBlocks = questionContent.split(/\?\s+(?=a\.)/);
   
-  while ((keyMatch = keyPattern.exec(text)) !== null) {
-    const key = `${keyMatch[1]}-${keyMatch[2]}`;
-    const answers: number[] = [];
+  for (let i = 0; i < questionBlocks.length - 1; i++) {
+    // Find where the question text starts (after previous options end)
+    let block = questionBlocks[i];
     
-    // Parse answers like "1. c" or "1. C"
-    const answerPattern = /(\d+)\.\s*([A-Da-d])/g;
-    let aMatch: RegExpExecArray | null;
-    while ((aMatch = answerPattern.exec(keyMatch[3])) !== null) {
-      const letter = aMatch[2].toLowerCase();
-      const index = letter.charCodeAt(0) - 'a'.charCodeAt(0); // a=0, b=1, c=2, d=3
-      answers.push(index);
+    // The question text is from the last sentence before ?
+    // Look backwards from end of block to find where question starts
+    const sentences = block.split(/(?<=[.!?])\s+/);
+    
+    // Find the last sentence that might be a question (or entire block if no clear break)
+    let questionText = '';
+    let foundQuestion = false;
+    
+    for (let j = sentences.length - 1; j >= 0; j--) {
+      const sentence = sentences[j].trim();
+      if (sentence.length > 20) {
+        // Check if this looks like a question start (capital letter, not an option)
+        if (/^[A-Z]/.test(sentence) && !/^[a-d]\.\s/.test(sentence.toLowerCase())) {
+          questionText = sentences.slice(j).join(' ').trim() + '?';
+          foundQuestion = true;
+          break;
+        }
+      }
     }
     
-    if (answers.length > 0) {
-      answerKeys.set(key, answers);
+    if (!foundQuestion && block.length > 20) {
+      // Just take the whole block as the question
+      questionText = block.trim() + '?';
     }
+    
+    if (!questionText || questionText.length < 15) continue;
+    
+    // Now parse options from the next block
+    const optionsBlock = questionBlocks[i + 1];
+    
+    // Find options: a. ... b. ... c. ... d. ...
+    // Use a more reliable pattern - split by option markers at word boundaries
+    const optionMatches = optionsBlock.match(/^a\.\s*(.*?)\s+b\.\s*(.*?)\s+c\.\s*(.*?)\s+d\.\s*([^\n]+?)(?=\s*[A-Z]|$)/s);
+    
+    if (!optionMatches) continue;
+    
+    const options = [
+      optionMatches[1].trim(),
+      optionMatches[2].trim(),
+      optionMatches[3].trim(),
+      optionMatches[4].trim(),
+    ];
+    
+    // Validate options
+    if (options.some(o => o.length === 0 || o.length > 500)) continue;
+    
+    questions.push({
+      questionText: cleanQuestionText(questionText),
+      options,
+      correctOption: 0,
+      explanation: '',
+    });
   }
   
-  return answerKeys;
+  // Parse answer keys and apply to questions
+  const answers = parseAnswerContent(answerContent);
+  for (let i = 0; i < questions.length && i < answers.length; i++) {
+    questions[i].correctOption = answers[i].correctOption;
+    questions[i].explanation = answers[i].explanation;
+  }
+  
+  return questions;
+}
+
+function cleanQuestionText(text: string): string {
+  // Remove any leading option markers from previous questions
+  return text.replace(/^[a-d]\.\s*[^\n]*\s*/gi, '').trim();
+}
+
+function parseAnswerContent(content: string): Array<{ correctOption: number; explanation: string }> {
+  const answers: Array<{ correctOption: number; explanation: string }> = [];
+  
+  if (!content) return answers;
+  
+  // Split by answer entries - each starts with a letter followed by period
+  // Format: "a. Answer text Explanation: ..."
+  const answerPattern = /([a-d])\.\s*([^]*?)(?=\n\s*[a-d]\.\s|$)/gi;
+  
+  let match: RegExpExecArray | null;
+  while ((match = answerPattern.exec(content)) !== null) {
+    const letter = match[1].toLowerCase();
+    const correctOption = letter.charCodeAt(0) - 'a'.charCodeAt(0);
+    const explanation = match[2].trim().substring(0, 500); // Limit explanation length
+    
+    answers.push({ correctOption, explanation });
+  }
+  
+  return answers;
+}
+
+async function clearExistingQuestionBanks(courseId: string) {
+  const existingBanks = await db.select({ id: questionBanks.id })
+    .from(questionBanks)
+    .where(eq(questionBanks.courseId, courseId));
+  
+  for (const bank of existingBanks) {
+    await db.delete(bankQuestions).where(eq(bankQuestions.bankId, bank.id));
+  }
+  
+  await db.delete(questionBanks).where(eq(questionBanks.courseId, courseId));
+  
+  console.log(`Cleared ${existingBanks.length} existing question banks`);
 }
 
 export async function importFRECIIQuizzes() {
   console.log('📝 Importing FREC II Quiz Questions...\n');
 
   try {
-    // Find the FREC II course
     const course = await db.select().from(courses).where(eq(courses.sku, FREC_II_SKU)).limit(1);
     if (!course || course.length === 0) {
       console.log('❌ FREC II course not found');
@@ -117,24 +196,21 @@ export async function importFRECIIQuizzes() {
     const courseId = course[0].id;
     console.log(`Found course: ${course[0].title}`);
 
-    // Get all units
+    await clearExistingQuestionBanks(courseId);
+
     const courseUnits = await db.select().from(units)
       .where(eq(units.courseId, courseId))
       .orderBy(units.unitNumber);
     
-    // Create unit lookup
     const unitMap = new Map<number, string>();
     for (const unit of courseUnits) {
       unitMap.set(unit.unitNumber, unit.id);
     }
 
-    // Extract document content
     console.log('Extracting document content...');
     const docText = await extractDocumentContent();
 
-    // Parse quizzes and answer keys
     const quizzes = parseQuizzes(docText);
-    const answerKeys = parseAnswerKey(docText);
     console.log(`Parsed ${quizzes.length} quizzes\n`);
 
     let totalQuestions = 0;
@@ -146,16 +222,6 @@ export async function importFRECIIQuizzes() {
         continue;
       }
 
-      // Apply answer key if available
-      const key = `${quiz.sessionNumber}-${quiz.quizNumber}`;
-      const answers = answerKeys.get(key);
-      if (answers) {
-        for (let i = 0; i < Math.min(quiz.questions.length, answers.length); i++) {
-          quiz.questions[i].correctOption = answers[i];
-        }
-      }
-
-      // Create question bank
       const [bank] = await db.insert(questionBanks).values({
         courseId,
         unitId,
@@ -166,15 +232,13 @@ export async function importFRECIIQuizzes() {
         isActive: 1,
       }).returning();
 
-      // Insert questions
-      for (let i = 0; i < quiz.questions.length; i++) {
-        const q = quiz.questions[i];
+      for (const q of quiz.questions) {
         await db.insert(bankQuestions).values({
           bankId: bank.id,
           questionText: q.questionText,
           options: JSON.stringify(q.options),
           correctOption: q.correctOption,
-          explanation: `The correct answer is option ${String.fromCharCode(97 + q.correctOption).toUpperCase()}.`,
+          explanation: q.explanation || `The correct answer is option ${String.fromCharCode(65 + q.correctOption)}.`,
         });
       }
 
@@ -190,7 +254,6 @@ export async function importFRECIIQuizzes() {
   }
 }
 
-// Run if executed directly
 import { fileURLToPath } from 'url';
 const isMain = process.argv[1] && fileURLToPath(import.meta.url).includes(process.argv[1].replace(/\.ts$/, ''));
 
