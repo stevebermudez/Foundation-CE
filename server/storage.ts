@@ -1858,13 +1858,18 @@ export class DatabaseStorage implements IStorage {
         const matchesUnitQuiz = (title: string | null | undefined, num: number): boolean => {
           if (!title) return false;
           const t = title.toLowerCase();
-          // Match patterns: "Unit 1 Quiz", "Unit 1:", "unit_1", "Unit1", etc.
+          // Match patterns: "Unit 1 Quiz", "Unit 1:", "unit_1", "Unit1", "Quiz 1-1:", "Quiz 1-2:", "Session 1 Quiz:", etc.
           const patterns = [
             `unit ${num} quiz`,
             `unit ${num}:`,
             `unit_${num}`,
             `unit${num}`,
-            new RegExp(`\\bunit\\s*${num}\\b`, 'i')
+            `session ${num} quiz`,
+            `session ${num}:`,
+            new RegExp(`\\bunit\\s*${num}\\b`, 'i'),
+            new RegExp(`\\bsession\\s*${num}\\b`, 'i'),
+            // Match "Quiz 12-1:", "Quiz 12-2:", "Quiz 12-3:" patterns (FREC II format)
+            new RegExp(`quiz\\s*${num}-\\d+`, 'i')
           ];
           return patterns.some(p => typeof p === 'string' ? t.includes(p) : p.test(title));
         };
