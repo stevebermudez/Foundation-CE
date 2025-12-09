@@ -1,0 +1,1166 @@
+## SESSION 12: CLOSING REAL ESTATE TRANSACTIONS
+
+**Duration:** 4 Hours  
+**Session Objectives:** Upon completion, students will understand the closing process, settlement procedures, prorations, closing costs, RESPA requirements, and the role of closing agents in Florida real estate transactions.
+
+### LEARNING OBJECTIVES
+
+1. Describe the closing process and the roles of various parties
+2. Explain the requirements of the Real Estate Settlement Procedures Act (RESPA)
+3. Understand the Closing Disclosure and its components
+4. Calculate prorations for taxes, insurance, rent, and interest
+5. Identify common closing costs for buyers and sellers
+6. Describe title insurance and its importance
+7. Understand escrow accounts and their management
+8. Explain post-closing procedures and document recording
+
+### KEY TERMS
+
+- **Accrued Items** - Expenses incurred but not yet paid, credited to buyer
+- **Closing** - Final step in real estate transaction; transfer of title
+- **Closing Agent** - Party responsible for conducting settlement
+- **Closing Disclosure (CD)** - TRID document detailing final loan terms and costs
+- **Credit** - Amount entered in party's favor on settlement statement
+- **Debit** - Amount charged to party on settlement statement
+- **Documentary Stamp Tax** - Florida transfer tax on deeds and mortgages
+- **Double Entry** - Accounting method where each item is both debit and credit
+- **Escrow Account** - Account holding funds for taxes and insurance
+- **Impound Account** - Same as escrow account
+- **Intangible Tax** - Florida tax on new mortgage obligations
+- **Loan Estimate (LE)** - TRID document estimating loan costs
+- **Prepaid Items** - Expenses paid in advance, credited to seller
+- **Proration** - Division of expenses between buyer and seller
+- **RESPA** - Real Estate Settlement Procedures Act
+- **Settlement** - Same as closing
+- **Settlement Statement** - Document showing all closing figures
+- **Single Entry** - Accounting method where item appears only once
+- **Survey** - Drawing showing property boundaries and improvements
+- **Title Commitment** - Preliminary report on title status
+- **Title Insurance** - Insurance protecting against title defects
+- **TRID** - TILA-RESPA Integrated Disclosure rule
+- **Wire Fraud** - Criminal scheme targeting real estate closing funds
+
+---
+
+### SEGMENT 1: THE CLOSING PROCESS OVERVIEW (45 minutes)
+
+#### What is Closing?
+
+Closing, also known as settlement or escrow closing, is the final step in a real estate transaction. It is the point at which ownership of property transfers from seller to buyer, funds are disbursed, and all documents are signed and recorded. The closing process ensures that all contractual obligations have been satisfied and that both parties receive what was promised in the purchase agreement.
+
+**Key Events at Closing:**
+
+*Title Transfer:*
+The seller executes and delivers the deed to the buyer, transferring legal ownership of the property.
+
+*Funds Disbursement:*
+The purchase price is paid to the seller, existing liens are satisfied, and closing costs are distributed to appropriate parties.
+
+*Document Execution:*
+All necessary legal documents are signed by the appropriate parties, including the deed, mortgage documents, and closing disclosures.
+
+*Recording:*
+The deed and mortgage are recorded in the public records, providing constructive notice of the transfer and any new liens.
+
+#### Parties Involved in Closing
+
+**The Closing Agent:**
+
+In Florida, the closing agent (also called settlement agent) is typically an attorney or a title company. Florida is considered an "attorney state" for closings, though title companies can conduct closings under attorney supervision. The closing agent serves as a neutral third party coordinating the transaction.
+
+*Closing Agent Responsibilities:*
+- Order and review title search and examination
+- Prepare or review closing documents
+- Calculate prorations and prepare settlement statement
+- Coordinate with lender on funding
+- Conduct closing meeting
+- Collect and disburse funds
+- Record documents in public records
+- Issue title insurance policies
+
+**Other Parties:**
+
+*Buyer:* Signs loan documents, pays closing costs and down payment, receives deed and keys.
+
+*Seller:* Executes deed, pays off existing liens, pays closing costs, receives net proceeds.
+
+*Real Estate Agents:* May attend closing, receive commission disbursement, assist parties with questions.
+
+*Lender:* Provides loan funds, requires specific documents and conditions be met.
+
+*Title Company:* Performs title search, issues title insurance, may serve as closing agent.
+
+#### Pre-Closing Activities
+
+Before closing can occur, numerous activities must be completed to ensure a smooth transaction.
+
+**Title Work:**
+
+*Title Search:*
+Examination of public records to determine ownership history and identify any liens, encumbrances, or defects.
+
+*Title Examination:*
+Attorney review of search results to render opinion on marketability.
+
+*Title Commitment:*
+Preliminary report showing current ownership, proposed insured, exceptions, and requirements for issuing title insurance.
+
+**Lender Requirements:**
+- Final loan approval and clear-to-close
+- Appraisal completion and review
+- Survey review (if required)
+- Insurance verification
+- Loan document preparation
+- Wire transfer instructions
+
+**Buyer Activities:**
+- Final walkthrough of property
+- Obtain homeowner's insurance
+- Review Closing Disclosure
+- Arrange for closing funds (certified check or wire)
+- Utility transfer arrangements
+
+**Seller Activities:**
+- Provide payoff information for existing loans
+- Clear any title defects
+- Complete required repairs
+- Gather keys, garage remotes, codes
+- Review Closing Disclosure
+
+#### The Final Walkthrough
+
+The buyer typically has the right to conduct a final walkthrough of the property within 24-48 hours before closing. This inspection verifies:
+
+- Property condition is same as when offer was made
+- Agreed-upon repairs have been completed
+- All fixtures and included items remain
+- No new damage has occurred
+- Property is vacant (unless otherwise agreed)
+
+If problems are discovered during the walkthrough, buyers should address them before closing, as it becomes much more difficult to resolve issues after title transfers.
+
+---
+
+### SEGMENT 2: RESPA AND TRID REQUIREMENTS (50 minutes)
+
+#### Real Estate Settlement Procedures Act (RESPA)
+
+RESPA is a federal law enacted in 1974 to protect consumers in the home buying process. It requires lenders and settlement service providers to give borrowers timely disclosures about the nature and costs of the settlement process. RESPA is enforced by the Consumer Financial Protection Bureau (CFPB).
+
+**RESPA Coverage:**
+
+RESPA applies to "federally related mortgage loans," which includes most residential mortgage loans. Specifically, RESPA covers:
+- Purchase loans for 1-4 family residential properties
+- Refinance loans
+- Home equity loans and lines of credit
+- Reverse mortgages
+
+RESPA does not apply to loans for business, commercial, or agricultural purposes, or to temporary construction loans.
+
+**RESPA Prohibitions:**
+
+*Kickbacks and Referral Fees (Section 8):*
+RESPA prohibits giving or receiving anything of value for referrals of settlement service business. This includes fees, kickbacks, or items of value exchanged between real estate agents, lenders, title companies, appraisers, and other settlement service providers.
+
+*Examples of Prohibited Conduct:*
+- Title company paying real estate broker for referrals
+- Lender providing vacation trips to agents for loan referrals
+- Split fees between service providers where no actual service performed
+- Excessive gifts to referral sources
+
+*Fee Splitting (Section 8):*
+No one may give or receive a portion of a charge for services not actually performed. If a fee is split, each party must provide a real service for their portion.
+
+*Title Insurance Requirements (Section 9):*
+Sellers cannot require buyers to purchase title insurance from a specific company as a condition of sale.
+
+*Escrow Account Limits (Section 10):*
+Limits the amount lenders can require borrowers to maintain in escrow accounts for taxes and insurance.
+
+**RESPA Permitted Practices:**
+- Affiliated Business Arrangements (ABA) with proper disclosure
+- Payments for actual services rendered
+- Employer payments to employees
+- Cooperative brokerage and referral arrangements between real estate agents
+- Secondary market transactions
+
+**Affiliated Business Arrangement (ABA) Disclosure:**
+
+When a settlement service provider refers business to a company with which they have an ownership or affiliate relationship, RESPA requires:
+- Written disclosure of the relationship
+- Estimated charges for the service
+- Statement that consumer is not required to use the affiliated provider
+- Disclosure provided at or before time of referral
+
+#### TRID - TILA-RESPA Integrated Disclosure
+
+In 2015, the CFPB implemented the TILA-RESPA Integrated Disclosure rule (TRID), also known as "Know Before You Owe." TRID combined the disclosure requirements of the Truth in Lending Act (TILA) and RESPA into two new forms: the Loan Estimate and the Closing Disclosure.
+
+**Loan Estimate (LE):**
+
+The Loan Estimate replaced the former Good Faith Estimate (GFE) and early Truth in Lending disclosure. It provides borrowers with important information about their loan terms and estimated costs.
+
+*Timing Requirement:*
+Lenders must provide the Loan Estimate within 3 business days of receiving a loan application. Borrowers must receive the LE at least 7 business days before closing.
+
+*Contents of Loan Estimate:*
+- Loan terms (amount, interest rate, monthly payment)
+- Projected payments over loan life
+- Closing costs breakdown
+- Cash to close estimate
+- Loan features (balloon, prepayment penalty, negative amortization)
+- Comparisons (APR, total interest, total payments)
+
+**Closing Disclosure (CD):**
+
+The Closing Disclosure replaced the HUD-1 Settlement Statement and final Truth in Lending disclosure. It provides final details about the loan terms and all closing costs.
+
+*Timing Requirement:*
+Borrowers must receive the Closing Disclosure at least 3 business days before closing. This is often called the "3-day rule" or "cooling-off period." If certain changes occur that require a new CD, a new 3-day waiting period begins.
+
+*Changes Requiring New 3-Day Period:*
+- APR increases by more than 0.125% (1/8%)
+- Loan product changes (e.g., fixed to adjustable)
+- Prepayment penalty added
+
+*Contents of Closing Disclosure:*
+
+**Page 1 - Loan Terms and Costs:**
+Final loan amount, interest rate, monthly payment, loan features.
+
+**Page 2 - Closing Cost Details:**
+Itemized closing costs including loan costs, other costs, and prorations.
+
+**Page 3 - Cash to Close:**
+Summary of transaction showing amounts due from borrower and seller.
+
+**Page 4 - Loan Disclosures:**
+Information about escrow, assumption, late payments, servicing.
+
+**Page 5 - Loan Calculations:**
+Total payments, finance charge, APR, total interest percentage.
+
+**Tolerance Limits:**
+
+TRID establishes tolerance limits on how much certain fees can increase from the Loan Estimate to the Closing Disclosure.
+
+| Tolerance Category | Fees Included |
+|-------------------|---------------|
+| Zero Tolerance (Cannot increase) | Fees paid to lender, transfer taxes, fees for required services from lender's chosen provider |
+| 10% Cumulative (Can increase up to 10% total) | Recording fees, fees for required services where borrower selects provider from lender's list |
+| No Limit (Can increase any amount) | Prepaid interest, property insurance premiums, fees for services borrower shops for independently |
+
+---
+
+### SEGMENT 3: PRORATIONS AND CALCULATIONS (55 minutes)
+
+#### Understanding Prorations
+
+Prorations are the division of ongoing expenses and income between buyer and seller based on the date of closing. The goal is to ensure each party pays only for the period they own or benefit from the property. Prorations are calculated to the day of closing, with the day of closing typically belonging to the buyer (unless otherwise specified in the contract).
+
+**Proration Methods:**
+
+*365-Day Method (Actual Days):*
+Uses actual number of days in the year and month. More accurate for daily calculations.
+
+*360-Day Method (Banker's Year):*
+Assumes 30 days per month and 360 days per year. Commonly used for interest calculations and often specified in contracts.
+
+**Accrued vs. Prepaid Items:**
+
+*Accrued Items:*
+Expenses that have been incurred but not yet paid. These are credited to the buyer (debited to seller) because the buyer will pay them later.
+
+*Example:* Property taxes in Florida (paid in arrears)
+
+*Prepaid Items:*
+Expenses that have been paid in advance. These are credited to the seller (debited to buyer) because the seller has already paid for future periods.
+
+*Example:* Homeowner's insurance paid for full year, rent collected in advance
+
+#### Property Tax Prorations
+
+In Florida, property taxes are paid in arrears (after the period for which they are due). The tax year runs from January 1 to December 31. Taxes are typically due by March 31 of the following year but may be paid as early as November 1 with a discount.
+
+**Florida Property Tax Payment Schedule:**
+- November: 4% discount if paid
+- December: 3% discount if paid
+- January: 2% discount if paid
+- February: 1% discount if paid
+- March 31: Face amount due (no discount)
+- April 1: Taxes become delinquent
+
+**Tax Proration Example:**
+
+*Scenario:* Closing date is September 15. Annual property taxes are $3,650. Taxes for the current year have not been paid. Use a 365-day year.
+
+*Step 1:* Calculate daily rate
+$3,650 ÷ 365 = $10.00 per day
+
+*Step 2:* Count seller's days (January 1 through September 14)
+January: 31, February: 28, March: 31, April: 30, May: 31, June: 30, July: 31, August: 31, September: 14
+Total: 258 days
+
+*Step 3:* Calculate seller's share
+258 days × $10.00 = $2,580.00
+
+*Result:* Credit buyer $2,580.00 / Debit seller $2,580.00
+
+The buyer receives a credit because they will be responsible for paying the full tax bill when it becomes due, even though the seller owned the property for most of the tax year.
+
+#### Insurance Prorations
+
+Homeowner's insurance is typically prepaid for one year. If the buyer assumes the seller's policy, the seller receives credit for the unused portion. Most commonly, however, the buyer obtains a new policy and no proration is necessary.
+
+**Insurance Proration Example:**
+
+*Scenario:* Closing date is April 10. Seller's insurance policy ($1,800 annual premium) was paid on January 1 and runs through December 31. Buyer is assuming the policy. Use 365-day year.
+
+*Step 1:* Calculate daily rate
+$1,800 ÷ 365 = $4.93 per day (rounded)
+
+*Step 2:* Count days remaining for buyer (April 10 through December 31)
+April: 21 (remaining), May: 31, June: 30, July: 31, August: 31, September: 30, October: 31, November: 30, December: 31
+Total: 266 days
+
+*Step 3:* Calculate amount owed to seller
+266 days × $4.93 = $1,311.38
+
+*Result:* Credit seller $1,311.38 / Debit buyer $1,311.38
+
+#### Rent Prorations
+
+When purchasing income property with existing tenants, rent collected in advance must be prorated. Rent is typically prepaid (paid at the beginning of the month), so the seller must credit the buyer for the portion of rent applicable to the buyer's ownership period.
+
+**Rent Proration Example:**
+
+*Scenario:* Closing date is July 18. Monthly rent of $2,400 was collected on July 1. Use a 30-day month.
+
+*Step 1:* Calculate daily rate
+$2,400 ÷ 30 = $80.00 per day
+
+*Step 2:* Count buyer's days (July 18 through July 31)
+July 18 through July 30 = 13 days (buyer owns day of closing)
+
+*Step 3:* Calculate buyer's share
+13 days × $80.00 = $1,040.00
+
+*Result:* Credit buyer $1,040.00 / Debit seller $1,040.00
+
+The buyer receives a credit because the seller collected the full month's rent but won't own the property for the entire month.
+
+#### Interest Prorations (Prepaid Interest)
+
+Mortgage interest is paid in arrears. The first mortgage payment is typically due on the first day of the month following 30 days from closing. Prepaid interest (also called interim interest or per diem interest) covers the period from closing to the end of the month.
+
+**Prepaid Interest Example:**
+
+*Scenario:* Closing date is March 12. Loan amount is $300,000 at 6% annual interest. Use a 360-day year.
+
+*Step 1:* Calculate annual interest
+$300,000 × 0.06 = $18,000 per year
+
+*Step 2:* Calculate daily interest
+$18,000 ÷ 360 = $50.00 per day
+
+*Step 3:* Count days from closing to end of month
+March 12 through March 31 = 20 days (including closing day)
+
+*Step 4:* Calculate prepaid interest
+20 days × $50.00 = $1,000.00
+
+*Result:* Debit buyer $1,000.00 (prepaid item collected at closing)
+First payment due May 1 (covers April interest)
+
+#### Settlement Statement Entries
+
+Understanding debits and credits on the settlement statement is essential.
+
+**Debits (Charges):**
+- Amounts the party owes or must pay
+- Reduce the party's proceeds or increase amount due
+
+**Credits (Receipts):**
+- Amounts in the party's favor
+- Increase the party's proceeds or reduce amount due
+
+**Double Entry vs. Single Entry Items:**
+
+*Double Entry Items:*
+Appear on both buyer's and seller's side of the statement. One party's debit is the other's credit.
+- Purchase price (debit buyer, credit seller)
+- Prorations (credit one, debit other)
+- Earnest money deposit (credit buyer only from buyer's perspective)
+
+*Single Entry Items:*
+Appear on only one party's side of the statement.
+- Buyer's loan costs (debit buyer only)
+- Seller's mortgage payoff (debit seller only)
+- Real estate commission (debit seller only)
+
+---
+
+### SEGMENT 4: CLOSING COSTS (45 minutes)
+
+#### Overview of Closing Costs
+
+Closing costs are the various fees and expenses incurred to complete a real estate transaction. These costs are in addition to the purchase price and typically range from 2% to 5% of the loan amount for buyers. In Florida, the contract determines which party pays which costs, though custom and negotiation play significant roles.
+
+#### Florida Transfer Taxes
+
+**Documentary Stamp Tax on Deeds:**
+
+Florida imposes a documentary stamp tax on the transfer of real property. The tax is calculated on the total consideration (purchase price or value).
+
+*Rate:* $0.70 per $100 of consideration (or portion thereof)
+
+*Miami-Dade County:* $0.60 per $100 (single-family residence), $0.60 plus $0.45 surtax for other property
+
+*Paid by:* Typically seller (negotiable)
+
+*Documentary Stamp Example:*
+```
+Sale price: $385,500
+Round up to next $100: $385,600
+$385,600 ÷ 100 = 3,856 taxable units
+3,856 × $0.70 = $2,699.20 doc stamps on deed
+```
+
+**Documentary Stamp Tax on Notes:**
+
+Documentary stamps are also due on promissory notes (mortgages).
+
+*Rate:* $0.35 per $100 of indebtedness (or portion thereof)
+
+*Paid by:* Buyer (borrower)
+
+*Example:*
+```
+Loan amount: $300,000
+$300,000 ÷ 100 = 3,000 taxable units
+3,000 × $0.35 = $1,050.00 doc stamps on note
+```
+
+**Intangible Tax on New Mortgages:**
+
+Florida imposes a one-time intangible tax on new mortgage obligations.
+
+*Rate:* $0.002 per $1.00 of new mortgage (2 mills)
+
+*Alternative calculation:* $2.00 per $1,000 of mortgage amount
+
+*Paid by:* Buyer (borrower)
+
+*Intangible Tax Example:*
+```
+Mortgage amount: $300,000
+$300,000 × 0.002 = $600.00 intangible tax
+Or: $300,000 ÷ 1,000 = 300 × $2.00 = $600.00
+```
+
+#### Common Buyer Closing Costs
+
+| Cost Item | Typical Range/Amount |
+|-----------|---------------------|
+| Loan Origination Fee | 0.5% - 1% of loan amount |
+| Discount Points | Varies (1 point = 1% of loan) |
+| Appraisal Fee | $400 - $700 |
+| Credit Report Fee | $25 - $75 |
+| Lender's Title Insurance | Varies by loan amount |
+| Owner's Title Insurance | Varies by purchase price |
+| Survey | $300 - $600 |
+| Recording Fees | $100 - $300 |
+| Doc Stamps on Note | $0.35 per $100 of loan |
+| Intangible Tax | $2.00 per $1,000 of loan |
+| Prepaid Interest | Varies by closing date |
+| Homeowner's Insurance (1 year) | Varies by coverage |
+| Escrow/Impound Deposits | 2-4 months taxes & insurance |
+| Flood Certification | $15 - $25 |
+| Home Inspection | $300 - $500 |
+| Termite Inspection | $75 - $150 |
+
+#### Common Seller Closing Costs
+
+| Cost Item | Typical Range/Amount |
+|-----------|---------------------|
+| Real Estate Commission | Negotiable |
+| Documentary Stamps on Deed | $0.70 per $100 of price |
+| Title Search/Abstract | $200 - $400 |
+| Owner's Title Insurance (if seller pays) | Varies by purchase price |
+| Mortgage Payoff | Outstanding balance |
+| Satisfaction/Release of Mortgage | $50 - $150 |
+| HOA Estoppel Letter | $100 - $500 |
+| Prorated Taxes (if unpaid) | Varies |
+| Repairs/Credits | As negotiated |
+| Attorney Fees | Varies |
+
+#### Who Pays What in Florida
+
+In Florida, closing cost responsibilities vary by region and contract terms. The FAR/BAR contract allows parties to select who pays for various items. Common customs include:
+
+**Traditionally Seller Pays:**
+- Documentary stamps on deed
+- Title search/abstract
+- Owner's title insurance (varies by county)
+- Real estate commission
+- HOA estoppel letter
+- Satisfaction of existing mortgages
+
+**Traditionally Buyer Pays:**
+- Loan-related costs
+- Documentary stamps on note
+- Intangible tax
+- Recording of deed and mortgage
+- Lender's title insurance
+- Survey
+- Inspections
+- Prepaid items and escrow deposits
+
+**Varies by County:**
+- Owner's title insurance (in some South Florida counties, buyer customarily pays)
+- Closing agent selection and fees
+
+---
+
+### SEGMENT 5: TITLE INSURANCE AND ESCROW (40 minutes)
+
+#### Understanding Title Insurance
+
+Title insurance protects against losses arising from defects in title that existed prior to the policy date but were not discovered during the title search. Unlike other types of insurance that protect against future events, title insurance protects against past events.
+
+**Types of Title Insurance Policies:**
+
+*Owner's Policy:*
+Protects the buyer/owner's equity in the property. Coverage equals the purchase price and remains in effect as long as the insured or their heirs have an interest in the property.
+
+*Lender's Policy (Mortgagee's Policy):*
+Protects the lender's security interest in the property. Coverage equals the loan amount and decreases as the loan is paid down. Required by virtually all lenders.
+
+**What Title Insurance Covers:**
+- Errors in public records
+- Unknown liens or encumbrances
+- Forgery or fraud in chain of title
+- Missing heirs or undisclosed spouses
+- Defective acknowledgments
+- Improperly indexed documents
+- Mistakes in recording legal documents
+- Undisclosed easements
+- Legal defense costs for covered claims
+
+**Standard Exclusions:**
+- Defects known to insured but not disclosed
+- Government regulations (zoning, building codes)
+- Eminent domain actions
+- Matters arising after policy date
+- Native American claims (federal)
+- Environmental contamination
+- Rights of parties in possession not shown in public records
+
+**Florida Title Insurance:**
+
+Florida has a unique system where title insurance rates are promulgated (set) by the Florida Department of Financial Services. This means rates are standardized across all title insurance companies in the state.
+
+*Florida Promulgated Rates (approximate):*
+The basic rate structure involves a per-thousand rate that decreases as property value increases. The exact rates are set by the state and updated periodically.
+
+*Simultaneous Issue Discount:*
+When owner's and lender's policies are issued simultaneously, a discount applies to the lender's policy, typically resulting in significant savings.
+
+In Florida, who pays for title insurance depends on local custom and contract negotiation. In many counties, the seller pays for the owner's policy, while in others (particularly South Florida), the buyer pays.
+
+#### The Title Commitment
+
+Before issuing title insurance, the title company issues a title commitment (also called title binder or preliminary title report). This document outlines:
+
+**Schedule A:**
+- Effective date of commitment
+- Type of policy to be issued
+- Proposed insured
+- Estate or interest to be insured
+- Property description
+
+**Schedule B-I (Requirements):**
+Items that must be satisfied before policy will be issued:
+- Payment of premiums
+- Recording of documents
+- Satisfying existing liens
+- Obtaining releases or subordinations
+
+**Schedule B-II (Exceptions):**
+Matters that will be excluded from coverage:
+- Existing easements
+- Restrictions and covenants
+- Mineral rights
+- Survey matters
+- Standard exceptions
+
+#### Escrow Accounts
+
+Escrow accounts (also called impound accounts) are established by lenders to collect monthly portions of annual expenses such as property taxes and insurance. This ensures these critical expenses are paid, protecting the lender's security interest.
+
+**RESPA Escrow Requirements:**
+
+*Initial Deposits:*
+Lenders may collect at closing amounts necessary to pay taxes and insurance when they come due, plus a cushion of no more than two months of escrow payments.
+
+*Monthly Collections:*
+Lenders collect 1/12 of annual taxes and insurance each month along with the mortgage payment.
+
+*Annual Analysis:*
+Lenders must perform annual escrow analysis and provide borrowers with an account statement.
+
+*Surplus Limits:*
+If surplus exceeds $50, lender must return excess within 30 days.
+
+*Shortages:*
+Borrowers may pay shortage as lump sum or spread over 12 months.
+
+**Escrow Calculation Example:**
+
+```
+Annual Property Taxes: $4,800
+Annual Homeowner's Insurance: $2,400
+Total Annual Escrow: $7,200
+Monthly Escrow: $7,200 ÷ 12 = $600
+
+Initial Escrow Deposit at Closing:
+Taxes: Depends on when due
+Insurance: Typically 2-3 months
+Cushion: Up to 2 months
+```
+
+---
+
+### SEGMENT 6: POST-CLOSING AND WIRE FRAUD PREVENTION (25 minutes)
+
+#### Post-Closing Procedures
+
+After the closing meeting concludes, several important steps complete the transaction.
+
+**Document Recording:**
+
+The closing agent records essential documents in the public records:
+
+*Documents Typically Recorded:*
+- Deed (transfers ownership)
+- Mortgage (creates lender's lien)
+- Assignments of mortgage
+- Subordination agreements
+- Satisfactions of prior mortgages
+
+*Recording Requirements:*
+- Proper execution and acknowledgment
+- Payment of recording fees
+- Payment of documentary stamp taxes
+- Proper legal description
+
+**Title Policy Issuance:**
+
+After recording and verification, the title company issues the final title insurance policies to the owner and lender.
+
+**Funds Disbursement:**
+
+The closing agent disburses funds according to the settlement statement:
+- Pays off existing mortgages
+- Pays real estate commissions
+- Pays closing costs to service providers
+- Disburses remaining proceeds to seller
+- Funds buyer's new mortgage
+
+**Document Distribution:**
+
+Parties receive copies of all relevant closing documents:
+- Buyer receives: Deed (original after recording), mortgage copies, Closing Disclosure, title policy
+- Seller receives: Closing Disclosure, copies of deed, settlement figures
+- Lender receives: Original note, recorded mortgage, title policy
+
+#### Wire Fraud Prevention
+
+Wire fraud targeting real estate transactions has become a significant threat. Criminals hack email accounts and send fraudulent wire instructions to buyers, diverting closing funds to accounts controlled by the criminals.
+
+**Common Wire Fraud Schemes:**
+
+*Email Compromise:*
+Criminals gain access to email accounts of real estate agents, attorneys, title companies, or lenders. They monitor communications and send fraudulent wire instructions at the appropriate time.
+
+*Spoofed Emails:*
+Criminals create email addresses that closely resemble legitimate addresses (e.g., substituting "rn" for "m") and send fake wire instructions.
+
+*Phone Spoofing:*
+Criminals use technology to make calls appear to come from legitimate phone numbers, then provide fraudulent instructions.
+
+**Warning Signs:**
+- Last-minute changes to wire instructions
+- Requests to wire to different accounts
+- Pressure to wire immediately
+- Instructions sent via email only
+- Slightly different email addresses
+- Poor grammar or unusual formatting
+
+**Prevention Best Practices:**
+
+*For Buyers:*
+- Verify wire instructions by phone using a known number (not from the email)
+- Call the title company directly before wiring funds
+- Never email financial information
+- Be suspicious of any changes to wire instructions
+- Confirm wire receipt with title company
+
+*For Real Estate Professionals:*
+- Use secure communication methods
+- Avoid sending wire instructions via email
+- Educate clients about wire fraud risks
+- Implement verification protocols
+- Use multi-factor authentication
+
+**If Wire Fraud Occurs:**
+1. Contact your bank immediately to recall the wire
+2. Contact the receiving bank
+3. File a report with the FBI's Internet Crime Complaint Center (IC3)
+4. Contact local law enforcement
+5. Notify the title company and real estate agents
+
+Time is critical—most funds can only be recovered if action is taken within 24-48 hours.
+
+#### Common Closing Problems and Solutions
+
+**Title Issues:**
+- Unreleased liens: Obtain satisfaction or payoff
+- Judgment liens: Pay or negotiate release
+- HOA violations: Clear before closing
+- Survey encroachments: Negotiate resolution
+
+**Funding Issues:**
+- Last-minute loan conditions: Address immediately
+- Appraisal shortfalls: Renegotiate price or bring cash
+- Rate lock expiration: Extend or accept new rate
+
+**Property Condition Issues:**
+- Walkthrough problems: Negotiate repairs or credits
+- Missing items: Hold funds in escrow
+- Damage discovered: Delay closing until resolved
+
+---
+
+### SESSION 12 SUMMARY AND KEY TAKEAWAYS
+
+**Essential Points:**
+
+1. **Closing Definition:** Final step in transaction where title transfers, funds disburse, and documents are recorded
+
+2. **RESPA Requirements:** Prohibits kickbacks and unearned fees; requires proper disclosures
+
+3. **TRID Timing:** Loan Estimate within 3 business days of application; Closing Disclosure 3 business days before closing
+
+4. **Proration Basics:** Day of closing typically belongs to buyer; accrued items credit buyer; prepaid items credit seller
+
+5. **Florida Taxes:** Doc stamps on deed $0.70/$100 (seller); Doc stamps on note $0.35/$100 (buyer); Intangible tax $2.00/$1,000 (buyer)
+
+6. **Title Insurance:** Owner's policy protects buyer; Lender's policy protects lender; Florida rates are promulgated
+
+7. **Escrow Accounts:** Limited to amounts needed plus 2-month cushion; annual analysis required
+
+8. **Recording:** Deed and mortgage recorded to provide constructive notice
+
+9. **Wire Fraud:** Verify all wire instructions by phone using known numbers; never rely solely on email
+
+10. **Post-Closing:** Documents recorded, funds disbursed, title policies issued
+
+**Key Formulas:**
+
+- **Documentary Stamps on Deed** = (Sale Price ÷ 100, rounded up) × $0.70
+- **Documentary Stamps on Note** = (Loan Amount ÷ 100, rounded up) × $0.35
+- **Intangible Tax** = Loan Amount × 0.002 (or $2.00 per $1,000)
+- **Daily Proration (365-day)** = Annual Amount ÷ 365
+- **Daily Proration (360-day)** = Annual Amount ÷ 360
+- **Prepaid Interest** = (Loan Amount × Interest Rate ÷ 360) × Days Remaining in Month
+
+---
+
+## SESSION 12: LESSON QUIZZES
+
+### QUIZ 12-1: CLOSING PROCESS AND RESPA
+
+**Instructions:** Select the best answer for each question.
+
+1. The final step in a real estate transaction where title transfers from seller to buyer is called:
+   a. Contract execution
+   b. Closing
+   c. Title commitment
+   d. Loan origination
+
+2. In Florida, the closing agent is typically:
+   a. The real estate agent
+   b. The mortgage broker
+   c. An attorney or title company
+   d. The buyer's lender
+
+3. RESPA is enforced by the:
+   a. Federal Trade Commission
+   b. Consumer Financial Protection Bureau
+   c. Department of Housing and Urban Development
+   d. Florida Real Estate Commission
+
+4. Section 8 of RESPA prohibits:
+   a. Prepayment penalties
+   b. Kickbacks and referral fees
+   c. Adjustable rate mortgages
+   d. Private mortgage insurance
+
+5. RESPA applies to:
+   a. Commercial real estate loans
+   b. Agricultural loans
+   c. Federally related residential mortgage loans
+   d. Construction loans only
+
+6. The Loan Estimate must be provided within how many business days of receiving a loan application?
+   a. 1 business day
+   b. 3 business days
+   c. 5 business days
+   d. 7 business days
+
+7. The Closing Disclosure must be received by the borrower at least how many business days before closing?
+   a. 1 business day
+   b. 3 business days
+   c. 5 business days
+   d. 7 business days
+
+8. Which change would require a new 3-day waiting period for the Closing Disclosure?
+   a. Seller credit increases by $500
+   b. APR increases by 0.25%
+   c. Closing date changes by one week
+   d. Recording fee increases by $20
+
+9. An Affiliated Business Arrangement (ABA) requires:
+   a. Exclusive use of affiliated services
+   b. Written disclosure of the relationship
+   c. FREC approval
+   d. Higher fees for affiliated services
+
+10. The title commitment is issued:
+    a. After closing
+    b. Before title insurance policy
+    c. By the real estate agent
+    d. By the lender
+
+11. Which is NOT a responsibility of the closing agent?
+    a. Calculating prorations
+    b. Recording documents
+    c. Qualifying the buyer for the loan
+    d. Disbursing funds
+
+12. RESPA limits the amount in escrow accounts to:
+    a. One month's payment
+    b. Amounts needed plus 2-month cushion
+    c. Six months' payments
+    d. One year's payments
+
+13. Which party typically attends closing?
+    a. The appraiser
+    b. The home inspector
+    c. The title company representative
+    d. The property surveyor
+
+14. The final walkthrough typically occurs:
+    a. Before the offer is made
+    b. At the home inspection
+    c. Within 24-48 hours before closing
+    d. 30 days after closing
+
+15. Under RESPA, a seller:
+    a. Must pay for title insurance
+    b. Cannot require use of a specific title insurance company
+    c. Must use the buyer's preferred closing agent
+    d. Cannot attend closing
+
+**ANSWER KEY - Quiz 12-1:**
+
+1. **b. Closing** - Closing is when title transfers and the transaction is completed.
+
+2. **c. An attorney or title company** - Florida is considered an attorney state for closings.
+
+3. **b. Consumer Financial Protection Bureau** - The CFPB enforces RESPA.
+
+4. **b. Kickbacks and referral fees** - Section 8 prohibits giving or receiving anything of value for referrals.
+
+5. **c. Federally related residential mortgage loans** - RESPA applies to most residential mortgage loans.
+
+6. **b. 3 business days** - Lenders must provide the LE within 3 business days of application.
+
+7. **b. 3 business days** - The "3-day rule" requires borrowers receive the CD 3 business days before closing.
+
+8. **b. APR increases by 0.25%** - APR increase over 0.125% requires new 3-day period.
+
+9. **b. Written disclosure of the relationship** - ABAs require disclosure; use is not mandatory.
+
+10. **b. Before title insurance policy** - The commitment is preliminary to the policy.
+
+11. **c. Qualifying the buyer for the loan** - This is the lender's responsibility.
+
+12. **b. Amounts needed plus 2-month cushion** - RESPA limits escrow cushions to 2 months.
+
+13. **c. The title company representative** - Title company often conducts the closing.
+
+14. **c. Within 24-48 hours before closing** - Allows buyer to verify property condition.
+
+15. **b. Cannot require use of a specific title insurance company** - RESPA Section 9 prohibition.
+
+---
+
+### QUIZ 12-2: PRORATIONS AND CALCULATIONS
+
+**Instructions:** Select the best answer for each question.
+
+1. Prorations are calculated to allocate:
+   a. The purchase price between parties
+   b. Ongoing expenses between buyer and seller
+   c. Commission between brokers
+   d. Title insurance costs
+
+2. In most Florida contracts, the day of closing belongs to the:
+   a. Seller
+   b. Buyer
+   c. Lender
+   d. Title company
+
+3. Property taxes in Florida are paid:
+   a. In advance for the upcoming year
+   b. In arrears for the prior year
+   c. Monthly with mortgage payment only
+   d. Quarterly
+
+4. Accrued items on the settlement statement are:
+   a. Credited to seller
+   b. Credited to buyer
+   c. Paid at application
+   d. Never prorated
+
+5. Using a 365-day year, annual taxes of $4,380 equal a daily rate of:
+   a. $10.00
+   b. $12.00
+   c. $14.00
+   d. $12.17
+
+6. Closing is September 1. Annual taxes of $3,650 are unpaid. Using 365 days, the seller owes approximately:
+   a. $2,430
+   b. $2,440
+   c. $2,450
+   d. $2,460
+
+7. The 360-day method assumes:
+   a. 365 days per year
+   b. 30 days per month
+   c. Actual days in each month
+   d. 31 days per month
+
+8. Prepaid items on the settlement statement are:
+   a. Credited to buyer
+   b. Credited to seller
+   c. Debited to both parties
+   d. Not shown on statement
+
+9. Rent collected in advance is typically:
+   a. Kept entirely by seller
+   b. Prorated with credit to buyer
+   c. Returned to tenant
+   d. Held in escrow for one year
+
+10. Closing is March 15. Monthly rent of $1,500 was collected March 1. Using 30-day month, buyer's share is:
+    a. $750
+    b. $800
+    c. $700
+    d. $850
+
+11. Mortgage interest is paid:
+    a. In advance
+    b. In arrears
+    c. At application
+    d. At closing only
+
+12. Prepaid interest covers the period from:
+    a. Application to closing
+    b. Closing to end of month
+    c. First payment to second payment
+    d. Previous month
+
+13. A double entry item on the settlement statement:
+    a. Appears on buyer's side only
+    b. Appears on seller's side only
+    c. Appears on both sides
+    d. Is never prorated
+
+14. Which is typically a single entry item?
+    a. Purchase price
+    b. Prorated taxes
+    c. Buyer's loan costs
+    d. Security deposit transfer
+
+15. Using 360-day year, a $250,000 loan at 6% has daily interest of:
+    a. $41.10
+    b. $41.67
+    c. $42.00
+    d. $40.00
+
+**ANSWER KEY - Quiz 12-2:**
+
+1. **b. Ongoing expenses between buyer and seller** - Prorations divide expenses fairly.
+
+2. **b. Buyer** - In most Florida contracts, closing day belongs to buyer.
+
+3. **b. In arrears for the prior year** - Florida property taxes cover the prior year.
+
+4. **b. Credited to buyer** - Buyer receives credit for expenses they'll pay later.
+
+5. **b. $12.00** - $4,380 ÷ 365 = $12.00 per day.
+
+6. **b. $2,440** - 244 days (Jan-Aug) × $10 = $2,440.
+
+7. **b. 30 days per month** - Also called banker's year (360 days total).
+
+8. **b. Credited to seller** - Seller paid in advance, receives credit for unused portion.
+
+9. **b. Prorated with credit to buyer** - Buyer receives portion for their ownership period.
+
+10. **a. $750** - 15 days × $50/day ($1,500 ÷ 30) = $750.
+
+11. **b. In arrears** - Interest is paid after it accrues.
+
+12. **b. Closing to end of month** - Prepaid interest covers remaining days in closing month.
+
+13. **c. Appears on both sides** - One party's debit equals other's credit.
+
+14. **c. Buyer's loan costs** - Only appears on buyer's side.
+
+15. **b. $41.67** - $250,000 × 0.06 ÷ 360 = $41.67.
+
+---
+
+### QUIZ 12-3: CLOSING COSTS AND TITLE INSURANCE
+
+**Instructions:** Select the best answer for each question.
+
+1. Documentary stamp tax on a deed in Florida (outside Miami-Dade) is:
+   a. $0.35 per $100
+   b. $0.55 per $100
+   c. $0.70 per $100
+   d. $1.00 per $100
+
+2. Documentary stamps on a deed are typically paid by the:
+   a. Buyer
+   b. Seller
+   c. Lender
+   d. Title company
+
+3. The intangible tax rate on a new mortgage in Florida is:
+   a. $0.35 per $100
+   b. $0.70 per $100
+   c. $2.00 per $1,000
+   d. $3.50 per $1,000
+
+4. For a $400,000 sale, documentary stamps on the deed equal:
+   a. $1,400
+   b. $2,100
+   c. $2,800
+   d. $4,000
+
+5. For a $320,000 mortgage, documentary stamps on the note equal:
+   a. $1,120
+   b. $1,600
+   c. $2,240
+   d. $640
+
+6. For a $320,000 mortgage, intangible tax equals:
+   a. $320
+   b. $480
+   c. $640
+   d. $1,120
+
+7. Title insurance protects against:
+   a. Future events only
+   b. Past defects in title
+   c. Property damage
+   d. Mortgage default
+
+8. An owner's title insurance policy:
+   a. Decreases as the loan is paid
+   b. Protects the lender
+   c. Protects the buyer's equity
+   d. Is never required
+
+9. A lender's title insurance policy:
+   a. Protects the buyer
+   b. Coverage equals purchase price
+   c. Coverage decreases as loan is paid
+   d. Is optional
+
+10. Florida title insurance rates are:
+    a. Negotiable between parties
+    b. Set by individual title companies
+    c. Promulgated by the state
+    d. Determined by RESPA
+
+11. The title commitment includes:
+    a. Final closing figures
+    b. Requirements and exceptions
+    c. Commission amounts
+    d. Loan terms
+
+12. Wire fraud prevention requires:
+    a. Using email only for wire instructions
+    b. Verifying wire instructions by phone
+    c. Wiring funds immediately when requested
+    d. Changing banks before closing
+
+13. Which is typically NOT covered by title insurance?
+    a. Forged documents in chain of title
+    b. Zoning violations
+    c. Unknown liens
+    d. Missing heirs
+
+14. Recording fees are typically paid by the:
+    a. Seller only
+    b. Buyer only
+    c. Party whose document is being recorded
+    d. Title company
+
+15. After closing, the deed is:
+    a. Destroyed
+    b. Held by the lender
+    c. Recorded in public records
+    d. Kept by the closing agent
+
+**ANSWER KEY - Quiz 12-3:**
+
+1. **c. $0.70 per $100** - Standard Florida rate outside Miami-Dade.
+
+2. **b. Seller** - Customarily paid by seller in Florida.
+
+3. **c. $2.00 per $1,000** - Equal to 2 mills or $0.002 per dollar.
+
+4. **c. $2,800** - $400,000 ÷ 100 = 4,000 × $0.70 = $2,800.
+
+5. **a. $1,120** - $320,000 ÷ 100 = 3,200 × $0.35 = $1,120.
+
+6. **c. $640** - $320,000 × $2 ÷ $1,000 = $640 (or $320,000 × 0.002).
+
+7. **b. Past defects in title** - Protects against existing but undiscovered defects.
+
+8. **c. Protects the buyer's equity** - Owner's policy protects the owner/buyer.
+
+9. **c. Coverage decreases as loan is paid** - Lender's policy covers loan balance.
+
+10. **c. Promulgated by the state** - Florida Department of Financial Services sets rates.
+
+11. **b. Requirements and exceptions** - Shows what must be done and what won't be covered.
+
+12. **b. Verifying wire instructions by phone** - Always verify using known phone numbers.
+
+13. **b. Zoning violations** - Government regulations are standard exclusions.
+
+14. **c. Party whose document is being recorded** - Buyer pays for deed and mortgage recording.
+
+15. **c. Recorded in public records** - Provides constructive notice of ownership.
+
+---
+
+This completes Session 12 on Closing Real Estate Transactions.
