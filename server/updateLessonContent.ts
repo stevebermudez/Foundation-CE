@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { lessons, units, questionBanks } from "@shared/schema";
+import { lessons, units, questionBanks, courses } from "@shared/schema";
 import { eq, and, ne } from "drizzle-orm";
 import { getLessonContent } from "./lessonContent";
 
@@ -10,11 +10,25 @@ const expectedLessonCounts: Record<number, number> = {
 
 const FALLBACK_MARKER = "Content for this lesson is being developed";
 
+// FREC I Pre-Licensing Course SKU - only update lessons for this course
+const FREC_I_SKU = "FL-RE-SA-63HR";
+
 export async function updateAllLessonContent() {
   try {
     console.log("Updating lesson content with real FREC I educational material...");
 
-    const allUnits = await db.select().from(units).orderBy(units.unitNumber);
+    // Find the FREC I course to only update its lessons (not CE courses)
+    const frecICourse = await db.select().from(courses).where(eq(courses.sku, FREC_I_SKU)).limit(1);
+    if (!frecICourse || frecICourse.length === 0) {
+      console.log("FREC I course not found, skipping lesson content update");
+      return;
+    }
+    const frecICourseId = frecICourse[0].id;
+    
+    // Only get units for the FREC I course
+    const allUnits = await db.select().from(units)
+      .where(eq(units.courseId, frecICourseId))
+      .orderBy(units.unitNumber);
     let fallbackCount = 0;
     let mismatchCount = 0;
     

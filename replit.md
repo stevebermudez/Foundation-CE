@@ -41,6 +41,20 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Questions include detailed explanations and subunit references
   - Each question is specifically covered in the corresponding unit's lesson content
   - Import script: `server/importAllUnitQuizzes.ts` replaces all unit quiz questions
+- **14-Hour Florida Real Estate CE Package**: Complete continuing education bundle for license renewal:
+  - Course 1: 3-Hour Florida Core Law Update (Core Law requirement) - $29.99
+    - 3 units covering recent legislative changes, agency law, escrow management
+    - 9 lessons with detailed content and 15 quiz questions
+  - Course 2: 3-Hour Ethics and Business Practices (Ethics requirement) - $29.99
+    - 3 units covering ethics vs law, advertising standards, commission disputes
+    - 9 lessons and 15 quiz questions plus 20-question final exam (80% passing)
+  - Course 3: 8-Hour Florida Transaction Mastery (Specialty requirement) - $49.99
+    - 8 units organized in 4 modules: FAR/BAR contracts, disclosures, financing, closing
+    - 16 lessons covering complete transaction lifecycle
+    - 40 quiz questions across all units
+  - Bundle: All 3 courses for $89.97 (save $20 vs individual purchase)
+  - Applies to both Sales Associate and Broker license types
+  - Seed script: `server/seed14HourCE.ts`
 - **Visual Page Builder (CMS)**: Squarespace-style drag-and-drop page editor for managing marketing pages without code:
   - Database tables: `site_pages`, `page_sections`, `section_blocks` with hierarchical structure
   - Section types: Hero, Text Content, Features Grid, Call to Action, Column Layout, Image Gallery, Custom HTML
