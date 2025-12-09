@@ -39,6 +39,8 @@ interface ExamFormInfo {
   id: string;
   title: string;
   questionCount: number;
+  passingScore: number;
+  timeLimit: number;
 }
 
 function ExportDialog({ course, onClose }: { course: any; onClose: () => void }) {

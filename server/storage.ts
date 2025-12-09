@@ -2503,11 +2503,11 @@ export class DatabaseStorage implements IStorage {
     return { formA, formB };
   }
 
-  async getAvailableFinalExamForms(courseId: string): Promise<Array<{ form: string; id: string; title: string; questionCount: number }>> {
+  async getAvailableFinalExamForms(courseId: string): Promise<Array<{ form: string; id: string; title: string; questionCount: number; passingScore: number; timeLimit: number }>> {
     const allExams = await this.getPracticeExams(courseId);
     const finalExams = allExams.filter(e => e.isFinalExam === 1 && e.examForm);
     
-    const forms: Array<{ form: string; id: string; title: string; questionCount: number }> = [];
+    const forms: Array<{ form: string; id: string; title: string; questionCount: number; passingScore: number; timeLimit: number }> = [];
     
     for (const exam of finalExams) {
       const questions = await this.getExamQuestions(exam.id);
@@ -2515,7 +2515,9 @@ export class DatabaseStorage implements IStorage {
         form: exam.examForm || 'Unknown',
         id: exam.id,
         title: exam.title,
-        questionCount: questions.length
+        questionCount: questions.length,
+        passingScore: exam.passingScore || 70,
+        timeLimit: exam.timeLimit || 180
       });
     }
     
