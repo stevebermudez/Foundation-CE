@@ -65,8 +65,9 @@ const BLOCK_TYPES = [
   { type: "embed", label: "Embed", icon: Layers, description: "iFrame or external content" },
 ];
 
-function getAuthHeaders() {
-  return {};
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem("adminToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export default function BlockEditor({ lessonId, lessonTitle, onClose }: BlockEditorProps) {
@@ -79,6 +80,7 @@ export default function BlockEditor({ lessonId, lessonTitle, onClose }: BlockEdi
     queryFn: async () => {
       const res = await fetch(`/api/admin/lessons/${lessonId}/blocks`, {
         credentials: 'include',
+        headers: getAuthHeaders(),
       });
       if (!res.ok) return [];
       return res.json();
@@ -89,7 +91,7 @@ export default function BlockEditor({ lessonId, lessonTitle, onClose }: BlockEdi
     mutationFn: async (data: { blockType: string; content?: any; settings?: any }) => {
       const res = await fetch(`/api/admin/lessons/${lessonId}/blocks`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         credentials: 'include',
         body: JSON.stringify(data),
       });
@@ -110,7 +112,7 @@ export default function BlockEditor({ lessonId, lessonTitle, onClose }: BlockEdi
     mutationFn: async ({ blockId, data }: { blockId: string; data: any }) => {
       const res = await fetch(`/api/admin/blocks/${blockId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         credentials: 'include',
         body: JSON.stringify(data),
       });
@@ -132,6 +134,7 @@ export default function BlockEditor({ lessonId, lessonTitle, onClose }: BlockEdi
       const res = await fetch(`/api/admin/blocks/${blockId}`, {
         method: "DELETE",
         credentials: 'include',
+        headers: getAuthHeaders(),
       });
       if (!res.ok) throw new Error("Failed to delete block");
       return res.json();
@@ -150,6 +153,7 @@ export default function BlockEditor({ lessonId, lessonTitle, onClose }: BlockEdi
       const res = await fetch(`/api/admin/blocks/${blockId}/duplicate`, {
         method: "POST",
         credentials: 'include',
+        headers: getAuthHeaders(),
       });
       if (!res.ok) throw new Error("Failed to duplicate block");
       return res.json();
@@ -167,7 +171,7 @@ export default function BlockEditor({ lessonId, lessonTitle, onClose }: BlockEdi
     mutationFn: async (blockIds: string[]) => {
       const res = await fetch(`/api/admin/lessons/${lessonId}/blocks/reorder`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         credentials: 'include',
         body: JSON.stringify({ blockIds }),
       });
