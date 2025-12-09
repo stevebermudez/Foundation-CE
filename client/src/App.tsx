@@ -35,6 +35,7 @@ import AdminContentBuilderPage from "@/pages/admin/content-builder";
 import AdminPagesManagerPage from "@/pages/admin/pages-manager";
 import AdminFinancePage from "@/pages/admin/finance";
 import AdminSettingsPage from "@/pages/admin/settings";
+import AdminAnalyticsDashboard from "@/pages/admin/analytics-dashboard";
 import CourseLearningPage from "@/pages/course-learning";
 import UnitLearningPage from "@/pages/unit-learning";
 import AccessibilityPage from "@/pages/accessibility";
@@ -89,6 +90,7 @@ function Router() {
           <Route path="/admin/pages" component={AdminPagesManagerPage} />
           <Route path="/admin/finance" component={AdminFinancePage} />
           <Route path="/admin/settings" component={AdminSettingsPage} />
+          <Route path="/admin/analytics" component={AdminAnalyticsDashboard} />
           <Route path="/checkout"><CheckoutPage /></Route>
           <Route path="/:slug">{(params) => <CMSPage slug={params.slug} />}</Route>
           <Route component={NotFound} />

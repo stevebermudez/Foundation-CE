@@ -17,6 +17,7 @@ import PagesManagerPage from "./pages-manager";
 import ContentBuilderPage from "./content-builder";
 import AdminFinancePage from "./finance";
 import AdminSettingsPage from "./settings";
+import AnalyticsDashboard from "./analytics-dashboard";
 import {
   BarChart3,
   Users,
@@ -593,6 +594,9 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="finance" data-testid="tab-admin-finance">
               Finance
             </TabsTrigger>
+            <TabsTrigger value="analytics" data-testid="tab-admin-analytics">
+              Analytics
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -1000,6 +1004,11 @@ export default function AdminDashboardPage() {
           {/* Finance Tab */}
           <TabsContent value="finance">
             <AdminFinancePage />
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
           </TabsContent>
         </Tabs>
 
