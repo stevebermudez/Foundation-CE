@@ -121,7 +121,9 @@ export interface IStorage {
     includeVideos?: boolean;
     includeDescriptions?: boolean;
     unitNumbers?: number[];
+    examForms?: string[]; // e.g. ['A', 'B'] or undefined for all
   }): Promise<Buffer>;
+  getAvailableFinalExamForms(courseId: string): Promise<Array<{ form: string; id: string; title: string; questionCount: number }>>;
   exportAllUsersData(): Promise<string>;
   exportAllUsersDataCSV(): Promise<string>;
   exportEmailCampaignData(): Promise<string>;
@@ -1703,7 +1705,8 @@ export class DatabaseStorage implements IStorage {
       includeQuizzes: options?.includeQuizzes !== false,
       includeVideos: options?.includeVideos !== false,
       includeDescriptions: options?.includeDescriptions !== false,
-      unitNumbers: options?.unitNumbers || []
+      unitNumbers: options?.unitNumbers || [],
+      examForms: options?.examForms // undefined means all, empty array means none, ['A', 'B'] means specific forms
     };
     
     const course = await this.getCourse(courseId);
@@ -2033,114 +2036,199 @@ export class DatabaseStorage implements IStorage {
       sections.push(new Paragraph({ text: "", spacing: { after: 300 } }));
     }
     
-    // Final Exam (if exists and quizzes are included) - aggregate real questions from all unit quizzes
+    // Final Exam Export - supports multiple exam forms (A, B, etc.)
     if (opts.includeQuizzes) {
-      // Get all question banks for this course
-      const allQuestionBanks = await this.getQuestionBanksByCourse(courseId);
+      // Check if we should skip exam export (empty array means none)
+      const skipExamExport = Array.isArray(opts.examForms) && opts.examForms.length === 0;
       
-      // Aggregate ALL questions from unit quizzes to create comprehensive final exam
-      // This ensures we have 100 real questions (not placeholders)
-      const unitQuizBanks = allQuestionBanks.filter((qb: QuestionBank) => 
-        qb.bankType === 'unit_quiz' && qb.isActive === 1
-      );
-      console.log(`[DOCX Export] Final Exam: Found ${unitQuizBanks.length} unit quiz banks to aggregate`);
-      
-      // Collect questions from all unit quizzes
-      let allFinalQuestions: BankQuestion[] = [];
-      for (const bank of unitQuizBanks) {
-        const bankQuestions = await this.getBankQuestions(bank.id);
-        allFinalQuestions.push(...bankQuestions);
-      }
-      
-      // Also include any dedicated final exam questions
-      const finalExamBank = allQuestionBanks.find((qb: QuestionBank) => 
-        /final\s*exam/i.test(qb.title || '')
-      );
-      if (finalExamBank) {
-        const dedicatedFinalQuestions = await this.getBankQuestions(finalExamBank.id);
-        allFinalQuestions.push(...dedicatedFinalQuestions);
-      }
-      
-      // Shuffle and take 100 questions for the final exam
-      const shuffled = allFinalQuestions.sort(() => Math.random() - 0.5);
-      const finalQuestions = shuffled.slice(0, 100);
-      console.log(`[DOCX Export] Final Exam: Aggregated ${allFinalQuestions.length} total, using ${finalQuestions.length} for export`);
-      
-      if (finalQuestions.length > 0) {
+      if (!skipExamExport) {
+        // Get available final exam forms
+        const allExams = await this.getPracticeExams(courseId);
+        let finalExams = allExams.filter(e => e.isFinalExam === 1 && e.examForm);
         
-        sections.push(
-          new Paragraph({
-            children: [
-              new TextRun({ 
-                text: "Course Final Exam",
-                bold: true,
-                size: 36
-              })
-            ],
-            spacing: { before: 500, after: 150 }
-          })
-        );
+        // Filter by selected forms if specified
+        if (Array.isArray(opts.examForms) && opts.examForms.length > 0) {
+          finalExams = finalExams.filter(e => opts.examForms!.includes(e.examForm!));
+        }
         
-        sections.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: 70%`, italics: true })
-            ],
-            spacing: { after: 200 }
-          })
-        );
+        // Sort by form letter
+        finalExams.sort((a, b) => (a.examForm || '').localeCompare(b.examForm || ''));
         
-        finalQuestions.forEach((q, qIndex) => {
-          sections.push(
-            new Paragraph({
-              children: [
-                new TextRun({ text: `${qIndex + 1}. `, bold: true }),
-                new TextRun({ text: q.questionText || '' })
-              ],
-              spacing: { before: 150, after: 80 }
-            })
-          );
-          
-          let options: string[] = [];
-          try {
-            options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
-          } catch { options = []; }
-          
-          // bank_questions uses correctOption (index 0-3), not correctAnswer (letter A-D)
-          const correctIndex = q.correctOption ?? 0;
-          
-          const letterLabels = ['A', 'B', 'C', 'D'];
-          options.forEach((opt, optIdx) => {
-            // Options are stored as plain text, add letter labels
-            const isCorrect = optIdx === correctIndex;
-            const label = letterLabels[optIdx] || String(optIdx + 1);
+        console.log(`[DOCX Export] Final Exams: Found ${finalExams.length} exam forms to export`);
+        
+        if (finalExams.length > 0) {
+          // Export each form as a separate section
+          for (const exam of finalExams) {
+            const examQuestionsList = await this.getExamQuestions(exam.id);
+            
+            if (examQuestionsList.length === 0) continue;
+            
+            // Form header
             sections.push(
               new Paragraph({
                 children: [
                   new TextRun({ 
-                    text: `   ${label}. ${opt}`,
-                    bold: isCorrect,
-                    color: isCorrect ? "008000" : undefined
-                  }),
-                  ...(isCorrect ? [new TextRun({ text: " (Correct)", bold: true, color: "008000" })] : [])
+                    text: `Final Examination - Form ${exam.examForm}`,
+                    bold: true,
+                    size: 36
+                  })
                 ],
-                spacing: { after: 40 }
+                spacing: { before: 500, after: 150 }
               })
             );
-          });
-          
-          if (q.explanation) {
+            
             sections.push(
               new Paragraph({
                 children: [
-                  new TextRun({ text: "   Explanation: ", italics: true, bold: true }),
-                  new TextRun({ text: q.explanation, italics: true })
+                  new TextRun({ 
+                    text: `${examQuestionsList.length} questions  |  Passing Score: ${exam.passingScore || 70}%  |  Time Limit: ${exam.timeLimit || 180} minutes`, 
+                    italics: true 
+                  })
                 ],
-                spacing: { before: 50, after: 100 }
+                spacing: { after: 200 }
               })
             );
+            
+            // Export questions for this form
+            examQuestionsList.forEach((q, qIndex) => {
+              sections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `${qIndex + 1}. `, bold: true }),
+                    new TextRun({ text: q.questionText || '' })
+                  ],
+                  spacing: { before: 150, after: 80 }
+                })
+              );
+              
+              let examOptions: string[] = [];
+              try {
+                examOptions = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
+              } catch { examOptions = []; }
+              
+              const letterLabels = ['A', 'B', 'C', 'D'];
+              examOptions.forEach((opt, optIdx) => {
+                const hasLetterPrefix = /^[A-D]\./.test(opt);
+                const optionText = hasLetterPrefix ? opt : `${letterLabels[optIdx]}. ${opt}`;
+                const isCorrect = q.correctAnswer === letterLabels[optIdx];
+                
+                sections.push(
+                  new Paragraph({
+                    children: [
+                      new TextRun({ 
+                        text: `   ${optionText}`,
+                        bold: isCorrect,
+                        color: isCorrect ? "008000" : undefined
+                      }),
+                      ...(isCorrect ? [new TextRun({ text: " (Correct)", bold: true, color: "008000" })] : [])
+                    ],
+                    spacing: { after: 40 }
+                  })
+                );
+              });
+              
+              if (q.explanation) {
+                sections.push(
+                  new Paragraph({
+                    children: [
+                      new TextRun({ text: "   Explanation: ", italics: true, bold: true }),
+                      new TextRun({ text: q.explanation, italics: true })
+                    ],
+                    spacing: { before: 50, after: 100 }
+                  })
+                );
+              }
+            });
+            
+            // Add page break between forms
+            sections.push(new Paragraph({ text: "", spacing: { after: 400 } }));
           }
-        });
+        } else {
+          // Fallback: aggregate from unit quizzes if no formal exam forms exist
+          const allQuestionBanks = await this.getQuestionBanksByCourse(courseId);
+          const unitQuizBanks = allQuestionBanks.filter((qb: QuestionBank) => 
+            qb.bankType === 'unit_quiz' && qb.isActive === 1
+          );
+          
+          let allFinalQuestions: BankQuestion[] = [];
+          for (const bank of unitQuizBanks) {
+            const bankQuestions = await this.getBankQuestions(bank.id);
+            allFinalQuestions.push(...bankQuestions);
+          }
+          
+          const shuffled = allFinalQuestions.sort(() => Math.random() - 0.5);
+          const finalQuestions = shuffled.slice(0, 100);
+          
+          if (finalQuestions.length > 0) {
+            sections.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: "Course Final Exam", bold: true, size: 36 })
+                ],
+                spacing: { before: 500, after: 150 }
+              })
+            );
+            
+            sections.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `${finalQuestions.length} questions  |  Passing Score: 70%`, italics: true })
+                ],
+                spacing: { after: 200 }
+              })
+            );
+            
+            finalQuestions.forEach((q, qIndex) => {
+              sections.push(
+                new Paragraph({
+                  children: [
+                    new TextRun({ text: `${qIndex + 1}. `, bold: true }),
+                    new TextRun({ text: q.questionText || '' })
+                  ],
+                  spacing: { before: 150, after: 80 }
+                })
+              );
+              
+              let options: string[] = [];
+              try {
+                options = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options as string[]) || [];
+              } catch { options = []; }
+              
+              const correctIndex = q.correctOption ?? 0;
+              const letterLabels = ['A', 'B', 'C', 'D'];
+              
+              options.forEach((opt, optIdx) => {
+                const isCorrect = optIdx === correctIndex;
+                const label = letterLabels[optIdx] || String(optIdx + 1);
+                sections.push(
+                  new Paragraph({
+                    children: [
+                      new TextRun({ 
+                        text: `   ${label}. ${opt}`,
+                        bold: isCorrect,
+                        color: isCorrect ? "008000" : undefined
+                      }),
+                      ...(isCorrect ? [new TextRun({ text: " (Correct)", bold: true, color: "008000" })] : [])
+                    ],
+                    spacing: { after: 40 }
+                  })
+                );
+              });
+              
+              if (q.explanation) {
+                sections.push(
+                  new Paragraph({
+                    children: [
+                      new TextRun({ text: "   Explanation: ", italics: true, bold: true }),
+                      new TextRun({ text: q.explanation, italics: true })
+                    ],
+                    spacing: { before: 50, after: 100 }
+                  })
+                );
+              }
+            });
+          }
+        }
       }
     }
     
@@ -2413,6 +2501,28 @@ export class DatabaseStorage implements IStorage {
     const formA = allExams.find(e => e.isFinalExam === 1 && e.examForm === 'A') || null;
     const formB = allExams.find(e => e.isFinalExam === 1 && e.examForm === 'B') || null;
     return { formA, formB };
+  }
+
+  async getAvailableFinalExamForms(courseId: string): Promise<Array<{ form: string; id: string; title: string; questionCount: number }>> {
+    const allExams = await this.getPracticeExams(courseId);
+    const finalExams = allExams.filter(e => e.isFinalExam === 1 && e.examForm);
+    
+    const forms: Array<{ form: string; id: string; title: string; questionCount: number }> = [];
+    
+    for (const exam of finalExams) {
+      const questions = await this.getExamQuestions(exam.id);
+      forms.push({
+        form: exam.examForm || 'Unknown',
+        id: exam.id,
+        title: exam.title,
+        questionCount: questions.length
+      });
+    }
+    
+    // Sort by form letter (A, B, C, etc.)
+    forms.sort((a, b) => a.form.localeCompare(b.form));
+    
+    return forms;
   }
 
   async createFinalExamForm(courseId: string, form: 'A' | 'B', questionIds: string[]): Promise<any> {

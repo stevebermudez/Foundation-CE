@@ -3726,12 +3726,28 @@ segment1.ts
     },
   );
 
+  // Get available final exam forms for a course
+  app.get(
+    "/api/export/course/:courseId/exam-forms",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const forms = await storage.getAvailableFinalExamForms(req.params.courseId);
+        res.json(forms);
+      } catch (err) {
+        console.error("Error fetching exam forms:", err);
+        res.status(500).json({ error: "Failed to fetch exam forms" });
+      }
+    }
+  );
+
   app.get(
     "/api/export/course/:courseId/content.docx",
     isAdmin,
     async (req, res) => {
       try {
         // Parse export options from query params
+        const examFormsParam = req.query.examForms as string | undefined;
         const options = {
           includeLessons: req.query.includeLessons !== 'false',
           includeQuizzes: req.query.includeQuizzes !== 'false',
@@ -3739,7 +3755,10 @@ segment1.ts
           includeDescriptions: req.query.includeDescriptions !== 'false',
           unitNumbers: req.query.units 
             ? String(req.query.units).split(',').map(n => parseInt(n, 10)).filter(n => !isNaN(n))
-            : []
+            : [],
+          examForms: examFormsParam 
+            ? examFormsParam.split(',').filter(f => f.trim())
+            : undefined // undefined means export all available forms
         };
         
         const docxBuffer = await storage.exportCourseContentDocx(
