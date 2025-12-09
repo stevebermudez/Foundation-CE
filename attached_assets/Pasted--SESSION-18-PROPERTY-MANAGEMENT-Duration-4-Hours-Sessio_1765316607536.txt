@@ -1,0 +1,1459 @@
+## SESSION 18: PROPERTY MANAGEMENT
+
+**Duration:** 4 Hours  
+**Session Objectives:** Upon completion, students will understand property management principles, landlord-tenant law, lease agreements, tenant relations, maintenance responsibilities, financial management, and the role of property managers in Florida real estate.
+
+### LEARNING OBJECTIVES
+
+1. Describe the role and responsibilities of a property manager
+2. Explain Florida landlord-tenant law and its requirements
+3. Understand different types of lease agreements and their provisions
+4. Describe the tenant selection process and fair housing compliance
+5. Explain rent collection procedures and handling delinquencies
+6. Understand property maintenance and inspection requirements
+7. Describe financial management and reporting for managed properties
+8. Explain the eviction process in Florida
+
+### KEY TERMS
+
+- **Assignment** - Transfer of entire leasehold interest to another party
+- **Constructive Eviction** - Landlord's actions render property uninhabitable
+- **Escalation Clause** - Lease provision allowing rent increases
+- **Estate at Sufferance** - Tenant remains after lease expires without permission
+- **Estate at Will** - Tenancy with no definite term; terminable by either party
+- **Estate for Years** - Lease with definite beginning and ending dates
+- **Eviction** - Legal process to remove tenant from property
+- **Gross Lease** - Tenant pays fixed rent; landlord pays operating expenses
+- **Habitability** - Property condition suitable for living
+- **Holdover Tenant** - Tenant who remains after lease expiration
+- **Index Lease** - Rent adjustments tied to economic index
+- **Landlord** - Property owner who leases to tenant; also called lessor
+- **Lease** - Contract granting possession for specified term
+- **Lessee** - Tenant; party who receives leasehold interest
+- **Lessor** - Landlord; party who grants leasehold interest
+- **Management Agreement** - Contract between owner and property manager
+- **Net Lease** - Tenant pays rent plus some or all operating expenses
+- **Percentage Lease** - Rent based on percentage of tenant's gross sales
+- **Periodic Estate** - Tenancy that automatically renews (month-to-month)
+- **Property Manager** - Agent who manages real estate for owner
+- **Security Deposit** - Funds held to cover damages or unpaid rent
+- **Sublease** - Tenant transfers partial leasehold interest
+- **Tenant** - Party who holds leasehold interest; also called lessee
+- **Three-Day Notice** - Florida notice to pay rent or vacate
+- **Trust Account** - Account holding tenant security deposits
+- **Vacancy Rate** - Percentage of units unoccupied
+
+---
+
+### SEGMENT 1: INTRODUCTION TO PROPERTY MANAGEMENT (40 minutes)
+
+#### The Role of the Property Manager
+
+Property management encompasses the comprehensive oversight, operation, and administration of real estate assets on behalf of property owners. The property manager functions as a fiduciary agent for the owner, assuming responsibility for daily operations while striving to optimize the property's financial performance and preserve its long-term value. Florida law mandates that individuals who lease, rent, or manage real property for compensation on behalf of others must possess an active real estate license issued by the Florida Department of Business and Professional Regulation.
+
+**Core Objectives of Professional Property Management:**
+
+*Revenue Optimization:*
+The property manager works to generate maximum rental income through strategic pricing decisions, maintaining high occupancy levels, and implementing value-added services. This requires ongoing market research, competitive analysis, and responsive adjustments to changing conditions.
+
+*Asset Preservation:*
+Protecting the owner's investment requires diligent maintenance, timely repairs, and strategic capital improvements. The manager must balance short-term costs against long-term property values to ensure the asset appreciates over time.
+
+*Owner Goal Alignment:*
+Different owners have varying priorities—some focus primarily on monthly cash flow, others on tax advantages, and still others on building equity for eventual sale. The effective property manager understands these objectives and tailors their management approach accordingly.
+
+**Categories of Managed Properties:**
+
+*Residential Real Estate:*
+This category includes single-family rental homes, condominium units, townhouse communities, multi-family apartment buildings ranging from small duplexes to large complexes, manufactured housing communities, and short-term vacation rental properties.
+
+*Commercial Real Estate:*
+Commercial management covers professional office buildings, retail shopping centers and strip malls, industrial facilities including warehouses and distribution centers, and mixed-use developments combining multiple property types.
+
+*Specialty Properties:*
+Certain properties require specialized management expertise, including hospitality properties such as hotels and resorts, self-storage facilities, healthcare-related real estate, and age-restricted senior communities.
+
+#### The Property Management Agreement
+
+The management agreement serves as the foundational contract establishing the professional relationship between the property owner and the property manager. This legally binding document defines each party's rights, responsibilities, and expectations.
+
+**Critical Components of the Management Agreement:**
+
+*Party Identification:*
+The agreement must clearly identify all parties, including the legal name of the property owner (whether individual, partnership, corporation, or trust), the management company or licensed individual manager, and relevant contact information for both parties.
+
+*Property Specification:*
+A complete description of the managed property should include the legal description from public records, street address, property type, number of units or square footage, and identification of any common areas or amenities included in the management scope.
+
+*Agreement Duration:*
+The contract should specify the effective date, initial term length, and provisions for renewal or extension. Most management agreements run for one to three years with automatic renewal provisions unless either party provides termination notice.
+
+*Scope of Manager Authority:*
+The agreement should detail specific authorities granted to the manager:
+- Marketing and promotional activities
+- Applicant screening and tenant selection
+- Lease preparation, negotiation, and execution
+- Collection of rents and other charges
+- Coordination of maintenance and repairs
+- Preparation of financial statements and reports
+- Response to emergencies and urgent situations
+
+*Compensation Structure:*
+Management fees typically follow one of several models:
+- Percentage of collected gross rents (typically 8-12% for residential, 3-6% for commercial)
+- Fixed monthly management fee regardless of occupancy
+- Hybrid arrangements combining base fees with performance incentives
+- Separate fees for leasing services, lease renewals, or project management
+
+*Owner Obligations:*
+The agreement should address what the owner must provide:
+- Adequate property and liability insurance coverage
+- Sufficient funds for repairs and operating expenses
+- Compliance with applicable laws and regulations
+- Timely response to manager communications
+
+*Financial Protocols:*
+Clear procedures should govern:
+- Establishment and management of operating accounts
+- Security deposit handling and accounting
+- Maintenance reserve requirements
+- Timing and method of owner disbursements
+
+*Termination Procedures:*
+The agreement should specify:
+- Required notice period (commonly 30-90 days)
+- Permitted grounds for early termination
+- Procedures for transitioning to new management
+- Requirements for final accounting and fund transfers
+
+#### Property Manager Functions and Duties
+
+**Marketing and Tenant Acquisition:**
+
+*Market Research and Pricing:*
+The manager conducts thorough analysis of comparable rental properties to establish competitive yet profitable rental rates. This involves examining similar properties in terms of size, amenities, location, and condition, while also considering seasonal fluctuations and local economic factors.
+
+*Promotional Activities:*
+Effective marketing strategies incorporate multiple channels including online rental listing platforms, property signage, social media presence, and traditional advertising where appropriate. All marketing materials and activities must strictly comply with federal and state fair housing requirements.
+
+*Property Presentations:*
+The manager coordinates and conducts property showings for prospective tenants, presenting the property's features while providing honest answers to inquiries and disclosing any material facts that could influence the rental decision.
+
+*Applicant Processing:*
+A systematic screening process evaluates rental applications by verifying employment and income, reviewing credit history, contacting previous landlords, and checking references. Consistent application of objective screening criteria helps ensure fair treatment while identifying qualified tenants.
+
+**Financial Administration:**
+
+*Rent Administration:*
+Establishing clear payment policies, processing incoming payments, enforcing deadlines and late fee provisions, and maintaining detailed payment records form the foundation of effective rent collection.
+
+*Budget Development:*
+Annual operating budgets project anticipated income from all sources and estimate expenses across all categories. Regular monitoring compares actual performance against budgeted projections and identifies variances requiring attention.
+
+*Owner Reporting:*
+Comprehensive financial statements keep owners informed about their investment:
+- Monthly profit and loss statements
+- Occupancy reports and rent rolls
+- Aging reports for outstanding balances
+- Cash flow analysis
+- Annual summaries supporting tax preparation
+
+*Cost Management:*
+Negotiating favorable terms with service providers, soliciting competitive bids for significant expenditures, and monitoring expenses against industry benchmarks help control operating costs while maintaining property standards.
+
+**Operations and Maintenance:**
+
+*Scheduled Maintenance:*
+Proactive maintenance programs address routine service needs before they develop into costly problems. Regular servicing of mechanical systems, seasonal property preparations, and scheduled inspections extend equipment life and prevent failures.
+
+*Repair Coordination:*
+When problems arise, the manager evaluates urgency, dispatches appropriate contractors, monitors work quality, and follows up with tenants to confirm satisfaction. Emergency procedures ensure rapid response to urgent situations.
+
+*Property Monitoring:*
+Regular inspections of individual units and common areas identify maintenance needs, verify lease compliance, and document property conditions. Inspection findings guide maintenance priorities and budget planning.
+
+*Contractor Oversight:*
+Managing relationships with plumbers, electricians, HVAC technicians, landscapers, and other service providers requires verifying credentials, negotiating pricing, monitoring performance, and addressing quality concerns.
+
+---
+
+### SEGMENT 2: FLORIDA LANDLORD-TENANT LAW (50 minutes)
+
+#### Florida Residential Landlord and Tenant Act Overview
+
+Chapter 83, Part II of the Florida Statutes establishes the legal framework governing residential rental relationships in Florida. This comprehensive legislation defines the rights and responsibilities of both landlords and tenants, creating standards for rental housing transactions throughout the state.
+
+**Scope of Coverage:**
+
+The statute applies to rental arrangements for residential dwelling units including:
+- Detached houses and attached townhomes
+- Apartments and condominium units rented to tenants
+- Manufactured homes when the home rather than the lot is rented
+- Individual rooms rented within a larger residence
+
+Certain occupancies fall outside the statute's coverage:
+- Short-term hotel and motel stays
+- Institutional residence arrangements
+- Housing provided to members of fraternal or social organizations
+- Lodging provided to employees as an employment benefit
+- Occupancy pursuant to a purchase contract
+
+#### Landlord Duties and Responsibilities
+
+**Habitability and Maintenance Obligations:**
+
+Florida law imposes specific maintenance duties on residential landlords:
+
+*Building Code Compliance:*
+The landlord must maintain the property in compliance with applicable building, housing, and health codes. Any code violations that materially affect the health or safety of occupants must be promptly corrected.
+
+*Structural Integrity:*
+The landlord bears responsibility for maintaining the structural components of the building including the roof, exterior walls, foundation, floors, ceilings, windows, and exterior doors in sound condition.
+
+*Plumbing Systems:*
+All plumbing fixtures and systems must be maintained in reasonable working order, including pipes, drains, toilets, sinks, and water heaters.
+
+*Climate Control:*
+Where heating or air conditioning systems are provided as part of the rental, the landlord must maintain these systems in functional condition. Hot water systems must similarly be kept operational.
+
+*Common Area Maintenance:*
+In multi-unit properties, the landlord must keep shared spaces clean, safe, and properly maintained. This includes hallways, stairwells, laundry facilities, parking areas, and recreational amenities.
+
+*Waste Management:*
+For buildings with multiple units, the landlord must arrange for garbage collection services and provide suitable containers for refuse storage.
+
+*Appliance Maintenance:*
+Any appliances provided by the landlord—refrigerators, stoves, dishwashers, and similar equipment—must be maintained in reasonable working condition throughout the tenancy.
+
+*Security Features:*
+The landlord must provide and maintain functioning locks on exterior doors and windows, along with keys or other access devices as appropriate.
+
+*Environmental Disclosures:*
+Properties constructed before 1978 require disclosure of known lead-based paint hazards and provision of educational materials regarding lead paint risks.
+
+**Prohibited Landlord Conduct:**
+
+Certain landlord actions are expressly prohibited under Florida law:
+
+Landlords may not interrupt essential services—electricity, gas, water, or heat—as a means of pressuring tenants or forcing them to vacate. Deliberate service interruptions expose landlords to significant liability.
+
+Self-help eviction tactics are strictly forbidden. Landlords cannot change locks, remove doors or windows, take tenant belongings, or engage in other actions designed to exclude a tenant from the premises without going through proper legal eviction procedures.
+
+Any attempt to terminate utility services to force tenant departure constitutes illegal conduct that may result in tenant remedies including damages.
+
+#### Tenant Duties and Responsibilities
+
+**Statutory Tenant Obligations:**
+
+Florida law imposes corresponding duties on residential tenants:
+
+*Regulatory Compliance:*
+Tenants must comply with applicable building, housing, and health codes affecting their use of the premises.
+
+*Sanitation:*
+Maintaining the dwelling in a clean and sanitary condition is the tenant's responsibility. This includes regular cleaning and avoiding conditions that could attract pests or create health hazards.
+
+*Waste Disposal:*
+Tenants must remove garbage from the unit and dispose of it properly in designated receptacles.
+
+*Proper Use of Systems:*
+Electrical, plumbing, heating, cooling, and other building systems must be used appropriately and reasonably.
+
+*Property Preservation:*
+Tenants may not damage, deface, or remove any portion of the premises. They must also prevent guests from causing damage.
+
+*Neighbor Relations:*
+Tenants must conduct themselves in ways that do not disturb other residents' peaceful enjoyment of their homes.
+
+*Rules Compliance:*
+Reasonable rules and regulations established by the landlord and communicated to the tenant must be followed.
+
+*Authorized Use:*
+The property may only be used for its intended purpose as specified in the lease agreement.
+
+#### Security Deposit Regulations
+
+Florida imposes detailed requirements for the handling of tenant security deposits that property managers must carefully observe.
+
+**Deposit Amount:**
+
+Unlike some states, Florida does not cap the amount of security deposit a landlord may require. Market conditions and competitive factors generally influence deposit amounts, with most landlords collecting deposits equal to one or two months' rent.
+
+**Deposit Custody Options:**
+
+Landlords must hold security deposits using one of three prescribed methods:
+
+*Non-Interest Account:*
+The deposit may be held in a separate non-interest-bearing account maintained at a banking institution located in Florida.
+
+*Interest-Bearing Account:*
+Alternatively, the deposit may be placed in an interest-bearing account at a Florida financial institution. Under this option, the landlord must pay the tenant either the actual interest earned or five percent simple annual interest, paid either annually or upon lease termination.
+
+*Surety Bond:*
+The landlord may instead post a surety bond with the circuit court clerk in an amount equal to total security deposits held plus an additional five hundred dollars.
+
+**Disclosure Requirements:**
+
+Within thirty days after receiving a security deposit, the landlord must provide written notice to the tenant disclosing:
+- The name and street address of the banking institution holding the deposit
+- Whether the account bears interest or not
+- If interest-bearing, the applicable interest rate
+
+Failure to provide this notice does not forfeit the deposit but may affect the landlord's ability to impose claims.
+
+**Deposit Return Procedures:**
+
+*When No Claim Exists:*
+If the landlord intends no claim against the deposit, the full amount must be returned within fifteen days after the tenant vacates and surrenders possession.
+
+*When Imposing a Claim:*
+If the landlord intends to retain any portion of the deposit, written notice must be sent within thirty days of the tenant vacating. This notice must:
+- Be sent by certified mail to the tenant's last known address
+- State the landlord's intention to impose a claim
+- Describe each claimed item with specificity
+- State the amount claimed for each item
+- Inform the tenant of their right to object within fifteen days
+
+If the tenant fails to object within fifteen days, the landlord may deduct the claimed amounts. If the tenant timely objects, the landlord must initiate legal proceedings within forty-five days or forfeit the claim.
+
+**Allowable Deductions:**
+
+Legitimate deductions from security deposits include:
+- Rent remaining unpaid at lease termination
+- Physical damage exceeding ordinary wear and deterioration
+- Cleaning expenses when the tenant failed to leave the unit in reasonably clean condition
+- Costs specifically authorized by lease provisions
+- Amounts owed for other lease breaches causing quantifiable damages
+
+**Non-Compliance Consequences:**
+
+Landlords who fail to return deposits or provide required notices within specified timeframes forfeit their right to impose claims against the deposit. Courts may award the tenant the full deposit amount plus court costs and reasonable attorney fees.
+
+---
+
+### SEGMENT 3: LEASE AGREEMENTS AND TYPES OF TENANCIES (55 minutes)
+
+#### Leasehold Estate Classifications
+
+Property managers must understand the distinct categories of landlord-tenant relationships recognized under Florida law.
+
+**Estate for Years:**
+
+This tenancy type has definite commencement and termination dates specified in the lease agreement. Despite its name, the term can be any specific duration—days, weeks, months, or years.
+
+*Defining Features:*
+- Specific beginning and ending dates stated in the lease
+- Terminates automatically when the specified period ends
+- Neither party required to give notice of termination
+- Rent terms fixed for duration unless lease specifies adjustments
+- Continues despite death of either landlord or tenant
+
+*Practical Example:*
+A lease commencing March 1, 2025 and ending February 28, 2026 constitutes an estate for years. When February 28 arrives, the tenancy terminates without any notice requirement.
+
+**Periodic Estate:**
+
+This tenancy continues for successive periods automatically until either party provides proper notice of termination.
+
+*Defining Features:*
+- No fixed termination date specified
+- Automatically renews for another period unless terminated
+- Requires advance notice to end the tenancy
+- Most commonly structured as month-to-month
+- Can also be week-to-week, quarter-to-quarter, or year-to-year
+
+*Florida Notice Requirements:*
+- Week-to-week tenancy: Seven days advance notice
+- Month-to-month tenancy: Fifteen days advance notice
+- Quarter-to-quarter tenancy: Thirty days advance notice
+- Year-to-year tenancy: Sixty days advance notice
+
+**Estate at Will:**
+
+This tenancy lacks any definite duration and exists only so long as both parties desire its continuation.
+
+*Defining Features:*
+- No specified term or duration
+- Either party may terminate with reasonable notice
+- Often arises informally when possession is permitted without a written lease
+- Terminates automatically upon death of either party
+- Ends automatically if property ownership transfers
+
+**Estate at Sufferance:**
+
+This occurs when a tenant wrongfully remains in possession after their legal right to occupy has ended.
+
+*Defining Features:*
+- Tenant has no legal right to continue occupying
+- Represents the most limited form of tenancy interest
+- Landlord may pursue immediate eviction
+- Alternatively, landlord may accept rent and create a periodic tenancy
+- Holdover tenant potentially liable for increased rent or damages
+
+#### Commercial Lease Structures
+
+**Gross Lease Structure:**
+
+Under a gross lease arrangement, the tenant pays a fixed periodic rent while the landlord assumes responsibility for paying all property operating expenses.
+
+*Tenant Perspective:*
+- Occupancy costs are predictable and budgetable
+- No exposure to variable operating expense increases
+- Simplified accounting with single rent payment
+
+*Landlord Perspective:*
+- Marketing simplified with straightforward rent structure
+- Maintains direct control over property operations
+- Bears risk of operating cost increases
+- Benefits if expenses decrease below projections
+
+**Net Lease Variations:**
+
+Net leases shift some or all operating expenses from landlord to tenant in addition to base rent.
+
+*Single Net Lease:*
+Tenant pays base rent plus property taxes only. Landlord remains responsible for insurance and maintenance costs.
+
+*Double Net Lease:*
+Tenant pays base rent plus property taxes and building insurance. Landlord retains maintenance responsibilities.
+
+*Triple Net Lease:*
+Tenant pays base rent plus property taxes, insurance, and maintenance expenses. Landlord typically responsible only for structural components and roof. This structure is common for single-tenant commercial properties.
+
+**Percentage Lease Structure:**
+
+Retail properties frequently utilize percentage leases tying a portion of rent to the tenant's business performance.
+
+*Key Components:*
+- Base rent providing minimum guaranteed income
+- Breakpoint establishing the sales threshold triggering percentage rent
+- Percentage rate applied to sales exceeding the breakpoint
+- Precise definition of qualifying gross sales
+
+*Calculation Example:*
+Monthly base rent: $3,500
+Annual breakpoint: $600,000
+Percentage rate: 6% of sales above breakpoint
+Tenant's annual sales: $750,000
+Percentage rent calculation: ($750,000 - $600,000) × 6% = $9,000 additional annual rent
+
+**Index-Adjusted Lease:**
+
+These leases tie periodic rent adjustments to published economic indicators.
+
+*Common Reference Indices:*
+- Consumer Price Index (CPI) published by Bureau of Labor Statistics
+- Regional cost of living measurements
+- Industry-specific price indices
+
+*Typical Structure:*
+Annual adjustments match percentage change in specified index, often with floor and ceiling provisions limiting adjustment range.
+
+**Ground Lease Arrangements:**
+
+Ground leases involve long-term rental of land on which the tenant constructs improvements.
+
+*Characteristic Features:*
+- Extremely long terms, often fifty to ninety-nine years
+- Tenant finances and constructs buildings at their expense
+- Tenant owns and depreciates improvements during lease term
+- Improvements typically revert to landlord at lease expiration
+- Complex provisions address financing, insurance, and casualty events
+
+#### Lease Document Essentials
+
+**Identification Elements:**
+- Complete legal names of all parties
+- Detailed property description including address and unit number
+- Statement of permitted uses
+
+**Financial Terms:**
+- Rent amount and payment schedule
+- Security deposit amount and terms
+- Late fee provisions and grace periods
+- Responsibility for utilities
+
+**Duration Terms:**
+- Lease commencement date
+- Lease expiration date
+- Renewal options and procedures
+
+**Maintenance Allocation:**
+- Landlord maintenance obligations
+- Tenant maintenance responsibilities
+- Procedures for reporting needed repairs
+- Emergency contact information
+
+**Conduct Requirements:**
+- Occupancy limitations
+- Pet policies and restrictions
+- Noise and nuisance provisions
+- Guest policies
+
+**Default Provisions:**
+- Events constituting default
+- Notice requirements before enforcement
+- Cure periods allowing correction
+- Available remedies for default
+- Attorney fee provisions
+
+**Transfer Restrictions:**
+- Assignment and subletting limitations
+- Landlord consent requirements
+- Release of original tenant liability
+
+#### Assignment Versus Sublease Distinctions
+
+**Assignment Characteristics:**
+
+An assignment constitutes transfer of the tenant's complete remaining interest in the lease to another party.
+
+*Key Features:*
+- Original tenant conveys all remaining rights
+- New tenant (assignee) deals directly with landlord
+- Original tenant typically remains secondarily liable
+- Requires landlord consent unless lease permits assignment
+- Creates direct relationship between landlord and assignee
+
+**Sublease Characteristics:**
+
+A sublease involves transfer of only a portion of the tenant's interest, whether a shorter time period or a portion of the space.
+
+*Key Features:*
+- Original tenant retains some interest (reversionary)
+- Subtenant pays rent to original tenant, not landlord
+- Original tenant remains primarily liable to landlord
+- Creates separate landlord-tenant relationship between original tenant and subtenant
+- Typically requires landlord consent
+
+---
+
+### SEGMENT 4: TENANT SELECTION AND FAIR HOUSING (45 minutes)
+
+#### Systematic Tenant Selection
+
+Implementing a consistent, thorough tenant selection process helps identify reliable tenants while minimizing legal exposure.
+
+**Property Marketing:**
+
+*Market Positioning:*
+Research comparable rentals to position the property competitively. Consider factors including location desirability, property condition, included amenities, and current market vacancy rates.
+
+*Advertising Compliance:*
+All marketing must comply with fair housing requirements:
+- Avoid language suggesting preference for or against any protected class
+- Focus descriptions on property features rather than ideal occupant characteristics
+- Use diverse imagery in any photographic materials
+- Display Equal Housing Opportunity logo on marketing materials
+- Distribute advertising through media reaching all community segments
+
+**Prospect Interactions:**
+
+*Property Presentations:*
+Maintain consistent practices when showing properties:
+- Treat all prospects with equal courtesy and professionalism
+- Provide identical information about terms and conditions
+- Answer questions honestly and completely
+- Disclose material facts affecting the property
+- Document all showing activity
+
+**Application Processing:**
+
+*Application Content:*
+Comprehensive applications gather information supporting thorough evaluation:
+
+Personal identification including legal name, birth date, social security number for credit verification, and government identification numbers.
+
+Employment details including current and previous employers, positions held, employment duration, supervisor contacts, and income verification.
+
+Rental history covering current and prior residences, landlord contact information, tenancy dates, rental amounts, and reasons for departure.
+
+Reference contacts for verification purposes.
+
+Additional relevant information regarding proposed occupants, pets, vehicles, and relevant history.
+
+*Screening Standards:*
+
+Establish documented, objective criteria applied uniformly to all applicants:
+
+Income requirements typically specify minimum gross monthly income as a multiple of monthly rent—commonly three times the rent amount.
+
+Credit evaluation considers credit scores, payment history, outstanding debts, and overall financial profile.
+
+Rental history verification confirms previous tenancy performance, payment patterns, lease compliance, and landlord references.
+
+Employment verification confirms current job status, tenure, income level, and employment stability.
+
+Background screening, if conducted, must comply with applicable fair housing guidance regarding criminal history consideration.
+
+**Denial Procedures:**
+
+When declining applications based wholly or partially on consumer credit information, federal law requires:
+
+- Notice of the adverse action taken
+- Identification of the credit reporting agency providing information
+- Statement that the reporting agency did not make the decision
+- Notice of right to request free credit report within sixty days
+- Notice of right to dispute information accuracy with reporting agency
+
+#### Fair Housing Compliance
+
+**Federal Protected Classes:**
+
+The Fair Housing Act prohibits discrimination based on:
+- Race
+- Color
+- Religion
+- National origin
+- Sex (including sexual orientation and gender identity)
+- Familial status (families with children under eighteen)
+- Disability (physical or mental impairment)
+
+**Florida Protected Classes:**
+
+Florida's fair housing law mirrors federal protections and is administered by the Florida Commission on Human Relations.
+
+**Prohibited Discriminatory Conduct:**
+
+Fair housing laws prohibit numerous discriminatory actions in rental transactions:
+
+- Refusing to rent based on protected class membership
+- Imposing different rental terms or conditions
+- Providing different services or amenities
+- Making false statements about availability
+- Applying inconsistent qualification standards
+- Using discriminatory language in advertising
+- Steering prospects toward or away from certain properties
+
+Regarding disability, additional prohibitions include:
+- Refusing reasonable modifications to premises
+- Refusing reasonable policy accommodations
+- Failing to design accessible new construction
+
+**Compliance Best Practices:**
+
+*Documentation Protocols:*
+- Utilize standardized application forms for all applicants
+- Maintain records of all prospect contacts and outcomes
+- Document reasons for application decisions
+- Retain application files consistently regardless of outcome
+
+*Staff Development:*
+- Provide comprehensive fair housing training
+- Update training as laws evolve
+- Document training completion
+
+*Policy Framework:*
+- Maintain written, objective screening criteria
+- Establish procedures for accommodation requests
+- Implement complaint response protocols
+- Review policies periodically for compliance
+
+**Reasonable Accommodations:**
+
+Landlords must provide reasonable accommodations enabling disabled tenants equal opportunity to use and enjoy housing:
+
+*Common Accommodations:*
+- Permitting assistance animals despite pet restrictions
+- Designating accessible parking spaces
+- Modifying payment procedures or timing
+- Allowing live-in aides
+- Permitting lease modifications for disability-related relocations
+
+*Request Handling:*
+- Respond to all accommodation requests
+- May request verification of disability-related need
+- Evaluate reasonableness considering circumstances
+- Engage in interactive dialogue if initial request problematic
+- Document decisions and supporting reasoning
+
+---
+
+### SEGMENT 5: RENT COLLECTION AND FINANCIAL MANAGEMENT (45 minutes)
+
+#### Rent Collection Systems
+
+Effective rent collection combines clear policies, consistent enforcement, and efficient processing systems.
+
+**Payment Policy Elements:**
+
+*Due Date Specification:*
+Clearly state when rent becomes due—typically the first day of each month. Florida law does not mandate grace periods, though many landlords provide three to five days before assessing late charges.
+
+*Accepted Payment Methods:*
+Determine which payment forms the property will accept:
+- Personal checks from established tenants
+- Certified funds or money orders
+- Electronic transfers through ACH or online portals
+- Credit or debit cards with appropriate fee structures
+- Cash payments with mandatory receipts
+
+*Payment Delivery:*
+Specify acceptable payment locations—management office, online portal, mailing address, or designated drop box.
+
+*Delinquency Charges:*
+Late fees must be specified in the lease to be enforceable. Common structures include:
+- Fixed dollar amount assessed after grace period
+- Percentage of monthly rent
+- Combination with additional daily charges for extended delinquency
+
+**Collection Protocols:**
+
+*Initial Expectations:*
+Communicate payment expectations clearly during lease execution. Provide written instructions detailing payment procedures.
+
+*Payment Reminders:*
+Consider courtesy reminders before due dates, particularly for new tenants still establishing payment routines.
+
+*Uniform Enforcement:*
+Apply policies consistently across all tenants. Selective enforcement creates legal vulnerabilities and tenant relations problems.
+
+*Documentation Practices:*
+Maintain detailed records of all transactions, communications, and collection activities.
+
+*Partial Payment Considerations:*
+Accepting partial rent may affect eviction rights. Address partial payment situations specifically in lease provisions.
+
+#### Delinquency Management
+
+**Three-Day Notice (Rent Default):**
+
+When rent becomes delinquent, Florida landlords may serve a formal notice demanding payment or surrender of possession.
+
+*Notice Requirements:*
+- Written format required
+- Must state specific amount of unpaid rent
+- Must provide three business days (excluding weekends and legal holidays) to pay or vacate
+- Delivery by personal service, posting and mailing, or posting alone depending on circumstances
+
+*Notice Content:*
+The notice should clearly demand that the tenant either pay the specified delinquent amount within three days or surrender possession of the premises, and should state that the landlord will pursue legal remedies if compliance does not occur.
+
+**Seven-Day Notice (Non-Rent Violations):**
+
+Lease violations other than rent default require a different notice:
+
+*Curable Violations:*
+For violations capable of correction, notice must provide seven days to remedy the violation or face lease termination.
+
+*Non-Curable Violations:*
+For violations that cannot be corrected or repeated violations of the same type, notice states the lease will terminate in seven days.
+
+**Collection Approaches:**
+
+*Direct Communication:*
+Prompt contact with delinquent tenants often reveals circumstances—temporary hardship versus chronic payment problems—that inform appropriate responses.
+
+*Payment Arrangements:*
+For tenants experiencing temporary difficulties, structured payment plans may recover amounts owed while preserving the tenancy. Commit all arrangements to writing.
+
+*Legal Escalation:*
+When notices expire without compliance, formal eviction proceedings become necessary.
+
+*Post-Tenancy Collection:*
+Outstanding balances remaining after eviction may be pursued through collection agencies or civil judgments.
+
+#### Financial Management Functions
+
+**Budget Development:**
+
+Annual operating budgets project financial performance:
+
+*Revenue Projections:*
+- Potential gross rent at full occupancy
+- Anticipated vacancy and collection losses
+- Additional income sources (parking, storage, fees)
+- Projected effective gross income
+
+*Expense Projections:*
+- Management compensation
+- Personnel costs
+- Utility expenses
+- Insurance premiums
+- Property tax obligations
+- Repair and maintenance costs
+- Grounds and landscaping
+- Administrative expenses
+- Capital replacement reserves
+- Debt service if applicable
+
+**Reporting to Owners:**
+
+Regular financial reporting maintains owner confidence and supports investment decisions:
+
+*Monthly Deliverables:*
+- Operating statement comparing actual to budget
+- Current rent roll with occupancy detail
+- Receivables aging showing outstanding amounts
+- Cash position summary
+- Maintenance activity report
+
+*Annual Deliverables:*
+- Comprehensive year-end financial statements
+- Year-over-year comparative analysis
+- Capital expenditure summary
+- Tax reporting documentation
+
+**Performance Measurement:**
+
+*Occupancy Metrics:*
+Occupancy rate equals occupied units divided by total units—typically targeting ninety-five percent or higher.
+
+Vacancy rate equals vacant units divided by total units—lower rates indicate stronger performance.
+
+*Collection Metrics:*
+Collection rate measures rent actually received against rent charged—targeting ninety-eight percent or better.
+
+*Profitability Metrics:*
+Net operating income equals effective gross income minus operating expenses—the fundamental measure of property profitability.
+
+Operating expense ratio equals operating expenses divided by effective gross income—typically ranging from thirty-five to fifty percent for apartment properties.
+
+*Investment Metrics:*
+Cash-on-cash return equals annual before-tax cash flow divided by total equity invested—measures return on the owner's capital.
+
+#### Trust Account Requirements
+
+Property managers handling tenant monies must maintain appropriate trust accounts.
+
+**Florida Statutory Requirements:**
+
+Security deposits must be maintained in Florida banking institutions using one of the prescribed options—non-interest account, interest-bearing account, or surety bond.
+
+Owner operating funds require separate accounts distinct from the manager's business funds.
+
+Accurate records must track all deposits and disbursements with monthly reconciliations.
+
+**Commingling Prohibition:**
+
+Florida real estate licensees may not mix trust funds with personal or business accounts. Violations constitute grounds for license discipline and potential criminal liability.
+
+---
+
+### SEGMENT 6: MAINTENANCE, INSPECTIONS, AND EVICTIONS (45 minutes)
+
+#### Maintenance Program Management
+
+Comprehensive maintenance programs protect property values, ensure tenant satisfaction, and minimize legal exposure.
+
+**Maintenance Categories:**
+
+*Preventive Maintenance:*
+Scheduled activities prevent problems before they occur:
+- Regular HVAC system servicing and filter replacement
+- Periodic roof inspections and gutter cleaning
+- Scheduled pest control treatments
+- Routine landscaping and grounds care
+- Parking area maintenance and sweeping
+- Fire safety equipment testing and certification
+
+*Corrective Maintenance:*
+Repairs address existing problems:
+- Plumbing repairs and fixture replacement
+- Appliance troubleshooting and repair
+- Electrical system repairs
+- Building envelope repairs
+- Roof leak repairs
+
+*Emergency Maintenance:*
+Urgent situations require immediate response:
+- Fire damage or active water intrusion
+- Complete heating failure during cold weather
+- Total loss of water service or sewage backup
+- Dangerous electrical conditions
+- Security compromises from broken locks or windows
+- Air conditioning failure during extreme heat
+
+**Request Processing:**
+
+*Intake Channels:*
+Provide multiple methods for tenants to report maintenance needs:
+- Online maintenance portals
+- Dedicated telephone lines
+- Email request systems
+- Written request forms
+- Emergency after-hours contacts
+
+*Priority Classification:*
+Categorize incoming requests by urgency:
+- Emergency items requiring same-day response
+- Urgent matters warranting response within twenty-four hours
+- Routine requests addressed within three to seven days
+
+*Documentation Requirements:*
+Record all request details:
+- Date and time of report
+- Tenant identification and unit location
+- Problem description
+- Assigned priority level
+- Work performed and by whom
+- Completion date and cost
+- Tenant confirmation of completion
+
+**Contractor Relations:**
+
+*Vendor Selection:*
+Evaluate potential contractors based on:
+- Proper licensing and insurance coverage
+- References and reputation
+- Competitive pricing
+- Response time capabilities
+- Quality of previous work
+
+*Performance Monitoring:*
+Track contractor performance regarding:
+- Response time to service calls
+- Quality of completed work
+- Pricing consistency
+- Tenant feedback
+
+#### Property Inspection Programs
+
+Regular inspections identify maintenance needs, verify lease compliance, and establish condition documentation.
+
+**Inspection Types:**
+
+*Move-In Documentation:*
+Comprehensive inspection conducted with the tenant at occupancy commencement:
+- Systematic review of all areas and systems
+- Documentation of existing conditions including any damage
+- Photographic or video evidence
+- Written report signed by both parties
+- Copy provided to tenant for their records
+
+*Periodic Inspections:*
+Scheduled reviews during tenancy:
+- Typically conducted annually or semi-annually
+- Identifies unreported maintenance needs
+- Verifies compliance with lease provisions
+- Detects unauthorized alterations or occupants
+- Requires proper advance notice to tenant
+
+*Move-Out Assessment:*
+Inspection when tenant vacates:
+- Systematic review of entire unit
+- Comparison to move-in condition documentation
+- Identification of damage beyond normal wear
+- Photographic documentation
+- Foundation for security deposit disposition
+
+*Exterior Observations:*
+Informal monitoring of property exteriors:
+- Compliance with vehicle and parking rules
+- Proper trash disposal
+- Exterior maintenance compliance
+- General property appearance
+- Safety concerns
+
+**Entry Requirements:**
+
+Florida law establishes parameters for landlord entry:
+- Twelve hours advance notice presumed reasonable
+- Notice should specify date, approximate time, and purpose
+- Entry permitted only at reasonable hours
+- Emergency situations permit immediate entry without notice
+
+#### Florida Eviction Procedures
+
+When tenants fail to pay rent or violate lease terms without cure, formal eviction may become necessary.
+
+**Eviction Process Sequence:**
+
+*Step One - Notice Service:*
+Serve appropriate notice based on violation type:
+- Three-day notice for rent delinquency
+- Seven-day notice for other lease violations
+
+Proper service methods include personal delivery, posting on the premises, or posting combined with mailing.
+
+*Step Two - Notice Period Expiration:*
+Allow required notice period to elapse:
+- Three business days for rent notices (excluding weekends and holidays)
+- Seven days for other violation notices
+
+During this period, avoid accepting rent payments which may waive eviction rights.
+
+*Step Three - Court Filing:*
+If tenant fails to comply with notice, file eviction complaint in county court:
+- Include copy of lease agreement
+- Attach served notice with proof of service
+- Pay required filing fees
+- Request damages if applicable
+
+*Step Four - Defendant Service:*
+Court arranges service of summons and complaint on tenant:
+- Tenant has five business days to respond (excluding weekends and holidays)
+- Failure to respond permits default judgment request
+
+*Step Five - Court Proceedings:*
+If tenant contests eviction:
+- Hearing scheduled before judge
+- Both parties present evidence and arguments
+- Judge determines whether eviction warranted
+- Judgment entered for prevailing party
+
+*Step Six - Possession Recovery:*
+Following judgment for landlord:
+- Request writ of possession from clerk
+- Sheriff posts writ giving tenant twenty-four hours to vacate
+- Sheriff returns to remove tenant and belongings if necessary
+
+**Critical Eviction Rules:**
+
+*Self-Help Prohibition:*
+Landlords absolutely may not:
+- Change locks to exclude tenant
+- Remove tenant belongings from premises
+- Disconnect utility services
+- Engage in harassment or intimidation tactics
+
+Such actions expose landlords to significant liability and potential tenant damage awards.
+
+*Retaliation Prohibition:*
+Eviction may not be pursued in retaliation for tenant exercise of legal rights:
+- Complaints to housing authorities or code enforcement
+- Participation in tenant organizations
+- Exercise of rights guaranteed under the lease or law
+
+*Documentation Importance:*
+Maintain thorough records throughout:
+- Copies of all notices with proof of service
+- Complete payment history
+- Documentation of lease violations
+- Records of all tenant communications
+- Court filings and documents
+
+---
+
+### SESSION 18 SUMMARY AND KEY TAKEAWAYS
+
+**Essential Points:**
+
+1. **Property Manager Function:** Acts as owner's fiduciary agent to optimize income, preserve asset value, and achieve owner's investment objectives
+
+2. **Licensing Requirement:** Florida requires real estate licensure for those who lease, rent, or manage property for others for compensation
+
+3. **Management Agreement:** Must specify duties, authority, compensation, term, and termination provisions
+
+4. **Landlord Duties:** Maintain habitable conditions; comply with codes; keep systems operational; provide security features
+
+5. **Tenant Duties:** Pay rent timely; maintain cleanliness; avoid damage; follow rules; use property appropriately
+
+6. **Security Deposits:** Hold in Florida bank; disclose within 30 days; return within 15 days if no claim; provide itemized notice within 30 days if claiming
+
+7. **Tenancy Types:** Estate for Years (fixed term), Periodic Estate (auto-renewing), Estate at Will (no fixed term), Estate at Sufferance (wrongful holdover)
+
+8. **Lease Structures:** Gross (landlord pays expenses), Net (tenant pays some expenses), Percentage (retail sales-based), Index (tied to economic indicators)
+
+9. **Fair Housing:** Cannot discriminate based on race, color, religion, national origin, sex, familial status, or disability
+
+10. **Eviction Process:** Serve proper notice; allow cure period; file court action; obtain judgment; execute writ of possession
+
+**Key Formulas:**
+
+- **Occupancy Rate** = Occupied Units ÷ Total Units
+- **Vacancy Rate** = Vacant Units ÷ Total Units
+- **Collection Rate** = Rent Collected ÷ Rent Charged
+- **Net Operating Income** = Effective Gross Income - Operating Expenses
+- **Operating Expense Ratio** = Operating Expenses ÷ Effective Gross Income
+- **Percentage Rent** = (Gross Sales - Breakpoint) × Percentage Rate
+- **Cash-on-Cash Return** = Annual Before-Tax Cash Flow ÷ Total Cash Invested
+
+**Notice Period Requirements:**
+
+| Tenancy Type | Notice Required |
+|--------------|-----------------|
+| Week-to-Week | 7 days |
+| Month-to-Month | 15 days |
+| Quarter-to-Quarter | 30 days |
+| Year-to-Year | 60 days |
+
+---
+
+## SESSION 18: LESSON QUIZZES
+
+### QUIZ 18-1: PROPERTY MANAGEMENT FUNDAMENTALS
+
+**Instructions:** Select the best answer for each question.
+
+1. In Florida, a person who leases property on behalf of others for compensation must possess:
+   a. A property management certification
+   b. An active real estate license
+   c. A community association manager license
+   d. No license is required
+
+2. Which document establishes the relationship between a property owner and the property manager?
+   a. Listing agreement
+   b. Lease agreement
+   c. Management agreement
+   d. Purchase contract
+
+3. A property manager's primary objectives include all of the following EXCEPT:
+   a. Generating maximum rental income
+   b. Preserving property value
+   c. Guaranteeing the owner against all losses
+   d. Achieving the owner's investment goals
+
+4. Management fees for residential properties typically range from:
+   a. 1% to 3% of gross rent
+   b. 8% to 12% of gross rent
+   c. 20% to 25% of gross rent
+   d. 15% to 18% of gross rent
+
+5. Under Florida law, landlords must maintain which of the following in reasonable working condition?
+   a. Swimming pool filtration
+   b. Plumbing systems
+   c. Landscaping irrigation
+   d. Decorative lighting
+
+6. Which action constitutes illegal self-help eviction in Florida?
+   a. Serving a three-day notice
+   b. Changing locks while tenant is away
+   c. Filing an eviction lawsuit
+   d. Charging late fees
+
+7. Security deposits in Florida must be held in:
+   a. Any convenient bank account
+   b. A Florida banking institution
+   c. A safe deposit box
+   d. The manager's business account
+
+8. When a landlord makes no claim against a security deposit, it must be returned within:
+   a. 7 days
+   b. 15 days
+   c. 30 days
+   d. 45 days
+
+9. If a landlord intends to claim against a security deposit, notice must be sent within:
+   a. 7 days
+   b. 15 days
+   c. 30 days
+   d. 45 days
+
+10. Which is a statutory obligation of tenants under Florida law?
+    a. Making structural repairs
+    b. Painting interior walls annually
+    c. Maintaining the unit in clean condition
+    d. Replacing worn appliances
+
+11. Landlords must disclose security deposit account information within how many days of receiving the deposit?
+    a. 7 days
+    b. 15 days
+    c. 30 days
+    d. 60 days
+
+12. After receiving notice of a landlord's security deposit claim, a tenant has how many days to object?
+    a. 7 days
+    b. 15 days
+    c. 30 days
+    d. 45 days
+
+13. Reasonable advance notice before entering an occupied rental unit in Florida is presumed to be:
+    a. 6 hours
+    b. 12 hours
+    c. 24 hours
+    d. 48 hours
+
+14. A landlord who interrupts essential services to force a tenant to vacate has committed:
+    a. A permitted collection tactic
+    b. An illegal self-help eviction
+    c. A lease modification
+    d. An acceleration of rent
+
+15. The management agreement should specify all of the following EXCEPT:
+    a. Manager's compensation
+    b. Property description
+    c. Names of future tenants
+    d. Term of the agreement
+
+**ANSWER KEY - Quiz 18-1:**
+
+1. **b. An active real estate license** - Florida statutes require that individuals who lease, rent, or manage real property for others for compensation hold a valid real estate license. This requirement ensures that property managers have the education and oversight necessary to protect property owners and tenants. Property management certification alone is insufficient; the real estate license provides the legal authority to perform these activities.
+
+2. **c. Management agreement** - The management agreement is the contract that creates the agency relationship between the property owner and the property manager. This document specifies the manager's duties, compensation, authority limits, and other essential terms. A listing agreement covers sales, a lease covers the tenant relationship, and a purchase contract addresses property sales—none of these establish the management relationship.
+
+3. **c. Guaranteeing the owner against all losses** - Property managers cannot and should not guarantee owners against all losses, as many factors affecting property performance lie beyond management control. The manager's proper objectives include maximizing income through effective leasing and collections, preserving value through proper maintenance, and working to achieve whatever specific goals the owner has established for the investment.
+
+4. **b. 8% to 12% of gross rent** - Residential property management fees typically fall within this range, though actual fees vary based on property type, size, location, and services provided. Commercial properties typically command lower percentages (3-6%) due to larger rent amounts. Fee structures of 1-3% would be unrealistically low for full-service residential management, while 15-25% would exceed market norms.
+
+5. **b. Plumbing systems** - Florida's landlord-tenant statute specifically requires landlords to maintain plumbing in reasonable working condition. This represents a core habitability requirement. Swimming pools, irrigation systems, and decorative features may or may not be the landlord's responsibility depending on lease terms, but plumbing maintenance is a non-negotiable statutory duty.
+
+6. **b. Changing locks while tenant is away** - Changing locks to exclude a tenant constitutes illegal self-help eviction under Florida law. Landlords must pursue formal legal eviction procedures through the courts rather than taking matters into their own hands. Serving notices, filing lawsuits, and charging contractual late fees are all legitimate landlord actions—lock changes to exclude tenants are not.
+
+7. **b. A Florida banking institution** - Florida law specifically requires that security deposits be held in a banking institution located in Florida. The landlord may choose between non-interest-bearing accounts, interest-bearing accounts, or surety bonds, but whatever option is selected must involve a Florida-based institution. Personal accounts, out-of-state banks, or non-banking alternatives don't satisfy legal requirements.
+
+8. **b. 15 days** - When the landlord intends no claim against the security deposit, the full amount must be returned within fifteen days after the tenant vacates. This relatively short timeframe reflects the legislature's intent that tenants receive their funds promptly when no dispute exists. Missing this deadline can result in forfeiture of the landlord's right to later impose claims.
+
+9. **c. 30 days** - When claiming amounts from the security deposit, the landlord has thirty days from the tenant's departure to send itemized written notice by certified mail. This notice must describe each claimed item specifically and inform the tenant of their right to object. The thirty-day period gives landlords time to assess damages while still requiring reasonably prompt action.
+
+10. **c. Maintaining the unit in clean condition** - Florida statute specifically obligates tenants to keep their dwelling unit in a clean and sanitary condition. This represents a core tenant duty paralleling the landlord's maintenance obligations. Structural repairs and appliance replacement are typically landlord responsibilities, while annual painting requirements are not part of standard tenant obligations.
+
+11. **c. 30 days** - Landlords must provide written disclosure of security deposit account information within thirty days of receiving the deposit. This disclosure must include the depository's name and address, whether the account earns interest, and the interest rate if applicable. Failure to provide this notice doesn't forfeit the deposit but may affect later claim rights.
+
+12. **b. 15 days** - Upon receiving the landlord's notice of intent to claim against the security deposit, the tenant has fifteen days to object in writing. If the tenant fails to timely object, the landlord may deduct the claimed amounts. If the tenant does object, the landlord must file suit within forty-five days or forfeit the claim—the fifteen-day objection window is critical to the statutory process.
+
+13. **b. 12 hours** - Florida law provides that twelve hours constitutes presumptively reasonable advance notice before landlord entry into an occupied rental unit. The notice should specify the date, approximate time, and purpose of entry. Emergencies don't require advance notice, but routine inspections and repairs should follow this guideline.
+
+14. **b. An illegal self-help eviction** - Interrupting essential services—electricity, gas, water, or heat—to force a tenant to leave constitutes prohibited self-help eviction under Florida law. Landlords must pursue formal court eviction regardless of how egregious the tenant's conduct. Service interruption exposes landlords to tenant lawsuits and potential damages far exceeding any short-term benefit.
+
+15. **c. Names of future tenants** - Management agreements establish the terms between owner and manager but cannot identify future tenants who haven't yet applied or been selected. The agreement should specify compensation terms, provide complete property descriptions, establish the management term, and address numerous other operational matters—but tenant identification occurs later through the leasing process.
+
+---
+
+### QUIZ 18-2: LEASES AND TENANCIES
+
+**Instructions:** Select the best answer for each question.
+
+1. A tenancy with specified commencement and termination dates is called:
+   a. Estate at will
+   b. Estate for years
+   c. Periodic estate
+   d. Estate at sufferance
+
+2. A month-to-month rental arrangement is classified as:
+   a. Estate for years
+   b. Estate at will
+   c. Periodic estate
+   d. Estate at sufferance
+
+3. Florida law requires how many days notice to terminate a month-to-month tenancy?
+   a. 7 days
+   b. 15 days
+   c. 30 days
+   d. 60 days
+
+4. A tenant remaining after lease expiration without landlord consent has:
+   a. Estate for years
+   b. Estate at will
+   c. Periodic estate
+   d. Estate at sufferance
+
+5. In a gross lease, who pays operating expenses?
+   a. The tenant
+   b. The landlord
+   c. Expenses are shared equally
+   d. A third-party management company
+
+6. Under a triple net lease, the tenant pays rent plus:
+   a. Property taxes only
+   b. Property taxes and insurance only
+   c. Property taxes, insurance, and maintenance
+   d. Three months rent in advance
+
+7. Percentage leases are most commonly used for:
+   a. Residential apartment units
+   b. Industrial warehouse space
+   c. Retail commercial properties
+   d. Professional office buildings
+
+8. The sales threshold at which percentage rent begins is called the:
+   a. Base rent
+   b. Breakpoint
+   c. Overage
+   d. Escalation
+
+9. An assignment of a lease involves:
+   a. Transfer of a portion of the space
+   b. Transfer for less than the remaining term
+   c. Transfer of the entire remaining interest
+   d. Return of the security deposit
+
+10. In a sublease arrangement:
+    a. The original tenant is fully released
+    b. The subtenant pays rent directly to the landlord
+    c. The original tenant retains some interest
+    d. Landlord consent is never required
+
+11. What notice is required to terminate a year-to-year tenancy in Florida?
+    a. 15 days
+    b. 30 days
+    c. 60 days
+    d. 90 days
+
+12. An index lease ties rent adjustments to:
+    a. Property value changes
+    b. An economic indicator like CPI
+    c. The landlord's operating expenses
+    d. Current interest rates
+
+13. A ground lease typically involves:
+    a. Below-grade parking structures only
+    b. Land only with tenant-constructed improvements
+    c. Month-to-month arrangements
+    d. Government-owned properties exclusively
+
+14. The party granting a lease is called the:
+    a. Lessee
+    b. Lessor
+    c. Assignee
+    d. Subtenant
+
+15. Which lease type provides the tenant with the most predictable occupancy costs?
+    a. Triple net lease
+    b. Gross lease
+    c. Percentage lease
+    d. Index lease
+
+**ANSWER KEY - Quiz 18-2:**
+
+1. **b. Estate for years** - An estate for years has definite, specified beginning and ending dates. Despite the name suggesting measurement in years, this tenancy can be for any specific period—days, weeks, months, or years. The key characteristic is the definite termination date, after which the tenancy ends automatically without requiring notice from either party.
+
+2. **c. Periodic estate** - A month-to-month tenancy exemplifies the periodic estate, which automatically renews for successive periods until either party provides proper termination notice. Unlike an estate for years with a fixed end date, the periodic tenancy continues indefinitely until terminated. The estate at will lacks the automatic renewal feature of periodic tenancies.
+
+3. **b. 15 days** - Florida statute specifies that month-to-month tenancies require fifteen days advance notice for termination. This notice period differs from other states and from other tenancy types within Florida. Week-to-week tenancies require seven days, while year-to-year tenancies require sixty days—the fifteen-day requirement applies specifically to monthly arrangements.
+
+4. **d. Estate at sufferance** - When a tenant remains in possession after lease expiration without the landlord's permission, an estate at sufferance results. This represents the most limited form of tenancy interest—the tenant has no legal right to remain. The landlord may pursue immediate eviction or may accept rent and thereby create a periodic tenancy.
+
+5. **b. The landlord** - Under a gross lease structure, the tenant pays a fixed rent amount while the landlord assumes responsibility for paying all operating expenses including property taxes, insurance, utilities, and maintenance. This arrangement provides tenants with predictable occupancy costs but exposes landlords to the risk of rising expenses.
+
+6. **c. Property taxes, insurance, and maintenance** - A triple net (NNN) lease requires the tenant to pay base rent plus property taxes, insurance premiums, and maintenance costs. This shifts virtually all operating expenses to the tenant, leaving the landlord responsible typically only for structural components and roof. Single net leases cover taxes only; double net adds insurance.
+
+7. **c. Retail commercial properties** - Percentage leases are standard in retail settings where landlords share in tenant business success. The structure typically combines base rent with additional rent calculated as a percentage of gross sales exceeding a specified threshold. Industrial, office, and residential properties rarely use this structure because sales volume isn't relevant to those uses.
+
+8. **b. Breakpoint** - The breakpoint is the gross sales level at which percentage rent begins. Sales below the breakpoint incur only base rent; sales above trigger additional percentage rent. The breakpoint may be natural (base rent divided by percentage rate) or artificial (separately negotiated). Understanding this threshold is crucial for both landlord income projections and tenant occupancy cost planning.
+
+9. **c. Transfer of the entire remaining interest** - An assignment transfers the tenant's complete remaining lease interest to another party. The assignee steps into the original tenant's position and deals directly with the landlord. This differs from a sublease, which transfers less than the entire interest—either a shorter period or a portion of the space—while the original tenant retains some reversionary interest.
+
+10. **c. The original tenant retains some interest** - In a sublease, the original tenant transfers only a portion of their interest while retaining some rights—typically the right to retake possession at sublease termination. The subtenant pays rent to the original tenant rather than directly to the landlord, and the original tenant remains primarily liable on the original lease.
+
+11. **c. 60 days** - Florida law requires sixty days advance notice to terminate a year-to-year periodic tenancy. This longer notice period reflects the more substantial nature of annual arrangements. The progression of notice requirements—seven days for weekly, fifteen for monthly, thirty for quarterly, and sixty for yearly—scales with the tenancy period length.
+
+12. **b. An economic indicator like CPI** - Index leases tie rent adjustments to published economic indices, most commonly the Consumer Price Index. This approach ensures rent keeps pace with inflation while providing predictability for both parties. Rent changes follow the index movement, often with caps limiting maximum adjustments in either direction.
+
+13. **b. Land only with tenant-constructed improvements** - Ground leases involve long-term rental of land upon which the tenant constructs buildings or other improvements at their expense. Typical terms span fifty to ninety-nine years. The tenant owns the improvements during the lease term, though they may revert to the landlord at expiration. This structure is common for major commercial developments.
+
+14. **b. Lessor** - The lessor is the party granting the lease—typically the property owner or their authorized representative. The lessee is the party receiving the leasehold interest (the tenant). These terms derive from the legal concept of the landlord "leasing" possession rights to the tenant.
+
+15. **b. Gross lease** - Gross leases provide tenants with the most predictable occupancy costs because the tenant pays a fixed rent regardless of how operating expenses fluctuate. Under net leases, percentage leases, and index leases, the tenant's costs vary based on expenses, sales, or economic conditions. The gross lease's fixed payment structure simplifies tenant budgeting.
+
+---
+
+### QUIZ 18-3: TENANT RELATIONS AND EVICTIONS
+
+**Instructions:** Select the best answer for each question.
+
+1. Federal fair housing law prohibits discrimination based on all of the following EXCEPT:
+   a. Race
+   b. Religion
+   c. Source of income
+   d. Familial status
+
+2. A reasonable accommodation for a disabled tenant might include:
+   a. Waiving all rent payments
+   b. Permitting an assistance animal despite pet restrictions
+   c. Providing free utilities
+   d. Guaranteeing lease renewal
+
+3. The Florida three-day notice is used for:
+   a. All lease violations
+   b. Non-payment of rent specifically
+   c. Routine inspections
+   d. Month-to-month terminations
+
+4. The seven-day notice in Florida is used for:
+   a. Rent delinquency
+   b. Lease violations other than non-payment
+   c. Lease renewals
+   d. Security deposit claims
+
+5. Which action constitutes illegal self-help eviction?
+   a. Filing an eviction lawsuit
+   b. Posting a three-day notice
+   c. Removing the tenant's belongings from the unit
+   d. Requesting a writ of possession
+
+6. After the court issues a writ of possession, tenants have how long to vacate?
+   a. Immediately upon posting
+   b. 24 hours
+   c. 72 hours
+   d. 7 days
+
+7. Landlords may NOT evict tenants in retaliation for:
+   a. Failing to pay rent
+   b. Damaging property
+   c. Reporting code violations to authorities
+   d. Violating lease terms
+
+8. If a property has an occupancy rate of 92%, what is the vacancy rate?
+   a. 92%
+   b. 8%
+   c. 9.2%
+   d. 0.92%
+
+9. Net Operating Income equals:
+   a. Gross rent minus mortgage payments
+   b. Effective gross income minus operating expenses
+   c. Total revenue minus all expenses including debt
+   d. Collected rent minus management fees
+
+10. The collection rate measures:
+    a. Number of units occupied
+    b. Rent received versus rent charged
+    c. Average time to fill vacancies
+    d. Maintenance request response time
+
+11. Preventive maintenance includes:
+    a. Emergency plumbing repairs
+    b. Scheduled HVAC system servicing
+    c. Fire damage restoration
+    d. Eviction-related unit turnover
+
+12. Move-in inspections should be:
+    a. Conducted by the tenant alone
+    b. Documented with signatures from both parties
+    c. Completed within 30 days of occupancy
+    d. Based solely on verbal observations
+
+13. Tenant screening typically requires minimum gross monthly income of:
+    a. Equal to monthly rent
+    b. Double the monthly rent
+    c. Triple the monthly rent
+    d. Five times monthly rent
+
+14. When denying an application based on credit information, the Fair Credit Reporting Act requires:
+    a. No notification
+    b. Notice of adverse action
+    c. Automatic reconsideration
+    d. Full application fee refund
+
+15. The eviction process in Florida begins with:
+    a. Filing a court complaint
+    b. Serving proper notice
+    c. Obtaining a writ of possession
+    d. Contacting the sheriff
+
+**ANSWER KEY - Quiz 18-3:**
+
+1. **c. Source of income** - While federal fair housing law prohibits discrimination based on race, color, religion, national origin, sex (including sexual orientation and gender identity), familial status, and disability, source of income is not a federally protected class. Some state and local jurisdictions have added income source protections, but federal law does not include this category among protected classes.
+
+2. **b. Permitting an assistance animal despite pet restrictions** - Reasonable accommodations modify policies or practices to afford disabled individuals equal housing opportunity. Allowing assistance animals regardless of pet restrictions is a classic accommodation example. Accommodations must be reasonable—waiving rent entirely, providing free utilities, or guaranteeing renewals would exceed reasonable accommodation boundaries.
+
+3. **b. Non-payment of rent specifically** - The Florida three-day notice addresses rent delinquency specifically. This notice demands payment of specified past-due amounts within three business days or surrender of possession. Other lease violations require the seven-day notice. The three-day notice is the mandatory prerequisite before filing an eviction action based on non-payment.
+
+4. **b. Lease violations other than non-payment** - Florida's seven-day notice addresses lease violations other than rent default—unauthorized occupants, pets violating restrictions, noise disturbances, or other breaches. For curable violations, the notice provides seven days to remedy the problem; for non-curable or repeated violations, it announces lease termination in seven days.
+
+5. **c. Removing the tenant's belongings from the unit** - Removing a tenant's personal property constitutes illegal self-help eviction under Florida law. Landlords must obtain court judgments and writs of possession to lawfully remove tenants and their belongings. Filing lawsuits, serving notices, and requesting writs after judgment are all proper legal procedures—physical removal of belongings without court authority is not.
+
+6. **b. 24 hours** - After the court issues a writ of possession, the sheriff posts it on the property giving the tenant twenty-four hours to vacate. If the tenant remains after this period, the sheriff returns to physically remove the tenant and their belongings. This twenty-four-hour period represents the final opportunity for voluntary departure before forced removal.
+
+7. **c. Reporting code violations to authorities** - Florida law prohibits retaliatory eviction when tenants exercise legal rights, including reporting building code violations to government authorities, joining tenant organizations, or exercising other rights under the lease or law. Eviction remains proper for legitimate reasons like non-payment or property damage—retaliation for protected activities is not a legitimate reason.
+
+8. **b. 8%** - Vacancy rate and occupancy rate are complementary metrics that together equal 100%. If occupancy is 92%, vacancy must be 8% (100% - 92% = 8%). These metrics provide different perspectives on the same information—high occupancy indicates strong demand and effective management; low vacancy signals the same favorable conditions.
+
+9. **b. Effective gross income minus operating expenses** - Net Operating Income (NOI) represents property earnings before debt service and income taxes. It equals effective gross income (gross potential rent minus vacancy and collection losses, plus other income) minus operating expenses. NOI doesn't deduct mortgage payments—that calculation yields cash flow, a different but related metric.
+
+10. **b. Rent received versus rent charged** - Collection rate measures management effectiveness in converting rent obligations into actual payments. Calculating rent actually collected divided by rent charged reveals what percentage of owed amounts the property captures. Targeting 98% or higher indicates strong collections; lower rates signal delinquency problems requiring attention.
+
+11. **b. Scheduled HVAC system servicing** - Preventive maintenance involves routine, scheduled activities designed to prevent problems before they occur. Regular HVAC servicing—filter changes, coil cleaning, refrigerant checks—exemplifies preventive maintenance. Emergency repairs respond to existing problems; fire restoration and eviction turnover address specific events rather than preventing future issues.
+
+12. **b. Documented with signatures from both parties** - Move-in inspections should systematically document existing property conditions with both landlord and tenant present, create written records signed by both parties, and include photographic or video evidence. This documentation establishes baseline conditions for later comparison at move-out, supporting fair security deposit disposition.
+
+13. **c. Triple the monthly rent** - Industry standard screening criteria typically require gross monthly income of at least three times the monthly rent amount. This ratio helps ensure tenants can afford rent while meeting other living expenses. Some markets or property types may adjust this requirement, but the three-times standard represents common practice.
+
+14. **b. Notice of adverse action** - The Fair Credit Reporting Act requires that when applications are denied based wholly or partly on credit report information, applicants must receive adverse action notice identifying the credit bureau, stating the bureau didn't make the decision, and explaining rights to obtain free credit reports and dispute inaccuracies. This requirement promotes transparency in credit-based decisions.
+
+15. **b. Serving proper notice** - Florida eviction procedures require serving proper notice as the mandatory first step. For non-payment, a three-day notice must be served; for other violations, a seven-day notice. Only after the notice period expires without compliance may the landlord file a court complaint. Skipping the notice step invalidates subsequent court proceedings.
+
+---
+
+This completes Session 18 on Property Management.
