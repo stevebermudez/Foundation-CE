@@ -18,6 +18,7 @@ import ContactPage from "@/pages/contact";
 import CoursesFLPage from "@/pages/courses-fl";
 import CourseViewPage from "@/pages/course-view";
 import CheckoutPage from "@/pages/checkout";
+import CheckoutBundlePage from "@/pages/checkout-bundle";
 import CheckoutSuccessPage from "@/pages/checkout-success";
 import CheckoutCancelPage from "@/pages/checkout-cancel";
 import AccountSetupPage from "@/pages/account-setup";
@@ -66,6 +67,7 @@ function Router() {
           <Route path="/course/:courseId/unit/:unitId" component={UnitLearningPage} />
           <Route path="/checkout/success" component={CheckoutSuccessPage} />
           <Route path="/checkout/cancel" component={CheckoutCancelPage} />
+          <Route path="/checkout/bundle/:bundleId" component={CheckoutBundlePage} />
           <Route path="/checkout/:courseId" component={CheckoutPage} />
           <Route path="/login" component={LoginPage} />
           <Route path="/signup" component={SignupPage} />

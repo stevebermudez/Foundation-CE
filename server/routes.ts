@@ -1984,6 +1984,202 @@ export async function registerRoutes(
     }
   });
 
+  // Bundle Checkout - Create Stripe checkout session for a bundle
+  app.post("/api/checkout/bundle", async (req, res) => {
+    try {
+      const { bundleId, email, referral } = req.body;
+      if (!bundleId || !email) {
+        return res.status(400).json({ error: "bundleId and email required" });
+      }
+
+      const bundle = await storage.getCourseBundle(bundleId);
+      if (!bundle) return res.status(404).json({ error: "Bundle not found" });
+
+      const successUrl = `${req.headers.origin || process.env.CLIENT_URL || "http://localhost:5000"}/checkout/success?bundleId=${bundleId}`;
+      const cancelUrl = `${req.headers.origin || process.env.CLIENT_URL || "http://localhost:5000"}/checkout/cancel`;
+
+      const stripe = getStripeClient();
+      
+      // Build metadata with optional PromoteKit referral for affiliate tracking
+      const metadata: Record<string, string> = {
+        bundleId,
+        email,
+        type: 'bundle',
+      };
+      if (typeof referral === 'string' && referral.trim().length > 0) {
+        metadata.promotekit_referral = referral.trim();
+      }
+      
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: bundle.name,
+                description: bundle.description || undefined,
+              },
+              unit_amount: bundle.bundlePrice,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        customer_email: email,
+        success_url: successUrl + "&session_id={CHECKOUT_SESSION_ID}",
+        cancel_url: cancelUrl,
+        metadata,
+      });
+
+      res.json({ url: session.url, sessionId: session.id });
+    } catch (err: any) {
+      console.error("Bundle checkout error:", err);
+      const message = err.message || "Failed to create checkout session";
+      res.status(500).json({ error: message });
+    }
+  });
+
+  // Complete bundle enrollment after successful payment
+  app.post("/api/checkout/complete-bundle-enrollment", async (req, res) => {
+    try {
+      const { sessionId, bundleId } = req.body;
+      
+      if (!sessionId || !bundleId) {
+        return res.status(400).json({ error: "sessionId and bundleId are required" });
+      }
+
+      // Verify the Stripe session
+      const stripe = getStripeClient();
+      let session;
+      try {
+        session = await stripe.checkout.sessions.retrieve(sessionId);
+      } catch (stripeErr: any) {
+        console.error("Stripe session retrieval failed:", stripeErr.message);
+        return res.status(400).json({ error: "Invalid payment session" });
+      }
+
+      // Verify payment is complete
+      if (session.payment_status !== "paid") {
+        return res.status(400).json({ error: "Payment not completed" });
+      }
+
+      // SECURITY: Verify the bundleId from session metadata matches the request
+      const sessionBundleId = session.metadata?.bundleId;
+      if (!sessionBundleId) {
+        return res.status(400).json({ error: "Invalid session - no bundle information" });
+      }
+      if (sessionBundleId !== bundleId) {
+        console.error(`Bundle mismatch: session has ${sessionBundleId}, request has ${bundleId}`);
+        return res.status(400).json({ error: "Bundle mismatch - payment was for a different bundle" });
+      }
+
+      // Get email from session
+      const email = session.customer_email || session.metadata?.email;
+      if (!email) {
+        return res.status(400).json({ error: "No email found in payment session" });
+      }
+
+      // Check if bundle exists and get courses
+      const bundle = await storage.getCourseBundle(bundleId);
+      if (!bundle) {
+        return res.status(404).json({ error: "Bundle not found" });
+      }
+      const bundleCourses = await storage.getBundleCourses(bundleId);
+
+      // Find or create user
+      let user = await storage.getUserByEmail(email);
+      let isNewUser = false;
+      let temporaryPassword = "";
+
+      if (!user) {
+        isNewUser = true;
+        const { v4: uuidv4 } = await import("uuid");
+        const userId = uuidv4();
+        temporaryPassword = Math.random().toString(36).slice(-10);
+
+        const bcrypt = await import("bcrypt");
+        const passwordHash = await bcrypt.default.hash(temporaryPassword, 10);
+
+        user = await storage.upsertUser({
+          id: userId,
+          email,
+          passwordHash,
+          firstName: "",
+          lastName: "",
+        });
+
+        // Create welcome notification
+        try {
+          await storage.createNotification({
+            userId: user.id,
+            type: "system",
+            title: "Welcome to FoundationCE!",
+            message: "Your account has been created. Check your email to set your password.",
+            link: "/dashboard",
+            read: false
+          });
+        } catch (notifErr) {
+          console.error("Failed to create welcome notification:", notifErr);
+        }
+      }
+
+      // Create bundle enrollment
+      const bundleEnrollment = await storage.createBundleEnrollment(user.id, bundleId);
+
+      // Enroll user in all courses in the bundle
+      const courseEnrollments = [];
+      for (const course of bundleCourses) {
+        const existingEnrollment = await storage.getEnrollment(user.id, course.id);
+        if (!existingEnrollment) {
+          const enrollment = await storage.createEnrollment(user.id, course.id);
+          courseEnrollments.push(enrollment);
+        } else {
+          courseEnrollments.push(existingEnrollment);
+        }
+      }
+
+      // Create enrollment notification
+      try {
+        await storage.createNotification({
+          userId: user.id,
+          type: "enrollment",
+          title: "Bundle Enrollment Confirmed",
+          message: `You've been enrolled in "${bundle.name}" with ${bundleCourses.length} courses. Start learning now!`,
+          link: `/dashboard`,
+          read: false
+        });
+      } catch (notifErr) {
+        console.error("Failed to create enrollment notification:", notifErr);
+      }
+
+      // Generate JWT token for auto-login
+      const jwt = await import("jsonwebtoken");
+      const token = jwt.default.sign(
+        { id: user.id, email: user.email },
+        process.env.SESSION_SECRET || "fallback-secret",
+        { expiresIn: "7d" }
+      );
+
+      res.json({
+        success: true,
+        bundleEnrollment,
+        courseEnrollments,
+        isNewUser,
+        temporaryPassword: isNewUser ? temporaryPassword : null,
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }
+      });
+    } catch (err: any) {
+      console.error("Complete bundle enrollment error:", err);
+      res.status(500).json({ error: err.message || "Failed to complete bundle enrollment" });
+    }
+  });
+
   // Create Payment Intent for direct payment (supports Apple Pay, Google Pay, Cards)
   app.post("/api/payment/create-intent", async (req, res) => {
     try {
