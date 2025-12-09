@@ -1559,3 +1559,207 @@ export const userAchievements = pgTable("user_achievements", {
 
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = typeof userAchievements.$inferInsert;
+
+// ============================================================
+// COURSEBOX-STYLE COURSE CREATOR - Block-Based Content System
+// ============================================================
+
+// Content Blocks - Rich interactive lesson content
+// Supports: text, heading, image, video, embed, flashcard, accordion, tabs, quiz, divider
+export const contentBlocks = pgTable("content_blocks", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  lessonId: varchar("lesson_id").notNull(),
+  blockType: varchar("block_type").notNull(), // "text", "heading", "image", "video", "embed", "flashcard", "accordion", "tabs", "quiz", "divider", "callout", "code"
+  sortOrder: integer("sort_order").default(0),
+  content: text("content"), // JSON content specific to block type
+  settings: text("settings"), // JSON settings (styling, behavior)
+  isVisible: integer("is_visible").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type ContentBlock = typeof contentBlocks.$inferSelect;
+export type InsertContentBlock = typeof contentBlocks.$inferInsert;
+
+export const insertContentBlockSchema = createInsertSchema(contentBlocks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateContentBlockSchema = z.object({
+  blockType: z.string().optional(),
+  sortOrder: z.number().optional(),
+  content: z.string().optional(),
+  settings: z.string().optional(),
+  isVisible: z.number().optional(),
+});
+
+// Content block type definitions for TypeScript
+export const contentBlockTypeSchema = z.enum([
+  "text",           // Rich text content
+  "heading",        // H1-H6 headings
+  "image",          // Single image with caption
+  "video",          // Video embed (YouTube, Vimeo, direct URL)
+  "embed",          // Generic embed (iframe, SCORM, Canva, etc.)
+  "flashcard",      // Flip cards for memorization
+  "accordion",      // Collapsible sections
+  "tabs",           // Tabbed content panels
+  "quiz",           // Inline quiz question
+  "divider",        // Visual separator
+  "callout",        // Info/warning/success boxes
+  "code",           // Code blocks with syntax highlighting
+  "list",           // Ordered/unordered lists
+  "table",          // Data tables
+  "button",         // CTA buttons
+  "spacer",         // Vertical spacing
+]);
+
+export type ContentBlockType = z.infer<typeof contentBlockTypeSchema>;
+
+// Flashcard content structure
+export const flashcardContentSchema = z.object({
+  cards: z.array(z.object({
+    front: z.string(),
+    back: z.string(),
+    hint: z.string().optional(),
+  })),
+  shuffleCards: z.boolean().optional(),
+  showProgress: z.boolean().optional(),
+});
+
+// Accordion content structure
+export const accordionContentSchema = z.object({
+  items: z.array(z.object({
+    title: z.string(),
+    content: z.string(),
+    isOpen: z.boolean().optional(),
+  })),
+  allowMultipleOpen: z.boolean().optional(),
+});
+
+// Tabs content structure
+export const tabsContentSchema = z.object({
+  tabs: z.array(z.object({
+    label: z.string(),
+    content: z.string(),
+    icon: z.string().optional(),
+  })),
+  defaultTab: z.number().optional(),
+});
+
+// Callout content structure
+export const calloutContentSchema = z.object({
+  type: z.enum(["info", "warning", "success", "error", "tip"]),
+  title: z.string().optional(),
+  content: z.string(),
+  icon: z.string().optional(),
+});
+
+// Video content structure
+export const videoContentSchema = z.object({
+  url: z.string(),
+  provider: z.enum(["youtube", "vimeo", "direct", "other"]).optional(),
+  caption: z.string().optional(),
+  autoplay: z.boolean().optional(),
+  controls: z.boolean().optional(),
+  loop: z.boolean().optional(),
+});
+
+// Embed content structure
+export const embedContentSchema = z.object({
+  url: z.string().optional(),
+  html: z.string().optional(),
+  provider: z.string().optional(),
+  width: z.string().optional(),
+  height: z.string().optional(),
+  title: z.string().optional(),
+});
+
+// Course Templates - Reusable course structures
+export const courseTemplates = pgTable("course_templates", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: varchar("category"), // "real_estate", "insurance", "compliance", "onboarding"
+  structure: text("structure"), // JSON template structure (units, lessons, block types)
+  thumbnail: varchar("thumbnail"),
+  isPublic: integer("is_public").default(0),
+  createdBy: varchar("created_by"),
+  usageCount: integer("usage_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type CourseTemplate = typeof courseTemplates.$inferSelect;
+export type InsertCourseTemplate = typeof courseTemplates.$inferInsert;
+
+// AI Generation History - Track AI-generated content
+export const aiGenerationHistory = pgTable("ai_generation_history", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  generationType: varchar("generation_type").notNull(), // "course_outline", "quiz", "lesson_content", "flashcards"
+  inputPrompt: text("input_prompt"),
+  inputContext: text("input_context"), // Source material/context
+  outputContent: text("output_content"), // Generated content (JSON)
+  model: varchar("model"), // "gpt-4", "gpt-3.5-turbo", etc.
+  tokensUsed: integer("tokens_used"),
+  status: varchar("status").default("completed"), // "pending", "completed", "failed"
+  errorMessage: text("error_message"),
+  courseId: varchar("course_id"), // Optional - if tied to specific course
+  lessonId: varchar("lesson_id"), // Optional - if tied to specific lesson
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type AIGenerationHistory = typeof aiGenerationHistory.$inferSelect;
+export type InsertAIGenerationHistory = typeof aiGenerationHistory.$inferInsert;
+
+// Learner Analytics Events - Detailed engagement tracking
+export const learnerAnalyticsEvents = pgTable("learner_analytics_events", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  enrollmentId: varchar("enrollment_id"),
+  courseId: varchar("course_id"),
+  lessonId: varchar("lesson_id"),
+  blockId: varchar("block_id"),
+  eventType: varchar("event_type").notNull(), // "view", "complete", "interaction", "quiz_attempt", "video_play", "flashcard_flip"
+  eventData: text("event_data"), // JSON additional event data
+  timeSpentSeconds: integer("time_spent_seconds"),
+  sessionId: varchar("session_id"),
+  deviceType: varchar("device_type"), // "desktop", "mobile", "tablet"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type LearnerAnalyticsEvent = typeof learnerAnalyticsEvents.$inferSelect;
+export type InsertLearnerAnalyticsEvent = typeof learnerAnalyticsEvents.$inferInsert;
+
+// Course Analytics Summary - Aggregated course metrics
+export const courseAnalyticsSummary = pgTable("course_analytics_summary", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  courseId: varchar("course_id").notNull(),
+  periodType: varchar("period_type").notNull(), // "daily", "weekly", "monthly", "all_time"
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  totalEnrollments: integer("total_enrollments").default(0),
+  activeUsers: integer("active_users").default(0),
+  completions: integer("completions").default(0),
+  averageProgress: integer("average_progress").default(0), // 0-100
+  averageTimeSeconds: integer("average_time_seconds").default(0),
+  averageQuizScore: integer("average_quiz_score"), // 0-100
+  dropoffRate: integer("dropoff_rate"), // 0-100
+  engagementScore: integer("engagement_score"), // 0-100
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type CourseAnalyticsSummary = typeof courseAnalyticsSummary.$inferSelect;
+export type InsertCourseAnalyticsSummary = typeof courseAnalyticsSummary.$inferInsert;

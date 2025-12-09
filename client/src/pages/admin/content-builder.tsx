@@ -49,7 +49,9 @@ import {
   HelpCircle,
   ClipboardList,
   Award,
+  LayoutGrid,
 } from "lucide-react";
+import BlockEditor from "@/components/admin/BlockEditor";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -136,6 +138,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
   const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
   const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
+  const [blockEditorLesson, setBlockEditorLesson] = useState<Lesson | null>(null);
   const [showUnitForm, setShowUnitForm] = useState(false);
   const [showLessonForm, setShowLessonForm] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
@@ -736,6 +739,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
                   setShowLessonForm(true);
                 }}
                 onEditLesson={(lesson) => setEditingLesson(lesson)}
+                onOpenBlockEditor={(lesson) => setBlockEditorLesson(lesson)}
                 onDeleteLesson={(lessonId) => deleteLessonMutation.mutate(lessonId)}
                 onOpenMediaLibrary={(callback) => {
                   setMediaSelectCallback(() => callback);
@@ -930,6 +934,14 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
         />
       )}
 
+      {blockEditorLesson && (
+        <BlockEditor
+          lessonId={blockEditorLesson.id}
+          lessonTitle={blockEditorLesson.title}
+          onClose={() => setBlockEditorLesson(null)}
+        />
+      )}
+
       <MediaLibraryDialog
         open={showMediaLibrary}
         onClose={() => {
@@ -1019,6 +1031,7 @@ function UnitCard({
   onDelete,
   onAddLesson,
   onEditLesson,
+  onOpenBlockEditor,
   onDeleteLesson,
   onOpenMediaLibrary,
   onManageQuiz,
@@ -1036,6 +1049,7 @@ function UnitCard({
   onDelete: () => void;
   onAddLesson: () => void;
   onEditLesson: (lesson: Lesson) => void;
+  onOpenBlockEditor: (lesson: Lesson) => void;
   onDeleteLesson: (lessonId: string) => void;
   onOpenMediaLibrary: (callback: (url: string) => void) => void;
   onManageQuiz: () => void;
@@ -1118,6 +1132,7 @@ function UnitCard({
                   key={lesson.id}
                   lesson={lesson}
                   onEdit={() => onEditLesson(lesson)}
+                  onOpenBlockEditor={() => onOpenBlockEditor(lesson)}
                   onDelete={() => onDeleteLesson(lesson.id)}
                 />
               ))}
@@ -1228,10 +1243,12 @@ function UnitCard({
 function LessonRow({
   lesson,
   onEdit,
+  onOpenBlockEditor,
   onDelete,
 }: {
   lesson: Lesson;
   onEdit: () => void;
+  onOpenBlockEditor: () => void;
   onDelete: () => void;
 }) {
   const hasContent = !!lesson.content;
@@ -1288,6 +1305,15 @@ function LessonRow({
         </div>
       </div>
       <div className="flex items-center gap-1">
+        <Button 
+          size="icon" 
+          variant="ghost" 
+          onClick={onOpenBlockEditor} 
+          title="Block Editor"
+          data-testid={`button-block-editor-${lesson.id}`}
+        >
+          <LayoutGrid className="h-4 w-4 text-primary" />
+        </Button>
         <Button size="icon" variant="ghost" onClick={onEdit} data-testid={`button-edit-lesson-${lesson.id}`}>
           <Edit2 className="h-4 w-4" />
         </Button>

@@ -1,4 +1,4 @@
-import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, privacyConsents, dataSubjectRequests, auditLogs, userPrivacyPreferences, affiliates, affiliateLinks, affiliateVisits, affiliateConversions, affiliatePayouts, affiliateCoupons, affiliateCreatives, affiliateNotifications, affiliateCommissionTiers, sitePages, pageSections, sectionBlocks, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment, type PrivacyConsent, type DataSubjectRequest, type AuditLog, type UserPrivacyPreference, type Affiliate, type InsertAffiliate, type AffiliateLink, type InsertAffiliateLink, type AffiliateVisit, type AffiliateConversion, type AffiliatePayout, type AffiliateCoupon, type AffiliateCreative, type AffiliateNotification, type SitePage, type InsertSitePage, type PageSection, type InsertPageSection, type SectionBlock, type InsertSectionBlock, type AffiliateCommissionTier } from "@shared/schema";
+import { users, enrollments, courses, complianceRequirements, organizations, userOrganizations, organizationCourses, courseBundles, bundleCourses, bundleEnrollments, sirconReports, dbprReports, userLicenses, ceReviews, supervisors, practiceExams, examQuestions, examAttempts, examAnswers, subscriptions, coupons, couponUsage, emailCampaigns, emailRecipients, emailTracking, units, lessons, lessonProgress, unitProgress, questionBanks, bankQuestions, quizAttempts, quizAnswers, certificates, videos, notifications, purchases, accountCredits, refunds, systemSettings, emailTemplates, userRoles, userRoleAssignments, privacyConsents, dataSubjectRequests, auditLogs, userPrivacyPreferences, affiliates, affiliateLinks, affiliateVisits, affiliateConversions, affiliatePayouts, affiliateCoupons, affiliateCreatives, affiliateNotifications, affiliateCommissionTiers, sitePages, pageSections, sectionBlocks, contentBlocks, type User, type UpsertUser, type Course, type Enrollment, type ComplianceRequirement, type Organization, type CourseBundle, type BundleEnrollment, type SirconReport, type DBPRReport, type UserLicense, type CEReview, type Supervisor, type PracticeExam, type ExamQuestion, type ExamAttempt, type ExamAnswer, type Subscription, type Coupon, type CouponUsage, type EmailCampaign, type EmailRecipient, type EmailTracking, type Unit, type Lesson, type LessonProgress, type UnitProgress, type QuestionBank, type BankQuestion, type QuizAttempt, type QuizAnswer, type Certificate, type Video, type Notification, type InsertNotification, type Purchase, type UpsertPurchase, type AccountCredit, type InsertAccountCredit, type Refund, type InsertRefund, type SystemSetting, type EmailTemplate, type UserRole, type UserRoleAssignment, type PrivacyConsent, type DataSubjectRequest, type AuditLog, type UserPrivacyPreference, type Affiliate, type InsertAffiliate, type AffiliateLink, type InsertAffiliateLink, type AffiliateVisit, type AffiliateConversion, type AffiliatePayout, type AffiliateCoupon, type AffiliateCreative, type AffiliateNotification, type SitePage, type InsertSitePage, type PageSection, type InsertPageSection, type SectionBlock, type InsertSectionBlock, type AffiliateCommissionTier, type ContentBlock, type InsertContentBlock } from "@shared/schema";
 import { eq, and, lt, gte, desc, sql, inArray } from "drizzle-orm";
 import { db } from "./db";
 
@@ -283,6 +283,14 @@ export interface IStorage {
   
   // CMS Full Page Data
   getFullPageData(slug: string): Promise<{ page: SitePage; sections: (PageSection & { blocks: SectionBlock[] })[] } | undefined>;
+  
+  // Content Blocks Methods (Coursebox-style block editor)
+  getContentBlocks(lessonId: string): Promise<ContentBlock[]>;
+  getContentBlock(blockId: string): Promise<ContentBlock | undefined>;
+  createContentBlock(data: InsertContentBlock): Promise<ContentBlock>;
+  updateContentBlock(blockId: string, data: Partial<ContentBlock>): Promise<ContentBlock>;
+  deleteContentBlock(blockId: string): Promise<void>;
+  reorderContentBlocks(lessonId: string, blockIds: string[]): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -4078,6 +4086,43 @@ export class DatabaseStorage implements IStorage {
     );
 
     return { page, sections: sectionsWithBlocks };
+  }
+
+  // Content Blocks Methods (Coursebox-style block editor)
+  async getContentBlocks(lessonId: string): Promise<ContentBlock[]> {
+    return db.select().from(contentBlocks)
+      .where(and(eq(contentBlocks.lessonId, lessonId), eq(contentBlocks.isVisible, 1)))
+      .orderBy(contentBlocks.sortOrder);
+  }
+
+  async getContentBlock(blockId: string): Promise<ContentBlock | undefined> {
+    const [block] = await db.select().from(contentBlocks).where(eq(contentBlocks.id, blockId));
+    return block;
+  }
+
+  async createContentBlock(data: InsertContentBlock): Promise<ContentBlock> {
+    const [block] = await db.insert(contentBlocks).values(data).returning();
+    return block;
+  }
+
+  async updateContentBlock(blockId: string, data: Partial<ContentBlock>): Promise<ContentBlock> {
+    const [block] = await db.update(contentBlocks)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(contentBlocks.id, blockId))
+      .returning();
+    return block;
+  }
+
+  async deleteContentBlock(blockId: string): Promise<void> {
+    await db.delete(contentBlocks).where(eq(contentBlocks.id, blockId));
+  }
+
+  async reorderContentBlocks(lessonId: string, blockIds: string[]): Promise<void> {
+    for (let i = 0; i < blockIds.length; i++) {
+      await db.update(contentBlocks)
+        .set({ sortOrder: i, updatedAt: new Date() })
+        .where(and(eq(contentBlocks.id, blockIds[i]), eq(contentBlocks.lessonId, lessonId)));
+    }
   }
 }
 

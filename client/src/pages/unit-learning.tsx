@@ -21,6 +21,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Link } from "wouter";
+import { ContentBlockRenderer } from "@/components/lms/ContentBlockRenderer";
 
 interface Lesson {
   id: string;
@@ -493,6 +494,18 @@ function LessonViewer({
   const [localElapsedSeconds, setLocalElapsedSeconds] = useState(lesson.timeSpentSeconds);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
+  const { data: contentBlocks } = useQuery<any[]>({
+    queryKey: ["/api/lessons", lesson.id, "blocks"],
+    queryFn: async () => {
+      const res = await fetch(`/api/lessons/${lesson.id}/blocks`, {
+        credentials: "include",
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+  
   useEffect(() => {
     setLocalElapsedSeconds(lesson.timeSpentSeconds);
   }, [lesson.id, lesson.timeSpentSeconds]);
@@ -590,7 +603,13 @@ function LessonViewer({
           </div>
         )}
 
-        {!lesson.content && !lesson.videoUrl && (
+        {contentBlocks && contentBlocks.length > 0 && (
+          <div className="mt-6">
+            <ContentBlockRenderer blocks={contentBlocks} />
+          </div>
+        )}
+
+        {!lesson.content && !lesson.videoUrl && (!contentBlocks || contentBlocks.length === 0) && (
           <div className="text-center py-12 text-muted-foreground">
             <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Lesson content is being prepared.</p>

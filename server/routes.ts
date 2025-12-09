@@ -4206,6 +4206,156 @@ segment1.ts
     }
   });
 
+  // ===== Content Block Management Routes (Coursebox-style) =====
+  
+  // Get all content blocks for a lesson (admin - includes hidden)
+  app.get("/api/admin/lessons/:lessonId/blocks", isAdmin, async (req, res) => {
+    try {
+      const db = (await import("./db")).db;
+      const { contentBlocks } = await import("@shared/schema");
+      const { eq, asc } = await import("drizzle-orm");
+      
+      const blocks = await db.select().from(contentBlocks)
+        .where(eq(contentBlocks.lessonId, req.params.lessonId))
+        .orderBy(asc(contentBlocks.sortOrder));
+      res.json(blocks);
+    } catch (err) {
+      console.error("Error fetching content blocks:", err);
+      res.status(500).json({ error: "Failed to fetch content blocks" });
+    }
+  });
+
+  // Create a new content block
+  app.post("/api/admin/lessons/:lessonId/blocks", isAdmin, async (req, res) => {
+    try {
+      const { insertContentBlockSchema } = await import("@shared/schema");
+      const { blockType, content, settings } = req.body;
+      
+      if (!blockType) {
+        return res.status(400).json({ error: "blockType is required" });
+      }
+      
+      // Get max sort order for this lesson
+      const db = (await import("./db")).db;
+      const { contentBlocks } = await import("@shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      
+      const existing = await db.select().from(contentBlocks)
+        .where(eq(contentBlocks.lessonId, req.params.lessonId))
+        .orderBy(desc(contentBlocks.sortOrder))
+        .limit(1);
+      const nextOrder = existing.length > 0 ? (existing[0].sortOrder || 0) + 1 : 0;
+      
+      const blockData = {
+        lessonId: req.params.lessonId,
+        blockType,
+        sortOrder: nextOrder,
+        content: typeof content === 'object' ? JSON.stringify(content) : (content || null),
+        settings: typeof settings === 'object' ? JSON.stringify(settings) : (settings || null),
+        isVisible: 1,
+      };
+      
+      const block = await storage.createContentBlock(blockData);
+      res.status(201).json(block);
+    } catch (err) {
+      console.error("Error creating content block:", err);
+      res.status(500).json({ error: "Failed to create content block" });
+    }
+  });
+
+  // Update a content block
+  app.patch("/api/admin/blocks/:blockId", isAdmin, async (req, res) => {
+    try {
+      const { blockType, content, settings, sortOrder, isVisible } = req.body;
+      const updateData: any = {};
+      
+      if (blockType !== undefined) updateData.blockType = blockType;
+      if (content !== undefined) updateData.content = typeof content === 'object' ? JSON.stringify(content) : content;
+      if (settings !== undefined) updateData.settings = typeof settings === 'object' ? JSON.stringify(settings) : settings;
+      if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
+      if (isVisible !== undefined) updateData.isVisible = isVisible;
+      
+      const block = await storage.updateContentBlock(req.params.blockId, updateData);
+      res.json(block);
+    } catch (err) {
+      console.error("Error updating content block:", err);
+      res.status(500).json({ error: "Failed to update content block" });
+    }
+  });
+
+  // Delete a content block
+  app.delete("/api/admin/blocks/:blockId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteContentBlock(req.params.blockId);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error deleting content block:", err);
+      res.status(500).json({ error: "Failed to delete content block" });
+    }
+  });
+
+  // Reorder content blocks within a lesson
+  app.post("/api/admin/lessons/:lessonId/blocks/reorder", isAdmin, async (req, res) => {
+    try {
+      const { blockIds } = req.body;
+      if (!Array.isArray(blockIds)) {
+        return res.status(400).json({ error: "blockIds must be an array" });
+      }
+      
+      await storage.reorderContentBlocks(req.params.lessonId, blockIds);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Error reordering content blocks:", err);
+      res.status(500).json({ error: "Failed to reorder content blocks" });
+    }
+  });
+
+  // Duplicate a content block
+  app.post("/api/admin/blocks/:blockId/duplicate", isAdmin, async (req, res) => {
+    try {
+      const original = await storage.getContentBlock(req.params.blockId);
+      
+      if (!original) {
+        return res.status(404).json({ error: "Block not found" });
+      }
+      
+      const db = (await import("./db")).db;
+      const { contentBlocks } = await import("@shared/schema");
+      const { eq, desc } = await import("drizzle-orm");
+      
+      const existing = await db.select().from(contentBlocks)
+        .where(eq(contentBlocks.lessonId, original.lessonId))
+        .orderBy(desc(contentBlocks.sortOrder))
+        .limit(1);
+      const nextOrder = existing.length > 0 ? (existing[0].sortOrder || 0) + 1 : 0;
+      
+      const block = await storage.createContentBlock({
+        lessonId: original.lessonId,
+        blockType: original.blockType,
+        sortOrder: nextOrder,
+        content: original.content,
+        settings: original.settings,
+        isVisible: original.isVisible,
+      });
+      
+      res.status(201).json(block);
+    } catch (err) {
+      console.error("Error duplicating content block:", err);
+      res.status(500).json({ error: "Failed to duplicate content block" });
+    }
+  });
+
+  // Get content blocks for learner view (filtered by visibility)
+  app.get("/api/lessons/:lessonId/blocks", async (req, res) => {
+    try {
+      const blocks = await storage.getContentBlocks(req.params.lessonId);
+      res.json(blocks);
+    } catch (err) {
+      console.error("Error fetching content blocks:", err);
+      res.status(500).json({ error: "Failed to fetch content blocks" });
+    }
+  });
+
   // ===== Question Bank Management Routes =====
   
   // Get all question banks for a course
