@@ -41,7 +41,7 @@ export default function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
                 <GraduationCap className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-semibold text-lg">FoundationCE</span>
+              <span className="font-semibold text-lg">Foundation CE</span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
               State-approved continuing education and prelicensing for real estate professionals in Florida.

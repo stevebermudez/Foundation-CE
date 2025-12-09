@@ -208,7 +208,7 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-2">
         <div className="flex h-16 items-center justify-between gap-1">
           <div className="flex items-center gap-1 flex-shrink-0 mr-auto">
-            <Link href="/" className="flex items-center gap-2 hover-elevate rounded-md px-1 py-1 -ml-1" aria-label="FoundationCE - Go to homepage">
+            <Link href="/" className="flex items-center gap-2 hover-elevate rounded-md px-1 py-1 -ml-1" aria-label="Foundation CE - Go to homepage">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary" aria-hidden="true">
                 <GraduationCap className="h-4 w-4 text-primary-foreground" />
               </div>
@@ -216,7 +216,7 @@ export default function Header() {
                 className="font-semibold text-lg whitespace-nowrap" 
                 data-testid="text-logo"
               >
-                FoundationCE
+                Foundation CE
               </span>
             </Link>
           </div>
