@@ -72,58 +72,22 @@ function parseQuizzes(text: string): ParsedQuiz[] {
 function parseQuestionsV2(questionContent: string, answerContent: string): ParsedQuestion[] {
   const questions: ParsedQuestion[] = [];
   
-  // Find all questions: text ending with ? followed by options
-  // Split by question mark followed by space and lowercase 'a.'
-  const questionBlocks = questionContent.split(/\?\s+(?=a\.)/);
+  // Questions end with ? or : followed by options a. b. c. d.
+  // Match pattern: question text ending in ? or : followed by a. optA b. optB c. optC d. optD
+  const questionPattern = /([A-Z][^?:]*[?:])\s*a\.\s*([^\n]*?)\s+b\.\s*([^\n]*?)\s+c\.\s*([^\n]*?)\s+d\.\s*([^\n]*?)(?=\n|[A-Z][^?:]*[?:]|$)/g;
   
-  for (let i = 0; i < questionBlocks.length - 1; i++) {
-    // Find where the question text starts (after previous options end)
-    let block = questionBlocks[i];
-    
-    // The question text is from the last sentence before ?
-    // Look backwards from end of block to find where question starts
-    const sentences = block.split(/(?<=[.!?])\s+/);
-    
-    // Find the last sentence that might be a question (or entire block if no clear break)
-    let questionText = '';
-    let foundQuestion = false;
-    
-    for (let j = sentences.length - 1; j >= 0; j--) {
-      const sentence = sentences[j].trim();
-      if (sentence.length > 20) {
-        // Check if this looks like a question start (capital letter, not an option)
-        if (/^[A-Z]/.test(sentence) && !/^[a-d]\.\s/.test(sentence.toLowerCase())) {
-          questionText = sentences.slice(j).join(' ').trim() + '?';
-          foundQuestion = true;
-          break;
-        }
-      }
-    }
-    
-    if (!foundQuestion && block.length > 20) {
-      // Just take the whole block as the question
-      questionText = block.trim() + '?';
-    }
-    
-    if (!questionText || questionText.length < 15) continue;
-    
-    // Now parse options from the next block
-    const optionsBlock = questionBlocks[i + 1];
-    
-    // Find options: a. ... b. ... c. ... d. ...
-    // Use a more reliable pattern - split by option markers at word boundaries
-    const optionMatches = optionsBlock.match(/^a\.\s*(.*?)\s+b\.\s*(.*?)\s+c\.\s*(.*?)\s+d\.\s*([^\n]+?)(?=\s*[A-Z]|$)/s);
-    
-    if (!optionMatches) continue;
-    
+  let match: RegExpExecArray | null;
+  while ((match = questionPattern.exec(questionContent)) !== null) {
+    const questionText = match[1].trim();
     const options = [
-      optionMatches[1].trim(),
-      optionMatches[2].trim(),
-      optionMatches[3].trim(),
-      optionMatches[4].trim(),
+      match[2].trim(),
+      match[3].trim(),
+      match[4].trim(),
+      match[5].trim(),
     ];
     
-    // Validate options
+    // Validate - question must be substantial and options non-empty
+    if (questionText.length < 15) continue;
     if (options.some(o => o.length === 0 || o.length > 500)) continue;
     
     questions.push({
