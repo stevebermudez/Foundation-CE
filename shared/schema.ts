@@ -1611,6 +1611,9 @@ export const contentBlockTypeSchema = z.enum([
   "inline_quiz",    // Auto-graded embedded question
   "fill_blank",     // Fill-in-the-blank exercise
   "matching",       // Drag-and-drop matching activity
+  "hotspot",        // Clickable areas on images
+  "sorting",        // Drag-and-drop list reordering
+  "timeline",       // Sequential events display
   "divider",        // Visual separator
   "callout",        // Info/warning/success boxes
   "code",           // Code blocks with syntax highlighting
@@ -1729,6 +1732,64 @@ export const matchingContentSchema = z.object({
     correct: z.string().optional(),
     incorrect: z.string().optional(),
   }).optional(),
+});
+
+// Hotspot content structure - clickable areas on images
+export const hotspotContentSchema = z.object({
+  imageUrl: z.string(),
+  imageAlt: z.string().optional(),
+  title: z.string().optional(),
+  instructions: z.string().optional(),
+  hotspots: z.array(z.object({
+    id: z.string(),
+    x: z.number(), // X position as percentage (0-100)
+    y: z.number(), // Y position as percentage (0-100)
+    width: z.number().optional(), // Width as percentage (default 10)
+    height: z.number().optional(), // Height as percentage (default 10)
+    shape: z.enum(["circle", "rectangle"]).optional(), // Shape of hotspot
+    label: z.string(), // What to display when clicked
+    description: z.string().optional(), // Detailed description
+    isCorrect: z.boolean().optional(), // For quiz-style hotspots
+  })),
+  mode: z.enum(["explore", "quiz"]).optional(), // explore: info on click, quiz: find correct spots
+  showLabels: z.boolean().optional(), // Show labels on hover
+  allowRetry: z.boolean().optional(),
+});
+
+// Sorting content structure - drag-and-drop list reordering
+export const sortingContentSchema = z.object({
+  title: z.string().optional(),
+  instructions: z.string().optional(),
+  items: z.array(z.object({
+    id: z.string(),
+    content: z.string(), // The text/content of the item
+    correctPosition: z.number(), // The correct position (1-indexed)
+  })),
+  shuffleItems: z.boolean().optional(), // Shuffle on load (default true)
+  allowRetry: z.boolean().optional(),
+  feedback: z.object({
+    correct: z.string().optional(),
+    incorrect: z.string().optional(),
+    partial: z.string().optional(), // For partial correct answers
+  }).optional(),
+});
+
+// Timeline content structure - sequential events display
+export const timelineContentSchema = z.object({
+  title: z.string().optional(),
+  instructions: z.string().optional(),
+  events: z.array(z.object({
+    id: z.string(),
+    date: z.string().optional(), // Date/time label (e.g., "1920", "Step 1", "Jan 2024")
+    title: z.string(),
+    description: z.string().optional(),
+    icon: z.string().optional(), // Lucide icon name
+    color: z.string().optional(), // Accent color for this event
+  })),
+  layout: z.enum(["vertical", "horizontal"]).optional(), // Display orientation
+  isInteractive: z.boolean().optional(), // Quiz mode: arrange events in order
+  showConnectors: z.boolean().optional(), // Show lines between events
+  allowRetry: z.boolean().optional(),
 });
 
 // Course Templates - Reusable course structures
