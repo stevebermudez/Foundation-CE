@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { CoursePolicyDisclosure } from "@/components/lms/CoursePolicyDisclosure";
 import {
   ArrowLeft,
   Clock,
@@ -54,12 +55,16 @@ interface CourseProgress {
   finalExamPassed: boolean;
   finalExamScore?: number;
   units: Unit[];
+  expiresAt?: string;
+  policyAcknowledgedAt?: string;
 }
 
 export default function CourseLearningPage() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [showPolicyDialog, setShowPolicyDialog] = useState(false);
 
   // Fetch course data
   const { data: course, isLoading: courseLoading } = useQuery<any>({
@@ -88,6 +93,53 @@ export default function CourseLearningPage() {
     enabled: !!params.id,
     refetchInterval: 30000,
   });
+
+  // Mutation to acknowledge course policy
+  const acknowledgePolicyMutation = useMutation({
+    mutationFn: async () => {
+      const token = localStorage.getItem("authToken");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      
+      const res = await fetch(`/api/courses/${params.id}/acknowledge-policy`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to acknowledge policy");
+      return res.json();
+    },
+    onSuccess: () => {
+      setShowPolicyDialog(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/courses", params.id, "units-progress"] });
+      toast({
+        title: "Policy Acknowledged",
+        description: "You may now proceed with the course.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to acknowledge policy. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Check if we need to show the policy disclosure for Florida courses
+  const isFloridaCourse = course?.state === "FL";
+  const needsPolicyAcknowledgment = isFloridaCourse && progressData && !progressData.policyAcknowledgedAt;
+  
+  // Show policy dialog on first visit if needed
+  useEffect(() => {
+    if (needsPolicyAcknowledgment) {
+      setShowPolicyDialog(true);
+    }
+  }, [needsPolicyAcknowledgment]);
+
+  const handlePolicyAcknowledge = () => {
+    acknowledgePolicyMutation.mutate();
+  };
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -155,6 +207,16 @@ export default function CourseLearningPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Florida Course Policy Disclosure Dialog */}
+      {showPolicyDialog && course && (
+        <CoursePolicyDisclosure
+          course={course}
+          enrollmentExpiresAt={progressData.expiresAt}
+          onAcknowledge={handlePolicyAcknowledge}
+          isDialog={true}
+        />
+      )}
+
       {/* Header */}
       <div className="border-b bg-card">
         <div className="max-w-3xl mx-auto px-4 py-4">

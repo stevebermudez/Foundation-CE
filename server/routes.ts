@@ -1135,6 +1135,8 @@ export async function registerRoutes(
         totalTimeSeconds: enrollment.totalTimeSeconds || 0,
         finalExamPassed: enrollment.finalExamPassed === 1,
         finalExamScore: enrollment.finalExamScore,
+        expiresAt: enrollment.expiresAt,
+        policyAcknowledgedAt: enrollment.policyAcknowledgedAt,
         units: unitsWithProgress
       });
     } catch (err) {
@@ -1359,9 +1361,36 @@ export async function registerRoutes(
           }
         }
         
+        // Get course to check if Florida (for state-specific exam rules)
+        const course = await storage.getCourse(bank.courseId);
+        const isFloridaCourse = course?.state === "FL";
+        
+        // Florida courses: 2 attempts (original + 1 retest per Rule 61J2-3.008(5)(a))
+        // Non-Florida courses: 3 attempts
+        const maxAttempts = isFloridaCourse ? 2 : 3;
+        const currentAttempts = enrollment.finalExamAttempts || 0;
+        
+        // Florida-specific: Check 30-day waiting period before allowing retest
+        if (isFloridaCourse && currentAttempts > 0 && enrollment.finalExamPassed !== 1) {
+          const lastExamDate = enrollment.lastExamDate || enrollment.firstExamDate;
+          if (lastExamDate) {
+            const retestEligibleDate = new Date(lastExamDate);
+            retestEligibleDate.setDate(retestEligibleDate.getDate() + 30);
+            
+            const now = new Date();
+            if (now < retestEligibleDate) {
+              const daysRemaining = Math.ceil((retestEligibleDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              return res.status(403).json({ 
+                error: `Per Florida Rule 61J2-3.008(5)(a), you must wait ${daysRemaining} more day(s) before retaking the examination.`,
+                retestEligibleDate: retestEligibleDate.toISOString(),
+                daysRemaining
+              });
+            }
+          }
+        }
+        
         // Atomically increment attempt counter and check limits
         // This prevents race conditions from concurrent requests
-        const maxAttempts = 3;
         const incrementResult = await storage.incrementFinalExamAttempts(enrollmentId, maxAttempts);
         
         if (!incrementResult.success) {
@@ -1372,12 +1401,33 @@ export async function registerRoutes(
             return res.status(400).json({ error: "You have already passed the final exam" });
           }
           
+          const errorMessage = isFloridaCourse 
+            ? "Per Florida Rule 61J2-3.008(5)(a), you have exceeded the maximum retests. You must repeat the course to be eligible for another examination."
+            : `Maximum attempts reached. You have used all ${maxAttempts} final exam attempts.`;
+          
           return res.status(403).json({ 
-            error: "Maximum attempts reached. You have used all 3 final exam attempts.",
+            error: errorMessage,
             attemptsUsed: currentEnrollment?.finalExamAttempts || maxAttempts,
-            maxAttempts
+            maxAttempts,
+            isFloridaCourse
           });
         }
+        
+        // Track exam dates for Florida regulatory compliance
+        const now = new Date();
+        const updates: any = { lastExamDate: now };
+        
+        // Set firstExamDate only on first attempt
+        if (!enrollment.firstExamDate) {
+          updates.firstExamDate = now;
+        }
+        
+        // Calculate retest eligible date (30 days from now)
+        const retestDate = new Date(now);
+        retestDate.setDate(retestDate.getDate() + 30);
+        updates.retestEligibleDate = retestDate;
+        
+        await storage.updateEnrollmentProgress(enrollmentId, updates);
       }
       
       // Get random questions for this attempt
@@ -1708,10 +1758,11 @@ export async function registerRoutes(
   });
 
   // Get final exam info for a course (with Form A/B version logic)
-  // Students get 3 total attempts: 
-  // - Attempt 1: Form A
-  // - Attempt 2: Form B (if failed attempt 1)
-  // - Attempt 3: Form A (if failed attempt 2)
+  // Florida Rule 61J2-3.008(5)(a) - Exam retake policy:
+  // - 70% minimum passing score
+  // - 30-day wait after failing to retest
+  // - Max 1 retest within 1 year of original exam
+  // - Must repeat course after failing retest
   app.get("/api/courses/:courseId/final-exam", authMiddleware, async (req, res) => {
     try {
       const user = req.user as any;
@@ -1721,6 +1772,10 @@ export async function registerRoutes(
       if (!enrollment) {
         return res.status(404).json({ error: "Not enrolled in this course" });
       }
+      
+      // Get course to check state for regulatory requirements
+      const course = await storage.getCourse(courseId);
+      const isFloridaCourse = course?.state === "FL";
       
       // Get both exam forms
       const { formA, formB } = await storage.getFinalExamsByForm(courseId);
@@ -1732,13 +1787,51 @@ export async function registerRoutes(
       }
       
       const attempts = enrollment.finalExamAttempts || 0;
-      const maxAttempts = 3;
+      
+      // Florida-specific exam policy (Rule 61J2-3.008(5)(a))
+      // Max 2 attempts total (original + 1 retest)
+      // Non-Florida courses get 3 attempts
+      const maxAttempts = isFloridaCourse ? 2 : 3;
       const attemptsRemaining = Math.max(0, maxAttempts - attempts);
+      
+      // Florida 30-day wait period enforcement
+      let retestEligibleDate: Date | null = null;
+      let retestWaitMessage: string | null = null;
+      let canRetakeNow = true;
+      
+      if (isFloridaCourse && attempts > 0 && enrollment.finalExamPassed !== 1) {
+        // Check if student is within 30-day waiting period
+        const lastExamDate = enrollment.lastExamDate || enrollment.firstExamDate;
+        if (lastExamDate) {
+          retestEligibleDate = new Date(lastExamDate);
+          retestEligibleDate.setDate(retestEligibleDate.getDate() + 30);
+          
+          const now = new Date();
+          if (now < retestEligibleDate) {
+            canRetakeNow = false;
+            const daysRemaining = Math.ceil((retestEligibleDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            retestWaitMessage = `Per Florida Rule 61J2-3.008(5)(a), you must wait ${daysRemaining} more day(s) before retaking the examination. Eligible date: ${retestEligibleDate.toLocaleDateString()}`;
+          }
+        }
+        
+        // Check 1-year window from first exam
+        if (enrollment.firstExamDate) {
+          const firstExamDate = new Date(enrollment.firstExamDate);
+          const oneYearLater = new Date(firstExamDate);
+          oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+          
+          const now = new Date();
+          if (now > oneYearLater && attempts >= maxAttempts) {
+            retestWaitMessage = "Per Florida Rule 61J2-3.008(5)(a), you have exceeded the maximum retests within one year of your original examination. You must repeat the course to be eligible for another examination.";
+            canRetakeNow = false;
+          }
+        }
+      }
       
       // Determine which form to show based on attempt count
       // Attempt 1 (attempts=0): Form A
       // Attempt 2 (attempts=1): Form B
-      // Attempt 3 (attempts=2): Form A
+      // Attempt 3 (attempts=2): Form A (non-FL only)
       if (formA && formB) {
         if (attempts === 1) {
           currentExam = formB; // Switch to Form B for second attempt
@@ -1774,11 +1867,58 @@ export async function registerRoutes(
         attempts,
         maxAttempts,
         attemptsRemaining,
-        canRetake: attemptsRemaining > 0 && enrollment.finalExamPassed !== 1
+        canRetake: attemptsRemaining > 0 && enrollment.finalExamPassed !== 1 && canRetakeNow,
+        // Florida-specific fields
+        isFloridaCourse,
+        retestEligibleDate: retestEligibleDate?.toISOString(),
+        retestWaitMessage,
+        firstExamDate: enrollment.firstExamDate,
+        lastExamDate: enrollment.lastExamDate,
+        examPolicy: isFloridaCourse ? {
+          passingScore: 70,
+          retestWaitDays: 30,
+          maxRetestsPerYear: 1,
+          requiresCourseRepeatAfterMaxRetests: true,
+        } : null
       });
     } catch (err) {
       console.error("Error fetching final exam:", err);
       res.status(500).json({ error: "Failed to fetch final exam" });
+    }
+  });
+
+  // Acknowledge course policy disclosure (Florida Rule 61J2-3.008(5)(a))
+  app.post("/api/courses/:courseId/acknowledge-policy", authMiddleware, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const { courseId } = req.params;
+      
+      const enrollment = await storage.getEnrollment(user.id, courseId);
+      if (!enrollment) {
+        return res.status(404).json({ error: "Not enrolled in this course" });
+      }
+      
+      // Only allow acknowledgment once
+      if (enrollment.policyAcknowledgedAt) {
+        return res.json({ 
+          success: true, 
+          acknowledgedAt: enrollment.policyAcknowledgedAt,
+          message: "Policy already acknowledged" 
+        });
+      }
+      
+      const updated = await storage.updateEnrollmentProgress(enrollment.id, {
+        policyAcknowledgedAt: new Date()
+      });
+      
+      res.json({ 
+        success: true, 
+        acknowledgedAt: updated.policyAcknowledgedAt,
+        message: "Policy acknowledgment recorded" 
+      });
+    } catch (err) {
+      console.error("Error acknowledging policy:", err);
+      res.status(500).json({ error: "Failed to acknowledge policy" });
     }
   });
 

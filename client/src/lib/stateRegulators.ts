@@ -7,6 +7,14 @@ export type StateCode =
 
 export type ProfessionType = "real_estate" | "insurance" | "mortgage";
 
+export interface ExamPolicy {
+  passingScore: number; // Minimum passing percentage (e.g., 70)
+  retestWaitDays: number; // Days to wait before retesting after failure
+  maxRetestsPerYear: number; // Maximum retests within one year of original exam
+  requiresCourseRepeatAfterMaxRetests: boolean; // Must repeat course after max retests
+  hourEquivalency: string; // "50-minute distance learning hour = 50-minute classroom hour"
+}
+
 export interface RegulatoryAgency {
   id: string;
   name: string;
@@ -19,6 +27,7 @@ export interface RegulatoryAgency {
     renewalPeriod: string;
     mandatoryTopics?: { topic: string; hours: number }[];
   };
+  examPolicy?: ExamPolicy; // Florida Rule 61J2-3.008(5)(a) exam policies
   reportingMethod: "auto" | "manual" | "sircon";
   supportsUntimedExams: boolean;
 }
@@ -105,6 +114,13 @@ export const REGULATORY_AGENCIES: Record<string, RegulatoryAgency> = {
         { topic: "Core Law", hours: 3 },
         { topic: "Ethics", hours: 3 },
       ],
+    },
+    examPolicy: {
+      passingScore: 70,
+      retestWaitDays: 30,
+      maxRetestsPerYear: 1,
+      requiresCourseRepeatAfterMaxRetests: true,
+      hourEquivalency: "A 50-minute distance learning hour is equivalent to a 50-minute classroom hour",
     },
     reportingMethod: "auto",
     supportsUntimedExams: true,

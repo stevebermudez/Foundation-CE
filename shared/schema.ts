@@ -57,6 +57,10 @@ export const courses = pgTable("courses", {
   providerNumber: varchar("provider_number"), // DBPR provider/school number
   courseOfferingNumber: varchar("course_offering_number"), // DBPR course offering number
   instructorName: varchar("instructor_name"), // Course instructor (for regulatory reports)
+  instructorEmail: varchar("instructor_email"), // Instructor email for student questions
+  instructorPhone: varchar("instructor_phone"), // Instructor phone for student questions
+  instructorAddress: text("instructor_address"), // Instructor address per FL Rule 61J2-3.008(5)(b)
+  instructorAvailability: text("instructor_availability"), // Instructor availability hours
   expirationMonths: integer("expiration_months").default(6), // Months student has to complete course (default 6)
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -82,6 +86,12 @@ export const enrollments = pgTable("enrollments", {
   finalExamPassed: integer("final_exam_passed").default(0), // 1 if final exam passed
   finalExamScore: integer("final_exam_score"), // Final exam score percentage
   finalExamAttempts: integer("final_exam_attempts").default(0), // Number of final exam attempts
+  // Florida Rule 61J2-3.008(5)(a) exam retest tracking
+  firstExamDate: timestamp("first_exam_date"), // Date of original final exam attempt
+  lastExamDate: timestamp("last_exam_date"), // Date of most recent final exam attempt
+  retestEligibleDate: timestamp("retest_eligible_date"), // Date when student can retest (30 days after failure)
+  // Course policy disclosure acknowledgment
+  policyAcknowledgedAt: timestamp("policy_acknowledged_at"), // When student acknowledged course requirements
 });
 
 // Compliance requirements tracking
