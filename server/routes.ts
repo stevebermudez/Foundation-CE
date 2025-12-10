@@ -31,8 +31,13 @@ export async function registerRoutes(
   const publicPath = path.resolve(process.cwd(), "public");
   app.use("/course-viewer", express.static(publicPath));
   // Defer seeding operations to run asynchronously AFTER routes are registered
-  // IMPORTANT: Only run seeding in development - production uses catalog import
-  if (process.env.NODE_ENV !== 'production') {
+  // IMPORTANT: Only run seeding if explicitly enabled - production uses catalog import
+  // Check for explicit dev flag OR non-production with dev script running
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                       !process.env.npm_lifecycle_event?.includes('dev');
+  const allowDevSeeds = process.env.ALLOW_DEV_SEEDS === 'true';
+  
+  if (!isProduction || allowDevSeeds) {
     setImmediate(async () => {
       try {
         const db = (await import("./db")).db;
@@ -78,7 +83,9 @@ export async function registerRoutes(
       }
     });
   } else {
-    console.log("Production mode: skipping seed routines (using catalog import)");
+    console.log("🚫 Production mode detected: skipping ALL seed routines");
+    console.log(`   NODE_ENV=${process.env.NODE_ENV}, npm_lifecycle_event=${process.env.npm_lifecycle_event}`);
+    console.log("   Course content will be loaded from catalog snapshot only");
   }
   // Auth Routes - JWT or Passport
   const authMiddleware = async (req: any, res: any, next: any) => {
