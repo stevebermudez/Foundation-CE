@@ -67,6 +67,9 @@ export default function AdminEnrollmentsPage() {
   const [addEnrollmentDialogOpen, setAddEnrollmentDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [viewDetailsEnrollment, setViewDetailsEnrollment] = useState<any>(null);
+  const [manageProgressEnrollment, setManageProgressEnrollment] = useState<any>(null);
+  const [newProgress, setNewProgress] = useState("");
 
   const { data: enrollments = [], isLoading } = useQuery({
     queryKey: ["/api/admin/enrollments"],
@@ -129,6 +132,75 @@ export default function AdminEnrollmentsPage() {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
+
+  const updateProgressMutation = useMutation({
+    mutationFn: async ({ enrollmentId, progress, completed }: { enrollmentId: string; progress: number; completed?: boolean }) => {
+      const res = await fetch(`/api/admin/enrollments/${enrollmentId}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ progress, completed }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to update progress");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Progress updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
+      setManageProgressEnrollment(null);
+      setNewProgress("");
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const resetProgressMutation = useMutation({
+    mutationFn: async (enrollmentId: string) => {
+      const res = await fetch(`/api/admin/enrollments/${enrollmentId}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ progress: 0, completed: false, hoursCompleted: 0 }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to reset progress");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Progress reset successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const handleResetProgress = (enrollment: any) => {
+    if (window.confirm(`Reset all progress for this enrollment? This cannot be undone.`)) {
+      resetProgressMutation.mutate(enrollment.id);
+    }
+  };
+
+  const handleUpdateProgress = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manageProgressEnrollment) return;
+    const progress = parseInt(newProgress, 10);
+    if (isNaN(progress) || progress < 0 || progress > 100) {
+      toast({ title: "Error", description: "Progress must be between 0 and 100", variant: "destructive" });
+      return;
+    }
+    updateProgressMutation.mutate({
+      enrollmentId: manageProgressEnrollment.id,
+      progress,
+      completed: progress === 100,
+    });
+  };
 
   const getUser = (userId: string) => users.find((u: any) => u.id === userId);
   const getCourse = (courseId: string) => courses.find((c: any) => c.id === courseId);
@@ -370,15 +442,18 @@ export default function AdminEnrollmentsPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setViewDetailsEnrollment(enrollment)}>
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setManageProgressEnrollment(enrollment);
+                                setNewProgress(String(enrollment.progress || 0));
+                              }}>
                                 <Settings className="h-4 w-4 mr-2" />
                                 Manage Progress
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleResetProgress(enrollment)} className="text-destructive">
                                 <RefreshCcw className="h-4 w-4 mr-2" />
                                 Reset Progress
                               </DropdownMenuItem>
@@ -445,6 +520,122 @@ export default function AdminEnrollmentsPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Details Dialog */}
+      <Dialog open={!!viewDetailsEnrollment} onOpenChange={() => setViewDetailsEnrollment(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enrollment Details</DialogTitle>
+          </DialogHeader>
+          {viewDetailsEnrollment && (() => {
+            const user = getUser(viewDetailsEnrollment.userId);
+            const course = getCourse(viewDetailsEnrollment.courseId);
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Student</Label>
+                    <p className="font-medium">
+                      {user?.firstName && user?.lastName
+                        ? `${user.firstName} ${user.lastName}`
+                        : user?.email || "Unknown"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">{user?.email}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Course</Label>
+                    <p className="font-medium">{course?.title || "Unknown"}</p>
+                    <p className="text-sm text-muted-foreground">{course?.hoursRequired} hours</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Progress</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Progress value={viewDetailsEnrollment.progress || 0} className="h-2 flex-1" />
+                      <span className="text-sm font-medium">{viewDetailsEnrollment.progress || 0}%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Status</Label>
+                    <div className="mt-1">{getStatusBadge(viewDetailsEnrollment)}</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Hours Completed</Label>
+                    <p className="font-medium">{viewDetailsEnrollment.hoursCompleted || 0} / {course?.hoursRequired || 0}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground text-xs">Enrolled On</Label>
+                    <p className="font-medium">
+                      {viewDetailsEnrollment.enrolledAt 
+                        ? new Date(viewDetailsEnrollment.enrolledAt).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setViewDetailsEnrollment(null)}>
+                    Close
+                  </Button>
+                </DialogFooter>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Progress Dialog */}
+      <Dialog open={!!manageProgressEnrollment} onOpenChange={() => setManageProgressEnrollment(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Progress</DialogTitle>
+            <DialogDescription>
+              Manually adjust the student's course progress percentage.
+            </DialogDescription>
+          </DialogHeader>
+          {manageProgressEnrollment && (() => {
+            const user = getUser(manageProgressEnrollment.userId);
+            const course = getCourse(manageProgressEnrollment.courseId);
+            return (
+              <form onSubmit={handleUpdateProgress} className="space-y-4">
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="font-medium">
+                    {user?.firstName && user?.lastName
+                      ? `${user.firstName} ${user.lastName}`
+                      : user?.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground">{course?.title}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>New Progress (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={newProgress}
+                    onChange={(e) => setNewProgress(e.target.value)}
+                    placeholder="0-100"
+                    data-testid="input-new-progress"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Current: {manageProgressEnrollment.progress || 0}%. Setting to 100% will mark as completed.
+                  </p>
+                </div>
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setManageProgressEnrollment(null)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={updateProgressMutation.isPending} data-testid="button-update-progress">
+                    {updateProgressMutation.isPending ? "Updating..." : "Update Progress"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>

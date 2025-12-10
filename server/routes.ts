@@ -4306,6 +4306,34 @@ segment1.ts
     }
   });
 
+  // Admin update enrollment endpoint
+  app.patch("/api/admin/enrollments/:enrollmentId", isAdmin, async (req, res) => {
+    try {
+      const { enrollmentId } = req.params;
+      const { progress, completed, hoursCompleted } = req.body;
+      
+      // Get enrollment by ID
+      const allEnrollments = await storage.getEnrollments?.();
+      const enrollment = allEnrollments?.find((e: any) => e.id === enrollmentId);
+      
+      if (!enrollment) {
+        return res.status(404).json({ error: "Enrollment not found" });
+      }
+
+      // Update the enrollment
+      const updateData: any = {};
+      if (progress !== undefined) updateData.progress = progress;
+      if (completed !== undefined) updateData.completed = completed;
+      if (hoursCompleted !== undefined) updateData.hoursCompleted = hoursCompleted;
+      
+      const updated = await storage.updateEnrollmentProgress(enrollmentId, updateData);
+      res.json(updated);
+    } catch (err) {
+      console.error("Error updating enrollment:", err);
+      res.status(500).json({ error: "Failed to update enrollment" });
+    }
+  });
+
   // Course Management Admin Routes
   app.post("/api/admin/courses", isAdmin, async (req, res) => {
     try {
