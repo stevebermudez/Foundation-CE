@@ -190,6 +190,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import question banks
     console.log('❓ Importing question banks...');
+    const snapshotQuestionBankIds = snapshot.questionBanks.map(b => b.id);
+    
     for (const rawBank of snapshot.questionBanks) {
       const bank = parseTimestamps(rawBank);
       const existing = await db.select().from(questionBanks).where(eq(questionBanks.id, bank.id));
@@ -197,6 +199,22 @@ export async function importCourseCatalog(): Promise<{
         await db.update(questionBanks).set(bank).where(eq(questionBanks.id, bank.id));
       } else {
         await db.insert(questionBanks).values(bank);
+      }
+    }
+    
+    // Remove stale question banks (for snapshot courses only)
+    if (snapshotQuestionBankIds.length > 0 && snapshotCourseIds.length > 0) {
+      const staleBanks = await db.select({ id: questionBanks.id }).from(questionBanks)
+        .where(and(
+          inArray(questionBanks.courseId, snapshotCourseIds),
+          notInArray(questionBanks.id, snapshotQuestionBankIds)
+        ));
+      
+      if (staleBanks.length > 0) {
+        const staleBankIds = staleBanks.map(b => b.id);
+        await db.delete(bankQuestions).where(inArray(bankQuestions.bankId, staleBankIds));
+        await db.delete(questionBanks).where(inArray(questionBanks.id, staleBankIds));
+        console.log(`  🧹 Removed ${staleBanks.length} stale question banks`);
       }
     }
     console.log(`  ✓ ${snapshot.questionBanks.length} question banks`);
@@ -216,6 +234,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import practice exams
     console.log('📝 Importing practice exams...');
+    const snapshotPracticeExamIds = snapshot.practiceExams.map(e => e.id);
+    
     for (const rawExam of snapshot.practiceExams) {
       const exam = parseTimestamps(rawExam);
       const existing = await db.select().from(practiceExams).where(eq(practiceExams.id, exam.id));
@@ -223,6 +243,22 @@ export async function importCourseCatalog(): Promise<{
         await db.update(practiceExams).set(exam).where(eq(practiceExams.id, exam.id));
       } else {
         await db.insert(practiceExams).values(exam);
+      }
+    }
+    
+    // Remove stale practice exams (for snapshot courses only)
+    if (snapshotPracticeExamIds.length > 0 && snapshotCourseIds.length > 0) {
+      const staleExams = await db.select({ id: practiceExams.id }).from(practiceExams)
+        .where(and(
+          inArray(practiceExams.courseId, snapshotCourseIds),
+          notInArray(practiceExams.id, snapshotPracticeExamIds)
+        ));
+      
+      if (staleExams.length > 0) {
+        const staleExamIds = staleExams.map(e => e.id);
+        await db.delete(examQuestions).where(inArray(examQuestions.examId, staleExamIds));
+        await db.delete(practiceExams).where(inArray(practiceExams.id, staleExamIds));
+        console.log(`  🧹 Removed ${staleExams.length} stale practice exams`);
       }
     }
     console.log(`  ✓ ${snapshot.practiceExams.length} practice exams`);
