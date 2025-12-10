@@ -32,6 +32,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Search,
   Plus,
@@ -43,6 +57,12 @@ import {
   Users,
   UserPlus,
   Filter,
+  BookOpen,
+  Clock,
+  CheckCircle2,
+  RotateCcw,
+  Settings,
+  Award,
 } from "lucide-react";
 
 const getAuthHeaders = (): Record<string, string> => {
@@ -71,6 +91,14 @@ export default function AdminUsersPage() {
     lastName: "",
   });
 
+  // View Enrollments state
+  const [viewEnrollmentsDialogOpen, setViewEnrollmentsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [progressEditEnrollment, setProgressEditEnrollment] = useState<any>(null);
+  const [newProgress, setNewProgress] = useState<number>(0);
+  const [resetConfirmEnrollment, setResetConfirmEnrollment] = useState<any>(null);
+  const [markCompleteEnrollment, setMarkCompleteEnrollment] = useState<any>(null);
+
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["/api/admin/users"],
     queryFn: async () => {
@@ -92,6 +120,47 @@ export default function AdminUsersPage() {
       });
       if (!res.ok) return [];
       return res.json();
+    },
+  });
+
+  const { data: courses = [] } = useQuery({
+    queryKey: ["/api/courses"],
+    queryFn: async () => {
+      const res = await fetch("/api/courses", {
+        headers: getAuthHeaders(),
+        credentials: "include",
+      });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const updateProgressMutation = useMutation({
+    mutationFn: async ({ enrollmentId, progress, completed, hoursCompleted }: { 
+      enrollmentId: string; 
+      progress?: number; 
+      completed?: number;
+      hoursCompleted?: number;
+    }) => {
+      const res = await fetch(`/api/admin/enrollments/${enrollmentId}`, {
+        method: "PATCH",
+        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ progress, completed, hoursCompleted }),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to update progress");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Progress updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
+      setProgressEditEnrollment(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -156,6 +225,58 @@ export default function AdminUsersPage() {
 
   const getUserEnrollmentCount = (userId: string) => {
     return enrollments.filter((e: any) => e.userId === userId).length;
+  };
+
+  const getUserEnrollments = (userId: string) => {
+    return enrollments.filter((e: any) => e.userId === userId);
+  };
+
+  const getCourseById = (courseId: string) => {
+    return courses.find((c: any) => c.id === courseId);
+  };
+
+  const openViewEnrollments = (user: any) => {
+    setSelectedUser(user);
+    setViewEnrollmentsDialogOpen(true);
+  };
+
+  const handleUpdateProgress = (enrollment: any) => {
+    setProgressEditEnrollment(enrollment);
+    setNewProgress(enrollment.progress || 0);
+  };
+
+  const saveProgress = () => {
+    if (progressEditEnrollment) {
+      updateProgressMutation.mutate({
+        enrollmentId: progressEditEnrollment.id,
+        progress: newProgress,
+      });
+    }
+  };
+
+  const handleResetProgress = () => {
+    if (resetConfirmEnrollment) {
+      updateProgressMutation.mutate({
+        enrollmentId: resetConfirmEnrollment.id,
+        progress: 0,
+        completed: 0,
+        hoursCompleted: 0,
+      });
+      setResetConfirmEnrollment(null);
+    }
+  };
+
+  const handleMarkComplete = () => {
+    if (markCompleteEnrollment) {
+      const course = getCourseById(markCompleteEnrollment.courseId);
+      updateProgressMutation.mutate({
+        enrollmentId: markCompleteEnrollment.id,
+        progress: 100,
+        completed: 1,
+        hoursCompleted: course?.hoursRequired || 0,
+      });
+      setMarkCompleteEnrollment(null);
+    }
   };
 
   const openEditDialog = (user: any) => {
@@ -357,7 +478,7 @@ export default function AdminUsersPage() {
                               <Edit className="h-4 w-4 mr-2" />
                               Edit User
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openViewEnrollments(user)} data-testid={`button-view-enrollments-${user.id}`}>
                               <GraduationCap className="h-4 w-4 mr-2" />
                               View Enrollments
                             </DropdownMenuItem>
@@ -495,6 +616,223 @@ export default function AdminUsersPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* View Enrollments Dialog */}
+      <Dialog open={viewEnrollmentsDialogOpen} onOpenChange={setViewEnrollmentsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GraduationCap className="h-5 w-5" />
+              Enrollments for {selectedUser?.firstName} {selectedUser?.lastName}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedUser?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            {selectedUser && getUserEnrollments(selectedUser.id).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No enrollments found for this user.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {selectedUser && getUserEnrollments(selectedUser.id).map((enrollment: any) => {
+                  const course = getCourseById(enrollment.courseId);
+                  return (
+                    <Card key={enrollment.id} className="p-4">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">
+                              {course?.title || 'Unknown Course'}
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {course?.hoursRequired || 0} hours required
+                            </p>
+                          </div>
+                          <Badge variant={enrollment.completed ? "default" : "secondary"}>
+                            {enrollment.completed ? (
+                              <><CheckCircle2 className="h-3 w-3 mr-1" /> Complete</>
+                            ) : (
+                              <><Clock className="h-3 w-3 mr-1" /> In Progress</>
+                            )}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">Progress</span>
+                            <span className="font-medium">{enrollment.progress || 0}%</span>
+                          </div>
+                          <Progress value={enrollment.progress || 0} className="h-2" />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="text-muted-foreground">Hours Completed:</span>
+                            <span className="ml-1 font-medium">{enrollment.hoursCompleted || 0}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Enrolled:</span>
+                            <span className="ml-1 font-medium">
+                              {new Date(enrollment.enrolledAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {enrollment.expiresAt && (
+                            <div>
+                              <span className="text-muted-foreground">Expires:</span>
+                              <span className="ml-1 font-medium">
+                                {new Date(enrollment.expiresAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          )}
+                          {enrollment.finalExamPassed ? (
+                            <div>
+                              <span className="text-muted-foreground">Final Exam:</span>
+                              <span className="ml-1 font-medium text-green-600">
+                                Passed ({enrollment.finalExamScore}%)
+                              </span>
+                            </div>
+                          ) : enrollment.finalExamAttempts > 0 && (
+                            <div>
+                              <span className="text-muted-foreground">Final Exam:</span>
+                              <span className="ml-1 font-medium text-yellow-600">
+                                {enrollment.finalExamAttempts} attempt(s)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <Separator />
+                        
+                        <div className="flex flex-wrap gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleUpdateProgress(enrollment)}
+                            data-testid={`button-edit-progress-${enrollment.id}`}
+                          >
+                            <Settings className="h-3 w-3 mr-1" />
+                            Edit Progress
+                          </Button>
+                          {!enrollment.completed && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => setMarkCompleteEnrollment(enrollment)}
+                              data-testid={`button-mark-complete-${enrollment.id}`}
+                            >
+                              <Award className="h-3 w-3 mr-1" />
+                              Mark Complete
+                            </Button>
+                          )}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setResetConfirmEnrollment(enrollment)}
+                            data-testid={`button-reset-progress-${enrollment.id}`}
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Reset Progress
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewEnrollmentsDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Progress Dialog */}
+      <Dialog open={!!progressEditEnrollment} onOpenChange={() => setProgressEditEnrollment(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Progress</DialogTitle>
+            <DialogDescription>
+              Manually adjust the student's progress for this course.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Progress: {newProgress}%</Label>
+              <Slider
+                value={[newProgress]}
+                onValueChange={(value) => setNewProgress(value[0])}
+                max={100}
+                step={1}
+                className="w-full"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProgressEditEnrollment(null)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={saveProgress} 
+              disabled={updateProgressMutation.isPending}
+              data-testid="button-save-progress"
+            >
+              {updateProgressMutation.isPending ? "Saving..." : "Save Progress"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Progress Confirmation */}
+      <AlertDialog open={!!resetConfirmEnrollment} onOpenChange={() => setResetConfirmEnrollment(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Progress</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to reset this student's progress? This will set their progress to 0%, 
+              remove all completed hours, and mark the course as incomplete. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleResetProgress}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-reset"
+            >
+              Reset Progress
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Mark Complete Confirmation */}
+      <AlertDialog open={!!markCompleteEnrollment} onOpenChange={() => setMarkCompleteEnrollment(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark Course Complete</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to mark this course as complete? This will set progress to 100% 
+              and credit all required hours. Use this for manual completions or transfers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleMarkComplete}
+              data-testid="button-confirm-complete"
+            >
+              Mark Complete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
