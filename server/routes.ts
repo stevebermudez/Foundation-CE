@@ -2807,6 +2807,73 @@ segment1.ts
       const exam = await storage.getPracticeExam(req.params.examId);
       if (!exam) return res.status(404).json({ error: "Exam not found" });
 
+      // Check if this is a final exam for a Florida course - enforce 2-attempt limit
+      // Florida DBPR Rule 61J2-3.008(5)(a): 2 attempts max (Form A, then Form B)
+      const isFinalExam = exam.isFinalExam === 1 || exam.title?.toLowerCase().includes("final");
+      if (exam.courseId && isFinalExam) {
+        const course = await storage.getCourse(exam.courseId);
+        if (course?.state === "FL") {
+          // Get user's enrollment for this course
+          const enrollment = await storage.getEnrollment(user.id, course.id);
+          if (enrollment) {
+            // Get final exams ONLY for THIS course (scoped by course.id)
+            const allExamsForCourse = await storage.getPracticeExams(course.id);
+            const finalExamIdsForThisCourse = allExamsForCourse
+              .filter((e: any) => e.isFinalExam === 1 || e.title?.toLowerCase().includes("final"))
+              .map((e: any) => e.id);
+            
+            // Get all user attempts, then filter to ONLY this course's final exams
+            const userAttempts = await storage.getUserExamAttempts(user.id, "");
+            // Count ALL attempts for THIS course's final exams (including in-progress) to prevent bypass
+            const allFinalAttemptsForThisCourse = userAttempts.filter((a: any) => 
+              finalExamIdsForThisCourse.includes(a.examId)
+            );
+            
+            // Florida 2-attempt limit - count all attempts, not just completed
+            if (allFinalAttemptsForThisCourse.length >= 2) {
+              return res.status(403).json({ 
+                error: "Maximum exam attempts reached",
+                message: "You have exhausted your 2 final exam attempts (Form A and Form B). Per Florida DBPR Rule 61J2-3.008(5)(a), you must repeat the course to attempt the exam again.",
+                maxAttempts: 2,
+                attemptsMade: allFinalAttemptsForThisCourse.length,
+                requiresCourseRepeat: true
+              });
+            }
+            
+            // Check 30-day waiting period after first failed or incomplete attempt
+            // This includes completed failures AND any started attempts (to prevent exploit)
+            const completedAttempts = allFinalAttemptsForThisCourse.filter((a: any) => a.completedAt);
+            const failedAttempts = completedAttempts.filter((a: any) => a.passed !== 1);
+            
+            if (failedAttempts.length > 0) {
+              const lastFailedAttempt = failedAttempts.sort((a: any, b: any) => {
+                const dateA = b.completedAt ? new Date(b.completedAt).getTime() : 0;
+                const dateB = a.completedAt ? new Date(a.completedAt).getTime() : 0;
+                return dateA - dateB;
+              })[0];
+              
+              if (lastFailedAttempt.completedAt) {
+                const lastFailDate = new Date(lastFailedAttempt.completedAt);
+                const waitDays = 30;
+                const eligibleDate = new Date(lastFailDate);
+                eligibleDate.setDate(eligibleDate.getDate() + waitDays);
+                
+                if (new Date() < eligibleDate) {
+                  const daysRemaining = Math.ceil((eligibleDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                  return res.status(403).json({
+                    error: "Waiting period not elapsed",
+                    message: `Per Florida DBPR Rule 61J2-3.008(5)(a), you must wait 30 days after a failed exam attempt before retesting.`,
+                    daysRemaining,
+                    eligibleDate: eligibleDate.toISOString(),
+                    lastAttemptDate: lastFailDate.toISOString()
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+
       const attempt = await storage.createExamAttempt({
         userId: user.id,
         examId: req.params.examId,
