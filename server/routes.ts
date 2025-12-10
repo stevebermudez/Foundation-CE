@@ -2822,12 +2822,18 @@ segment1.ts
               .filter((e: any) => e.isFinalExam === 1 || e.title?.toLowerCase().includes("final"))
               .map((e: any) => e.id);
             
-            // Get all user attempts, then filter to ONLY this course's final exams
+            // Get all user attempts, then filter to THIS enrollment's final exams
             const userAttempts = await storage.getUserExamAttempts(user.id, "");
-            // Count ALL attempts for THIS course's final exams (including in-progress) to prevent bypass
-            const allFinalAttemptsForThisCourse = userAttempts.filter((a: any) => 
-              finalExamIdsForThisCourse.includes(a.examId)
-            );
+            // Filter by enrollmentId if available, otherwise fall back to course-scoped exam IDs
+            // This ensures course repeats get a fresh attempt window
+            const allFinalAttemptsForThisCourse = userAttempts.filter((a: any) => {
+              // Must be a final exam for this course
+              if (!finalExamIdsForThisCourse.includes(a.examId)) return false;
+              // If attempt has enrollmentId, it must match current enrollment
+              // (older attempts without enrollmentId still count for backward compatibility)
+              if (a.enrollmentId && a.enrollmentId !== enrollment.id) return false;
+              return true;
+            });
             
             // Florida 2-attempt limit - count all attempts, not just completed
             if (allFinalAttemptsForThisCourse.length >= 2) {
@@ -2874,9 +2880,19 @@ segment1.ts
         }
       }
 
+      // Get enrollment for this exam's course to link attempt to enrollment
+      let enrollmentIdForAttempt: string | null = null;
+      if (exam.courseId) {
+        const enrollment = await storage.getEnrollment(user.id, exam.courseId);
+        if (enrollment) {
+          enrollmentIdForAttempt = enrollment.id;
+        }
+      }
+
       const attempt = await storage.createExamAttempt({
         userId: user.id,
         examId: req.params.examId,
+        enrollmentId: enrollmentIdForAttempt,
         totalQuestions: exam.totalQuestions,
         startedAt: new Date(),
         completedAt: null,

@@ -335,6 +335,7 @@ export const examAttempts = pgTable("exam_attempts", {
     .default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   examId: varchar("exam_id").notNull(),
+  enrollmentId: varchar("enrollment_id"), // Links attempt to specific enrollment for Florida course repeat tracking
   startedAt: timestamp("started_at").defaultNow(),
   completedAt: timestamp("completed_at"),
   score: integer("score"),
