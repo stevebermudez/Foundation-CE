@@ -41,6 +41,19 @@ interface CatalogSnapshot {
   bundleCourses: any[];
 }
 
+// Convert ISO timestamp strings back to Date objects
+function parseTimestamps(obj: any): any {
+  if (!obj) return obj;
+  const timestampFields = ['createdAt', 'updatedAt', 'startedAt', 'completedAt', 'answeredAt'];
+  const result = { ...obj };
+  for (const field of timestampFields) {
+    if (result[field] && typeof result[field] === 'string') {
+      result[field] = new Date(result[field]);
+    }
+  }
+  return result;
+}
+
 export async function importCourseCatalog(): Promise<{
   success: boolean;
   coursesImported: number;
@@ -68,7 +81,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import courses
     console.log('📚 Importing courses...');
-    for (const course of snapshot.courses) {
+    for (const rawCourse of snapshot.courses) {
+      const course = parseTimestamps(rawCourse);
       const existing = await db.select().from(courses).where(eq(courses.id, course.id));
       if (existing.length > 0) {
         await db.update(courses).set(course).where(eq(courses.id, course.id));
@@ -80,7 +94,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import units
     console.log('📖 Importing units...');
-    for (const unit of snapshot.units) {
+    for (const rawUnit of snapshot.units) {
+      const unit = parseTimestamps(rawUnit);
       const existing = await db.select().from(units).where(eq(units.id, unit.id));
       if (existing.length > 0) {
         await db.update(units).set(unit).where(eq(units.id, unit.id));
@@ -92,7 +107,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import lessons
     console.log('📝 Importing lessons...');
-    for (const lesson of snapshot.lessons) {
+    for (const rawLesson of snapshot.lessons) {
+      const lesson = parseTimestamps(rawLesson);
       const existing = await db.select().from(lessons).where(eq(lessons.id, lesson.id));
       if (existing.length > 0) {
         await db.update(lessons).set(lesson).where(eq(lessons.id, lesson.id));
@@ -104,7 +120,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import question banks
     console.log('❓ Importing question banks...');
-    for (const bank of snapshot.questionBanks) {
+    for (const rawBank of snapshot.questionBanks) {
+      const bank = parseTimestamps(rawBank);
       const existing = await db.select().from(questionBanks).where(eq(questionBanks.id, bank.id));
       if (existing.length > 0) {
         await db.update(questionBanks).set(bank).where(eq(questionBanks.id, bank.id));
@@ -116,7 +133,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import bank questions
     console.log('📋 Importing bank questions...');
-    for (const question of snapshot.bankQuestions) {
+    for (const rawQuestion of snapshot.bankQuestions) {
+      const question = parseTimestamps(rawQuestion);
       const existing = await db.select().from(bankQuestions).where(eq(bankQuestions.id, question.id));
       if (existing.length > 0) {
         await db.update(bankQuestions).set(question).where(eq(bankQuestions.id, question.id));
@@ -128,7 +146,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import practice exams
     console.log('📝 Importing practice exams...');
-    for (const exam of snapshot.practiceExams) {
+    for (const rawExam of snapshot.practiceExams) {
+      const exam = parseTimestamps(rawExam);
       const existing = await db.select().from(practiceExams).where(eq(practiceExams.id, exam.id));
       if (existing.length > 0) {
         await db.update(practiceExams).set(exam).where(eq(practiceExams.id, exam.id));
@@ -140,7 +159,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import exam questions
     console.log('📋 Importing exam questions...');
-    for (const question of snapshot.examQuestions) {
+    for (const rawQuestion of snapshot.examQuestions) {
+      const question = parseTimestamps(rawQuestion);
       const existing = await db.select().from(examQuestions).where(eq(examQuestions.id, question.id));
       if (existing.length > 0) {
         await db.update(examQuestions).set(question).where(eq(examQuestions.id, question.id));
@@ -152,7 +172,8 @@ export async function importCourseCatalog(): Promise<{
     
     // Import bundles
     console.log('📦 Importing bundles...');
-    for (const bundle of snapshot.bundles) {
+    for (const rawBundle of snapshot.bundles) {
+      const bundle = parseTimestamps(rawBundle);
       const existing = await db.select().from(courseBundles).where(eq(courseBundles.id, bundle.id));
       if (existing.length > 0) {
         await db.update(courseBundles).set(bundle).where(eq(courseBundles.id, bundle.id));
