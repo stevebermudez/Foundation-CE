@@ -256,9 +256,9 @@ function SystemHealth({ healthStatus, loading }: { healthStatus: any; loading: b
   }
 
   const services = [
-    { name: "Database", status: healthStatus?.database || "unknown" },
-    { name: "Storage", status: healthStatus?.storage || "unknown" },
-    { name: "Auth", status: healthStatus?.auth || "unknown" },
+    { name: "Database", status: healthStatus?.database?.status || "unknown" },
+    { name: "API Server", status: healthStatus?.api?.status || "unknown" },
+    { name: "Payments", status: healthStatus?.payment?.status || "unknown" },
   ];
 
   return (
