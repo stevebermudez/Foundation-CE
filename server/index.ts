@@ -4,6 +4,7 @@ import { serveStatic } from "./static";
 import { setupAuth } from "./oauthAuth";
 import { createServer } from "http";
 import { ensureAdminExists } from "./seedAdmin";
+import { importCourseCatalog } from "./importCourseCatalog";
 
 const app = express();
 const httpServer = createServer(app);
@@ -109,6 +110,15 @@ app.use((req, res, next) => {
       setImmediate(async () => {
         try {
           await ensureAdminExists();
+          
+          // Auto-sync course catalog on startup (replaces manual sync button)
+          console.log("Auto-syncing course catalog...");
+          const result = await importCourseCatalog();
+          if (result.success) {
+            console.log(`Course catalog synced: ${result.coursesImported} courses, ${result.unitsImported} units, ${result.lessonsImported} lessons`);
+          } else {
+            console.error("Course catalog sync failed:", result.error);
+          }
         } catch (err) {
           console.error("Error in deferred initialization:", err);
         }

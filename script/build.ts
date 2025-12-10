@@ -1,6 +1,8 @@
 import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
-import { rm, readFile } from "fs/promises";
+import { rm, readFile, copyFile, mkdir } from "fs/promises";
+import { existsSync } from "fs";
+import { join } from "path";
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -60,6 +62,19 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+  // Copy catalog snapshot for production sync
+  console.log("copying catalog snapshot...");
+  const snapshotSrc = join(process.cwd(), "server", "catalogSnapshot.json");
+  const snapshotDest = join(process.cwd(), "dist", "server", "catalogSnapshot.json");
+  
+  if (existsSync(snapshotSrc)) {
+    await mkdir(join(process.cwd(), "dist", "server"), { recursive: true });
+    await copyFile(snapshotSrc, snapshotDest);
+    console.log("  catalog snapshot copied to dist/server/");
+  } else {
+    console.log("  WARNING: catalogSnapshot.json not found, skipping copy");
+  }
 }
 
 buildAll().catch((err) => {

@@ -628,41 +628,6 @@ export default function AdminDashboardPage() {
                   <Button 
                     className="w-full justify-start" 
                     variant="outline" 
-                    data-testid="button-sync-courses"
-                    onClick={async () => {
-                      try {
-                        const token = localStorage.getItem("adminToken");
-                        const res = await fetch("/api/admin/seed-courses", {
-                          method: "POST",
-                          headers: token ? { Authorization: `Bearer ${token}` } : {},
-                          credentials: 'include',
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                          alert(`Course Catalog Synced!\n\n` +
-                            `Courses: ${data.totalCourses}\n` +
-                            `Units: ${data.totalUnits}\n` +
-                            `Lessons: ${data.totalLessons}\n` +
-                            `Question Banks: ${data.totalQuestionBanks}\n` +
-                            `Bank Questions: ${data.totalBankQuestions}\n` +
-                            `Practice Exams: ${data.totalPracticeExams}\n` +
-                            `Exam Questions: ${data.totalExamQuestions}\n` +
-                            `Bundles: ${data.totalBundles}`);
-                          window.location.reload();
-                        } else {
-                          alert("Failed to sync courses: " + (data.error || "Unknown error"));
-                        }
-                      } catch (err) {
-                        alert("Error syncing courses");
-                      }
-                    }}
-                  >
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Sync Course Catalog
-                  </Button>
-                  <Button 
-                    className="w-full justify-start" 
-                    variant="outline" 
                     data-testid="button-view-reports"
                     onClick={() => setActiveTab("enrollments")}
                   >

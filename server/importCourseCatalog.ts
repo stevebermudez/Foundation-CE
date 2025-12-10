@@ -22,10 +22,25 @@ import {
 import { eq, and } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Resolve snapshot path - works in both development and production
+function getSnapshotPath(): string {
+  // Try multiple locations to find the snapshot file
+  const possiblePaths = [
+    path.resolve(process.cwd(), 'server', 'catalogSnapshot.json'),  // Source location
+    path.resolve(process.cwd(), 'dist', 'server', 'catalogSnapshot.json'),  // Dist location
+    path.resolve(process.cwd(), 'catalogSnapshot.json'),  // Root location
+  ];
+  
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      return p;
+    }
+  }
+  
+  // Return first option for error messaging
+  return possiblePaths[0];
+}
 
 interface CatalogSnapshot {
   version: string;
@@ -70,9 +85,11 @@ export async function importCourseCatalog(): Promise<{
     console.log('📥 Importing Course Catalog from snapshot...\n');
     
     // Load snapshot
-    const snapshotPath = path.join(__dirname, 'catalogSnapshot.json');
+    const snapshotPath = getSnapshotPath();
+    console.log(`📂 Looking for snapshot at: ${snapshotPath}`);
+    
     if (!fs.existsSync(snapshotPath)) {
-      throw new Error('catalogSnapshot.json not found. Run exportCourseCatalog.ts first.');
+      throw new Error(`catalogSnapshot.json not found at ${snapshotPath}. Ensure the file exists in the server directory.`);
     }
     
     const snapshot: CatalogSnapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf-8'));
