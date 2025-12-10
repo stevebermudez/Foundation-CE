@@ -97,6 +97,14 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Achievement/badge system with user awards
   - Notifications system with read status
   - Learning paths with course sequences
+- **Enterprise Content Pipeline**: Bulletproof catalog sync system with ACID transaction support:
+  - `server/catalogImportV2.ts` - Hardened import with pre-validation, post-verification, and audit logging
+  - `server/dbTransaction.ts` - WebSocket-based Neon connection for true PostgreSQL transactions
+  - Pre-import validation: Referential integrity checks, schema verification, checksum validation
+  - Post-import verification: Entity count comparison, reconciliation between quiz systems
+  - Automatic quiz reconciliation: Syncs `question_banks` + `bank_questions` with `practice_exams` + `exam_questions`
+  - Structured audit logs written to `/logs/import-*.json` for troubleshooting
+  - Dry-run mode for testing imports without database changes
 
 ## External Dependencies
 - **Database**: Neon (PostgreSQL)
