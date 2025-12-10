@@ -21,7 +21,7 @@ import {
   courseBundles,
   bundleCourses
 } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, like } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -63,6 +63,76 @@ export interface ExportResult {
   examQuestionsExported: number;
   bundlesExported: number;
   error?: string;
+}
+
+/**
+ * Auto-detect and fix final exam flags before export.
+ * This ensures exams with "Final Exam" in their title are properly flagged.
+ */
+async function validateAndFixFinalExams(): Promise<{ fixed: number; warnings: string[] }> {
+  const warnings: string[] = [];
+  let fixed = 0;
+  
+  // Find exams that look like final exams but aren't flagged
+  const allExams = await db.select().from(practiceExams);
+  
+  for (const exam of allExams) {
+    const titleLower = exam.title.toLowerCase();
+    const isFinalExamTitle = titleLower.includes('final exam');
+    
+    if (isFinalExamTitle && exam.isFinalExam !== 1) {
+      // Auto-fix: Mark as final exam
+      await db.update(practiceExams)
+        .set({ isFinalExam: 1 })
+        .where(eq(practiceExams.id, exam.id));
+      console.log(`  🔧 Auto-fixed: "${exam.title}" marked as final exam`);
+      fixed++;
+    }
+    
+    // Check for missing exam form on final exams
+    if (isFinalExamTitle && !exam.examForm) {
+      // Try to detect form from title
+      if (titleLower.includes('form a')) {
+        await db.update(practiceExams)
+          .set({ examForm: 'A' })
+          .where(eq(practiceExams.id, exam.id));
+        console.log(`  🔧 Auto-fixed: "${exam.title}" set to Form A`);
+        fixed++;
+      } else if (titleLower.includes('form b')) {
+        await db.update(practiceExams)
+          .set({ examForm: 'B' })
+          .where(eq(practiceExams.id, exam.id));
+        console.log(`  🔧 Auto-fixed: "${exam.title}" set to Form B`);
+        fixed++;
+      } else {
+        warnings.push(`Final exam "${exam.title}" is missing Form A/B designation`);
+      }
+    }
+  }
+  
+  // Validate pre-licensing courses have dual final exams
+  for (const courseId of COURSE_IDS) {
+    const course = await db.select().from(courses).where(eq(courses.id, courseId));
+    if (course.length === 0) continue;
+    
+    const courseData = course[0];
+    if (courseData.requirementCycleType === 'Pre-Licensing') {
+      const finals = await db.select().from(practiceExams)
+        .where(and(
+          eq(practiceExams.courseId, courseId),
+          eq(practiceExams.isFinalExam, 1)
+        ));
+      
+      const hasFormA = finals.some(e => e.examForm === 'A');
+      const hasFormB = finals.some(e => e.examForm === 'B');
+      
+      if (!hasFormA || !hasFormB) {
+        warnings.push(`Pre-licensing course "${courseData.title}" should have both Form A and Form B final exams (has: ${finals.map(e => `Form ${e.examForm || '?'}`).join(', ') || 'none'})`);
+      }
+    }
+  }
+  
+  return { fixed, warnings };
 }
 
 function getSnapshotPath(): string {
@@ -164,6 +234,16 @@ async function buildCatalogSnapshot(): Promise<CatalogSnapshot> {
  */
 export async function exportCourseCatalog(): Promise<ExportResult> {
   try {
+    // Validate and auto-fix final exam issues before export
+    const validation = await validateAndFixFinalExams();
+    if (validation.fixed > 0) {
+      console.log(`✅ Auto-fixed ${validation.fixed} final exam issue(s)`);
+    }
+    if (validation.warnings.length > 0) {
+      console.log(`⚠️ Export warnings:`);
+      validation.warnings.forEach(w => console.log(`   - ${w}`));
+    }
+    
     const snapshot = await buildCatalogSnapshot();
     
     const outputPath = getSnapshotPath();
@@ -200,6 +280,18 @@ export async function exportCourseCatalog(): Promise<ExportResult> {
 async function main() {
   try {
     console.log('📦 Exporting Course Catalog...\n');
+    
+    // Validate and auto-fix final exam issues before export
+    console.log('🔍 Validating final exams...');
+    const validation = await validateAndFixFinalExams();
+    if (validation.fixed > 0) {
+      console.log(`✅ Auto-fixed ${validation.fixed} final exam issue(s)`);
+    }
+    if (validation.warnings.length > 0) {
+      console.log(`⚠️ Validation warnings:`);
+      validation.warnings.forEach(w => console.log(`   - ${w}`));
+    }
+    console.log('');
     
     const snapshot = await buildCatalogSnapshot();
     
