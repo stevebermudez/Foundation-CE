@@ -328,6 +328,152 @@ export async function importCourseCatalog(): Promise<{
       console.log(`  ✓ No orphan enrollments found`);
     }
     
+    // Ensure all units have question banks (especially for CE courses)
+    console.log('🏦 Ensuring all units have question banks...');
+    const allUnits = await db.select().from(units);
+    const existingBanks = await db.select().from(questionBanks);
+    const existingBankUnitIds = new Set(
+      existingBanks.map(b => b.unitId).filter((id): id is string => id !== null)
+    );
+    
+    // Also get all practice exams to copy questions from
+    const allPracticeExams = await db.select().from(practiceExams);
+    const allExamQuestions = await db.select().from(examQuestions);
+    
+    let createdBanks = 0;
+    let copiedQuestions = 0;
+    
+    for (const unit of allUnits) {
+      // Skip if unit already has a question bank
+      if (existingBankUnitIds.has(unit.id)) continue;
+      
+      // Create a question bank for this unit
+      const bankId = crypto.randomUUID();
+      const bankTitle = `${unit.title} Quiz`;
+      
+      await db.insert(questionBanks).values({
+        id: bankId,
+        title: bankTitle,
+        courseId: unit.courseId,
+        unitId: unit.id,
+        bankType: 'unit_quiz',
+        questionsPerAttempt: 10,
+        passingScore: 70,
+        isActive: 1,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      createdBanks++;
+      
+      // Find a matching practice exam for this unit (by title match or course + unit combo)
+      const matchingExam = allPracticeExams.find(pe => {
+        // Match by course_id and title similarity
+        if (pe.courseId !== unit.courseId) return false;
+        const unitTitle = unit.title.toLowerCase();
+        const examTitle = pe.title.toLowerCase();
+        // Check if the unit title is contained in the exam title
+        return examTitle.includes(unitTitle.replace(/ quiz$/i, '')) ||
+               unitTitle.includes(examTitle.replace(/ quiz$/i, ''));
+      });
+      
+      if (matchingExam) {
+        // Copy questions from the practice exam to the new question bank
+        const questionsForExam = allExamQuestions.filter(eq => eq.examId === matchingExam.id);
+        
+        for (const eq of questionsForExam) {
+          await db.insert(bankQuestions).values({
+            bankId: bankId,
+            questionText: eq.questionText || '',
+            questionType: eq.questionType || 'multiple_choice',
+            options: eq.options || '[]',
+            correctOption: eq.correctAnswer ? parseInt(eq.correctAnswer) || 0 : 0,
+            explanation: eq.explanation || '',
+            difficulty: 'medium',
+            isActive: 1,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+          copiedQuestions++;
+        }
+      }
+    }
+    
+    if (createdBanks > 0) {
+      console.log(`  ✓ Created ${createdBanks} missing question banks for units`);
+      if (copiedQuestions > 0) {
+        console.log(`  ✓ Copied ${copiedQuestions} questions to new question banks`);
+      }
+    } else {
+      console.log(`  ✓ All units already have question banks`);
+    }
+    
+    // Also ensure ALL empty question banks (including newly created ones) get populated
+    console.log('📝 Populating empty question banks...');
+    let populatedBanks = 0;
+    let populatedQuestions = 0;
+    
+    // Re-fetch all question banks including newly created ones
+    const allBanks = await db.select().from(questionBanks);
+    
+    for (const bank of allBanks) {
+      // Check if bank has any questions
+      const existingBankQuestions = await db.select({ id: bankQuestions.id })
+        .from(bankQuestions)
+        .where(eq(bankQuestions.bankId, bank.id));
+      
+      if (existingBankQuestions.length > 0) continue;
+      
+      // Find matching practice exam by course_id and hour number
+      if (!bank.courseId) continue;
+      
+      const bankTitle = bank.title.toLowerCase();
+      const bankHourMatch = bankTitle.match(/hour (\d+)/);
+      
+      const matchingExam = allPracticeExams.find(pe => {
+        if (pe.courseId !== bank.courseId) return false;
+        if (pe.isFinalExam) return false; // Skip final exams
+        
+        const examTitle = pe.title.toLowerCase();
+        const examHourMatch = examTitle.match(/hour (\d+)/);
+        
+        // Match by hour number
+        if (bankHourMatch && examHourMatch && bankHourMatch[1] === examHourMatch[1]) {
+          return true;
+        }
+        return false;
+      });
+      
+      if (matchingExam) {
+        const questionsForExam = allExamQuestions.filter(eq => eq.examId === matchingExam.id);
+        
+        if (questionsForExam.length > 0) {
+          for (const eq of questionsForExam) {
+            await db.insert(bankQuestions).values({
+              bankId: bank.id,
+              questionText: eq.questionText || '',
+              questionType: eq.questionType || 'multiple_choice',
+              options: eq.options || '[]',
+              correctOption: eq.correctAnswer ? parseInt(eq.correctAnswer) || 0 : 0,
+              explanation: eq.explanation || '',
+              difficulty: 'medium',
+              isActive: 1,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+            populatedQuestions++;
+          }
+          populatedBanks++;
+          console.log(`    - Populated "${bank.title}" with ${questionsForExam.length} questions from "${matchingExam.title}"`);
+        }
+      }
+    }
+    
+    if (populatedBanks > 0) {
+      console.log(`  ✓ Populated ${populatedBanks} empty question banks with ${populatedQuestions} questions`);
+    } else {
+      console.log(`  ✓ No empty question banks need populating`);
+    }
+    
     console.log('\n✅ Import complete!');
     
     return {
