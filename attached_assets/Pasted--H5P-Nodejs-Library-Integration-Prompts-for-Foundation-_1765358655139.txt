@@ -1,0 +1,565 @@
+# H5P-Nodejs-Library Integration Prompts for Foundation CE
+
+Use these prompts in Replit AI, Claude, or ChatGPT to integrate H5P into your existing Express/React platform.
+
+---
+
+## PROMPT 1: Install Dependencies and Setup
+
+```
+I need to integrate H5P-Nodejs-library into my existing Express.js + React LMS platform called Foundation CE. 
+
+My current stack:
+- Express.js backend with Node.js
+- React + TypeScript frontend
+- PostgreSQL database with Drizzle ORM
+- Existing course structure: courses → units → lessons → question banks
+
+Install the required H5P packages and set up the basic folder structure:
+
+1. Install these npm packages:
+   - @lumieducation/h5p-server (core H5P server)
+   - @lumieducation/h5p-express (Express routes/controllers)
+   - @lumieducation/h5p-react (React components for frontend)
+
+2. Create the folder structure:
+   /h5p
+     /core (will contain H5P core files)
+     /editor (will contain H5P editor files)
+     /libraries (H5P content type libraries)
+     /content (user-created H5P content)
+     /temporary-files (upload temp storage)
+
+3. Download H5P core files:
+   - H5P Core: https://github.com/h5p/h5p-php-library/archive/refs/heads/master.zip
+   - H5P Editor: https://github.com/h5p/h5p-editor-php-library/archive/refs/heads/master.zip
+
+Show me the npm install commands and the script to download/extract the core files.
+```
+
+---
+
+## PROMPT 2: Create H5P Server Configuration
+
+```
+Create the H5P server configuration file for my Foundation CE Express app.
+
+Requirements:
+- File-based storage for development (can upgrade to S3 later)
+- Support for H5P Hub to download content types
+- User permissions based on role (admin can install libraries, students can only view)
+- Integration with my existing user authentication
+
+Create a file called /server/h5p/h5pConfig.ts with:
+
+1. H5P configuration object with these settings:
+   - baseUrl: '/h5p'
+   - libraryUrl: '/h5p/libraries'
+   - contentUrl: '/h5p/content'
+   - coreUrl: '/h5p/core'
+   - editorUrl: '/h5p/editor'
+   - enableLrsContentTypes: true (for xAPI)
+   - fetchingDisabled: false (allow downloading from H5P Hub)
+   - hubRegistrationEndpoint: 'https://api.h5p.org/v1/sites'
+   - hubContentTypesEndpoint: 'https://api.h5p.org/v1/content-types/'
+
+2. A function to create the H5PEditor instance with:
+   - FileContentStorage
+   - FileLibraryStorage  
+   - FileTemporaryFileStorage
+   - KeyValueStorage (can use simple JSON file or connect to PostgreSQL)
+
+3. A user object factory that converts my existing user to H5P user format:
+   interface IUser {
+     id: string;
+     name: string;
+     email: string;
+     type: 'local';
+     canInstallRecommended: boolean;
+     canUpdateAndInstallLibraries: boolean;
+     canCreateRestricted: boolean;
+   }
+
+Include TypeScript types and proper error handling.
+```
+
+---
+
+## PROMPT 3: Create Express Routes for H5P
+
+```
+Create the Express routes to handle all H5P AJAX requests for my Foundation CE platform.
+
+I need a file /server/routes/h5p.ts that:
+
+1. Uses @lumieducation/h5p-express to set up these route groups:
+   
+   a) Core H5P AJAX routes (POST /h5p/ajax/*):
+      - Content type cache
+      - Library installation
+      - Content hub operations
+   
+   b) Content routes:
+      - GET /h5p/content/:contentId - render player
+      - GET /h5p/edit/:contentId - render editor for existing content
+      - GET /h5p/new - render editor for new content
+      - POST /h5p/content - save new content
+      - PATCH /h5p/content/:contentId - update content
+      - DELETE /h5p/content/:contentId - delete content
+   
+   c) Static file routes:
+      - /h5p/core/* - serve H5P core JS/CSS
+      - /h5p/editor/* - serve H5P editor JS/CSS
+      - /h5p/libraries/* - serve installed libraries
+      - /h5p/content/:contentId/* - serve content files
+      - /h5p/temp-files/* - serve temporary uploads
+
+2. Add authentication middleware that:
+   - Allows public access to player routes
+   - Requires login for editor routes
+   - Requires admin role for library installation
+
+3. Create render functions that return JSON (for my React frontend) instead of HTML:
+   - getPlayerModel(contentId) - returns player integration data
+   - getEditorModel(contentId?) - returns editor integration data
+
+Include proper error handling and TypeScript types.
+```
+
+---
+
+## PROMPT 4: Create React Components for H5P
+
+```
+Create React components to display and edit H5P content in my Foundation CE platform.
+
+I need these components in /client/components/h5p/:
+
+1. H5PPlayer.tsx - Display H5P content
+   Props:
+   - contentId: string
+   - onXAPIStatement?: (statement: any) => void (for tracking)
+   - onInitialized?: () => void
+   - onError?: (error: Error) => void
+   
+   Features:
+   - Fetch player data from /h5p/content/:contentId/play
+   - Load H5P core scripts dynamically
+   - Initialize H5P.init() when ready
+   - Capture xAPI statements for progress tracking
+   - Responsive container that adapts to content size
+
+2. H5PEditor.tsx - Create/edit H5P content
+   Props:
+   - contentId?: string (undefined for new content)
+   - onSave: (contentId: string, metadata: any) => void
+   - onCancel: () => void
+   
+   Features:
+   - Fetch editor data from /h5p/edit/:contentId or /h5p/new
+   - Load H5P editor scripts dynamically
+   - Handle save with POST/PATCH to /h5p/content
+   - Show loading state while initializing
+
+3. H5PContentBrowser.tsx - Browse and select H5P content types
+   Features:
+   - Fetch available content types from H5P Hub
+   - Search/filter functionality
+   - Preview thumbnails
+   - "Install" button for content types not yet installed
+   - "Create" button to start new content
+
+4. useH5P.ts - Custom hook for H5P operations
+   Functions:
+   - loadPlayerConfig(contentId)
+   - loadEditorConfig(contentId?)
+   - saveContent(contentId, params)
+   - deleteContent(contentId)
+   - getContentTypes()
+   - installContentType(machineName)
+
+Use my existing shadcn/ui components for buttons, cards, and loading states.
+Include TypeScript types and proper cleanup on unmount.
+```
+
+---
+
+## PROMPT 5: Integrate H5P with Existing Course Structure
+
+```
+Integrate H5P content into my existing Foundation CE course structure.
+
+Current database schema (Drizzle ORM):
+- courses (id, title, description, hours, price, state)
+- units (id, courseId, title, position)
+- lessons (id, unitId, title, position, content)
+- content_blocks (id, lessonId, blockType, content, position)
+
+I need to:
+
+1. Add H5P as a new block type in content_blocks:
+   - blockType: 'h5p'
+   - content: JSON with { h5pContentId: string, metadata: object }
+
+2. Create a migration to add:
+   - h5p_content table to store H5P metadata locally:
+     - id (uuid)
+     - h5pContentId (string - the H5P internal ID)
+     - title (string)
+     - contentType (string - e.g., 'H5P.QuestionSet')
+     - createdBy (userId)
+     - createdAt, updatedAt
+   
+   - h5p_user_data table for xAPI progress:
+     - id
+     - h5pContentId
+     - userId
+     - dataType (string - 'state' or 'result')
+     - data (jsonb)
+     - createdAt, updatedAt
+
+3. Create API endpoints:
+   - POST /api/lessons/:lessonId/h5p - add H5P block to lesson
+   - GET /api/h5p/:h5pContentId/progress - get user's progress
+   - POST /api/h5p/:h5pContentId/xapi - save xAPI statement
+
+4. Update the lesson player to render H5P blocks using H5PPlayer component
+
+5. Create admin UI to:
+   - Browse existing H5P content
+   - Create new H5P content and add to lesson
+   - View analytics from xAPI statements
+
+Show me the Drizzle schema, migrations, and API routes.
+```
+
+---
+
+## PROMPT 6: Handle xAPI Statements for Compliance Tracking
+
+```
+Set up xAPI statement handling for Florida DBPR compliance tracking in Foundation CE.
+
+Requirements:
+1. Capture these xAPI statements from H5P content:
+   - completed - when user finishes content
+   - answered - when user submits quiz answer
+   - scored - when quiz is graded
+   - progressed - progress percentage updates
+   - interacted - clicks, video plays, etc.
+
+2. Create an xAPI statement processor that:
+   - Validates incoming statements
+   - Extracts relevant data (score, duration, success)
+   - Maps H5P contentId to our lesson/unit/course structure
+   - Updates enrollment progress in our database
+   - Calculates cumulative time spent (required for CE compliance)
+
+3. Store statements in a format that supports:
+   - Florida DBPR electronic reporting
+   - Real-time progress dashboards
+   - Completion certificates with time tracking
+
+4. Create these functions:
+   - processXAPIStatement(userId, statement)
+   - calculateCourseProgress(enrollmentId)
+   - generateComplianceReport(userId, courseId)
+   - getCourseTimeSpent(enrollmentId) - total minutes
+
+5. Add webhook/event for:
+   - When lesson is completed (all H5P content finished)
+   - When unit is completed
+   - When course is completed (trigger certificate)
+
+Create the xAPI processor, database updates, and progress calculation logic.
+```
+
+---
+
+## PROMPT 7: Create Quiz/Assessment Content Types
+
+```
+Set up H5P quiz content types for my real estate continuing education courses.
+
+I need to:
+
+1. Install these H5P content types via the Hub:
+   - H5P.QuestionSet (multiple question quiz)
+   - H5P.SingleChoiceSet (single choice quiz)
+   - H5P.MultiChoice (multiple choice question)
+   - H5P.TrueFalse (true/false questions)
+   - H5P.DragText (drag words into blanks)
+   - H5P.Blanks (fill in the blanks)
+   - H5P.InteractiveVideo (video with embedded questions)
+   - H5P.CoursePresentation (slides with embedded content)
+
+2. Create a script to bulk-install content types:
+   - Fetch list from H5P Hub
+   - Install each required type
+   - Verify installation
+
+3. Create a question bank importer that:
+   - Takes my existing question_banks and bank_questions data
+   - Converts to H5P QuestionSet format
+   - Creates H5P content programmatically
+   
+   My current question format:
+   {
+     question: string,
+     questionType: 'multiple_choice' | 'true_false',
+     options: { text: string, isCorrect: boolean }[],
+     explanation: string,
+     pageReference: string
+   }
+
+4. Create exam settings that support:
+   - Timed exams (server-side timer validation)
+   - Randomized question order
+   - Question pooling (select N from pool of M)
+   - Passing score threshold
+   - Form A/B variants (dual exam requirement)
+
+Show me the content type installation script and question bank converter.
+```
+
+---
+
+## PROMPT 8: Production Setup with S3 Storage
+
+```
+Configure H5P for production with S3 storage in my Foundation CE platform.
+
+Requirements:
+
+1. Replace file-based storage with S3:
+   - Use @lumieducation/h5p-mongos3 package
+   - Configure S3ContentStorage for content
+   - Configure S3TemporaryFileStorage for uploads
+   - Keep libraries in S3 or local (your recommendation)
+
+2. S3 bucket structure:
+   /h5p-content/{contentId}/
+   /h5p-libraries/{machineName}-{version}/
+   /h5p-temp/{userId}/{timestamp}/
+
+3. CloudFront CDN for serving content:
+   - Signed URLs for protected content
+   - Cache headers for libraries (long cache)
+   - No cache for user-specific content
+
+4. Environment variables needed:
+   - AWS_ACCESS_KEY_ID
+   - AWS_SECRET_ACCESS_KEY
+   - AWS_REGION
+   - H5P_S3_BUCKET
+   - CLOUDFRONT_DOMAIN
+   - CLOUDFRONT_KEY_PAIR_ID
+   - CLOUDFRONT_PRIVATE_KEY
+
+5. Redis for:
+   - H5P locks (prevent concurrent edits)
+   - Content type cache
+   - Use @lumieducation/h5p-redis-lock
+
+6. Handle multi-server deployment:
+   - Shared storage (S3)
+   - Shared cache (Redis)
+   - Proper lock management
+
+Show me the production configuration with S3, CloudFront, and Redis.
+```
+
+---
+
+## PROMPT 9: Admin Panel for Content Management
+
+```
+Create an admin panel for managing H5P content in Foundation CE.
+
+Build these pages using my existing React + shadcn/ui setup:
+
+1. /admin/h5p/content - Content List Page
+   Features:
+   - DataTable with columns: Title, Type, Created, Author, Used In, Actions
+   - Filter by content type
+   - Search by title
+   - Bulk delete
+   - "Create New" button
+   - Click to edit
+
+2. /admin/h5p/content/new - Create Content Page
+   Features:
+   - Content type selector (grid of available types)
+   - H5P editor embedded
+   - Metadata form (title, description, tags)
+   - "Save and Add to Lesson" button
+   - "Save as Template" option
+
+3. /admin/h5p/content/:id/edit - Edit Content Page
+   Features:
+   - H5P editor with existing content loaded
+   - Update metadata
+   - View usage (which lessons use this content)
+   - Preview button
+   - Version history (if possible)
+
+4. /admin/h5p/libraries - Library Management
+   Features:
+   - List installed libraries with versions
+   - "Check for Updates" button
+   - Install from Hub
+   - Upload custom library (.h5p file)
+   - Delete unused libraries
+
+5. /admin/h5p/analytics - Content Analytics
+   Features:
+   - Most used content
+   - Average scores per content
+   - Completion rates
+   - Time spent distribution
+   - Filter by date range, course, content type
+
+Create the React components, API calls, and routing.
+```
+
+---
+
+## PROMPT 10: Testing and Validation
+
+```
+Create tests and validation for the H5P integration in Foundation CE.
+
+1. Backend tests (Jest):
+   - H5P configuration loads correctly
+   - Content CRUD operations work
+   - xAPI statements are processed correctly
+   - Progress calculation is accurate
+   - Permissions are enforced
+
+2. Frontend tests (React Testing Library):
+   - H5PPlayer renders and initializes
+   - H5PEditor loads and saves
+   - xAPI events are captured
+   - Error states display correctly
+
+3. Integration tests:
+   - Full flow: Create content → Add to lesson → Student views → Progress tracked
+   - Quiz flow: Answer questions → Score calculated → Progress updated
+   - Compliance: Time tracking accurate for DBPR reporting
+
+4. Create validation scripts:
+   - Verify all required content types installed
+   - Check S3 permissions and connectivity
+   - Validate xAPI endpoint is receiving statements
+   - Test CDN serving content correctly
+
+5. Create health check endpoint /api/h5p/health that checks:
+   - H5P server initialized
+   - Storage accessible
+   - Content types available
+   - Database connection
+
+Show me the test files and validation scripts.
+```
+
+---
+
+## Quick Start Commands
+
+Run these in your Replit shell:
+
+```bash
+# 1. Install H5P packages
+npm install @lumieducation/h5p-server @lumieducation/h5p-express @lumieducation/h5p-react
+
+# 2. Create directories
+mkdir -p h5p/core h5p/editor h5p/libraries h5p/content h5p/temporary-files
+
+# 3. Download H5P core (run this script)
+curl -L https://github.com/h5p/h5p-php-library/archive/refs/heads/master.zip -o h5p-core.zip
+unzip h5p-core.zip -d h5p/core
+mv h5p/core/h5p-php-library-master/* h5p/core/
+rm -rf h5p/core/h5p-php-library-master h5p-core.zip
+
+# 4. Download H5P editor
+curl -L https://github.com/h5p/h5p-editor-php-library/archive/refs/heads/master.zip -o h5p-editor.zip
+unzip h5p-editor.zip -d h5p/editor
+mv h5p/editor/h5p-editor-php-library-master/* h5p/editor/
+rm -rf h5p/editor/h5p-editor-php-library-master h5p-editor.zip
+
+# 5. Verify installation
+ls h5p/core/js/h5p.js && echo "Core installed ✓"
+ls h5p/editor/scripts/h5peditor.js && echo "Editor installed ✓"
+```
+
+---
+
+## File Structure After Integration
+
+```
+/foundation-ce
+├── /server
+│   ├── /h5p
+│   │   ├── h5pConfig.ts         # H5P configuration
+│   │   ├── h5pEditor.ts         # H5PEditor instance factory
+│   │   ├── h5pUser.ts           # User adapter
+│   │   └── xapiProcessor.ts     # xAPI statement handler
+│   ├── /routes
+│   │   └── h5p.ts               # Express routes for H5P
+│   └── index.ts                 # Add H5P routes here
+├── /client
+│   ├── /components
+│   │   └── /h5p
+│   │       ├── H5PPlayer.tsx
+│   │       ├── H5PEditor.tsx
+│   │       ├── H5PContentBrowser.tsx
+│   │       └── useH5P.ts
+│   └── /pages
+│       └── /admin
+│           └── /h5p
+│               ├── content.tsx
+│               ├── libraries.tsx
+│               └── analytics.tsx
+├── /h5p
+│   ├── /core                    # H5P core JS/CSS
+│   ├── /editor                  # H5P editor JS/CSS
+│   ├── /libraries               # Installed content types
+│   ├── /content                 # User-created content
+│   └── /temporary-files         # Upload temp storage
+└── /drizzle
+    └── /migrations
+        └── add-h5p-tables.ts    # Database migration
+```
+
+---
+
+## Troubleshooting Prompts
+
+If something doesn't work, use these follow-up prompts:
+
+**"H5P editor shows blank white screen"**
+```
+The H5P editor is showing a blank white screen. Debug this by:
+1. Check browser console for JavaScript errors
+2. Verify H5P core/editor files are being served at correct URLs
+3. Check that H5PIntegration object is being passed to the page
+4. Verify content type libraries are installed
+```
+
+**"Content types not installing from Hub"**
+```
+H5P content types are not installing from the Hub. Check:
+1. Network requests to api.h5p.org
+2. Write permissions to h5p/libraries folder
+3. Hub registration status
+4. Proxy/firewall blocking H5P.org
+```
+
+**"xAPI statements not being captured"**
+```
+xAPI statements are not being captured from H5P content. Debug:
+1. Add console.log in H5P.externalDispatcher listener
+2. Check that H5P.init() is being called
+3. Verify the content type supports xAPI
+4. Check network tab for POST to xAPI endpoint
+```
