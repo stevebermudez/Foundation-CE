@@ -1607,7 +1607,10 @@ export const contentBlockTypeSchema = z.enum([
   "flashcard",      // Flip cards for memorization
   "accordion",      // Collapsible sections
   "tabs",           // Tabbed content panels
-  "quiz",           // Inline quiz question
+  "quiz",           // Inline quiz question (legacy)
+  "inline_quiz",    // Auto-graded embedded question
+  "fill_blank",     // Fill-in-the-blank exercise
+  "matching",       // Drag-and-drop matching activity
   "divider",        // Visual separator
   "callout",        // Info/warning/success boxes
   "code",           // Code blocks with syntax highlighting
@@ -1676,6 +1679,56 @@ export const embedContentSchema = z.object({
   width: z.string().optional(),
   height: z.string().optional(),
   title: z.string().optional(),
+});
+
+// Inline Quiz content structure - embedded questions within lessons
+export const inlineQuizContentSchema = z.object({
+  question: z.string(),
+  questionType: z.enum(["multiple_choice", "true_false"]),
+  options: z.array(z.string()),
+  correctOptionIndex: z.number(),
+  explanation: z.string().optional(),
+  feedback: z.object({
+    correct: z.string().optional(),
+    incorrect: z.string().optional(),
+  }).optional(),
+  showExplanation: z.boolean().optional(),
+  allowRetry: z.boolean().optional(),
+});
+
+// Fill-in-the-blank content structure
+export const fillBlankContentSchema = z.object({
+  text: z.string(), // Text with {{blank}} placeholders
+  blanks: z.array(z.object({
+    id: z.string(),
+    answer: z.string(),
+    acceptableAnswers: z.array(z.string()).optional(), // Alternative correct answers
+    caseSensitive: z.boolean().optional(),
+    hint: z.string().optional(),
+  })),
+  showHints: z.boolean().optional(),
+  allowRetry: z.boolean().optional(),
+  feedback: z.object({
+    correct: z.string().optional(),
+    incorrect: z.string().optional(),
+  }).optional(),
+});
+
+// Matching/drag-drop content structure
+export const matchingContentSchema = z.object({
+  title: z.string().optional(),
+  instructions: z.string().optional(),
+  pairs: z.array(z.object({
+    id: z.string(),
+    left: z.string(), // Term/question
+    right: z.string(), // Definition/answer
+  })),
+  shufflePairs: z.boolean().optional(),
+  allowRetry: z.boolean().optional(),
+  feedback: z.object({
+    correct: z.string().optional(),
+    incorrect: z.string().optional(),
+  }).optional(),
 });
 
 // Course Templates - Reusable course structures

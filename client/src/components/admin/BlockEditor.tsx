@@ -61,6 +61,9 @@ const BLOCK_TYPES = [
   { type: "image", label: "Image", icon: Image, description: "Single image with caption" },
   { type: "video", label: "Video", icon: Video, description: "YouTube, Vimeo, or direct URL" },
   { type: "flashcard", label: "Flashcards", icon: CreditCard, description: "Interactive flip cards" },
+  { type: "inline_quiz", label: "Inline Quiz", icon: Check, description: "Auto-graded question" },
+  { type: "fill_blank", label: "Fill in Blank", icon: Type, description: "Fill-in-the-blank exercise" },
+  { type: "matching", label: "Matching", icon: Layers, description: "Drag-and-drop matching" },
   { type: "accordion", label: "Accordion", icon: ChevronDown, description: "Collapsible sections" },
   { type: "tabs", label: "Tabs", icon: LayoutList, description: "Tabbed content panels" },
   { type: "callout", label: "Callout", icon: AlertCircle, description: "Info/warning/tip boxes" },
@@ -470,6 +473,44 @@ function BlockPreview({ blockType, content }: { blockType: string; content: any 
           </span>
         </div>
       );
+    case "inline_quiz":
+      return (
+        <div className="flex items-center gap-2">
+          <Check className="w-8 h-8 text-green-600" />
+          <div>
+            <span className="text-sm font-medium">
+              {content.questionType === "true_false" ? "True/False" : "Multiple Choice"}
+            </span>
+            <p className="text-xs text-muted-foreground line-clamp-1">
+              {content.question || "Click to add question..."}
+            </p>
+          </div>
+        </div>
+      );
+    case "fill_blank":
+      return (
+        <div className="flex items-center gap-2">
+          <Type className="w-8 h-8 text-blue-600" />
+          <div>
+            <span className="text-sm font-medium">Fill in the Blank</span>
+            <p className="text-xs text-muted-foreground line-clamp-1">
+              {content.blanks?.length || 0} blank(s)
+            </p>
+          </div>
+        </div>
+      );
+    case "matching":
+      return (
+        <div className="flex items-center gap-2">
+          <Layers className="w-8 h-8 text-purple-600" />
+          <div>
+            <span className="text-sm font-medium">Matching Activity</span>
+            <p className="text-xs text-muted-foreground">
+              {content.pairs?.length || 0} pair(s) to match
+            </p>
+          </div>
+        </div>
+      );
     default:
       return <p className="text-sm text-muted-foreground">Unknown block type</p>;
   }
@@ -779,6 +820,29 @@ function EditBlockDialog({ block, onSave, onClose }: { block: ContentBlock; onSa
               </div>
             </>
           )}
+
+          {block.blockType === "inline_quiz" && (
+            <InlineQuizEditor 
+              data={formData} 
+              onChange={(data) => setFormData(data)} 
+            />
+          )}
+
+          {block.blockType === "fill_blank" && (
+            <FillBlankEditor 
+              data={formData} 
+              onChange={(data) => setFormData(data)} 
+            />
+          )}
+
+          {block.blockType === "matching" && (
+            <MatchingEditor 
+              pairs={formData.pairs || []} 
+              onChange={(pairs) => updateFormData("pairs", pairs)}
+              title={formData.title || ""}
+              onTitleChange={(title) => updateFormData("title", title)}
+            />
+          )}
         </div>
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={onClose} data-testid="button-cancel-edit">
@@ -972,6 +1036,302 @@ function TabsEditor({ tabs, onChange }: { tabs: any[]; onChange: (tabs: any[]) =
           </div>
         </Card>
       ))}
+    </div>
+  );
+}
+
+function InlineQuizEditor({ data, onChange }: { data: any; onChange: (data: any) => void }) {
+  const options = data.options || ["", "", "", ""];
+  
+  const updateField = (field: string, value: any) => {
+    onChange({ ...data, [field]: value });
+  };
+
+  const updateOption = (index: number, value: string) => {
+    const newOptions = [...options];
+    newOptions[index] = value;
+    onChange({ ...data, options: newOptions });
+  };
+
+  const addOption = () => {
+    onChange({ ...data, options: [...options, ""] });
+  };
+
+  const removeOption = (index: number) => {
+    const newOptions = options.filter((_: any, i: number) => i !== index);
+    const correctIdx = data.correctOptionIndex;
+    onChange({ 
+      ...data, 
+      options: newOptions,
+      correctOptionIndex: correctIdx >= index ? Math.max(0, correctIdx - 1) : correctIdx
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label>Question Type</Label>
+        <Select 
+          value={data.questionType || "multiple_choice"} 
+          onValueChange={(v) => updateField("questionType", v)}
+        >
+          <SelectTrigger data-testid="select-quiz-type">
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+            <SelectItem value="true_false">True/False</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Question</Label>
+        <Textarea
+          value={data.question || ""}
+          onChange={(e) => updateField("question", e.target.value)}
+          rows={3}
+          placeholder="Enter the question..."
+          data-testid="input-quiz-question"
+        />
+      </div>
+
+      {data.questionType === "true_false" ? (
+        <div>
+          <Label>Correct Answer</Label>
+          <Select 
+            value={String(data.correctOptionIndex || 0)} 
+            onValueChange={(v) => updateField("correctOptionIndex", parseInt(v))}
+          >
+            <SelectTrigger data-testid="select-correct-answer">
+              <SelectValue placeholder="Select correct answer" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0">True</SelectItem>
+              <SelectItem value="1">False</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label>Answer Options</Label>
+            <Button size="sm" onClick={addOption} data-testid="button-add-option">
+              <Plus className="w-4 h-4 mr-1" /> Add Option
+            </Button>
+          </div>
+          {options.map((option: string, index: number) => (
+            <div key={index} className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="correctOption"
+                checked={data.correctOptionIndex === index}
+                onChange={() => updateField("correctOptionIndex", index)}
+                className="w-4 h-4"
+                data-testid={`radio-correct-${index}`}
+              />
+              <Input
+                value={option}
+                onChange={(e) => updateOption(index, e.target.value)}
+                placeholder={`Option ${index + 1}...`}
+                className="flex-1"
+                data-testid={`input-option-${index}`}
+              />
+              {options.length > 2 && (
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  onClick={() => removeOption(index)}
+                  data-testid={`button-remove-option-${index}`}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <p className="text-xs text-muted-foreground">Select the radio button next to the correct answer</p>
+        </div>
+      )}
+
+      <div>
+        <Label>Explanation (shown after answer)</Label>
+        <Textarea
+          value={data.explanation || ""}
+          onChange={(e) => updateField("explanation", e.target.value)}
+          rows={2}
+          placeholder="Explain why this is the correct answer..."
+          data-testid="input-quiz-explanation"
+        />
+      </div>
+    </div>
+  );
+}
+
+function FillBlankEditor({ data, onChange }: { data: any; onChange: (data: any) => void }) {
+  const blanks = data.blanks || [];
+
+  const updateField = (field: string, value: any) => {
+    onChange({ ...data, [field]: value });
+  };
+
+  const addBlank = () => {
+    const newBlank = { id: `blank-${Date.now()}`, answer: "", hint: "" };
+    onChange({ ...data, blanks: [...blanks, newBlank] });
+  };
+
+  const updateBlank = (index: number, field: string, value: any) => {
+    const newBlanks = [...blanks];
+    newBlanks[index] = { ...newBlanks[index], [field]: value };
+    onChange({ ...data, blanks: newBlanks });
+  };
+
+  const removeBlank = (index: number) => {
+    onChange({ ...data, blanks: blanks.filter((_: any, i: number) => i !== index) });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label>Text with Blanks</Label>
+        <Textarea
+          value={data.text || ""}
+          onChange={(e) => updateField("text", e.target.value)}
+          rows={4}
+          placeholder="Enter text with {{blank}} placeholders. Example: The capital of Florida is {{blank}}."
+          data-testid="input-fill-blank-text"
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Use {"{{blank}}"} to mark where blanks should appear
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Blank Answers ({blanks.length})</Label>
+          <Button size="sm" onClick={addBlank} data-testid="button-add-blank">
+            <Plus className="w-4 h-4 mr-1" /> Add Blank
+          </Button>
+        </div>
+        {blanks.map((blank: any, index: number) => (
+          <Card key={blank.id || index} className="p-3">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <span className="text-sm font-medium">Blank {index + 1}</span>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => removeBlank(index)}
+                data-testid={`button-remove-blank-${index}`}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <div>
+                <Label className="text-xs">Correct Answer</Label>
+                <Input
+                  value={blank.answer || ""}
+                  onChange={(e) => updateBlank(index, "answer", e.target.value)}
+                  placeholder="Correct answer..."
+                  data-testid={`input-blank-answer-${index}`}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Hint (optional)</Label>
+                <Input
+                  value={blank.hint || ""}
+                  onChange={(e) => updateBlank(index, "hint", e.target.value)}
+                  placeholder="Hint for learners..."
+                  data-testid={`input-blank-hint-${index}`}
+                />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MatchingEditor({ 
+  pairs, 
+  onChange, 
+  title, 
+  onTitleChange 
+}: { 
+  pairs: any[]; 
+  onChange: (pairs: any[]) => void;
+  title: string;
+  onTitleChange: (title: string) => void;
+}) {
+  const addPair = () => {
+    onChange([...pairs, { id: `pair-${Date.now()}`, left: "", right: "" }]);
+  };
+
+  const updatePair = (index: number, field: string, value: string) => {
+    const newPairs = [...pairs];
+    newPairs[index] = { ...newPairs[index], [field]: value };
+    onChange(newPairs);
+  };
+
+  const removePair = (index: number) => {
+    onChange(pairs.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label>Activity Title</Label>
+        <Input
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          placeholder="Match the terms with definitions..."
+          data-testid="input-matching-title"
+        />
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Matching Pairs ({pairs.length})</Label>
+          <Button size="sm" onClick={addPair} data-testid="button-add-pair">
+            <Plus className="w-4 h-4 mr-1" /> Add Pair
+          </Button>
+        </div>
+        {pairs.map((pair, index) => (
+          <Card key={pair.id || index} className="p-3">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <span className="text-sm font-medium">Pair {index + 1}</span>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => removePair(index)}
+                data-testid={`button-remove-pair-${index}`}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Term/Question</Label>
+                <Input
+                  value={pair.left || ""}
+                  onChange={(e) => updatePair(index, "left", e.target.value)}
+                  placeholder="Term..."
+                  data-testid={`input-pair-left-${index}`}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Definition/Answer</Label>
+                <Input
+                  value={pair.right || ""}
+                  onChange={(e) => updatePair(index, "right", e.target.value)}
+                  placeholder="Definition..."
+                  data-testid={`input-pair-right-${index}`}
+                />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
