@@ -303,6 +303,31 @@ export async function importCourseCatalog(): Promise<{
     }
     console.log(`  ✓ ${snapshot.bundleCourses.length} bundle courses`);
     
+    // Fix orphan enrollments - map old course IDs to canonical ones
+    console.log('🔧 Checking for orphan enrollments...');
+    const { enrollments } = await import('@shared/schema');
+    const validCourseIds = snapshot.courses.map(c => c.id);
+    
+    // Find enrollments with course IDs not in our snapshot
+    const allEnrollments = await db.select().from(enrollments);
+    const orphanEnrollments = allEnrollments.filter(e => !validCourseIds.includes(e.courseId));
+    
+    if (orphanEnrollments.length > 0) {
+      console.log(`  Found ${orphanEnrollments.length} orphan enrollments`);
+      
+      // Map to FREC I (the most common pre-licensing course) since these are likely old FREC I enrollments
+      const frecICourseId = '4793335c-ce58-4cab-af5c-a9160d593ced';
+      
+      for (const enrollment of orphanEnrollments) {
+        await db.update(enrollments)
+          .set({ courseId: frecICourseId })
+          .where(eq(enrollments.id, enrollment.id));
+      }
+      console.log(`  ✓ Migrated ${orphanEnrollments.length} orphan enrollments to FREC I course`);
+    } else {
+      console.log(`  ✓ No orphan enrollments found`);
+    }
+    
     console.log('\n✅ Import complete!');
     
     return {
