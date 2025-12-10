@@ -2822,17 +2822,26 @@ segment1.ts
               .filter((e: any) => e.isFinalExam === 1 || e.title?.toLowerCase().includes("final"))
               .map((e: any) => e.id);
             
-            // Get all user attempts, then filter to THIS enrollment's final exams
+            // Get all user attempts for this course's final exams
             const userAttempts = await storage.getUserExamAttempts(user.id, "");
-            // Filter by enrollmentId if available, otherwise fall back to course-scoped exam IDs
-            // This ensures course repeats get a fresh attempt window
-            const allFinalAttemptsForThisCourse = userAttempts.filter((a: any) => {
-              // Must be a final exam for this course
-              if (!finalExamIdsForThisCourse.includes(a.examId)) return false;
-              // If attempt has enrollmentId, it must match current enrollment
-              // (older attempts without enrollmentId still count for backward compatibility)
-              if (a.enrollmentId && a.enrollmentId !== enrollment.id) return false;
-              return true;
+            const courseFinalAttempts = userAttempts.filter((a: any) => 
+              finalExamIdsForThisCourse.includes(a.examId)
+            );
+            
+            // Use enrollment start date to determine which attempts belong to this enrollment
+            // - Attempts with matching enrollmentId: count (new tracked attempts)
+            // - Attempts without enrollmentId (legacy) created AFTER enrollment started: count
+            // - Attempts without enrollmentId (legacy) created BEFORE enrollment started: don't count (previous enrollment)
+            const enrollmentStartDate = enrollment.enrolledAt ? new Date(enrollment.enrolledAt) : new Date(0);
+            
+            const allFinalAttemptsForThisCourse = courseFinalAttempts.filter((a: any) => {
+              // If attempt has enrollmentId, it must match this enrollment
+              if (a.enrollmentId) {
+                return a.enrollmentId === enrollment.id;
+              }
+              // Legacy attempt (no enrollmentId) - only count if created after this enrollment started
+              const attemptDate = a.createdAt ? new Date(a.createdAt) : new Date(0);
+              return attemptDate >= enrollmentStartDate;
             });
             
             // Florida 2-attempt limit - count all attempts, not just completed
