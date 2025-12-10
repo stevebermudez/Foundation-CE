@@ -67,19 +67,22 @@ The platform utilizes `shadcn/ui` components with `Tailwind CSS` for a modern an
   - Admin access at `/admin/pages` or `/admin/pages-manager`
 - **Coursebox-style Block Editor**: Advanced block-based content builder for lesson content:
   - Database table: `content_blocks` with lessonId, blockType, content (JSON), settings, sortOrder, isVisible
-  - 14 block types: text, heading, image, video, flashcard, inline_quiz, fill_blank, matching, accordion, tabs, callout, divider, code, embed
+  - 17 block types: text, heading, image, video, flashcard, inline_quiz, fill_blank, matching, hotspot, sorting, timeline, accordion, tabs, callout, divider, code, embed
   - BlockEditor component with drag-drop reordering, visibility toggles, duplication, and type-specific edit forms
   - ContentBlockRenderer for learner view with interactive elements (flashcard flip animations, collapsible accordions, tabbed content)
   - Admin API endpoints at `/api/admin/lessons/:lessonId/blocks` and `/api/admin/blocks/:blockId`
   - Learner API at `/api/lessons/:lessonId/blocks` (returns only visible blocks)
   - Zod validation with insertContentBlockSchema
   - Full admin JWT authentication on all write operations
-- **Interactive Assessment Blocks**: Three new auto-graded block types for inline learning activities:
+- **Interactive Assessment Blocks**: Six auto-graded block types for inline learning activities:
   - `inline_quiz`: Multiple choice or true/false questions with instant feedback, explanations, and retry option
   - `fill_blank`: Fill-in-the-blank exercises with {{blank}} placeholder syntax, case-insensitive matching, and hints
-  - `matching`: Drag-and-drop matching activity for pairing terms with definitions, with shuffle and retry support
-  - All blocks track analytics events (quiz_answer, fill_blank_complete, matching_complete) via onBlockInteraction callback
-  - Zod schemas: inlineQuizContentSchema, fillBlankContentSchema, matchingContentSchema
+  - `matching`: Click-to-match activity for pairing terms with definitions, with one-to-one validation and retry support
+  - `hotspot`: Interactive image with clickable areas; explore mode (show info) or quiz mode (find correct spots)
+  - `sorting`: Drag-and-drop list reordering with shuffled items, position validation, and visual feedback
+  - `timeline`: Chronological event display with vertical/horizontal layouts; optional interactive mode for learner reordering
+  - All blocks track analytics events (quiz_answer, fill_blank_complete, matching_complete, hotspot_complete, sorting_complete, timeline_complete) via onBlockInteraction callback
+  - Zod schemas: inlineQuizContentSchema, fillBlankContentSchema, matchingContentSchema, hotspotContentSchema, sortingContentSchema, timelineContentSchema
 
 ### System Design Choices
 - **Layered Storage Interface**: Data operations abstracted through an `IStorage` interface.
