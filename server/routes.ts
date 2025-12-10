@@ -4063,22 +4063,31 @@ segment1.ts
     }
   });
 
-  // Admin endpoint to seed production courses
+  // Admin endpoint to sync full course catalog from snapshot
   app.post("/api/admin/seed-courses", isAdmin, async (req, res) => {
     try {
-      const { seedProductionCourses } = await import("./seedProductionCoursesStartup");
-      await seedProductionCourses();
+      const { importCourseCatalog } = await import("./importCourseCatalog");
+      const result = await importCourseCatalog();
       
-      // Return current course count
-      const allCourses = await storage.getCourses?.() || [];
+      if (!result.success) {
+        return res.status(500).json({ error: result.error || "Import failed" });
+      }
+      
       res.json({ 
         success: true, 
         message: `Course catalog synced successfully`,
-        totalCourses: allCourses.length
+        totalCourses: result.coursesImported,
+        totalUnits: result.unitsImported,
+        totalLessons: result.lessonsImported,
+        totalQuestionBanks: result.questionBanksImported,
+        totalBankQuestions: result.bankQuestionsImported,
+        totalPracticeExams: result.practiceExamsImported,
+        totalExamQuestions: result.examQuestionsImported,
+        totalBundles: result.bundlesImported
       });
     } catch (err) {
-      console.error("Error seeding courses:", err);
-      res.status(500).json({ error: "Failed to seed courses" });
+      console.error("Error syncing course catalog:", err);
+      res.status(500).json({ error: "Failed to sync course catalog" });
     }
   });
 

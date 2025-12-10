@@ -639,10 +639,18 @@ export default function AdminDashboardPage() {
                         });
                         const data = await res.json();
                         if (res.ok) {
-                          alert(`Courses synced! Total: ${data.totalCourses} courses`);
+                          alert(`Course Catalog Synced!\n\n` +
+                            `Courses: ${data.totalCourses}\n` +
+                            `Units: ${data.totalUnits}\n` +
+                            `Lessons: ${data.totalLessons}\n` +
+                            `Question Banks: ${data.totalQuestionBanks}\n` +
+                            `Bank Questions: ${data.totalBankQuestions}\n` +
+                            `Practice Exams: ${data.totalPracticeExams}\n` +
+                            `Exam Questions: ${data.totalExamQuestions}\n` +
+                            `Bundles: ${data.totalBundles}`);
                           window.location.reload();
                         } else {
-                          alert("Failed to sync courses");
+                          alert("Failed to sync courses: " + (data.error || "Unknown error"));
                         }
                       } catch (err) {
                         alert("Error syncing courses");
