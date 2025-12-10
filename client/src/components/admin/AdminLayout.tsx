@@ -40,8 +40,6 @@ import {
   BarChart3,
   LogOut,
   ChevronDown,
-  Bell,
-  Search,
   Building2,
   Shield,
 } from "lucide-react";
@@ -264,26 +262,6 @@ function AdminHeader() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="hidden md:flex gap-2 text-muted-foreground"
-          data-testid="button-search"
-        >
-          <Search className="h-4 w-4" />
-          <span>Search...</span>
-          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-xs font-medium text-muted-foreground sm:flex">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </Button>
-        
-        <Button variant="ghost" size="icon" className="relative" data-testid="button-notifications">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
-            3
-          </span>
-        </Button>
-        
         <ThemeToggle />
       </div>
     </header>
