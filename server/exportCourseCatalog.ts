@@ -4,7 +4,9 @@
  * Exports all course content (courses, units, lessons, quizzes, exams) 
  * to a JSON snapshot file for deployment to production.
  * 
- * Usage: npx tsx server/exportCourseCatalog.ts
+ * Can be used as:
+ * - CLI: npx tsx server/exportCourseCatalog.ts
+ * - Module: import { exportCourseCatalog } from './exportCourseCatalog'
  */
 
 import { db } from './db';
@@ -22,10 +24,6 @@ import {
 import { eq } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Course IDs to export
 const COURSE_IDS = [
@@ -40,7 +38,7 @@ const BUNDLE_IDS = [
   '24da327b-4fda-4464-884c-ecf47bb92d95' // 14-Hour CE Bundle
 ];
 
-interface CatalogSnapshot {
+export interface CatalogSnapshot {
   version: string;
   exportedAt: string;
   courses: any[];
@@ -54,86 +52,96 @@ interface CatalogSnapshot {
   bundleCourses: any[];
 }
 
-async function exportCatalog(): Promise<CatalogSnapshot> {
-  console.log('📦 Exporting Course Catalog...\n');
+export interface ExportResult {
+  success: boolean;
+  coursesExported: number;
+  unitsExported: number;
+  lessonsExported: number;
+  questionBanksExported: number;
+  bankQuestionsExported: number;
+  practiceExamsExported: number;
+  examQuestionsExported: number;
+  bundlesExported: number;
+  error?: string;
+}
+
+function getSnapshotPath(): string {
+  const possiblePaths = [
+    path.resolve(process.cwd(), 'server', 'catalogSnapshot.json'),
+    path.resolve(process.cwd(), 'dist', 'server', 'catalogSnapshot.json'),
+    path.resolve(process.cwd(), 'catalogSnapshot.json'),
+  ];
   
+  for (const p of possiblePaths) {
+    const dir = path.dirname(p);
+    if (fs.existsSync(dir)) {
+      return p;
+    }
+  }
+  
+  return possiblePaths[0];
+}
+
+async function buildCatalogSnapshot(): Promise<CatalogSnapshot> {
   // Export courses
-  console.log('📚 Exporting courses...');
   const coursesData = await db.select().from(courses);
   const filteredCourses = coursesData.filter(c => COURSE_IDS.includes(c.id));
-  console.log(`  Found ${filteredCourses.length} courses`);
   
   // Export units for these courses
-  console.log('📖 Exporting units...');
   const allUnits: any[] = [];
   for (const courseId of COURSE_IDS) {
     const courseUnits = await db.select().from(units).where(eq(units.courseId, courseId));
     allUnits.push(...courseUnits);
   }
-  console.log(`  Found ${allUnits.length} units`);
   
   // Export lessons for these units
-  console.log('📝 Exporting lessons...');
   const allLessons: any[] = [];
   for (const unit of allUnits) {
     const unitLessons = await db.select().from(lessons).where(eq(lessons.unitId, unit.id));
     allLessons.push(...unitLessons);
   }
-  console.log(`  Found ${allLessons.length} lessons`);
   
   // Export question banks for these courses
-  console.log('❓ Exporting question banks...');
   const allQuestionBanks: any[] = [];
   for (const courseId of COURSE_IDS) {
     const banks = await db.select().from(questionBanks).where(eq(questionBanks.courseId, courseId));
     allQuestionBanks.push(...banks);
   }
-  console.log(`  Found ${allQuestionBanks.length} question banks`);
   
   // Export bank questions
-  console.log('📋 Exporting bank questions...');
   const allBankQuestions: any[] = [];
   for (const bank of allQuestionBanks) {
     const questions = await db.select().from(bankQuestions).where(eq(bankQuestions.bankId, bank.id));
     allBankQuestions.push(...questions);
   }
-  console.log(`  Found ${allBankQuestions.length} bank questions`);
   
   // Export practice exams
-  console.log('📝 Exporting practice exams...');
   const allPracticeExams: any[] = [];
   for (const courseId of COURSE_IDS) {
     const exams = await db.select().from(practiceExams).where(eq(practiceExams.courseId, courseId));
     allPracticeExams.push(...exams);
   }
-  console.log(`  Found ${allPracticeExams.length} practice exams`);
   
   // Export exam questions
-  console.log('📋 Exporting exam questions...');
   const allExamQuestions: any[] = [];
   for (const exam of allPracticeExams) {
     const questions = await db.select().from(examQuestions).where(eq(examQuestions.examId, exam.id));
     allExamQuestions.push(...questions);
   }
-  console.log(`  Found ${allExamQuestions.length} exam questions`);
   
   // Export bundles
-  console.log('📦 Exporting bundles...');
   const allBundles: any[] = [];
   for (const bundleId of BUNDLE_IDS) {
     const bundle = await db.select().from(courseBundles).where(eq(courseBundles.id, bundleId));
     allBundles.push(...bundle);
   }
-  console.log(`  Found ${allBundles.length} bundles`);
   
   // Export bundle courses
-  console.log('🔗 Exporting bundle courses...');
   const allBundleCourses: any[] = [];
   for (const bundleId of BUNDLE_IDS) {
     const bcs = await db.select().from(bundleCourses).where(eq(bundleCourses.bundleId, bundleId));
     allBundleCourses.push(...bcs);
   }
-  console.log(`  Found ${allBundleCourses.length} bundle courses`);
   
   return {
     version: '1.0.0',
@@ -150,11 +158,71 @@ async function exportCatalog(): Promise<CatalogSnapshot> {
   };
 }
 
+/**
+ * Export course catalog to JSON snapshot file.
+ * This function can be called from other modules.
+ */
+export async function exportCourseCatalog(): Promise<ExportResult> {
+  try {
+    const snapshot = await buildCatalogSnapshot();
+    
+    const outputPath = getSnapshotPath();
+    fs.writeFileSync(outputPath, JSON.stringify(snapshot, null, 2));
+    
+    return {
+      success: true,
+      coursesExported: snapshot.courses.length,
+      unitsExported: snapshot.units.length,
+      lessonsExported: snapshot.lessons.length,
+      questionBanksExported: snapshot.questionBanks.length,
+      bankQuestionsExported: snapshot.bankQuestions.length,
+      practiceExamsExported: snapshot.practiceExams.length,
+      examQuestionsExported: snapshot.examQuestions.length,
+      bundlesExported: snapshot.bundles.length
+    };
+  } catch (error) {
+    return {
+      success: false,
+      coursesExported: 0,
+      unitsExported: 0,
+      lessonsExported: 0,
+      questionBanksExported: 0,
+      bankQuestionsExported: 0,
+      practiceExamsExported: 0,
+      examQuestionsExported: 0,
+      bundlesExported: 0,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+// CLI entry point - only runs when called directly
 async function main() {
   try {
-    const snapshot = await exportCatalog();
+    console.log('📦 Exporting Course Catalog...\n');
     
-    const outputPath = path.join(__dirname, 'catalogSnapshot.json');
+    const snapshot = await buildCatalogSnapshot();
+    
+    console.log(`📚 Exporting courses...`);
+    console.log(`  Found ${snapshot.courses.length} courses`);
+    console.log(`📖 Exporting units...`);
+    console.log(`  Found ${snapshot.units.length} units`);
+    console.log(`📝 Exporting lessons...`);
+    console.log(`  Found ${snapshot.lessons.length} lessons`);
+    console.log(`❓ Exporting question banks...`);
+    console.log(`  Found ${snapshot.questionBanks.length} question banks`);
+    console.log(`📋 Exporting bank questions...`);
+    console.log(`  Found ${snapshot.bankQuestions.length} bank questions`);
+    console.log(`📝 Exporting practice exams...`);
+    console.log(`  Found ${snapshot.practiceExams.length} practice exams`);
+    console.log(`📋 Exporting exam questions...`);
+    console.log(`  Found ${snapshot.examQuestions.length} exam questions`);
+    console.log(`📦 Exporting bundles...`);
+    console.log(`  Found ${snapshot.bundles.length} bundles`);
+    console.log(`🔗 Exporting bundle courses...`);
+    console.log(`  Found ${snapshot.bundleCourses.length} bundle courses`);
+    
+    const outputPath = getSnapshotPath();
     fs.writeFileSync(outputPath, JSON.stringify(snapshot, null, 2));
     
     console.log('\n✅ Export complete!');
@@ -176,4 +244,8 @@ async function main() {
   }
 }
 
-main();
+// Only run main() when this file is executed directly (not imported)
+const isMainModule = process.argv[1]?.includes('exportCourseCatalog');
+if (isMainModule) {
+  main();
+}

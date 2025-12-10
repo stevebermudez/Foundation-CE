@@ -19,6 +19,7 @@ import { submitToDBPR, validateDBPRData, generateDBPRBatchFile } from "./dbprSer
 import { generateCertificateHTML, generateCertificateFileName, CertificateData } from "./certificates";
 import { sendContactFormEmail, sendEnrollmentConfirmationEmail, sendCertificateEmail } from "./emailService";
 import { generateSCORMManifest, generateQTIAssessment, generateQuestionBankQTI, exportCourseData } from "./lmsExportService";
+import { triggerCatalogSyncDebounced } from "./catalogAutoSync";
 import express from "express";
 import path from "path";
 
@@ -4278,6 +4279,7 @@ segment1.ts
         courseData.expirationMonths = 6; // Default to 6 months
       }
       const course = await storage.createCourse?.(courseData);
+      triggerCatalogSyncDebounced();
       res.status(201).json(course);
     } catch (err) {
       console.error("Error creating course:", err);
@@ -4312,6 +4314,7 @@ segment1.ts
       
       const course = await storage.updateCourse?.(courseId, updateData);
       if (!course) return res.status(404).json({ error: "Course not found" });
+      triggerCatalogSyncDebounced();
       res.json(course);
     } catch (err) {
       console.error("Error updating course:", err);
@@ -4323,6 +4326,7 @@ segment1.ts
     try {
       const { courseId } = req.params;
       await storage.deleteCourse?.(courseId);
+      triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
       console.error("Error deleting course:", err);
@@ -4347,6 +4351,7 @@ segment1.ts
       const { courseId } = req.params;
       const { unitNumber, title, description, hoursRequired } = req.body;
       const unit = await storage.createUnit(courseId, unitNumber, title, description, hoursRequired);
+      triggerCatalogSyncDebounced();
       res.status(201).json(unit);
     } catch (err) {
       console.error("Error creating unit:", err);
@@ -4358,6 +4363,7 @@ segment1.ts
     try {
       const { unitId } = req.params;
       const unit = await storage.updateUnit(unitId, req.body);
+      triggerCatalogSyncDebounced();
       res.json(unit);
     } catch (err) {
       console.error("Error updating unit:", err);
@@ -4369,6 +4375,7 @@ segment1.ts
     try {
       const { unitId } = req.params;
       await storage.deleteUnit(unitId);
+      triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
       console.error("Error deleting unit:", err);
@@ -4386,6 +4393,7 @@ segment1.ts
       for (let i = 0; i < unitIds.length; i++) {
         await db.update(units).set({ unitNumber: i + 1 }).where(eq(units.id, unitIds[i]));
       }
+      triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
       console.error("Error reordering units:", err);
@@ -4410,6 +4418,7 @@ segment1.ts
       const { unitId } = req.params;
       const { lessonNumber, title, videoUrl, durationMinutes, content, imageUrl } = req.body;
       const lesson = await storage.createLesson(unitId, lessonNumber, title, videoUrl, durationMinutes, content, imageUrl);
+      triggerCatalogSyncDebounced();
       res.status(201).json(lesson);
     } catch (err) {
       console.error("Error creating lesson:", err);
@@ -4421,6 +4430,7 @@ segment1.ts
     try {
       const { lessonId } = req.params;
       const lesson = await storage.updateLesson(lessonId, req.body);
+      triggerCatalogSyncDebounced();
       res.json(lesson);
     } catch (err) {
       console.error("Error updating lesson:", err);
@@ -4432,6 +4442,7 @@ segment1.ts
     try {
       const { lessonId } = req.params;
       await storage.deleteLesson(lessonId);
+      triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
       console.error("Error deleting lesson:", err);
@@ -4449,6 +4460,7 @@ segment1.ts
       for (let i = 0; i < lessonIds.length; i++) {
         await db.update(lessons).set({ lessonNumber: i + 1 }).where(eq(lessons.id, lessonIds[i]));
       }
+      triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
       console.error("Error reordering lessons:", err);
@@ -4829,6 +4841,7 @@ segment1.ts
         isActive: 1,
       });
       
+      triggerCatalogSyncDebounced();
       res.status(201).json(bank);
     } catch (err) {
       console.error("Error creating question bank:", err);
@@ -4840,6 +4853,7 @@ segment1.ts
   app.patch("/api/admin/question-banks/:bankId", isAdmin, async (req, res) => {
     try {
       const bank = await storage.updateQuestionBank(req.params.bankId, req.body);
+      triggerCatalogSyncDebounced();
       res.json(bank);
     } catch (err) {
       console.error("Error updating question bank:", err);
@@ -4851,6 +4865,7 @@ segment1.ts
   app.delete("/api/admin/question-banks/:bankId", isAdmin, async (req, res) => {
     try {
       await storage.deleteQuestionBank(req.params.bankId);
+      triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
       console.error("Error deleting question bank:", err);
@@ -4907,6 +4922,7 @@ segment1.ts
         isActive: 1,
       });
       
+      triggerCatalogSyncDebounced();
       res.status(201).json(question);
     } catch (err) {
       console.error("Error creating question:", err);
@@ -4923,6 +4939,7 @@ segment1.ts
         data.options = JSON.stringify(data.options);
       }
       const question = await storage.updateBankQuestion(req.params.questionId, data);
+      triggerCatalogSyncDebounced();
       res.json(question);
     } catch (err) {
       console.error("Error updating question:", err);
@@ -4934,6 +4951,7 @@ segment1.ts
   app.delete("/api/admin/questions/:questionId", isAdmin, async (req, res) => {
     try {
       await storage.deleteBankQuestion(req.params.questionId);
+      triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
       console.error("Error deleting question:", err);
@@ -4947,6 +4965,7 @@ segment1.ts
       console.log("Manual quiz import triggered by admin");
       const { importAllUnitQuizzes } = await import("./importAllUnitQuizzes");
       await importAllUnitQuizzes();
+      triggerCatalogSyncDebounced();
       res.json({ success: true, message: "Successfully imported 380 unit quiz questions (20 per unit x 19 units)" });
     } catch (err) {
       console.error("Error importing quiz questions:", err);
@@ -4969,6 +4988,7 @@ segment1.ts
       
       const { importFinalExams } = await import("./importFinalExams");
       await importFinalExams(courseResult[0].id);
+      triggerCatalogSyncDebounced();
       res.json({ success: true, message: "Successfully imported final exams (Form A: 100, Form B: 100)" });
     } catch (err) {
       console.error("Error importing final exams:", err);
