@@ -628,6 +628,33 @@ export default function AdminDashboardPage() {
                   <Button 
                     className="w-full justify-start" 
                     variant="outline" 
+                    data-testid="button-sync-courses"
+                    onClick={async () => {
+                      try {
+                        const token = localStorage.getItem("adminToken");
+                        const res = await fetch("/api/admin/seed-courses", {
+                          method: "POST",
+                          headers: token ? { Authorization: `Bearer ${token}` } : {},
+                          credentials: 'include',
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                          alert(`Courses synced! Total: ${data.totalCourses} courses`);
+                          window.location.reload();
+                        } else {
+                          alert("Failed to sync courses");
+                        }
+                      } catch (err) {
+                        alert("Error syncing courses");
+                      }
+                    }}
+                  >
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Sync Course Catalog
+                  </Button>
+                  <Button 
+                    className="w-full justify-start" 
+                    variant="outline" 
                     data-testid="button-view-reports"
                     onClick={() => setActiveTab("enrollments")}
                   >

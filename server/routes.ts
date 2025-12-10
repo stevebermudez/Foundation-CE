@@ -4063,6 +4063,25 @@ segment1.ts
     }
   });
 
+  // Admin endpoint to seed production courses
+  app.post("/api/admin/seed-courses", isAdmin, async (req, res) => {
+    try {
+      const { seedProductionCourses } = await import("./seedProductionCoursesStartup");
+      await seedProductionCourses();
+      
+      // Return current course count
+      const allCourses = await storage.getCourses?.() || [];
+      res.json({ 
+        success: true, 
+        message: `Course catalog synced successfully`,
+        totalCourses: allCourses.length
+      });
+    } catch (err) {
+      console.error("Error seeding courses:", err);
+      res.status(500).json({ error: "Failed to seed courses" });
+    }
+  });
+
   // Admin endpoints
   app.get("/api/auth/is-admin", async (req, res) => {
     try {
