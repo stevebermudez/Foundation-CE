@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -29,9 +29,12 @@ import SignupPage from "@/pages/signup";
 import ForgotPasswordPage from "@/pages/forgot-password";
 import ResetPasswordPage from "@/pages/reset-password";
 import AdminLoginPage from "@/pages/admin/login";
-import AdminDashboardPage from "@/pages/admin/dashboard";
 import AdminIndexPage from "@/pages/admin/index";
+import AdminLayout from "@/components/admin/AdminLayout";
+import AdminOverviewPage from "@/pages/admin/overview";
 import AdminCoursesPage from "@/pages/admin/courses";
+import AdminUsersPage from "@/pages/admin/users-page";
+import AdminEnrollmentsPage from "@/pages/admin/enrollments-page";
 import AdminContentBuilderPage from "@/pages/admin/content-builder";
 import AdminPagesManagerPage from "@/pages/admin/pages-manager";
 import AdminFinancePage from "@/pages/admin/finance";
@@ -46,8 +49,26 @@ import AffiliateProgramPage from "@/pages/affiliate-program";
 import CookieConsent from "@/components/CookieConsent";
 import CMSPage from "@/components/CMSPage";
 
-function Router() {
-  // Track page views for analytics
+function AdminRouter() {
+  return (
+    <AdminLayout>
+      <Switch>
+        <Route path="/admin/dashboard" component={AdminOverviewPage} />
+        <Route path="/admin/courses" component={AdminCoursesPage} />
+        <Route path="/admin/users" component={AdminUsersPage} />
+        <Route path="/admin/enrollments" component={AdminEnrollmentsPage} />
+        <Route path="/admin/content" component={AdminContentBuilderPage} />
+        <Route path="/admin/pages" component={AdminPagesManagerPage} />
+        <Route path="/admin/finance" component={AdminFinancePage} />
+        <Route path="/admin/settings" component={AdminSettingsPage} />
+        <Route path="/admin/analytics" component={AdminAnalyticsDashboard} />
+        <Route component={AdminOverviewPage} />
+      </Switch>
+    </AdminLayout>
+  );
+}
+
+function PublicRouter() {
   useAnalytics();
   
   return (
@@ -83,16 +104,6 @@ function Router() {
           <Route path="/security" component={LegalCompliancePage} />
           <Route path="/affiliates" component={AffiliateProgramPage} />
           <Route path="/affiliate-program" component={AffiliateProgramPage} />
-          <Route path="/admin" component={AdminIndexPage} />
-          <Route path="/admin/login" component={AdminLoginPage} />
-          <Route path="/admin/dashboard" component={AdminDashboardPage} />
-          <Route path="/admin/courses" component={AdminCoursesPage} />
-          <Route path="/admin/content-builder">{() => <AdminContentBuilderPage />}</Route>
-          <Route path="/admin/pages-manager" component={AdminPagesManagerPage} />
-          <Route path="/admin/pages" component={AdminPagesManagerPage} />
-          <Route path="/admin/finance" component={AdminFinancePage} />
-          <Route path="/admin/settings" component={AdminSettingsPage} />
-          <Route path="/admin/analytics" component={AdminAnalyticsDashboard} />
           <Route path="/checkout"><CheckoutPage /></Route>
           <Route path="/:slug">{(params) => <CMSPage slug={params.slug} />}</Route>
           <Route component={NotFound} />
@@ -103,8 +114,25 @@ function Router() {
   );
 }
 
+function AppRouter() {
+  const [location] = useLocation();
+  
+  if (location === "/admin") {
+    return <AdminIndexPage />;
+  }
+  
+  if (location === "/admin/login") {
+    return <AdminLoginPage />;
+  }
+  
+  if (location.startsWith("/admin/")) {
+    return <AdminRouter />;
+  }
+  
+  return <PublicRouter />;
+}
+
 export default function App() {
-  // Initialize analytics (Google Analytics + Facebook Pixel) on app load
   useEffect(() => {
     initAnalytics();
   }, []);
@@ -113,7 +141,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <Router />
+          <AppRouter />
           <Toaster />
           <CookieConsent />
         </TooltipProvider>

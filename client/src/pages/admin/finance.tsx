@@ -336,7 +336,20 @@ export default function AdminFinancePage() {
     .reduce((sum, c) => sum + c.amount, 0);
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Finance</h2>
+          <p className="text-muted-foreground">
+            Manage purchases, refunds, and account credits
+          </p>
+        </div>
+        <Button onClick={() => setCreditDialogOpen(true)} data-testid="button-add-credit">
+          <Plus className="h-4 w-4 mr-2" />
+          Issue Credit
+        </Button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card data-testid="card-total-revenue">
           <CardContent className="pt-6">

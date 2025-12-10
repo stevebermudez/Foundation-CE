@@ -573,11 +573,11 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
 
   if (!selectedCourseId) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold" data-testid="text-content-builder-title">Content Builder</h2>
-            <p className="text-muted-foreground mt-1">Select a course to manage its units and lessons</p>
+            <h2 className="text-2xl font-bold tracking-tight" data-testid="text-content-builder-title">Content Builder</h2>
+            <p className="text-muted-foreground">Select a course to manage its units and lessons</p>
           </div>
         </div>
 
@@ -629,7 +629,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -644,7 +644,7 @@ export default function ContentBuilderPage({ courseId }: { courseId?: string }) 
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
-          <h2 className="text-2xl font-bold" data-testid="text-course-title">{selectedCourse?.title}</h2>
+          <h2 className="text-2xl font-bold tracking-tight" data-testid="text-course-title">{selectedCourse?.title}</h2>
           <div className="flex flex-wrap gap-2 mt-1">
             <Badge variant="outline">{selectedCourse?.state}</Badge>
             <Badge variant="outline">{selectedCourse?.hoursRequired} hrs</Badge>

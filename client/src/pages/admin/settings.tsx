@@ -425,10 +425,14 @@ export default function AdminSettingsPage() {
   }, {});
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Admin Settings</h1>
-        <p className="text-muted-foreground">Manage system configuration, email templates, and user roles</p>
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+          <p className="text-muted-foreground">
+            Manage system configuration, email templates, and user roles
+          </p>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
