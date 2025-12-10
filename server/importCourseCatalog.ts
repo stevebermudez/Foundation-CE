@@ -19,7 +19,7 @@ import {
   courseBundles,
   bundleCourses
 } from '@shared/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray, notInArray, sql } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -126,6 +126,9 @@ export async function importCourseCatalog(): Promise<{
     
     // Import units
     console.log('📖 Importing units...');
+    const snapshotUnitIds = snapshot.units.map(u => u.id);
+    const snapshotCourseIds = snapshot.courses.map(c => c.id);
+    
     for (const rawUnit of snapshot.units) {
       const unit = parseTimestamps(rawUnit);
       const existing = await db.select().from(units).where(eq(units.id, unit.id));
@@ -135,10 +138,30 @@ export async function importCourseCatalog(): Promise<{
         await db.insert(units).values(unit);
       }
     }
+    
+    // Remove duplicate/stale units that aren't in the snapshot (for snapshot courses only)
+    if (snapshotUnitIds.length > 0 && snapshotCourseIds.length > 0) {
+      const staleUnits = await db.select({ id: units.id }).from(units)
+        .where(and(
+          inArray(units.courseId, snapshotCourseIds),
+          notInArray(units.id, snapshotUnitIds)
+        ));
+      
+      if (staleUnits.length > 0) {
+        const staleUnitIds = staleUnits.map(u => u.id);
+        // First delete lessons belonging to stale units
+        await db.delete(lessons).where(inArray(lessons.unitId, staleUnitIds));
+        // Then delete the stale units
+        await db.delete(units).where(inArray(units.id, staleUnitIds));
+        console.log(`  🧹 Removed ${staleUnits.length} stale units`);
+      }
+    }
     console.log(`  ✓ ${snapshot.units.length} units`);
     
     // Import lessons
     console.log('📝 Importing lessons...');
+    const snapshotLessonIds = snapshot.lessons.map(l => l.id);
+    
     for (const rawLesson of snapshot.lessons) {
       const lesson = parseTimestamps(rawLesson);
       const existing = await db.select().from(lessons).where(eq(lessons.id, lesson.id));
@@ -146,6 +169,21 @@ export async function importCourseCatalog(): Promise<{
         await db.update(lessons).set(lesson).where(eq(lessons.id, lesson.id));
       } else {
         await db.insert(lessons).values(lesson);
+      }
+    }
+    
+    // Remove duplicate/stale lessons that aren't in the snapshot (for snapshot units only)
+    if (snapshotLessonIds.length > 0 && snapshotUnitIds.length > 0) {
+      const staleLessons = await db.select({ id: lessons.id }).from(lessons)
+        .where(and(
+          inArray(lessons.unitId, snapshotUnitIds),
+          notInArray(lessons.id, snapshotLessonIds)
+        ));
+      
+      if (staleLessons.length > 0) {
+        const staleLessonIds = staleLessons.map(l => l.id);
+        await db.delete(lessons).where(inArray(lessons.id, staleLessonIds));
+        console.log(`  🧹 Removed ${staleLessons.length} stale lessons`);
       }
     }
     console.log(`  ✓ ${snapshot.lessons.length} lessons`);
