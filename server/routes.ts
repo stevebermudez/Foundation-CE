@@ -4103,6 +4103,38 @@ segment1.ts
     }
   });
 
+  // Admin endpoint for transactional catalog import (V2 - ACID guarantees)
+  app.post("/api/admin/seed-courses-v2", isAdmin, async (req, res) => {
+    try {
+      const dryRun = req.query.dryRun === 'true';
+      const { importCourseCatalogV2 } = await import("./catalogImportV2");
+      const result = await importCourseCatalogV2(dryRun);
+      
+      if (!result.success) {
+        return res.status(500).json({ 
+          success: false,
+          errors: result.errors,
+          warnings: result.warnings,
+          logs: result.logs
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        message: dryRun ? 'Dry run completed - no changes made' : 'Course catalog synced with ACID transactions',
+        dryRun,
+        duration: result.duration,
+        counts: result.counts,
+        reconciliation: result.reconciliation,
+        errors: result.errors,
+        warnings: result.warnings
+      });
+    } catch (err) {
+      console.error("Error in V2 catalog sync:", err);
+      res.status(500).json({ error: "Failed to sync course catalog with V2 importer" });
+    }
+  });
+
   // Admin endpoints
   app.get("/api/auth/is-admin", async (req, res) => {
     try {

@@ -181,6 +181,37 @@ class CatalogImporter {
       }
     }
 
+    // Check all bank questions reference valid question banks
+    const questionBankIds = new Set(snapshot.questionBanks.map(qb => qb.id));
+    for (const bq of snapshot.bankQuestions) {
+      if (!questionBankIds.has(bq.bankId)) {
+        this.log('ERROR', 'VALIDATION', `Bank question references non-existent bank: ${bq.bankId}`);
+        isValid = false;
+      }
+    }
+
+    // Check all exam questions reference valid practice exams
+    const practiceExamIds = new Set(snapshot.practiceExams.map(pe => pe.id));
+    for (const eq of snapshot.examQuestions) {
+      if (!practiceExamIds.has(eq.examId)) {
+        this.log('ERROR', 'VALIDATION', `Exam question references non-existent exam: ${eq.examId}`);
+        isValid = false;
+      }
+    }
+
+    // Check all bundle courses reference valid bundles and courses
+    const bundleIds = new Set(snapshot.bundles.map(b => b.id));
+    for (const bc of snapshot.bundleCourses) {
+      if (!bundleIds.has(bc.bundleId)) {
+        this.log('ERROR', 'VALIDATION', `Bundle course references non-existent bundle: ${bc.bundleId}`);
+        isValid = false;
+      }
+      if (!courseIds.has(bc.courseId)) {
+        this.log('ERROR', 'VALIDATION', `Bundle course references non-existent course: ${bc.courseId}`);
+        isValid = false;
+      }
+    }
+
     if (isValid) {
       this.log('SUCCESS', 'VALIDATION', 'Pre-import validation passed');
     } else {
