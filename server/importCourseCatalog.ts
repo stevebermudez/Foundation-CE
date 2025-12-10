@@ -94,7 +94,22 @@ export async function importCourseCatalog(): Promise<{
     
     const snapshot: CatalogSnapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf-8'));
     console.log(`📦 Snapshot version: ${snapshot.version}`);
-    console.log(`📅 Exported at: ${snapshot.exportedAt}\n`);
+    console.log(`📅 Exported at: ${snapshot.exportedAt}`);
+    
+    // Check snapshot staleness
+    const exportedAt = new Date(snapshot.exportedAt);
+    const ageMs = Date.now() - exportedAt.getTime();
+    const ageHours = ageMs / (1000 * 60 * 60);
+    const ageDays = ageHours / 24;
+    
+    if (ageDays > 7) {
+      console.log(`⚠️  WARNING: Snapshot is ${Math.floor(ageDays)} days old! Consider re-exporting for latest content.`);
+    } else if (ageHours > 24) {
+      console.log(`ℹ️  Snapshot is ${Math.floor(ageHours)} hours old.`);
+    } else {
+      console.log(`✓ Snapshot is fresh (${Math.floor(ageHours * 60)} minutes old).`);
+    }
+    console.log('');
     
     // Import courses
     console.log('📚 Importing courses...');
