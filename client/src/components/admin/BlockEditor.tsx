@@ -64,6 +64,9 @@ const BLOCK_TYPES = [
   { type: "inline_quiz", label: "Inline Quiz", icon: Check, description: "Auto-graded question" },
   { type: "fill_blank", label: "Fill in Blank", icon: Type, description: "Fill-in-the-blank exercise" },
   { type: "matching", label: "Matching", icon: Layers, description: "Drag-and-drop matching" },
+  { type: "hotspot", label: "Hotspot", icon: Image, description: "Clickable image areas" },
+  { type: "sorting", label: "Sorting", icon: LayoutList, description: "Drag to reorder items" },
+  { type: "timeline", label: "Timeline", icon: LayoutList, description: "Sequential events" },
   { type: "accordion", label: "Accordion", icon: ChevronDown, description: "Collapsible sections" },
   { type: "tabs", label: "Tabs", icon: LayoutList, description: "Tabbed content panels" },
   { type: "callout", label: "Callout", icon: AlertCircle, description: "Info/warning/tip boxes" },
@@ -511,6 +514,42 @@ function BlockPreview({ blockType, content }: { blockType: string; content: any 
           </div>
         </div>
       );
+    case "hotspot":
+      return (
+        <div className="flex items-center gap-2">
+          <Image className="w-8 h-8 text-orange-600" />
+          <div>
+            <span className="text-sm font-medium">Hotspot Image</span>
+            <p className="text-xs text-muted-foreground">
+              {content.hotspots?.length || 0} clickable area(s)
+            </p>
+          </div>
+        </div>
+      );
+    case "sorting":
+      return (
+        <div className="flex items-center gap-2">
+          <LayoutList className="w-8 h-8 text-cyan-600" />
+          <div>
+            <span className="text-sm font-medium">Sorting Activity</span>
+            <p className="text-xs text-muted-foreground">
+              {content.items?.length || 0} item(s) to order
+            </p>
+          </div>
+        </div>
+      );
+    case "timeline":
+      return (
+        <div className="flex items-center gap-2">
+          <LayoutList className="w-8 h-8 text-indigo-600" />
+          <div>
+            <span className="text-sm font-medium">Timeline</span>
+            <p className="text-xs text-muted-foreground">
+              {content.events?.length || 0} event(s)
+            </p>
+          </div>
+        </div>
+      );
     default:
       return <p className="text-sm text-muted-foreground">Unknown block type</p>;
   }
@@ -841,6 +880,27 @@ function EditBlockDialog({ block, onSave, onClose }: { block: ContentBlock; onSa
               onChange={(pairs) => updateFormData("pairs", pairs)}
               title={formData.title || ""}
               onTitleChange={(title) => updateFormData("title", title)}
+            />
+          )}
+
+          {block.blockType === "hotspot" && (
+            <HotspotEditor 
+              content={formData}
+              onChange={(data) => setFormData(data)}
+            />
+          )}
+
+          {block.blockType === "sorting" && (
+            <SortingEditor 
+              content={formData}
+              onChange={(data) => setFormData(data)}
+            />
+          )}
+
+          {block.blockType === "timeline" && (
+            <TimelineEditor 
+              content={formData}
+              onChange={(data) => setFormData(data)}
             />
           )}
         </div>
@@ -1514,5 +1574,427 @@ function MediaLibraryDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function HotspotEditor({ content, onChange }: { content: any; onChange: (data: any) => void }) {
+  const hotspots = content.hotspots || [];
+
+  const addHotspot = () => {
+    const newHotspot = {
+      id: `hs-${Date.now()}`,
+      x: 50,
+      y: 50,
+      width: 10,
+      height: 10,
+      shape: "circle",
+      label: "New hotspot",
+      description: "",
+      isCorrect: false,
+    };
+    onChange({ ...content, hotspots: [...hotspots, newHotspot] });
+  };
+
+  const updateHotspot = (index: number, field: string, value: any) => {
+    const updated = [...hotspots];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange({ ...content, hotspots: updated });
+  };
+
+  const removeHotspot = (index: number) => {
+    onChange({ ...content, hotspots: hotspots.filter((_: any, i: number) => i !== index) });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Image URL</Label>
+        <Input
+          value={content.imageUrl || ""}
+          onChange={(e) => onChange({ ...content, imageUrl: e.target.value })}
+          placeholder="https://example.com/image.jpg"
+          data-testid="input-hotspot-image"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Title (optional)</Label>
+        <Input
+          value={content.title || ""}
+          onChange={(e) => onChange({ ...content, title: e.target.value })}
+          placeholder="Hotspot activity title"
+          data-testid="input-hotspot-title"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Instructions (optional)</Label>
+        <Textarea
+          value={content.instructions || ""}
+          onChange={(e) => onChange({ ...content, instructions: e.target.value })}
+          placeholder="Click on the areas of interest..."
+          data-testid="input-hotspot-instructions"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Mode</Label>
+        <Select 
+          value={content.mode || "explore"} 
+          onValueChange={(v) => onChange({ ...content, mode: v })}
+        >
+          <SelectTrigger data-testid="select-hotspot-mode">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="explore">Explore (show info on click)</SelectItem>
+            <SelectItem value="quiz">Quiz (find correct spots)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Hotspots ({hotspots.length})</Label>
+          <Button size="sm" onClick={addHotspot} data-testid="button-add-hotspot">
+            <Plus className="w-4 h-4 mr-1" /> Add Hotspot
+          </Button>
+        </div>
+
+        {hotspots.map((hs: any, index: number) => (
+          <Card key={hs.id} className="p-3">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Hotspot {index + 1}</span>
+                <Button size="sm" variant="ghost" onClick={() => removeHotspot(index)}>
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                <div>
+                  <Label className="text-xs">X (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={hs.x}
+                    onChange={(e) => updateHotspot(index, "x", Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Y (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={hs.y}
+                    onChange={(e) => updateHotspot(index, "y", Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Width (%)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={hs.width || 10}
+                    onChange={(e) => updateHotspot(index, "width", Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Height (%)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={hs.height || 10}
+                    onChange={(e) => updateHotspot(index, "height", Number(e.target.value))}
+                  />
+                </div>
+              </div>
+              <Input
+                value={hs.label}
+                onChange={(e) => updateHotspot(index, "label", e.target.value)}
+                placeholder="Label (shown on click)"
+              />
+              <Textarea
+                value={hs.description || ""}
+                onChange={(e) => updateHotspot(index, "description", e.target.value)}
+                placeholder="Description (optional)"
+                rows={2}
+              />
+              {content.mode === "quiz" && (
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={hs.isCorrect || false}
+                    onChange={(e) => updateHotspot(index, "isCorrect", e.target.checked)}
+                  />
+                  <span className="text-sm">This is a correct answer</span>
+                </label>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SortingEditor({ content, onChange }: { content: any; onChange: (data: any) => void }) {
+  const items = content.items || [];
+
+  const addItem = () => {
+    const newItem = {
+      id: `sort-${Date.now()}`,
+      content: "New item",
+      correctPosition: items.length + 1,
+    };
+    onChange({ ...content, items: [...items, newItem] });
+  };
+
+  const updateItem = (index: number, field: string, value: any) => {
+    const updated = [...items];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange({ ...content, items: updated });
+  };
+
+  const removeItem = (index: number) => {
+    const updated = items.filter((_: any, i: number) => i !== index);
+    const renumbered = updated.map((item: any, i: number) => ({
+      ...item,
+      correctPosition: i + 1,
+    }));
+    onChange({ ...content, items: renumbered });
+  };
+
+  const moveItem = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === items.length - 1) return;
+    
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    const updated = [...items];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    const renumbered = updated.map((item: any, i: number) => ({
+      ...item,
+      correctPosition: i + 1,
+    }));
+    onChange({ ...content, items: renumbered });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Title (optional)</Label>
+        <Input
+          value={content.title || ""}
+          onChange={(e) => onChange({ ...content, title: e.target.value })}
+          placeholder="Put these steps in the correct order..."
+          data-testid="input-sorting-title"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Instructions (optional)</Label>
+        <Textarea
+          value={content.instructions || ""}
+          onChange={(e) => onChange({ ...content, instructions: e.target.value })}
+          placeholder="Drag the items into the correct order."
+          data-testid="input-sorting-instructions"
+        />
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Items ({items.length}) - Order them correctly below</Label>
+          <Button size="sm" onClick={addItem} data-testid="button-add-sort-item">
+            <Plus className="w-4 h-4 mr-1" /> Add Item
+          </Button>
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          The order shown here is the CORRECT order. Items will be shuffled for learners.
+        </p>
+
+        {items.map((item: any, index: number) => (
+          <div key={item.id} className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+            <div className="flex flex-col gap-1">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="h-6 w-6 p-0"
+                onClick={() => moveItem(index, "up")}
+                disabled={index === 0}
+              >
+                <ArrowUp className="w-3 h-3" />
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                className="h-6 w-6 p-0"
+                onClick={() => moveItem(index, "down")}
+                disabled={index === items.length - 1}
+              >
+                <ArrowDown className="w-3 h-3" />
+              </Button>
+            </div>
+            <span className="text-sm font-medium w-6 text-center">{index + 1}.</span>
+            <Input
+              value={item.content}
+              onChange={(e) => updateItem(index, "content", e.target.value)}
+              placeholder="Item text"
+              className="flex-1"
+            />
+            <Button size="sm" variant="ghost" onClick={() => removeItem(index)}>
+              <Trash2 className="w-4 h-4 text-destructive" />
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TimelineEditor({ content, onChange }: { content: any; onChange: (data: any) => void }) {
+  const events = content.events || [];
+
+  const addEvent = () => {
+    const newEvent = {
+      id: `evt-${Date.now()}`,
+      date: "",
+      title: "New event",
+      description: "",
+    };
+    onChange({ ...content, events: [...events, newEvent] });
+  };
+
+  const updateEvent = (index: number, field: string, value: any) => {
+    const updated = [...events];
+    updated[index] = { ...updated[index], [field]: value };
+    onChange({ ...content, events: updated });
+  };
+
+  const removeEvent = (index: number) => {
+    onChange({ ...content, events: events.filter((_: any, i: number) => i !== index) });
+  };
+
+  const moveEvent = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === events.length - 1) return;
+    
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    const updated = [...events];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    onChange({ ...content, events: updated });
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label>Timeline Title (optional)</Label>
+        <Input
+          value={content.title || ""}
+          onChange={(e) => onChange({ ...content, title: e.target.value })}
+          placeholder="Key events in Florida real estate law..."
+          data-testid="input-timeline-title"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Layout</Label>
+        <Select 
+          value={content.layout || "vertical"} 
+          onValueChange={(v) => onChange({ ...content, layout: v })}
+        >
+          <SelectTrigger data-testid="select-timeline-layout">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="vertical">Vertical</SelectItem>
+            <SelectItem value="horizontal">Horizontal</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          checked={content.isInteractive || false}
+          onChange={(e) => onChange({ ...content, isInteractive: e.target.checked })}
+        />
+        <span className="text-sm">Interactive mode (learners arrange events in order)</span>
+      </label>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Events ({events.length})</Label>
+          <Button size="sm" onClick={addEvent} data-testid="button-add-timeline-event">
+            <Plus className="w-4 h-4 mr-1" /> Add Event
+          </Button>
+        </div>
+
+        {events.map((event: any, index: number) => (
+          <Card key={event.id} className="p-3">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-1">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-5 w-5 p-0"
+                      onClick={() => moveEvent(index, "up")}
+                      disabled={index === 0}
+                    >
+                      <ArrowUp className="w-3 h-3" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-5 w-5 p-0"
+                      onClick={() => moveEvent(index, "down")}
+                      disabled={index === events.length - 1}
+                    >
+                      <ArrowDown className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <span className="text-sm font-medium">Event {index + 1}</span>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => removeEvent(index)}>
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Date/Label</Label>
+                  <Input
+                    value={event.date || ""}
+                    onChange={(e) => updateEvent(index, "date", e.target.value)}
+                    placeholder="1968, Step 1, etc."
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Title</Label>
+                  <Input
+                    value={event.title}
+                    onChange={(e) => updateEvent(index, "title", e.target.value)}
+                    placeholder="Event title"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Description (optional)</Label>
+                <Textarea
+                  value={event.description || ""}
+                  onChange={(e) => updateEvent(index, "description", e.target.value)}
+                  placeholder="Describe what happened..."
+                  rows={2}
+                />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 }

@@ -93,6 +93,12 @@ function BlockComponent({
       return <FillBlankBlock content={content} onComplete={(correct) => handleInteraction("fill_blank_complete", { correct })} />;
     case "matching":
       return <MatchingBlock content={content} onComplete={(correct) => handleInteraction("matching_complete", { correct })} />;
+    case "hotspot":
+      return <HotspotBlock content={content} onComplete={(correct) => handleInteraction("hotspot_complete", { correct })} />;
+    case "sorting":
+      return <SortingBlock content={content} onComplete={(correct) => handleInteraction("sorting_complete", { correct })} />;
+    case "timeline":
+      return <TimelineBlock content={content} onComplete={(correct) => handleInteraction("timeline_complete", { correct })} />;
     default:
       return null;
   }
@@ -804,6 +810,435 @@ function MatchingBlock({ content, onComplete }: { content: any; onComplete?: (al
             </div>
             {!allCorrect && content.allowRetry !== false && (
               <Button variant="outline" onClick={handleRetry} data-testid="button-retry-matches">
+                Try Again
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function HotspotBlock({ content, onComplete }: { content: any; onComplete?: (allCorrect: boolean) => void }) {
+  const hotspots = content.hotspots || [];
+  const [clickedSpots, setClickedSpots] = useState<Set<string>>(new Set());
+  const [selectedSpot, setSelectedSpot] = useState<any>(null);
+  const [showResults, setShowResults] = useState(false);
+
+  const isQuizMode = content.mode === "quiz";
+  const correctSpots = hotspots.filter((h: any) => h.isCorrect);
+
+  const handleSpotClick = (spot: any) => {
+    if (showResults) return;
+
+    if (isQuizMode) {
+      setClickedSpots(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(spot.id)) {
+          newSet.delete(spot.id);
+        } else {
+          newSet.add(spot.id);
+        }
+        return newSet;
+      });
+    } else {
+      setSelectedSpot(spot);
+    }
+  };
+
+  const checkAnswers = () => {
+    setShowResults(true);
+    const userCorrect = Array.from(clickedSpots).filter(id => 
+      hotspots.find((h: any) => h.id === id)?.isCorrect
+    );
+    const allCorrect = userCorrect.length === correctSpots.length && 
+                       clickedSpots.size === correctSpots.length;
+    onComplete?.(allCorrect);
+  };
+
+  const handleRetry = () => {
+    setClickedSpots(new Set());
+    setShowResults(false);
+  };
+
+  const allCorrect = showResults && 
+    Array.from(clickedSpots).every(id => hotspots.find((h: any) => h.id === id)?.isCorrect) &&
+    clickedSpots.size === correctSpots.length;
+
+  return (
+    <Card className="p-4" data-testid="block-hotspot">
+      <div className="space-y-4">
+        {content.title && <h3 className="font-semibold text-lg">{content.title}</h3>}
+        {content.instructions && <p className="text-muted-foreground">{content.instructions}</p>}
+        
+        <div className="relative inline-block w-full">
+          <img 
+            src={content.imageUrl} 
+            alt={content.imageAlt || "Interactive image"} 
+            className="w-full rounded-lg"
+          />
+          {hotspots.map((spot: any) => (
+            <button
+              key={spot.id}
+              onClick={() => handleSpotClick(spot)}
+              style={{
+                position: "absolute",
+                left: `${spot.x}%`,
+                top: `${spot.y}%`,
+                width: `${spot.width || 10}%`,
+                height: `${spot.height || 10}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+              className={`rounded-full border-2 transition-all ${
+                showResults
+                  ? spot.isCorrect
+                    ? clickedSpots.has(spot.id)
+                      ? 'bg-green-500/50 border-green-500'
+                      : 'bg-green-500/30 border-green-500 border-dashed'
+                    : clickedSpots.has(spot.id)
+                    ? 'bg-red-500/50 border-red-500'
+                    : 'bg-transparent border-transparent'
+                  : clickedSpots.has(spot.id)
+                  ? 'bg-primary/50 border-primary'
+                  : 'bg-primary/20 border-primary/50 hover:bg-primary/40'
+              }`}
+              data-testid={`hotspot-${spot.id}`}
+            />
+          ))}
+        </div>
+
+        {!isQuizMode && selectedSpot && (
+          <div className="p-4 bg-muted rounded-lg">
+            <h4 className="font-medium">{selectedSpot.label}</h4>
+            {selectedSpot.description && <p className="text-sm mt-1">{selectedSpot.description}</p>}
+          </div>
+        )}
+
+        {isQuizMode && !showResults && (
+          <Button onClick={checkAnswers} disabled={clickedSpots.size === 0} data-testid="button-check-hotspots">
+            Check Answers
+          </Button>
+        )}
+
+        {isQuizMode && showResults && (
+          <div className="space-y-3">
+            <div className={`p-3 rounded-lg ${allCorrect ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'}`}>
+              <div className="flex items-center gap-2">
+                {allCorrect ? (
+                  <><CheckCircle2 className="w-5 h-5 text-green-600" /><span className="font-medium text-green-800 dark:text-green-200">Perfect! You found all the correct spots!</span></>
+                ) : (
+                  <><XCircle className="w-5 h-5 text-red-600" /><span className="font-medium text-red-800 dark:text-red-200">Some spots are incorrect or missing</span></>
+                )}
+              </div>
+            </div>
+            {!allCorrect && content.allowRetry !== false && (
+              <Button variant="outline" onClick={handleRetry} data-testid="button-retry-hotspots">
+                Try Again
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function SortingBlock({ content, onComplete }: { content: any; onComplete?: (allCorrect: boolean) => void }) {
+  const correctOrder = useMemo(() => {
+    return [...(content.items || [])].sort((a, b) => a.correctPosition - b.correctPosition);
+  }, [content.items]);
+
+  const [items, setItems] = useState<any[]>(() => {
+    const shuffled = [...(content.items || [])];
+    shuffled.sort(() => Math.random() - 0.5);
+    return shuffled;
+  });
+  const [showResults, setShowResults] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    
+    const newItems = [...items];
+    const draggedItem = newItems[draggedIndex];
+    newItems.splice(draggedIndex, 1);
+    newItems.splice(index, 0, draggedItem);
+    setItems(newItems);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const moveItem = (index: number, direction: "up" | "down") => {
+    if (showResults) return;
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === items.length - 1) return;
+    
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    const newItems = [...items];
+    [newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]];
+    setItems(newItems);
+  };
+
+  const checkOrder = () => {
+    setShowResults(true);
+    const allCorrect = items.every((item, index) => item.correctPosition === index + 1);
+    onComplete?.(allCorrect);
+  };
+
+  const handleRetry = () => {
+    const shuffled = [...(content.items || [])];
+    shuffled.sort(() => Math.random() - 0.5);
+    setItems(shuffled);
+    setShowResults(false);
+  };
+
+  const allCorrect = showResults && items.every((item, index) => item.correctPosition === index + 1);
+
+  return (
+    <Card className="p-4" data-testid="block-sorting">
+      <div className="space-y-4">
+        {content.title && <h3 className="font-semibold text-lg">{content.title}</h3>}
+        {content.instructions && <p className="text-muted-foreground">{content.instructions}</p>}
+        
+        <div className="space-y-2">
+          {items.map((item: any, index: number) => {
+            const isCorrect = item.correctPosition === index + 1;
+            return (
+              <div
+                key={item.id}
+                draggable={!showResults}
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                  showResults
+                    ? isCorrect
+                      ? 'bg-green-100 dark:bg-green-900 border-green-500'
+                      : 'bg-red-100 dark:bg-red-900 border-red-500'
+                    : draggedIndex === index
+                    ? 'bg-primary/20 border-primary'
+                    : 'bg-card border-muted'
+                } ${!showResults ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                data-testid={`sorting-item-${item.id}`}
+              >
+                {!showResults && (
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => moveItem(index, "up")}
+                      disabled={index === 0}
+                      className="p-1 hover:bg-muted rounded disabled:opacity-30"
+                    >
+                      <ChevronLeft className="w-4 h-4 rotate-90" />
+                    </button>
+                    <button
+                      onClick={() => moveItem(index, "down")}
+                      disabled={index === items.length - 1}
+                      className="p-1 hover:bg-muted rounded disabled:opacity-30"
+                    >
+                      <ChevronRight className="w-4 h-4 rotate-90" />
+                    </button>
+                  </div>
+                )}
+                <span className="text-sm font-medium w-6 text-center">{index + 1}.</span>
+                <span className="flex-1">{item.content}</span>
+                {showResults && (
+                  isCorrect 
+                    ? <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    : <XCircle className="w-5 h-5 text-red-600" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {!showResults ? (
+          <Button onClick={checkOrder} data-testid="button-check-sorting">
+            Check Order
+          </Button>
+        ) : (
+          <div className="space-y-3">
+            <div className={`p-3 rounded-lg ${allCorrect ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'}`}>
+              <div className="flex items-center gap-2">
+                {allCorrect ? (
+                  <><CheckCircle2 className="w-5 h-5 text-green-600" /><span className="font-medium text-green-800 dark:text-green-200">Perfect! All items are in the correct order!</span></>
+                ) : (
+                  <><XCircle className="w-5 h-5 text-red-600" /><span className="font-medium text-red-800 dark:text-red-200">Some items are in the wrong position</span></>
+                )}
+              </div>
+            </div>
+            {!allCorrect && content.allowRetry !== false && (
+              <Button variant="outline" onClick={handleRetry} data-testid="button-retry-sorting">
+                Try Again
+              </Button>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function TimelineBlock({ content, onComplete }: { content: any; onComplete?: (allCorrect: boolean) => void }) {
+  const events = content.events || [];
+  const isVertical = content.layout !== "horizontal";
+  const isInteractive = content.isInteractive;
+
+  const [orderedEvents, setOrderedEvents] = useState<any[]>(() => {
+    if (isInteractive) {
+      const shuffled = [...events];
+      shuffled.sort(() => Math.random() - 0.5);
+      return shuffled;
+    }
+    return events;
+  });
+  const [showResults, setShowResults] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (index: number) => {
+    if (!isInteractive || showResults) return;
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    if (!isInteractive || showResults) return;
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    
+    const newEvents = [...orderedEvents];
+    const draggedEvent = newEvents[draggedIndex];
+    newEvents.splice(draggedIndex, 1);
+    newEvents.splice(index, 0, draggedEvent);
+    setOrderedEvents(newEvents);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const checkOrder = () => {
+    setShowResults(true);
+    const allCorrect = orderedEvents.every((event, index) => event.id === events[index].id);
+    onComplete?.(allCorrect);
+  };
+
+  const handleRetry = () => {
+    const shuffled = [...events];
+    shuffled.sort(() => Math.random() - 0.5);
+    setOrderedEvents(shuffled);
+    setShowResults(false);
+  };
+
+  const allCorrect = showResults && orderedEvents.every((event, index) => event.id === events[index].id);
+
+  if (!isInteractive) {
+    return (
+      <Card className="p-4" data-testid="block-timeline">
+        <div className="space-y-4">
+          {content.title && <h3 className="font-semibold text-lg">{content.title}</h3>}
+          
+          <div className={`relative ${isVertical ? 'space-y-4 pl-6' : 'flex gap-4 overflow-x-auto pb-4'}`}>
+            {isVertical && (
+              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-primary/30" />
+            )}
+            {events.map((event: any, index: number) => (
+              <div
+                key={event.id}
+                className={`relative ${isVertical ? '' : 'flex-shrink-0 w-64'}`}
+              >
+                {isVertical && (
+                  <div className="absolute -left-6 top-2 w-4 h-4 rounded-full bg-primary border-2 border-background" />
+                )}
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  {event.date && (
+                    <span className="text-xs font-medium text-primary">{event.date}</span>
+                  )}
+                  <h4 className="font-medium">{event.title}</h4>
+                  {event.description && (
+                    <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-4" data-testid="block-timeline">
+      <div className="space-y-4">
+        {content.title && <h3 className="font-semibold text-lg">{content.title}</h3>}
+        {content.instructions && <p className="text-muted-foreground">{content.instructions}</p>}
+        
+        <div className="space-y-2">
+          {orderedEvents.map((event: any, index: number) => {
+            const correctIndex = events.findIndex((e: any) => e.id === event.id);
+            const isCorrect = correctIndex === index;
+            return (
+              <div
+                key={event.id}
+                draggable={!showResults}
+                onDragStart={() => handleDragStart(index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`p-3 rounded-lg border transition-colors ${
+                  showResults
+                    ? isCorrect
+                      ? 'bg-green-100 dark:bg-green-900 border-green-500'
+                      : 'bg-red-100 dark:bg-red-900 border-red-500'
+                    : draggedIndex === index
+                    ? 'bg-primary/20 border-primary'
+                    : 'bg-card border-muted'
+                } ${!showResults ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                data-testid={`timeline-event-${event.id}`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium w-6 text-center">{index + 1}.</span>
+                  <div className="flex-1">
+                    {event.date && (
+                      <span className="text-xs font-medium text-primary">{event.date}</span>
+                    )}
+                    <h4 className="font-medium">{event.title}</h4>
+                  </div>
+                  {showResults && (
+                    isCorrect 
+                      ? <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      : <XCircle className="w-5 h-5 text-red-600" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {!showResults ? (
+          <Button onClick={checkOrder} data-testid="button-check-timeline">
+            Check Order
+          </Button>
+        ) : (
+          <div className="space-y-3">
+            <div className={`p-3 rounded-lg ${allCorrect ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'}`}>
+              <div className="flex items-center gap-2">
+                {allCorrect ? (
+                  <><CheckCircle2 className="w-5 h-5 text-green-600" /><span className="font-medium text-green-800 dark:text-green-200">Perfect! Events are in the correct order!</span></>
+                ) : (
+                  <><XCircle className="w-5 h-5 text-red-600" /><span className="font-medium text-red-800 dark:text-red-200">Some events are in the wrong position</span></>
+                )}
+              </div>
+            </div>
+            {!allCorrect && content.allowRetry !== false && (
+              <Button variant="outline" onClick={handleRetry} data-testid="button-retry-timeline">
                 Try Again
               </Button>
             )}
