@@ -4,7 +4,8 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { validateRequest, validateUUID, createCourseSchema, updateCourseSchema, createUnitSchema, updateUnitSchema, createLessonSchema, updateLessonSchema } from "./validation";
 import { asyncHandler, NotFoundError, ConflictError } from "./errors";
-import { authRateLimit, publicRateLimit, authenticatedRateLimit, adminRateLimit, quizSubmissionRateLimit } from "./rateLimit";
+import { authRateLimit, publicRateLimit, authenticatedRateLimit, adminRateLimit, quizSubmissionRateLimit } from "./rateLimitRedis";
+import { getQueryMetrics, getQueryStats } from "./queryMonitor";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
@@ -4410,43 +4411,33 @@ segment1.ts
     }
   });
 
-  // Admin health check endpoint - checks database and payment gateway status
+  // Admin health check endpoint - uses comprehensive health check
   app.get("/api/admin/health", isAdmin, async (req, res) => {
-    const healthStatus = {
-      database: { status: "unknown", message: "" },
-      api: { status: "healthy", message: "API server is running" },
-      payment: { status: "unknown", message: "" }
-    };
+    const { comprehensiveHealthCheck } = await import("./healthCheck");
+    await comprehensiveHealthCheck(req, res);
+  });
 
-    // Check database connection
+  // Query performance metrics endpoint
+  app.get("/api/admin/query-metrics", isAdmin, async (req, res) => {
     try {
-      const users = await storage.getUsers?.();
-      if (users !== undefined) {
-        healthStatus.database = { status: "healthy", message: "Database connection active" };
-      } else {
-        healthStatus.database = { status: "degraded", message: "Database query returned undefined" };
-      }
-    } catch (err) {
-      healthStatus.database = { status: "error", message: "Database connection failed" };
-    }
+      const filters: any = {};
+      if (req.query.minDuration) filters.minDuration = parseInt(req.query.minDuration as string);
+      if (req.query.maxDuration) filters.maxDuration = parseInt(req.query.maxDuration as string);
+      if (req.query.userId) filters.userId = req.query.userId as string;
+      if (req.query.route) filters.route = req.query.route as string;
+      if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
 
-    // Check Stripe status
-    try {
-      const stripeStatus = getStripeStatus();
-      if (stripeStatus.configured) {
-        healthStatus.payment = { status: "healthy", message: "Stripe connected" };
-      } else if (stripeStatus.hasSecretKey && !stripeStatus.hasPublishableKey) {
-        healthStatus.payment = { status: "degraded", message: "Stripe partially configured (missing publishable key)" };
-      } else if (!stripeStatus.hasSecretKey && stripeStatus.hasPublishableKey) {
-        healthStatus.payment = { status: "degraded", message: "Stripe partially configured (missing secret key)" };
-      } else {
-        healthStatus.payment = { status: "not_configured", message: "Stripe not configured" };
-      }
-    } catch (err) {
-      healthStatus.payment = { status: "error", message: "Payment gateway check failed" };
-    }
+      const metrics = getQueryMetrics(filters);
+      const stats = getQueryStats();
 
-    res.json(healthStatus);
+      res.json({
+        metrics,
+        stats,
+      });
+    } catch (err) {
+      console.error("Error fetching query metrics:", err);
+      res.status(500).json({ error: "Failed to fetch query metrics" });
+    }
   });
 
   app.get("/api/admin/users", isAdmin, async (req, res) => {
@@ -4571,10 +4562,13 @@ segment1.ts
 
   // Course Management Admin Routes
   app.post("/api/admin/courses", adminRateLimit, isAdmin, validateRequest(createCourseSchema), asyncHandler(async (req, res) => {
+    const userId = (req.user as any)?.id;
     const course = await storage.createCourse?.(req.body);
     if (!course) {
       throw new Error("Failed to create course");
     }
+    // Audit log
+    await storage.createAuditLog?.("CREATE", userId, "course", course.id, JSON.stringify({ title: course.title, sku: course.sku }), "info", req.ip, req.get("user-agent"));
     triggerCatalogSyncDebounced();
     res.status(201).json(course);
   }));
@@ -4586,16 +4580,22 @@ segment1.ts
 
   app.patch("/api/admin/courses/:courseId", adminRateLimit, isAdmin, validateUUID("courseId"), validateRequest(updateCourseSchema), asyncHandler(async (req, res) => {
     const { courseId } = req.params;
+    const userId = (req.user as any)?.id;
     const course = await storage.updateCourse?.(courseId, req.body);
     if (!course) throw new NotFoundError("Course");
+    // Audit log
+    await storage.createAuditLog?.("UPDATE", userId, "course", courseId, JSON.stringify(req.body), "info", req.ip, req.get("user-agent"));
     triggerCatalogSyncDebounced();
     res.json(course);
   }));
 
   app.delete("/api/admin/courses/:courseId", adminRateLimit, isAdmin, validateUUID("courseId"), asyncHandler(async (req, res) => {
     const { courseId } = req.params;
+    const userId = (req.user as any)?.id;
     const hardDelete = req.query.hardDelete === "true";
     await storage.deleteCourse?.(courseId, { hardDelete });
+    // Audit log
+    await storage.createAuditLog?.("DELETE", userId, "course", courseId, JSON.stringify({ mode: hardDelete ? "hard" : "soft" }), "warning", req.ip, req.get("user-agent"));
     triggerCatalogSyncDebounced();
     res.json({ success: true, mode: hardDelete ? "hard" : "soft" });
   }));

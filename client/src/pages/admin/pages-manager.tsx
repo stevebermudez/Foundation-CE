@@ -15,10 +15,11 @@ import {
   Plus, Trash2, GripVertical, Image as ImageIcon, Video as VideoIcon, 
   Type, Save, FileText, Settings, Eye, EyeOff, ChevronUp, ChevronDown,
   Layout, Columns, Square, LayoutGrid, Heading1, AlignLeft, MousePointer,
-  ExternalLink, Minus, Code, RefreshCw, Globe
+  ExternalLink, Minus, Code, RefreshCw, Globe, Palette, Monitor
 } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import VisualPageBuilder from "@/components/admin/VisualPageBuilder";
 
 interface SectionBlock {
   id: string;
@@ -94,6 +95,7 @@ export default function PagesManagerPage() {
   const [editingSection, setEditingSection] = useState<Partial<PageSection> | null>(null);
   const [editingBlock, setEditingBlock] = useState<Partial<SectionBlock> | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"visual" | "list">("visual");
 
   const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("adminToken");
@@ -565,6 +567,22 @@ export default function PagesManagerPage() {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
+                        variant={viewMode === "visual" ? "default" : "outline"}
+                        onClick={() => setViewMode("visual")}
+                      >
+                        <Palette className="h-4 w-4 mr-1" />
+                        Visual
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={viewMode === "list" ? "default" : "outline"}
+                        onClick={() => setViewMode("list")}
+                      >
+                        <Monitor className="h-4 w-4 mr-1" />
+                        List
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => {
                           setEditingPage(pageData.page);
@@ -603,159 +621,197 @@ export default function PagesManagerPage() {
                 </CardHeader>
               </Card>
 
-              {/* Sections */}
-              <div className="space-y-4">
-                {pageData.sections.map((section, index) => (
-                  <Card key={section.id} className="relative">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex flex-col gap-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => moveSectionUp(index)}
-                              disabled={index === 0}
-                            >
-                              <ChevronUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => moveSectionDown(index)}
-                              disabled={index === pageData.sections.length - 1}
-                            >
-                              <ChevronDown className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <div>
-                            <CardTitle className="text-sm flex items-center gap-2">
-                              <Badge variant="outline">{section.sectionType}</Badge>
-                              {section.title || `Section ${index + 1}`}
-                            </CardTitle>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {section.blocks.length} block{section.blocks.length !== 1 ? "s" : ""}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedSectionId(section.id);
-                              setEditingBlock({ blockType: "text", content: "", alignment: "left", size: "medium" });
-                              setShowBlockDialog(true);
-                            }}
-                            data-testid={`button-add-block-${section.id}`}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add Block
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setEditingSection(section);
-                              setShowSectionDialog(true);
-                            }}
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              if (confirm("Delete this section and all its content?")) {
-                                deleteSectionMutation.mutate(section.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      {section.blocks.length === 0 ? (
-                        <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center text-muted-foreground">
-                          <p>No blocks in this section</p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="mt-2"
-                            onClick={() => {
-                              setSelectedSectionId(section.id);
-                              setEditingBlock({ blockType: "text", content: "", alignment: "left", size: "medium" });
-                              setShowBlockDialog(true);
-                            }}
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add Block
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          {section.blocks.map((block) => (
-                            <div
-                              key={block.id}
-                              className="flex items-center gap-3 p-3 border rounded-lg group hover-elevate"
-                            >
-                              <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                              <Badge variant="secondary" className="text-xs">
-                                {block.blockType}
-                              </Badge>
-                              <div className="flex-1 min-w-0">{renderBlockContent(block)}</div>
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7"
-                                  onClick={() => {
-                                    setSelectedSectionId(section.id);
-                                    setEditingBlock(block);
-                                    setShowBlockDialog(true);
-                                  }}
-                                >
-                                  <Settings className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7"
-                                  onClick={() => {
-                                    if (confirm("Delete this block?")) {
-                                      deleteBlockMutation.mutate(block.id);
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-
-                {/* Add Section Button */}
-                <Button
-                  variant="outline"
-                  className="w-full h-16 border-2 border-dashed"
-                  onClick={() => {
-                    setEditingSection({ sectionType: "text", title: "", padding: "normal" });
-                    setShowSectionDialog(true);
+              {/* Sections - Visual or List View */}
+              {viewMode === "visual" ? (
+                <VisualPageBuilder
+                  sections={pageData.sections}
+                  onSectionsChange={(sections) => {
+                    // Handle sections change if needed
                   }}
-                  data-testid="button-add-section"
-                >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Add Section
-                </Button>
-              </div>
+                  onSectionAdd={(section) => {
+                    createSectionMutation.mutate(section);
+                  }}
+                  onSectionUpdate={(sectionId, data) => {
+                    updateSectionMutation.mutate({ id: sectionId, data });
+                  }}
+                  onSectionDelete={(sectionId) => {
+                    if (confirm("Delete this section and all its content?")) {
+                      deleteSectionMutation.mutate(sectionId);
+                    }
+                  }}
+                  onBlockAdd={(sectionId, block) => {
+                    createBlockMutation.mutate({ sectionId, data: block });
+                  }}
+                  onBlockUpdate={(blockId, data) => {
+                    updateBlockMutation.mutate({ id: blockId, data });
+                  }}
+                  onBlockDelete={(blockId) => {
+                    if (confirm("Delete this block?")) {
+                      deleteBlockMutation.mutate(blockId);
+                    }
+                  }}
+                  onBlockReorder={(sectionId, blockIds) => {
+                    // TODO: Implement block reorder API
+                    toast({ title: "Info", description: "Block reordering will be saved automatically" });
+                  }}
+                  onSectionReorder={(sectionIds) => {
+                    reorderSectionsMutation.mutate(sectionIds);
+                  }}
+                />
+              ) : (
+                <div className="space-y-4">
+                  {pageData.sections.map((section, index) => (
+                    <Card key={section.id} className="relative">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex flex-col gap-1">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-6 w-6"
+                                onClick={() => moveSectionUp(index)}
+                                disabled={index === 0}
+                              >
+                                <ChevronUp className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-6 w-6"
+                                onClick={() => moveSectionDown(index)}
+                                disabled={index === pageData.sections.length - 1}
+                              >
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div>
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <Badge variant="outline">{section.sectionType}</Badge>
+                                {section.title || `Section ${index + 1}`}
+                              </CardTitle>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {section.blocks.length} block{section.blocks.length !== 1 ? "s" : ""}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedSectionId(section.id);
+                                setEditingBlock({ blockType: "text", content: "", alignment: "left", size: "medium" });
+                                setShowBlockDialog(true);
+                              }}
+                              data-testid={`button-add-block-${section.id}`}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Block
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingSection(section);
+                                setShowSectionDialog(true);
+                              }}
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm("Delete this section and all its content?")) {
+                                  deleteSectionMutation.mutate(section.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        {section.blocks.length === 0 ? (
+                          <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center text-muted-foreground">
+                            <p>No blocks in this section</p>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="mt-2"
+                              onClick={() => {
+                                setSelectedSectionId(section.id);
+                                setEditingBlock({ blockType: "text", content: "", alignment: "left", size: "medium" });
+                                setShowBlockDialog(true);
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add Block
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {section.blocks.map((block) => (
+                              <div
+                                key={block.id}
+                                className="flex items-center gap-3 p-3 border rounded-lg group hover-elevate"
+                              >
+                                <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                                <Badge variant="secondary" className="text-xs">
+                                  {block.blockType}
+                                </Badge>
+                                <div className="flex-1 min-w-0">{renderBlockContent(block)}</div>
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-7 w-7"
+                                    onClick={() => {
+                                      setSelectedSectionId(section.id);
+                                      setEditingBlock(block);
+                                      setShowBlockDialog(true);
+                                    }}
+                                  >
+                                    <Settings className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-7 w-7"
+                                    onClick={() => {
+                                      if (confirm("Delete this block?")) {
+                                        deleteBlockMutation.mutate(block.id);
+                                      }
+                                    }}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  {/* Add Section Button */}
+                  <Button
+                    variant="outline"
+                    className="w-full h-16 border-2 border-dashed"
+                    onClick={() => {
+                      setEditingSection({ sectionType: "text", title: "", padding: "normal" });
+                      setShowSectionDialog(true);
+                    }}
+                    data-testid="button-add-section"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Add Section
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <Card className="h-64 flex items-center justify-center">

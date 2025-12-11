@@ -13,6 +13,9 @@
     "restore:db": "tsx scripts/restore-database.ts"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",
@@ -56,6 +59,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "compression": "^1.8.1",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
     "docx": "^9.5.1",
@@ -67,6 +71,7 @@
     "express-session": "^1.18.1",
     "framer-motion": "^11.13.1",
     "input-otp": "^1.4.2",
+    "ioredis": "^5.8.2",
     "lucide-react": "^0.453.0",
     "mammoth": "^1.11.0",
     "memoizee": "^0.4.17",
@@ -80,6 +85,7 @@
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
+    "rate-limit-redis": "^4.3.1",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",

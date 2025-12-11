@@ -6,6 +6,9 @@ import { createServer } from "http";
 import { ensureAdminExists } from "./seedAdmin";
 import { importCourseCatalog } from "./importCourseCatalog";
 import { requestIdMiddleware, errorHandler } from "./errors";
+import { compressionMiddleware } from "./compression";
+import { comprehensiveHealthCheck, livenessCheck, readinessCheck } from "./healthCheck";
+import { queryMonitorMiddleware } from "./queryMonitor";
 
 const app = express();
 const httpServer = createServer(app);
@@ -26,14 +29,19 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
+// Response compression (compress responses > 1KB)
+app.use(compressionMiddleware);
+
 // Add request ID to all requests for tracing
 app.use(requestIdMiddleware);
 
-// Simple health check endpoint that responds immediately (no DB queries)
-// This helps deployment readiness checks succeed quickly
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok", timestamp: Date.now() });
-});
+// Query performance monitoring
+app.use(queryMonitorMiddleware);
+
+// Health check endpoints
+app.get("/health", comprehensiveHealthCheck);
+app.get("/health/live", livenessCheck);
+app.get("/health/ready", readinessCheck);
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
