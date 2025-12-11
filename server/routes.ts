@@ -7,6 +7,8 @@ import { asyncHandler, NotFoundError, ConflictError } from "./errors";
 import { authRateLimit, publicRateLimit, authenticatedRateLimit, adminRateLimit, quizSubmissionRateLimit } from "./rateLimitRedis";
 import { getQueryMetrics, getQueryStats } from "./queryMonitor";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
 import { updateAllLessonContent, fixQuestionBankSettings } from "./updateLessonContent";
@@ -4594,6 +4596,68 @@ segment1.ts
       res.status(500).json({ error: "Failed to update enrollment" });
     }
   });
+
+  // Admin Health Check Endpoint
+  app.get("/api/admin/health", adminRateLimit, isAdmin, asyncHandler(async (req, res) => {
+    try {
+      // Check database
+      const dbStart = Date.now();
+      let dbStatus = "unknown";
+      let dbMessage = "Checking...";
+      try {
+        await db.execute(sql`SELECT 1 as health`);
+        const dbLatency = Date.now() - dbStart;
+        dbStatus = dbLatency < 1000 ? "healthy" : "degraded";
+        dbMessage = dbLatency < 1000 ? "Connected" : `Slow (${dbLatency}ms)`;
+      } catch (err) {
+        dbStatus = "error";
+        dbMessage = `Error: ${(err as Error).message}`;
+      }
+
+      // Check API (always healthy if we got here)
+      const apiStatus = "healthy";
+      const apiMessage = "Running";
+
+      // Check payment gateway (Stripe)
+      let paymentStatus = "unknown";
+      let paymentMessage = "Checking...";
+      try {
+        const stripeStatus = getStripeStatus();
+        if (stripeStatus.configured) {
+          paymentStatus = "healthy";
+          paymentMessage = "Connected";
+        } else {
+          paymentStatus = "not_configured";
+          paymentMessage = "Not configured";
+        }
+      } catch (err) {
+        paymentStatus = "error";
+        paymentMessage = `Error: ${(err as Error).message}`;
+      }
+
+      // Return format matching frontend expectations
+      res.json({
+        database: {
+          status: dbStatus,
+          message: dbMessage,
+        },
+        api: {
+          status: apiStatus,
+          message: apiMessage,
+        },
+        payment: {
+          status: paymentStatus,
+          message: paymentMessage,
+        },
+      });
+    } catch (err) {
+      res.status(500).json({
+        database: { status: "error", message: "Health check failed" },
+        api: { status: "error", message: "Health check failed" },
+        payment: { status: "error", message: "Health check failed" },
+      });
+    }
+  }));
 
   // Course Management Admin Routes
   app.post("/api/admin/courses", adminRateLimit, isAdmin, validateRequest(createCourseSchema), asyncHandler(async (req, res) => {

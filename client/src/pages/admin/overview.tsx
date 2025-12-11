@@ -258,7 +258,7 @@ function SystemHealth({ healthStatus, loading }: { healthStatus: any; loading: b
   const services = [
     { name: "Database", status: healthStatus?.database?.status || "unknown" },
     { name: "API Server", status: healthStatus?.api?.status || "unknown" },
-    { name: "Payments", status: healthStatus?.payment?.status || "unknown" },
+    { name: "Payments", status: healthStatus?.payment?.status || healthStatus?.paymentGateway?.status || "unknown" },
   ];
 
   return (
@@ -270,23 +270,41 @@ function SystemHealth({ healthStatus, loading }: { healthStatus: any; loading: b
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {services.map((service) => (
-          <div key={service.name} className="flex items-center justify-between">
-            <span className="text-sm">{service.name}</span>
-            <Badge 
-              variant={service.status === "healthy" || service.status === "ok" ? "default" : "destructive"}
-              className="text-xs"
-            >
-              {service.status === "healthy" || service.status === "ok" ? (
-                <><CheckCircle2 className="h-3 w-3 mr-1" /> Healthy</>
-              ) : service.status === "unknown" ? (
-                <><Clock className="h-3 w-3 mr-1" /> Unknown</>
-              ) : (
-                <><AlertTriangle className="h-3 w-3 mr-1" /> Issue</>
-              )}
-            </Badge>
-          </div>
-        ))}
+        {services.map((service) => {
+          const isHealthy = service.status === "healthy" || service.status === "ok";
+          const isError = service.status === "error";
+          const isUnknown = service.status === "unknown";
+          const isNotConfigured = service.status === "not_configured";
+          const isDegraded = service.status === "degraded";
+          
+          return (
+            <div key={service.name} className="flex items-center justify-between">
+              <span className="text-sm">{service.name}</span>
+              <Badge 
+                variant={isHealthy ? "default" : isError ? "destructive" : "secondary"}
+                className={`text-xs ${
+                  isHealthy ? "bg-green-600" :
+                  isError ? "bg-red-600" :
+                  isNotConfigured ? "bg-yellow-600" :
+                  isDegraded ? "bg-orange-600" :
+                  "bg-gray-600"
+                }`}
+              >
+                {isHealthy ? (
+                  <><CheckCircle2 className="h-3 w-3 mr-1" /> Healthy</>
+                ) : isError ? (
+                  <><AlertTriangle className="h-3 w-3 mr-1" /> Error</>
+                ) : isNotConfigured ? (
+                  <><Clock className="h-3 w-3 mr-1" /> Not Configured</>
+                ) : isDegraded ? (
+                  <><AlertTriangle className="h-3 w-3 mr-1" /> Degraded</>
+                ) : (
+                  <><Clock className="h-3 w-3 mr-1" /> Unknown</>
+                )}
+              </Badge>
+            </div>
+          );
+        })}
         <div className="pt-2 border-t">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Last checked</span>
