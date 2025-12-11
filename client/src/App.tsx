@@ -40,6 +40,7 @@ import AdminPagesManagerPage from "@/pages/admin/pages-manager";
 import AdminFinancePage from "@/pages/admin/finance";
 import AdminSettingsPage from "@/pages/admin/settings";
 import AdminAnalyticsDashboard from "@/pages/admin/analytics-dashboard";
+import AdminCoursePreviewPage from "@/pages/admin/course-preview";
 import CourseLearningPage from "@/pages/course-learning";
 import UnitLearningPage from "@/pages/unit-learning";
 import AccessibilityPage from "@/pages/accessibility";
@@ -62,6 +63,7 @@ function AdminRouter() {
         <Route path="/admin/finance" component={AdminFinancePage} />
         <Route path="/admin/settings" component={AdminSettingsPage} />
         <Route path="/admin/analytics" component={AdminAnalyticsDashboard} />
+        <Route path="/admin/courses/:id/preview" component={AdminCoursePreviewPage} />
         <Route component={AdminOverviewPage} />
       </Switch>
     </AdminLayout>

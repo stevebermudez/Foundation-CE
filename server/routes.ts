@@ -1077,6 +1077,41 @@ export async function registerRoutes(
     res.json(course);
   });
 
+  // Admin Course Preview - Bypass enrollment checks for admins
+  app.get("/api/admin/courses/:id/preview", isAdmin, adminRateLimit, asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const course = await storage.getCourse(id);
+    if (!course) {
+      throw new NotFoundError("Course not found");
+    }
+
+    // Get all units with lessons (no enrollment required for preview)
+    const units = await storage.getUnits(id);
+    const sortedUnits = units.sort((a, b) => a.unitNumber - b.unitNumber);
+
+    const unitsWithLessons = await Promise.all(sortedUnits.map(async (unit) => {
+      const lessons = await storage.getLessons(unit.id);
+      const sortedLessons = lessons.sort((a, b) => a.lessonNumber - b.lessonNumber);
+      return {
+        id: unit.id,
+        unitNumber: unit.unitNumber,
+        title: unit.title,
+        description: unit.description,
+        hoursRequired: unit.hoursRequired,
+        lessons: sortedLessons.map(lesson => ({
+          id: lesson.id,
+          lessonNumber: lesson.lessonNumber,
+          title: lesson.title,
+          content: lesson.content,
+          videoUrl: lesson.videoUrl,
+          durationMinutes: lesson.durationMinutes || 15,
+        })),
+      };
+    }));
+
+    res.json(unitsWithLessons);
+  }));
+
   // ============================================================
   // LMS Routes - Sequential Learning, Time Tracking, Quizzes
   // ============================================================

@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Edit2, Trash2, AlertCircle, FileDown, Download, FileText, ClipboardList } from "lucide-react";
+import { Plus, Edit2, Trash2, AlertCircle, FileDown, Download, FileText, ClipboardList, Eye } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -975,6 +975,16 @@ export default function AdminCoursesPage() {
                       aria-label={`Export ${course.title} to Word document`}
                     >
                       <FileDown className="h-4 w-4" aria-hidden="true" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => window.location.href = `/admin/courses/${course.id}/preview`}
+                      data-testid={`button-preview-${course.id}`}
+                      aria-label={`Preview ${course.title}`}
+                      title="Preview Course"
+                    >
+                      <Eye className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     {course.state === 'FL' && (
                       <Button
