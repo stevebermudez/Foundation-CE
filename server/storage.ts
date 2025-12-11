@@ -716,20 +716,42 @@ export class DatabaseStorage implements IStorage {
         const tempValue = -Math.abs(Date.now() % 1000000); // Unique negative value per transaction
         await tx.update(units).set({ unitNumber: tempValue, sequence: tempValue }).where(eq(units.id, unitId));
         
-        // Reposition all siblings to create sequential positions 1..N
-        // Algorithm: iterate through siblings in order, assign sequential positions
-        // but skip the target position (it's reserved for the moved item)
-        let newPos = 1;
+        // Reposition all siblings based on the move operation
+        // Algorithm: Calculate new position for each sibling based on where it falls relative to currentPos and target
         for (const u of siblings) {
           if (u.id === unitId) {
             continue; // Skip the item being moved, we'll set it separately
           }
           const oldPos = (u as any).unitNumber || 1;
+          let newPos: number;
           
-          // Calculate new position: items should be numbered 1..N sequentially
-          // but we need to skip position 'target' (reserved for moved item)
-          if (newPos === target) {
-            newPos++; // Skip target position, it's for the moved item
+          if (currentPos === target) {
+            // No actual move, positions stay the same
+            newPos = oldPos;
+          } else if (currentPos < target) {
+            // Moving forward: items between currentPos and target shift down by 1
+            if (oldPos <= currentPos) {
+              // Items before/at current position: no change
+              newPos = oldPos;
+            } else if (oldPos <= target) {
+              // Items between currentPos and target: shift down by 1
+              newPos = oldPos - 1;
+            } else {
+              // Items after target: no change
+              newPos = oldPos;
+            }
+          } else {
+            // Moving backward: items between target and currentPos shift up by 1
+            if (oldPos < target) {
+              // Items before target: no change
+              newPos = oldPos;
+            } else if (oldPos < currentPos) {
+              // Items between target and currentPos: shift up by 1
+              newPos = oldPos + 1;
+            } else {
+              // Items at/after current position: no change
+              newPos = oldPos;
+            }
           }
           
           // Increment version for resequenced units to maintain optimistic concurrency control
@@ -738,8 +760,6 @@ export class DatabaseStorage implements IStorage {
             sequence: newPos,
             version: ((u as any).version || 1) + 1,
           }).where(eq(units.id, u.id));
-          
-          newPos++; // Move to next position
         }
         updateData.unitNumber = target;
         updateData.sequence = target;
@@ -866,20 +886,42 @@ export class DatabaseStorage implements IStorage {
         const tempValue = -Math.abs(Date.now() % 1000000); // Unique negative value per transaction
         await tx.update(lessons).set({ lessonNumber: tempValue, sequence: tempValue }).where(eq(lessons.id, lessonId));
         
-        // Reposition all siblings to create sequential positions 1..N
-        // Algorithm: iterate through siblings in order, assign sequential positions
-        // but skip the target position (it's reserved for the moved item)
-        let newPos = 1;
+        // Reposition all siblings based on the move operation
+        // Algorithm: Calculate new position for each sibling based on where it falls relative to currentPos and target
         for (const l of siblings) {
           if (l.id === lessonId) {
             continue; // Skip the item being moved, we'll set it separately
           }
           const oldPos = (l as any).lessonNumber || 1;
+          let newPos: number;
           
-          // Calculate new position: items should be numbered 1..N sequentially
-          // but we need to skip position 'target' (reserved for moved item)
-          if (newPos === target) {
-            newPos++; // Skip target position, it's for the moved item
+          if (currentPos === target) {
+            // No actual move, positions stay the same
+            newPos = oldPos;
+          } else if (currentPos < target) {
+            // Moving forward: items between currentPos and target shift down by 1
+            if (oldPos <= currentPos) {
+              // Items before/at current position: no change
+              newPos = oldPos;
+            } else if (oldPos <= target) {
+              // Items between currentPos and target: shift down by 1
+              newPos = oldPos - 1;
+            } else {
+              // Items after target: no change
+              newPos = oldPos;
+            }
+          } else {
+            // Moving backward: items between target and currentPos shift up by 1
+            if (oldPos < target) {
+              // Items before target: no change
+              newPos = oldPos;
+            } else if (oldPos < currentPos) {
+              // Items between target and currentPos: shift up by 1
+              newPos = oldPos + 1;
+            } else {
+              // Items at/after current position: no change
+              newPos = oldPos;
+            }
           }
           
           // Increment version for resequenced lessons to maintain optimistic concurrency control
@@ -888,8 +930,6 @@ export class DatabaseStorage implements IStorage {
             sequence: newPos,
             version: ((l as any).version || 1) + 1,
           }).where(eq(lessons.id, l.id));
-          
-          newPos++; // Move to next position
         }
         updateData.lessonNumber = target;
         updateData.sequence = target;
