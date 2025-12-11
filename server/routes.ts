@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import { validateRequest, validateUUID, createCourseSchema, updateCourseSchema, createUnitSchema, updateUnitSchema, createLessonSchema, updateLessonSchema } from "./validation";
+import { asyncHandler, NotFoundError, ConflictError } from "./errors";
+import { authRateLimit, publicRateLimit, authenticatedRateLimit, adminRateLimit, quizSubmissionRateLimit } from "./rateLimit";
 import { getStripeClient, getStripeStatus, getStripePublishableKey } from "./stripeClient";
 import { seedFRECIPrelicensing } from "./seedFRECIPrelicensing";
 import { seedLMSContent } from "./seedLMSContent";
@@ -544,7 +547,7 @@ export async function registerRoutes(
 });
 
   // Admin Login Route - validates credentials and returns JWT with isAdmin flag
-  app.post("/api/auth/admin/login", async (req, res) => {
+  app.post("/api/auth/admin/login", authRateLimit, async (req, res) => {
     try {
       const { email, password } = req.body;
       
@@ -4567,69 +4570,14 @@ segment1.ts
   });
 
   // Course Management Admin Routes
-  const createCourseSchema = z.object({
-    title: z.string().min(1),
-    description: z.string().optional(),
-    productType: z.string().min(1),
-    state: z.string().min(2),
-    licenseType: z.string().min(1),
-    requirementCycleType: z.string().min(1),
-    requirementBucket: z.string().min(1),
-    hoursRequired: z.number().int().positive(),
-    deliveryMethod: z.string().optional(),
-    difficultyLevel: z.string().optional(),
-    price: z.number().int().nonnegative(),
-    sku: z.string().min(1),
-    renewalApplicable: z.number().optional(),
-    renewalPeriodYears: z.number().optional(),
-    providerNumber: z.string().optional(),
-    courseOfferingNumber: z.string().optional(),
-    instructorName: z.string().optional(),
-    instructorEmail: z.string().email().optional(),
-    instructorPhone: z.string().optional(),
-    instructorAddress: z.string().optional(),
-    instructorAvailability: z.string().optional(),
-    expirationMonths: z.number().int().positive().max(36).optional(),
-    units: z.array(z.object({
-      unitNumber: z.number().int().positive().optional(),
-      title: z.string().optional(),
-      description: z.string().optional(),
-      hoursRequired: z.number().int().nonnegative().optional(),
-      sequence: z.number().int().nonnegative().optional(),
-    })).optional(),
-  });
-
-  const updateCourseSchema = createCourseSchema.partial().extend({
-    expectedVersion: z.number().int().optional(),
-  });
-
-  function mapCourseErrors(err: any, res: any) {
-    const msg = typeof err?.message === "string" ? err.message : "";
-    if (msg === "COURSE_SKU_EXISTS" || msg === "COURSE_TITLE_EXISTS") {
-      return res.status(409).json({ error: "Duplicate course", code: msg });
+  app.post("/api/admin/courses", adminRateLimit, isAdmin, validateRequest(createCourseSchema), asyncHandler(async (req, res) => {
+    const course = await storage.createCourse?.(req.body);
+    if (!course) {
+      throw new Error("Failed to create course");
     }
-    if (msg === "COURSE_VERSION_CONFLICT") {
-      return res.status(412).json({ error: "Version conflict", code: msg });
-    }
-    return null;
-  }
-
-  app.post("/api/admin/courses", isAdmin, async (req, res) => {
-    try {
-      const parsed = createCourseSchema.parse(req.body);
-      const course = await storage.createCourse?.(parsed);
-      triggerCatalogSyncDebounced();
-      res.status(201).json(course);
-    } catch (err: any) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Validation failed", details: err.errors });
-      }
-      const handled = mapCourseErrors(err, res);
-      if (handled) return handled;
-      console.error("Error creating course:", err);
-      res.status(500).json({ error: "Failed to create course" });
-    }
-  });
+    triggerCatalogSyncDebounced();
+    res.status(201).json(course);
+  }));
 
   app.get("/api/admin/courses", isAdmin, async (req, res) => {
     try {
