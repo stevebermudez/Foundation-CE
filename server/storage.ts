@@ -684,7 +684,9 @@ export class DatabaseStorage implements IStorage {
         pos += 1;
       }
 
-      return unit;
+      // Fetch the updated unit with correct positions after resequencing
+      const [updatedUnit] = await tx.select().from(units).where(eq(units.id, unit.id));
+      return updatedUnit || unit;
     });
   }
 
@@ -707,24 +709,37 @@ export class DatabaseStorage implements IStorage {
       // Reposition if unitNumber provided
       if (updateData.unitNumber !== undefined && updateData.unitNumber >= 1) {
         const siblings = await tx.select().from(units).where(eq(units.courseId, existing.courseId)).orderBy(units.unitNumber);
-        const target = Math.min(updateData.unitNumber, siblings.length);
+        const currentPos = (existing as any).unitNumber || 1;
+        const target = Math.min(Math.max(1, updateData.unitNumber), siblings.length);
+        
         // Use negative temporary value to avoid unique constraint conflicts (negative numbers won't conflict with valid positions)
         const tempValue = -Math.abs(Date.now() % 1000000); // Unique negative value per transaction
         await tx.update(units).set({ unitNumber: tempValue, sequence: tempValue }).where(eq(units.id, unitId));
-        let pos = 1;
+        
+        // Reposition all siblings to create sequential positions 1..N
+        // Algorithm: iterate through siblings in order, assign sequential positions
+        // but skip the target position (it's reserved for the moved item)
+        let newPos = 1;
         for (const u of siblings) {
           if (u.id === unitId) {
-            pos += 1;
-            continue;
+            continue; // Skip the item being moved, we'll set it separately
           }
-          const newPos = pos >= target ? pos + 1 : pos;
+          const oldPos = (u as any).unitNumber || 1;
+          
+          // Calculate new position: items should be numbered 1..N sequentially
+          // but we need to skip position 'target' (reserved for moved item)
+          if (newPos === target) {
+            newPos++; // Skip target position, it's for the moved item
+          }
+          
           // Increment version for resequenced units to maintain optimistic concurrency control
           await tx.update(units).set({ 
             unitNumber: newPos, 
             sequence: newPos,
             version: ((u as any).version || 1) + 1,
           }).where(eq(units.id, u.id));
-          pos += 1;
+          
+          newPos++; // Move to next position
         }
         updateData.unitNumber = target;
         updateData.sequence = target;
@@ -820,7 +835,9 @@ export class DatabaseStorage implements IStorage {
         pos += 1;
       }
 
-      return lesson;
+      // Fetch the updated lesson with correct positions after resequencing
+      const [updatedLesson] = await tx.select().from(lessons).where(eq(lessons.id, lesson.id));
+      return updatedLesson || lesson;
     });
   }
 
@@ -842,24 +859,37 @@ export class DatabaseStorage implements IStorage {
 
       if (updateData.lessonNumber !== undefined && updateData.lessonNumber >= 1) {
         const siblings = await tx.select().from(lessons).where(eq(lessons.unitId, existing.unitId)).orderBy(lessons.lessonNumber);
-        const target = Math.min(updateData.lessonNumber, siblings.length);
+        const currentPos = (existing as any).lessonNumber || 1;
+        const target = Math.min(Math.max(1, updateData.lessonNumber), siblings.length);
+        
         // Use negative temporary value to avoid unique constraint conflicts
         const tempValue = -Math.abs(Date.now() % 1000000); // Unique negative value per transaction
         await tx.update(lessons).set({ lessonNumber: tempValue, sequence: tempValue }).where(eq(lessons.id, lessonId));
-        let pos = 1;
+        
+        // Reposition all siblings to create sequential positions 1..N
+        // Algorithm: iterate through siblings in order, assign sequential positions
+        // but skip the target position (it's reserved for the moved item)
+        let newPos = 1;
         for (const l of siblings) {
           if (l.id === lessonId) {
-            pos += 1;
-            continue;
+            continue; // Skip the item being moved, we'll set it separately
           }
-          const newPos = pos >= target ? pos + 1 : pos;
+          const oldPos = (l as any).lessonNumber || 1;
+          
+          // Calculate new position: items should be numbered 1..N sequentially
+          // but we need to skip position 'target' (reserved for moved item)
+          if (newPos === target) {
+            newPos++; // Skip target position, it's for the moved item
+          }
+          
           // Increment version for resequenced lessons to maintain optimistic concurrency control
           await tx.update(lessons).set({ 
             lessonNumber: newPos, 
             sequence: newPos,
             version: ((l as any).version || 1) + 1,
           }).where(eq(lessons.id, l.id));
-          pos += 1;
+          
+          newPos++; // Move to next position
         }
         updateData.lessonNumber = target;
         updateData.sequence = target;
