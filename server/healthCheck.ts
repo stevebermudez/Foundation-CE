@@ -102,7 +102,8 @@ async function checkDatabase(): Promise<HealthCheckResult> {
     const result = await db.execute(sql`SELECT 1 as health`);
     const latency = Date.now() - startTime;
 
-    if (!result || result.length === 0) {
+    // Check if result exists (NeonHttpQueryResult doesn't have .length)
+    if (!result) {
       return {
         status: "degraded",
         message: "Database query returned no results",

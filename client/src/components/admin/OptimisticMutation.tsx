@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import type { UseMutationOptions, UseMutationResult } from "@tanstack/react-query";
+import type { UseMutationOptions, UseMutationResult, QueryKey } from "@tanstack/react-query";
 
 interface OptimisticMutationOptions<TData, TVariables, TContext> {
   mutationFn: (variables: TVariables) => Promise<TData>;
   onMutate?: (variables: TVariables) => Promise<TContext> | TContext;
   onSuccess?: (data: TData, variables: TVariables, context: TContext | undefined) => void;
   onError?: (error: Error, variables: TVariables, context: TContext | undefined) => void;
-  queryKey: string | string[];
+  queryKey: QueryKey;
   successMessage?: string;
   errorMessage?: string;
   invalidateQueries?: boolean;

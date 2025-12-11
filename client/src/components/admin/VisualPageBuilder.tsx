@@ -564,7 +564,7 @@ function SectionSettingsForm({
         <div>
           <Label>Padding</Label>
           <Select
-            value={formData.padding}
+            value={formData.padding ?? undefined}
             onValueChange={(val) => setFormData({ ...formData, padding: val })}
           >
             <SelectTrigger>
@@ -722,7 +722,7 @@ function BlockSettingsForm({
           <div>
             <Label>Alignment</Label>
             <Select
-              value={formData.alignment}
+              value={formData.alignment ?? undefined}
               onValueChange={(val) => setFormData({ ...formData, alignment: val })}
             >
               <SelectTrigger>
@@ -738,7 +738,7 @@ function BlockSettingsForm({
           <div>
             <Label>Size</Label>
             <Select
-              value={formData.size}
+              value={formData.size ?? undefined}
               onValueChange={(val) => setFormData({ ...formData, size: val })}
             >
               <SelectTrigger>
