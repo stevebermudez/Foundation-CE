@@ -7,6 +7,7 @@ import {
   integer,
   boolean,
 } from "drizzle-orm/pg-core";
+import { index, uniqueIndex, check } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -63,7 +64,14 @@ export const courses = pgTable("courses", {
   instructorAvailability: text("instructor_availability"), // Instructor availability hours
   expirationMonths: integer("expiration_months").default(6), // Months student has to complete course (default 6)
   createdAt: timestamp("created_at").defaultNow(),
-});
+  deletedAt: timestamp("deleted_at"),
+  version: integer("version").notNull().default(1),
+}, (course) => ({
+  skuUnique: uniqueIndex("uq_courses_sku").on(course.sku),
+  courseStateIdx: index("idx_courses_state").on(course.state),
+  courseLicenseIdx: index("idx_courses_license").on(course.licenseType),
+  courseDeletedIdx: index("idx_courses_deleted_at").on(course.deletedAt),
+}));
 
 // Course enrollment table
 export const enrollments = pgTable("enrollments", {
@@ -553,7 +561,13 @@ export const units = pgTable("units", {
   hoursRequired: integer("hours_required").default(3),
   sequence: integer("sequence").default(0),
   createdAt: timestamp("created_at").defaultNow(),
-});
+  version: integer("version").notNull().default(1),
+}, (unit) => ({
+  unitCourseIdx: index("idx_units_course").on(unit.courseId),
+  unitSequenceIdx: index("idx_units_sequence").on(unit.sequence),
+  unitPositionUnique: uniqueIndex("uq_units_course_position").on(unit.courseId, unit.unitNumber),
+  unitPositionCheck: check("chk_units_unit_number_nonnegative", sql`${unit.unitNumber} >= 0`),
+}));
 
 // Videos (reusable video assets - can be at course or unit level)
 export const videos = pgTable("videos", {
@@ -588,7 +602,14 @@ export const lessons = pgTable("lessons", {
   sequence: integer("sequence").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+  lastModified: timestamp("last_modified").defaultNow(),
+  version: integer("version").notNull().default(1),
+}, (lesson) => ({
+  lessonUnitIdx: index("idx_lessons_unit").on(lesson.unitId),
+  lessonSequenceIdx: index("idx_lessons_sequence").on(lesson.sequence),
+  lessonPositionUnique: uniqueIndex("uq_lessons_unit_position").on(lesson.unitId, lesson.lessonNumber),
+  lessonPositionCheck: check("chk_lessons_lesson_number_nonnegative", sql`${lesson.lessonNumber} >= 0`),
+}));
 
 // Track user progress on lessons
 export const lessonProgress = pgTable("lesson_progress", {

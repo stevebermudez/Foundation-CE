@@ -14,9 +14,9 @@ export interface IStorage {
   getCourses(filters?: { state?: string; licenseType?: string; requirementBucket?: string }): Promise<Course[]>;
   getCourse(id: string): Promise<Course | undefined>;
   getCourseBySku(sku: string): Promise<Course | undefined>;
-  createCourse?(courseData: any): Promise<Course>;
-  updateCourse?(courseId: string, data: Partial<Course>): Promise<Course | undefined>;
-  deleteCourse?(courseId: string): Promise<void>;
+  createCourse?(courseData: Partial<Course> & { units?: Array<Partial<Unit>> }): Promise<Course>;
+  updateCourse?(courseId: string, data: Partial<Course> & { expectedVersion?: number }): Promise<Course | undefined>;
+  deleteCourse?(courseId: string, opts?: { hardDelete?: boolean }): Promise<void>;
   getUsers?(): Promise<User[]>;
   getEnrollments?(): Promise<Enrollment[]>;
   createPracticeExam?(data: any): Promise<PracticeExam>;
@@ -94,6 +94,12 @@ export interface IStorage {
   createUnit(courseId: string, unitNumber: number, title: string, description?: string, hoursRequired?: number): Promise<Unit>;
   updateUnit(unitId: string, data: Partial<Unit>): Promise<Unit>;
   deleteUnit(unitId: string): Promise<void>;
+  createUnitForCourse?(courseId: string, payload: Partial<Unit>): Promise<Unit>;
+  updateUnitWithValidation?(unitId: string, data: Partial<Unit> & { courseId?: string; expectedVersion?: number }): Promise<Unit | undefined>;
+  deleteUnitSafe?(unitId: string): Promise<void>;
+  createLessonForUnit?(unitId: string, payload: Partial<Lesson>): Promise<Lesson>;
+  updateLessonWithValidation?(lessonId: string, data: Partial<Lesson> & { unitId?: string; expectedVersion?: number }): Promise<Lesson | undefined>;
+  deleteLessonSafe?(lessonId: string): Promise<void>;
   createLesson(unitId: string, lessonNumber: number, title: string, videoUrl?: string, durationMinutes?: number, content?: string, imageUrl?: string): Promise<Lesson>;
   updateLesson(lessonId: string, data: Partial<Lesson>): Promise<Lesson>;
   deleteLesson(lessonId: string): Promise<void>;
@@ -476,25 +482,390 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createCourse(courseData: any): Promise<Course> {
-    const [course] = await db
-      .insert(courses)
-      .values(courseData)
-      .returning();
-    return course;
+  async createCourse(courseData: Partial<Course> & { units?: Array<Partial<Unit>> }): Promise<Course> {
+    return db.transaction(async (tx) => {
+      // Duplicate protection on SKU and title
+      if (courseData.sku) {
+        const existingSku = await tx.select().from(courses).where(eq(courses.sku, courseData.sku));
+        if (existingSku.length > 0) {
+          throw new Error("COURSE_SKU_EXISTS");
+        }
+      }
+      if (courseData.title) {
+        const existingTitle = await tx.select().from(courses).where(eq(courses.title, courseData.title));
+        if (existingTitle.length > 0) {
+          throw new Error("COURSE_TITLE_EXISTS");
+        }
+      }
+
+      const unitsPayload = courseData.units || [];
+      const { units: _omitUnits, ...courseValues } = courseData;
+
+      const [course] = await tx.insert(courses).values(courseValues as any).returning();
+
+      // Optionally seed initial units atomically
+      if (unitsPayload.length > 0) {
+        const used = new Set<number>();
+        for (const u of unitsPayload) {
+          if (u.unitNumber && u.unitNumber > 0) {
+            used.add(u.unitNumber);
+          }
+        }
+
+        let autoPos = 1;
+        const nextAuto = () => {
+          while (used.has(autoPos)) autoPos += 1;
+          const pos = autoPos;
+          used.add(pos);
+          autoPos += 1;
+          return pos;
+        };
+
+        for (const u of unitsPayload) {
+          const position = u.unitNumber && u.unitNumber > 0 ? u.unitNumber : nextAuto();
+          await tx.insert(units).values({
+            courseId: course.id,
+            unitNumber: position,
+            title: u.title ?? `Unit ${position}`,
+            description: u.description ?? null,
+            hoursRequired: u.hoursRequired ?? 0,
+            sequence: u.sequence ?? position,
+          });
+        }
+      }
+
+      return course;
+    });
   }
 
-  async updateCourse(courseId: string, data: Partial<Course>): Promise<Course | undefined> {
-    const [course] = await db
-      .update(courses)
-      .set(data)
-      .where(eq(courses.id, courseId))
-      .returning();
-    return course;
+  async updateCourse(courseId: string, data: Partial<Course> & { expectedVersion?: number }): Promise<Course | undefined> {
+    return db.transaction(async (tx) => {
+      const existing = await tx.select().from(courses).where(eq(courses.id, courseId));
+      if (existing.length === 0) return undefined;
+      const current = existing[0];
+
+      if (data.expectedVersion !== undefined && current.version !== data.expectedVersion) {
+        throw new Error("COURSE_VERSION_CONFLICT");
+      }
+
+      // Duplicate checks if sku/title changing
+      if (data.sku && data.sku !== current.sku) {
+        const dup = await tx.select().from(courses).where(eq(courses.sku, data.sku));
+        if (dup.length > 0) {
+          throw new Error("COURSE_SKU_EXISTS");
+        }
+      }
+      if (data.title && data.title !== current.title) {
+        const dup = await tx.select().from(courses).where(eq(courses.title, data.title));
+        if (dup.length > 0) {
+          throw new Error("COURSE_TITLE_EXISTS");
+        }
+      }
+
+      const { expectedVersion, ...updateData } = data;
+      const [course] = await tx
+        .update(courses)
+        .set({
+          ...updateData,
+          version: (current.version || 1) + 1,
+        })
+        .where(eq(courses.id, courseId))
+        .returning();
+      return course;
+    });
   }
 
-  async deleteCourse(courseId: string): Promise<void> {
-    await db.delete(courses).where(eq(courses.id, courseId));
+  async deleteCourse(courseId: string, opts?: { hardDelete?: boolean }): Promise<void> {
+    const hardDelete = opts?.hardDelete === true;
+
+    await db.transaction(async (tx) => {
+      // Soft delete by default
+      if (!hardDelete) {
+        const [existing] = await tx.select().from(courses).where(eq(courses.id, courseId));
+        if (!existing) return;
+        await tx
+          .update(courses)
+          .set({ deletedAt: new Date(), version: (existing.version || 1) + 1 })
+          .where(eq(courses.id, courseId));
+        return;
+      }
+
+      // Collect related entities
+      const bankRows = await tx.select({ id: questionBanks.id }).from(questionBanks).where(eq(questionBanks.courseId, courseId));
+      const bankIds = bankRows.map((b) => b.id);
+
+      const quizAttemptRows = bankIds.length
+        ? await tx.select({ id: quizAttempts.id }).from(quizAttempts).where(inArray(quizAttempts.bankId, bankIds))
+        : [];
+      const quizAttemptIds = quizAttemptRows.map((a) => a.id);
+
+      if (quizAttemptIds.length) {
+        await tx.delete(quizAnswers).where(inArray(quizAnswers.attemptId, quizAttemptIds));
+        await tx.delete(quizAttempts).where(inArray(quizAttempts.id, quizAttemptIds));
+      }
+      if (bankIds.length) {
+        await tx.delete(bankQuestions).where(inArray(bankQuestions.bankId, bankIds));
+        await tx.delete(questionBanks).where(inArray(questionBanks.id, bankIds));
+      }
+
+      const examRows = await tx.select({ id: practiceExams.id }).from(practiceExams).where(eq(practiceExams.courseId, courseId));
+      const examIds = examRows.map((e) => e.id);
+      if (examIds.length) {
+        const examAttemptRows = await tx.select({ id: examAttempts.id }).from(examAttempts).where(inArray(examAttempts.examId, examIds));
+        const examAttemptIds = examAttemptRows.map((a) => a.id);
+        if (examAttemptIds.length) {
+          await tx.delete(examAnswers).where(inArray(examAnswers.attemptId, examAttemptIds));
+          await tx.delete(examAttempts).where(inArray(examAttempts.id, examAttemptIds));
+        }
+        await tx.delete(examQuestions).where(inArray(examQuestions.examId, examIds));
+        await tx.delete(practiceExams).where(inArray(practiceExams.id, examIds));
+      }
+
+      // Units / lessons / content
+      const unitRows = await tx.select({ id: units.id }).from(units).where(eq(units.courseId, courseId));
+      const unitIds = unitRows.map((u) => u.id);
+      if (unitIds.length) {
+        const lessonRows = await tx.select({ id: lessons.id }).from(lessons).where(inArray(lessons.unitId, unitIds));
+        const lessonIds = lessonRows.map((l) => l.id);
+        if (lessonIds.length) {
+          await tx.delete(contentBlocks).where(inArray(contentBlocks.lessonId, lessonIds));
+          await tx.delete(lessonProgress).where(inArray(lessonProgress.lessonId, lessonIds));
+          await tx.delete(lessons).where(inArray(lessons.id, lessonIds));
+        }
+        await tx.delete(unitProgress).where(inArray(unitProgress.unitId, unitIds));
+        await tx.delete(units).where(inArray(units.id, unitIds));
+      }
+
+      // Enrollments and certificates tied to course
+      const enrollmentRows = await tx.select({ id: enrollments.id }).from(enrollments).where(eq(enrollments.courseId, courseId));
+      const enrollmentIds = enrollmentRows.map((e) => e.id);
+      if (enrollmentIds.length) {
+        await tx.delete(certificates).where(inArray(certificates.enrollmentId, enrollmentIds));
+        await tx.delete(enrollments).where(inArray(enrollments.id, enrollmentIds));
+      }
+
+      await tx.delete(courses).where(eq(courses.id, courseId));
+    });
+  }
+
+  async createUnitForCourse(courseId: string, payload: Partial<Unit>): Promise<Unit> {
+    return db.transaction(async (tx) => {
+      const course = await tx.select().from(courses).where(eq(courses.id, courseId));
+      if (course.length === 0) throw new Error("COURSE_NOT_FOUND");
+
+      // Determine position
+      const requestedPosition = payload.unitNumber;
+      const existing = await tx.select().from(units).where(eq(units.courseId, courseId)).orderBy(units.unitNumber);
+      let insertPosition = existing.length + 1;
+      if (requestedPosition && requestedPosition >= 1 && requestedPosition <= existing.length + 1) {
+        insertPosition = requestedPosition;
+      }
+
+      // Insert
+      const [unit] = await tx.insert(units).values({
+        courseId,
+        unitNumber: insertPosition,
+        sequence: insertPosition,
+        title: payload.title || `Unit ${insertPosition}`,
+        description: payload.description ?? null,
+        hoursRequired: payload.hoursRequired ?? 0,
+      }).returning();
+
+      // Resequence to remove gaps/duplicates
+      const reordered = await tx.select().from(units).where(eq(units.courseId, courseId)).orderBy(units.unitNumber);
+      let pos = 1;
+      for (const u of reordered) {
+        await tx.update(units).set({ unitNumber: pos, sequence: pos }).where(eq(units.id, u.id));
+        pos += 1;
+      }
+
+      return unit;
+    });
+  }
+
+  async updateUnitWithValidation(unitId: string, data: Partial<Unit> & { courseId?: string; expectedVersion?: number }): Promise<Unit | undefined> {
+    return db.transaction(async (tx) => {
+      const existingRows = await tx.select().from(units).where(eq(units.id, unitId));
+      if (existingRows.length === 0) return undefined;
+      const existing = existingRows[0];
+
+      if (data.courseId && data.courseId !== existing.courseId) {
+        throw new Error("UNIT_COURSE_MISMATCH");
+      }
+      if (data.expectedVersion !== undefined && (existing as any).version !== undefined && (existing as any).version !== data.expectedVersion) {
+        throw new Error("UNIT_VERSION_CONFLICT");
+      }
+
+      const updateData: any = { ...data };
+      delete updateData.expectedVersion;
+
+      // Reposition if unitNumber provided
+      if (updateData.unitNumber !== undefined && updateData.unitNumber >= 1) {
+        const siblings = await tx.select().from(units).where(eq(units.courseId, existing.courseId)).orderBy(units.unitNumber);
+        const target = Math.min(updateData.unitNumber, siblings.length);
+        // Temporarily set to high number to avoid constraint
+        await tx.update(units).set({ unitNumber: 9999, sequence: 9999 }).where(eq(units.id, unitId));
+        let pos = 1;
+        for (const u of siblings) {
+          if (u.id === unitId) {
+            pos += 1;
+            continue;
+          }
+          const newPos = pos >= target ? pos + 1 : pos;
+          await tx.update(units).set({ unitNumber: newPos, sequence: newPos }).where(eq(units.id, u.id));
+          pos += 1;
+        }
+        updateData.unitNumber = target;
+        updateData.sequence = target;
+      }
+
+      const [updated] = await tx.update(units)
+        .set({
+          ...updateData,
+          version: ((existing as any).version || 1) + 1,
+        })
+        .where(eq(units.id, unitId))
+        .returning();
+      return updated;
+    });
+  }
+
+  async deleteUnitSafe(unitId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      const unitRows = await tx.select().from(units).where(eq(units.id, unitId));
+      if (unitRows.length === 0) return;
+      const unit = unitRows[0];
+
+      // Block delete if active enrollments exist for the course
+      const activeEnrollment = await tx
+        .select({ id: enrollments.id })
+        .from(enrollments)
+        .where(and(eq(enrollments.courseId, unit.courseId), eq(enrollments.completed, 0)))
+        .limit(1);
+      if (activeEnrollment.length > 0) {
+        throw new Error("UNIT_HAS_ACTIVE_ENROLLMENTS");
+      }
+
+      const lessonRows = await tx.select({ id: lessons.id }).from(lessons).where(eq(lessons.unitId, unitId));
+      const lessonIds = lessonRows.map((l) => l.id);
+      if (lessonIds.length) {
+        await tx.delete(contentBlocks).where(inArray(contentBlocks.lessonId, lessonIds));
+        await tx.delete(lessonProgress).where(inArray(lessonProgress.lessonId, lessonIds));
+        await tx.delete(lessons).where(inArray(lessons.id, lessonIds));
+      }
+
+      await tx.delete(unitProgress).where(eq(unitProgress.unitId, unitId));
+      await tx.delete(units).where(eq(units.id, unitId));
+
+      // Resequence remaining units
+      const remaining = await tx.select().from(units).where(eq(units.courseId, unit.courseId)).orderBy(units.unitNumber);
+      let pos = 1;
+      for (const u of remaining) {
+        await tx.update(units).set({ unitNumber: pos, sequence: pos }).where(eq(units.id, u.id));
+        pos += 1;
+      }
+    });
+  }
+
+  async createLessonForUnit(unitId: string, payload: Partial<Lesson>): Promise<Lesson> {
+    return db.transaction(async (tx) => {
+      const unitRows = await tx.select().from(units).where(eq(units.id, unitId));
+      if (unitRows.length === 0) throw new Error("UNIT_NOT_FOUND");
+      const unit = unitRows[0];
+
+      const existing = await tx.select().from(lessons).where(eq(lessons.unitId, unitId)).orderBy(lessons.lessonNumber);
+      const requested = payload.lessonNumber;
+      let insertPos = existing.length + 1;
+      if (requested && requested >= 1 && requested <= existing.length + 1) {
+        insertPos = requested;
+      }
+
+      const [lesson] = await tx.insert(lessons).values({
+        unitId,
+        lessonNumber: insertPos,
+        sequence: insertPos,
+        title: payload.title || `Lesson ${insertPos}`,
+        content: payload.content ?? null,
+        videoUrl: payload.videoUrl ?? null,
+        imageUrl: payload.imageUrl ?? null,
+        durationMinutes: payload.durationMinutes ?? 15,
+      }).returning();
+
+      // Resequence
+      const reordered = await tx.select().from(lessons).where(eq(lessons.unitId, unitId)).orderBy(lessons.lessonNumber);
+      let pos = 1;
+      for (const l of reordered) {
+        await tx.update(lessons).set({ lessonNumber: pos, sequence: pos }).where(eq(lessons.id, l.id));
+        pos += 1;
+      }
+
+      return lesson;
+    });
+  }
+
+  async updateLessonWithValidation(lessonId: string, data: Partial<Lesson> & { unitId?: string; expectedVersion?: number }): Promise<Lesson | undefined> {
+    return db.transaction(async (tx) => {
+      const existingRows = await tx.select().from(lessons).where(eq(lessons.id, lessonId));
+      if (existingRows.length === 0) return undefined;
+      const existing = existingRows[0];
+
+      if (data.unitId && data.unitId !== existing.unitId) {
+        throw new Error("LESSON_UNIT_MISMATCH");
+      }
+      if (data.expectedVersion !== undefined && (existing as any).version !== undefined && (existing as any).version !== data.expectedVersion) {
+        throw new Error("LESSON_VERSION_CONFLICT");
+      }
+
+      const updateData: any = { ...data };
+      delete updateData.expectedVersion;
+
+      if (updateData.lessonNumber !== undefined && updateData.lessonNumber >= 1) {
+        const siblings = await tx.select().from(lessons).where(eq(lessons.unitId, existing.unitId)).orderBy(lessons.lessonNumber);
+        const target = Math.min(updateData.lessonNumber, siblings.length);
+        await tx.update(lessons).set({ lessonNumber: 9999, sequence: 9999 }).where(eq(lessons.id, lessonId));
+        let pos = 1;
+        for (const l of siblings) {
+          if (l.id === lessonId) {
+            pos += 1;
+            continue;
+          }
+          const newPos = pos >= target ? pos + 1 : pos;
+          await tx.update(lessons).set({ lessonNumber: newPos, sequence: newPos }).where(eq(lessons.id, l.id));
+          pos += 1;
+        }
+        updateData.lessonNumber = target;
+        updateData.sequence = target;
+      }
+
+      const [updated] = await tx.update(lessons)
+        .set({
+          ...updateData,
+          version: ((existing as any).version || 1) + 1,
+          lastModified: new Date(),
+        })
+        .where(eq(lessons.id, lessonId))
+        .returning();
+      return updated;
+    });
+  }
+
+  async deleteLessonSafe(lessonId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      const lessonRows = await tx.select().from(lessons).where(eq(lessons.id, lessonId));
+      if (lessonRows.length === 0) return;
+      const lesson = lessonRows[0];
+
+      await tx.delete(contentBlocks).where(eq(contentBlocks.lessonId, lessonId));
+      await tx.delete(lessonProgress).where(eq(lessonProgress.lessonId, lessonId));
+      await tx.delete(lessons).where(eq(lessons.id, lessonId));
+
+      const remaining = await tx.select().from(lessons).where(eq(lessons.unitId, lesson.unitId)).orderBy(lessons.lessonNumber);
+      let pos = 1;
+      for (const l of remaining) {
+        await tx.update(lessons).set({ lessonNumber: pos, sequence: pos }).where(eq(lessons.id, l.id));
+        pos += 1;
+      }
+    });
   }
 
   async getComplianceRequirement(userId: string): Promise<ComplianceRequirement | undefined> {
@@ -1675,6 +2046,7 @@ export class DatabaseStorage implements IStorage {
     includeVideos?: boolean;
     includeDescriptions?: boolean;
     unitNumbers?: number[];
+    examForms?: string[];
   }): Promise<Buffer> {
     const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, WidthType, AlignmentType, convertInchesToTwip } = await import("docx");
     

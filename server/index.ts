@@ -5,6 +5,7 @@ import { setupAuth } from "./oauthAuth";
 import { createServer } from "http";
 import { ensureAdminExists } from "./seedAdmin";
 import { importCourseCatalog } from "./importCourseCatalog";
+import { requestIdMiddleware, errorHandler } from "./errors";
 
 const app = express();
 const httpServer = createServer(app);
@@ -24,6 +25,9 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: false }));
+
+// Add request ID to all requests for tracing
+app.use(requestIdMiddleware);
 
 // Simple health check endpoint that responds immediately (no DB queries)
 // This helps deployment readiness checks succeed quickly
@@ -73,13 +77,8 @@ app.use((req, res, next) => {
   await setupAuth(app);
   await registerRoutes(httpServer, app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
+  // Global error handler (must be last middleware)
+  app.use(errorHandler);
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route

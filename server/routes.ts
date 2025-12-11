@@ -4567,24 +4567,65 @@ segment1.ts
   });
 
   // Course Management Admin Routes
+  const createCourseSchema = z.object({
+    title: z.string().min(1),
+    description: z.string().optional(),
+    productType: z.string().min(1),
+    state: z.string().min(2),
+    licenseType: z.string().min(1),
+    requirementCycleType: z.string().min(1),
+    requirementBucket: z.string().min(1),
+    hoursRequired: z.number().int().positive(),
+    deliveryMethod: z.string().optional(),
+    difficultyLevel: z.string().optional(),
+    price: z.number().int().nonnegative(),
+    sku: z.string().min(1),
+    renewalApplicable: z.number().optional(),
+    renewalPeriodYears: z.number().optional(),
+    providerNumber: z.string().optional(),
+    courseOfferingNumber: z.string().optional(),
+    instructorName: z.string().optional(),
+    instructorEmail: z.string().email().optional(),
+    instructorPhone: z.string().optional(),
+    instructorAddress: z.string().optional(),
+    instructorAvailability: z.string().optional(),
+    expirationMonths: z.number().int().positive().max(36).optional(),
+    units: z.array(z.object({
+      unitNumber: z.number().int().positive().optional(),
+      title: z.string().optional(),
+      description: z.string().optional(),
+      hoursRequired: z.number().int().nonnegative().optional(),
+      sequence: z.number().int().nonnegative().optional(),
+    })).optional(),
+  });
+
+  const updateCourseSchema = createCourseSchema.partial().extend({
+    expectedVersion: z.number().int().optional(),
+  });
+
+  function mapCourseErrors(err: any, res: any) {
+    const msg = typeof err?.message === "string" ? err.message : "";
+    if (msg === "COURSE_SKU_EXISTS" || msg === "COURSE_TITLE_EXISTS") {
+      return res.status(409).json({ error: "Duplicate course", code: msg });
+    }
+    if (msg === "COURSE_VERSION_CONFLICT") {
+      return res.status(412).json({ error: "Version conflict", code: msg });
+    }
+    return null;
+  }
+
   app.post("/api/admin/courses", isAdmin, async (req, res) => {
     try {
-      const courseData = req.body;
-      // Validate and default expirationMonths
-      if (courseData.expirationMonths !== undefined) {
-        const months = parseInt(courseData.expirationMonths);
-        if (isNaN(months) || months < 1 || months > 24) {
-          courseData.expirationMonths = 6; // Default to 6 months if invalid
-        } else {
-          courseData.expirationMonths = months;
-        }
-      } else {
-        courseData.expirationMonths = 6; // Default to 6 months
-      }
-      const course = await storage.createCourse?.(courseData);
+      const parsed = createCourseSchema.parse(req.body);
+      const course = await storage.createCourse?.(parsed);
       triggerCatalogSyncDebounced();
       res.status(201).json(course);
-    } catch (err) {
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: err.errors });
+      }
+      const handled = mapCourseErrors(err, res);
+      if (handled) return handled;
       console.error("Error creating course:", err);
       res.status(500).json({ error: "Failed to create course" });
     }
@@ -4603,23 +4644,17 @@ segment1.ts
   app.patch("/api/admin/courses/:courseId", isAdmin, async (req, res) => {
     try {
       const { courseId } = req.params;
-      const updateData = { ...req.body };
-      
-      // Validate expirationMonths if provided
-      if (updateData.expirationMonths !== undefined) {
-        const months = parseInt(updateData.expirationMonths);
-        if (isNaN(months) || months < 1 || months > 24) {
-          updateData.expirationMonths = 6; // Default to 6 months if invalid
-        } else {
-          updateData.expirationMonths = months;
-        }
-      }
-      
-      const course = await storage.updateCourse?.(courseId, updateData);
+      const parsed = updateCourseSchema.parse(req.body);
+      const course = await storage.updateCourse?.(courseId, parsed);
       if (!course) return res.status(404).json({ error: "Course not found" });
       triggerCatalogSyncDebounced();
       res.json(course);
-    } catch (err) {
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: err.errors });
+      }
+      const handled = mapCourseErrors(err, res);
+      if (handled) return handled;
       console.error("Error updating course:", err);
       res.status(500).json({ error: "Failed to update course" });
     }
@@ -4628,9 +4663,10 @@ segment1.ts
   app.delete("/api/admin/courses/:courseId", isAdmin, async (req, res) => {
     try {
       const { courseId } = req.params;
-      await storage.deleteCourse?.(courseId);
+      const hardDelete = req.query.hardDelete === "true";
+      await storage.deleteCourse?.(courseId, { hardDelete });
       triggerCatalogSyncDebounced();
-      res.json({ success: true });
+      res.json({ success: true, mode: hardDelete ? "hard" : "soft" });
     } catch (err) {
       console.error("Error deleting course:", err);
       res.status(500).json({ error: "Failed to delete course" });
@@ -4649,14 +4685,29 @@ segment1.ts
     }
   });
 
+  const unitSchema = z.object({
+    unitNumber: z.number().int().positive().optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    hoursRequired: z.number().int().nonnegative().optional(),
+    sequence: z.number().int().nonnegative().optional(),
+    expectedVersion: z.number().int().optional(),
+  });
+
   app.post("/api/admin/courses/:courseId/units", isAdmin, async (req, res) => {
     try {
       const { courseId } = req.params;
-      const { unitNumber, title, description, hoursRequired } = req.body;
-      const unit = await storage.createUnit(courseId, unitNumber, title, description, hoursRequired);
+      const parsed = unitSchema.parse(req.body);
+      const unit = await storage.createUnitForCourse?.(courseId, parsed);
       triggerCatalogSyncDebounced();
       res.status(201).json(unit);
-    } catch (err) {
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: err.errors });
+      }
+      if (err?.message === "COURSE_NOT_FOUND") {
+        return res.status(404).json({ error: "Course not found" });
+      }
       console.error("Error creating unit:", err);
       res.status(500).json({ error: "Failed to create unit" });
     }
@@ -4665,10 +4716,21 @@ segment1.ts
   app.patch("/api/admin/units/:unitId", isAdmin, async (req, res) => {
     try {
       const { unitId } = req.params;
-      const unit = await storage.updateUnit(unitId, req.body);
+      const parsed = unitSchema.parse(req.body);
+      const unit = await storage.updateUnitWithValidation?.(unitId, parsed);
+      if (!unit) return res.status(404).json({ error: "Unit not found" });
       triggerCatalogSyncDebounced();
       res.json(unit);
-    } catch (err) {
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: err.errors });
+      }
+      if (err?.message === "UNIT_COURSE_MISMATCH") {
+        return res.status(400).json({ error: "Unit does not belong to course" });
+      }
+      if (err?.message === "UNIT_VERSION_CONFLICT") {
+        return res.status(412).json({ error: "Version conflict" });
+      }
       console.error("Error updating unit:", err);
       res.status(500).json({ error: "Failed to update unit" });
     }
@@ -4677,10 +4739,13 @@ segment1.ts
   app.delete("/api/admin/units/:unitId", isAdmin, async (req, res) => {
     try {
       const { unitId } = req.params;
-      await storage.deleteUnit(unitId);
+      await storage.deleteUnitSafe?.(unitId);
       triggerCatalogSyncDebounced();
       res.json({ success: true });
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.message === "UNIT_HAS_ACTIVE_ENROLLMENTS") {
+        return res.status(400).json({ error: "Cannot delete unit with active enrollments" });
+      }
       console.error("Error deleting unit:", err);
       res.status(500).json({ error: "Failed to delete unit" });
     }
@@ -4716,14 +4781,30 @@ segment1.ts
     }
   });
 
+  const lessonSchema = z.object({
+    lessonNumber: z.number().int().positive().optional(),
+    title: z.string().optional(),
+    videoUrl: z.string().url().optional(),
+    durationMinutes: z.number().int().nonnegative().optional(),
+    content: z.string().optional(),
+    imageUrl: z.string().url().optional(),
+    expectedVersion: z.number().int().optional(),
+  });
+
   app.post("/api/admin/units/:unitId/lessons", isAdmin, async (req, res) => {
     try {
       const { unitId } = req.params;
-      const { lessonNumber, title, videoUrl, durationMinutes, content, imageUrl } = req.body;
-      const lesson = await storage.createLesson(unitId, lessonNumber, title, videoUrl, durationMinutes, content, imageUrl);
+      const parsed = lessonSchema.parse(req.body);
+      const lesson = await storage.createLessonForUnit?.(unitId, parsed);
       triggerCatalogSyncDebounced();
       res.status(201).json(lesson);
-    } catch (err) {
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: err.errors });
+      }
+      if (err?.message === "UNIT_NOT_FOUND") {
+        return res.status(404).json({ error: "Unit not found" });
+      }
       console.error("Error creating lesson:", err);
       res.status(500).json({ error: "Failed to create lesson" });
     }
@@ -4732,10 +4813,21 @@ segment1.ts
   app.patch("/api/admin/lessons/:lessonId", isAdmin, async (req, res) => {
     try {
       const { lessonId } = req.params;
-      const lesson = await storage.updateLesson(lessonId, req.body);
+      const parsed = lessonSchema.parse(req.body);
+      const lesson = await storage.updateLessonWithValidation?.(lessonId, parsed);
+      if (!lesson) return res.status(404).json({ error: "Lesson not found" });
       triggerCatalogSyncDebounced();
       res.json(lesson);
-    } catch (err) {
+    } catch (err: any) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ error: "Validation failed", details: err.errors });
+      }
+      if (err?.message === "LESSON_UNIT_MISMATCH") {
+        return res.status(400).json({ error: "Lesson does not belong to unit" });
+      }
+      if (err?.message === "LESSON_VERSION_CONFLICT") {
+        return res.status(412).json({ error: "Version conflict" });
+      }
       console.error("Error updating lesson:", err);
       res.status(500).json({ error: "Failed to update lesson" });
     }
@@ -4744,7 +4836,7 @@ segment1.ts
   app.delete("/api/admin/lessons/:lessonId", isAdmin, async (req, res) => {
     try {
       const { lessonId } = req.params;
-      await storage.deleteLesson(lessonId);
+      await storage.deleteLessonSafe?.(lessonId);
       triggerCatalogSyncDebounced();
       res.json({ success: true });
     } catch (err) {
