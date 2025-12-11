@@ -1,8 +1,6 @@
-import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Shield, CheckCircle, Smartphone, Pause, Play } from "lucide-react";
-import heroVideo from "@assets/generated_videos/florida_real_estate_aerial_footage.mp4";
+import { ArrowRight, Zap, Shield, CheckCircle, Smartphone } from "lucide-react";
 import heroImage from "@assets/generated_images/professional_real_estate_training_classroom.png";
 
 interface HeroProps {
@@ -11,76 +9,17 @@ interface HeroProps {
 }
 
 export default function Hero({ onBrowseCourses, onGetStarted }: HeroProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(mediaQuery.matches);
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
-      if (e.matches && videoRef.current) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
-    };
-    
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  const togglePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
   return (
     <section className="relative overflow-hidden min-h-[550px] sm:min-h-[600px] md:min-h-[700px] lg:min-h-[750px] flex items-center">
       <div className="absolute inset-0">
-        {prefersReducedMotion ? (
-          <img
-            src={heroImage}
-            alt="Professional training classroom"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster={heroImage}
-            className="h-full w-full object-cover"
-            aria-hidden="true"
-          >
-            <source src={heroVideo} type="video/mp4" />
-          </video>
-        )}
+        <img
+          src={heroImage}
+          alt="Professional training classroom"
+          className="h-full w-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/70 to-black/50" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
       </div>
-
-      {!prefersReducedMotion && (
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={togglePlayPause}
-          className="absolute bottom-4 right-4 z-20 bg-black/30 hover:bg-black/50 text-white border border-white/20"
-          aria-label={isPlaying ? "Pause background video" : "Play background video"}
-          data-testid="button-toggle-video"
-        >
-          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        </Button>
-      )}
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 w-full py-8 sm:py-12">
         <div className="max-w-3xl">
