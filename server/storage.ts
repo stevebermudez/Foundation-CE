@@ -675,7 +675,12 @@ export class DatabaseStorage implements IStorage {
       const reordered = await tx.select().from(units).where(eq(units.courseId, courseId)).orderBy(units.unitNumber);
       let pos = 1;
       for (const u of reordered) {
-        await tx.update(units).set({ unitNumber: pos, sequence: pos }).where(eq(units.id, u.id));
+        // Increment version for resequenced units to maintain optimistic concurrency control
+        await tx.update(units).set({ 
+          unitNumber: pos, 
+          sequence: pos,
+          version: ((u as any).version || 1) + 1,
+        }).where(eq(units.id, u.id));
         pos += 1;
       }
 
@@ -703,8 +708,9 @@ export class DatabaseStorage implements IStorage {
       if (updateData.unitNumber !== undefined && updateData.unitNumber >= 1) {
         const siblings = await tx.select().from(units).where(eq(units.courseId, existing.courseId)).orderBy(units.unitNumber);
         const target = Math.min(updateData.unitNumber, siblings.length);
-        // Temporarily set to high number to avoid constraint
-        await tx.update(units).set({ unitNumber: 9999, sequence: 9999 }).where(eq(units.id, unitId));
+        // Use negative temporary value to avoid unique constraint conflicts (negative numbers won't conflict with valid positions)
+        const tempValue = -Math.abs(Date.now() % 1000000); // Unique negative value per transaction
+        await tx.update(units).set({ unitNumber: tempValue, sequence: tempValue }).where(eq(units.id, unitId));
         let pos = 1;
         for (const u of siblings) {
           if (u.id === unitId) {
@@ -712,7 +718,12 @@ export class DatabaseStorage implements IStorage {
             continue;
           }
           const newPos = pos >= target ? pos + 1 : pos;
-          await tx.update(units).set({ unitNumber: newPos, sequence: newPos }).where(eq(units.id, u.id));
+          // Increment version for resequenced units to maintain optimistic concurrency control
+          await tx.update(units).set({ 
+            unitNumber: newPos, 
+            sequence: newPos,
+            version: ((u as any).version || 1) + 1,
+          }).where(eq(units.id, u.id));
           pos += 1;
         }
         updateData.unitNumber = target;
@@ -761,7 +772,12 @@ export class DatabaseStorage implements IStorage {
       const remaining = await tx.select().from(units).where(eq(units.courseId, unit.courseId)).orderBy(units.unitNumber);
       let pos = 1;
       for (const u of remaining) {
-        await tx.update(units).set({ unitNumber: pos, sequence: pos }).where(eq(units.id, u.id));
+        // Increment version for resequenced units to maintain optimistic concurrency control
+        await tx.update(units).set({ 
+          unitNumber: pos, 
+          sequence: pos,
+          version: ((u as any).version || 1) + 1,
+        }).where(eq(units.id, u.id));
         pos += 1;
       }
     });
@@ -795,7 +811,12 @@ export class DatabaseStorage implements IStorage {
       const reordered = await tx.select().from(lessons).where(eq(lessons.unitId, unitId)).orderBy(lessons.lessonNumber);
       let pos = 1;
       for (const l of reordered) {
-        await tx.update(lessons).set({ lessonNumber: pos, sequence: pos }).where(eq(lessons.id, l.id));
+        // Increment version for resequenced lessons to maintain optimistic concurrency control
+        await tx.update(lessons).set({ 
+          lessonNumber: pos, 
+          sequence: pos,
+          version: ((l as any).version || 1) + 1,
+        }).where(eq(lessons.id, l.id));
         pos += 1;
       }
 
@@ -822,7 +843,9 @@ export class DatabaseStorage implements IStorage {
       if (updateData.lessonNumber !== undefined && updateData.lessonNumber >= 1) {
         const siblings = await tx.select().from(lessons).where(eq(lessons.unitId, existing.unitId)).orderBy(lessons.lessonNumber);
         const target = Math.min(updateData.lessonNumber, siblings.length);
-        await tx.update(lessons).set({ lessonNumber: 9999, sequence: 9999 }).where(eq(lessons.id, lessonId));
+        // Use negative temporary value to avoid unique constraint conflicts
+        const tempValue = -Math.abs(Date.now() % 1000000); // Unique negative value per transaction
+        await tx.update(lessons).set({ lessonNumber: tempValue, sequence: tempValue }).where(eq(lessons.id, lessonId));
         let pos = 1;
         for (const l of siblings) {
           if (l.id === lessonId) {
@@ -830,7 +853,12 @@ export class DatabaseStorage implements IStorage {
             continue;
           }
           const newPos = pos >= target ? pos + 1 : pos;
-          await tx.update(lessons).set({ lessonNumber: newPos, sequence: newPos }).where(eq(lessons.id, l.id));
+          // Increment version for resequenced lessons to maintain optimistic concurrency control
+          await tx.update(lessons).set({ 
+            lessonNumber: newPos, 
+            sequence: newPos,
+            version: ((l as any).version || 1) + 1,
+          }).where(eq(lessons.id, l.id));
           pos += 1;
         }
         updateData.lessonNumber = target;
@@ -862,7 +890,12 @@ export class DatabaseStorage implements IStorage {
       const remaining = await tx.select().from(lessons).where(eq(lessons.unitId, lesson.unitId)).orderBy(lessons.lessonNumber);
       let pos = 1;
       for (const l of remaining) {
-        await tx.update(lessons).set({ lessonNumber: pos, sequence: pos }).where(eq(lessons.id, l.id));
+        // Increment version for resequenced lessons to maintain optimistic concurrency control
+        await tx.update(lessons).set({ 
+          lessonNumber: pos, 
+          sequence: pos,
+          version: ((l as any).version || 1) + 1,
+        }).where(eq(lessons.id, l.id));
         pos += 1;
       }
     });

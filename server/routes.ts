@@ -4620,28 +4620,13 @@ segment1.ts
     res.status(201).json(unit);
   }));
 
-  app.patch("/api/admin/units/:unitId", isAdmin, async (req, res) => {
-    try {
-      const { unitId } = req.params;
-      const parsed = unitSchema.parse(req.body);
-      const unit = await storage.updateUnitWithValidation?.(unitId, parsed);
-      if (!unit) return res.status(404).json({ error: "Unit not found" });
-      triggerCatalogSyncDebounced();
-      res.json(unit);
-    } catch (err: any) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Validation failed", details: err.errors });
-      }
-      if (err?.message === "UNIT_COURSE_MISMATCH") {
-        return res.status(400).json({ error: "Unit does not belong to course" });
-      }
-      if (err?.message === "UNIT_VERSION_CONFLICT") {
-        return res.status(412).json({ error: "Version conflict" });
-      }
-      console.error("Error updating unit:", err);
-      res.status(500).json({ error: "Failed to update unit" });
-    }
-  });
+  app.patch("/api/admin/units/:unitId", adminRateLimit, isAdmin, validateUUID("unitId"), validateRequest(updateUnitSchema), asyncHandler(async (req, res) => {
+    const { unitId } = req.params;
+    const unit = await storage.updateUnitWithValidation?.(unitId, req.body);
+    if (!unit) throw new NotFoundError("Unit");
+    triggerCatalogSyncDebounced();
+    res.json(unit);
+  }));
 
   app.delete("/api/admin/units/:unitId", isAdmin, async (req, res) => {
     try {
@@ -4695,33 +4680,14 @@ segment1.ts
     triggerCatalogSyncDebounced();
     res.status(201).json(lesson);
   }));
-      console.error("Error creating lesson:", err);
-      res.status(500).json({ error: "Failed to create lesson" });
-    }
-  });
 
-  app.patch("/api/admin/lessons/:lessonId", isAdmin, async (req, res) => {
-    try {
-      const { lessonId } = req.params;
-      const parsed = lessonSchema.parse(req.body);
-      const lesson = await storage.updateLessonWithValidation?.(lessonId, parsed);
-      if (!lesson) return res.status(404).json({ error: "Lesson not found" });
-      triggerCatalogSyncDebounced();
-      res.json(lesson);
-    } catch (err: any) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Validation failed", details: err.errors });
-      }
-      if (err?.message === "LESSON_UNIT_MISMATCH") {
-        return res.status(400).json({ error: "Lesson does not belong to unit" });
-      }
-      if (err?.message === "LESSON_VERSION_CONFLICT") {
-        return res.status(412).json({ error: "Version conflict" });
-      }
-      console.error("Error updating lesson:", err);
-      res.status(500).json({ error: "Failed to update lesson" });
-    }
-  });
+  app.patch("/api/admin/lessons/:lessonId", adminRateLimit, isAdmin, validateUUID("lessonId"), validateRequest(updateLessonSchema), asyncHandler(async (req, res) => {
+    const { lessonId } = req.params;
+    const lesson = await storage.updateLessonWithValidation?.(lessonId, req.body);
+    if (!lesson) throw new NotFoundError("Lesson");
+    triggerCatalogSyncDebounced();
+    res.json(lesson);
+  }));
 
   app.delete("/api/admin/lessons/:lessonId", isAdmin, async (req, res) => {
     try {
