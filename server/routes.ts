@@ -4579,47 +4579,26 @@ segment1.ts
     res.status(201).json(course);
   }));
 
-  app.get("/api/admin/courses", isAdmin, async (req, res) => {
-    try {
-      const allCourses = (await storage.getCourses?.()) || [];
-      res.json(allCourses.slice(0, 500));
-    } catch (err) {
-      console.error("Error fetching courses:", err);
-      res.status(500).json({ error: "Failed to fetch courses" });
-    }
-  });
+  app.get("/api/admin/courses", adminRateLimit, isAdmin, asyncHandler(async (req, res) => {
+    const allCourses = (await storage.getCourses?.()) || [];
+    res.json(allCourses.slice(0, 500));
+  }));
 
-  app.patch("/api/admin/courses/:courseId", isAdmin, async (req, res) => {
-    try {
-      const { courseId } = req.params;
-      const parsed = updateCourseSchema.parse(req.body);
-      const course = await storage.updateCourse?.(courseId, parsed);
-      if (!course) return res.status(404).json({ error: "Course not found" });
-      triggerCatalogSyncDebounced();
-      res.json(course);
-    } catch (err: any) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Validation failed", details: err.errors });
-      }
-      const handled = mapCourseErrors(err, res);
-      if (handled) return handled;
-      console.error("Error updating course:", err);
-      res.status(500).json({ error: "Failed to update course" });
-    }
-  });
+  app.patch("/api/admin/courses/:courseId", adminRateLimit, isAdmin, validateUUID("courseId"), validateRequest(updateCourseSchema), asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const course = await storage.updateCourse?.(courseId, req.body);
+    if (!course) throw new NotFoundError("Course");
+    triggerCatalogSyncDebounced();
+    res.json(course);
+  }));
 
-  app.delete("/api/admin/courses/:courseId", isAdmin, async (req, res) => {
-    try {
-      const { courseId } = req.params;
-      const hardDelete = req.query.hardDelete === "true";
-      await storage.deleteCourse?.(courseId, { hardDelete });
-      triggerCatalogSyncDebounced();
-      res.json({ success: true, mode: hardDelete ? "hard" : "soft" });
-    } catch (err) {
-      console.error("Error deleting course:", err);
-      res.status(500).json({ error: "Failed to delete course" });
-    }
-  });
+  app.delete("/api/admin/courses/:courseId", adminRateLimit, isAdmin, validateUUID("courseId"), asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const hardDelete = req.query.hardDelete === "true";
+    await storage.deleteCourse?.(courseId, { hardDelete });
+    triggerCatalogSyncDebounced();
+    res.json({ success: true, mode: hardDelete ? "hard" : "soft" });
+  }));
 
   // ===== Unit Management Routes =====
   app.get("/api/admin/courses/:courseId/units", isAdmin, async (req, res) => {
@@ -4633,33 +4612,13 @@ segment1.ts
     }
   });
 
-  const unitSchema = z.object({
-    unitNumber: z.number().int().positive().optional(),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    hoursRequired: z.number().int().nonnegative().optional(),
-    sequence: z.number().int().nonnegative().optional(),
-    expectedVersion: z.number().int().optional(),
-  });
-
-  app.post("/api/admin/courses/:courseId/units", isAdmin, async (req, res) => {
-    try {
-      const { courseId } = req.params;
-      const parsed = unitSchema.parse(req.body);
-      const unit = await storage.createUnitForCourse?.(courseId, parsed);
-      triggerCatalogSyncDebounced();
-      res.status(201).json(unit);
-    } catch (err: any) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Validation failed", details: err.errors });
-      }
-      if (err?.message === "COURSE_NOT_FOUND") {
-        return res.status(404).json({ error: "Course not found" });
-      }
-      console.error("Error creating unit:", err);
-      res.status(500).json({ error: "Failed to create unit" });
-    }
-  });
+  app.post("/api/admin/courses/:courseId/units", adminRateLimit, isAdmin, validateUUID("courseId"), validateRequest(createUnitSchema), asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const unit = await storage.createUnitForCourse?.(courseId, req.body);
+    if (!unit) throw new NotFoundError("Course");
+    triggerCatalogSyncDebounced();
+    res.status(201).json(unit);
+  }));
 
   app.patch("/api/admin/units/:unitId", isAdmin, async (req, res) => {
     try {
@@ -4729,30 +4688,13 @@ segment1.ts
     }
   });
 
-  const lessonSchema = z.object({
-    lessonNumber: z.number().int().positive().optional(),
-    title: z.string().optional(),
-    videoUrl: z.string().url().optional(),
-    durationMinutes: z.number().int().nonnegative().optional(),
-    content: z.string().optional(),
-    imageUrl: z.string().url().optional(),
-    expectedVersion: z.number().int().optional(),
-  });
-
-  app.post("/api/admin/units/:unitId/lessons", isAdmin, async (req, res) => {
-    try {
-      const { unitId } = req.params;
-      const parsed = lessonSchema.parse(req.body);
-      const lesson = await storage.createLessonForUnit?.(unitId, parsed);
-      triggerCatalogSyncDebounced();
-      res.status(201).json(lesson);
-    } catch (err: any) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({ error: "Validation failed", details: err.errors });
-      }
-      if (err?.message === "UNIT_NOT_FOUND") {
-        return res.status(404).json({ error: "Unit not found" });
-      }
+  app.post("/api/admin/units/:unitId/lessons", adminRateLimit, isAdmin, validateUUID("unitId"), validateRequest(createLessonSchema), asyncHandler(async (req, res) => {
+    const { unitId } = req.params;
+    const lesson = await storage.createLessonForUnit?.(unitId, req.body);
+    if (!lesson) throw new NotFoundError("Unit");
+    triggerCatalogSyncDebounced();
+    res.status(201).json(lesson);
+  }));
       console.error("Error creating lesson:", err);
       res.status(500).json({ error: "Failed to create lesson" });
     }

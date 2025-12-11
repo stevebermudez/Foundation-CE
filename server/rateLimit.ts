@@ -1,6 +1,19 @@
 import rateLimit from "express-rate-limit";
 import type { Request, Response } from "express";
 
+// Extend Express Request type for rate limit
+declare global {
+  namespace Express {
+    interface Request {
+      rateLimit?: {
+        limit: number;
+        remaining: number;
+        resetTime: number;
+      };
+    }
+  }
+}
+
 // Helper to get client IP (works behind proxies)
 function getClientIp(req: Request): string {
   return (
@@ -28,8 +41,8 @@ export const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: skipIfWhitelisted,
-  keyGenerator: (req) => getClientIp(req),
-  handler: (req: Request, res: Response) => {
+  keyGenerator: (req: Request): string => getClientIp(req),
+  handler: (req: Request, res: Response): void => {
     res.status(429).json({
       error: "Too Many Requests",
       message: "Too many authentication attempts, please try again later",
@@ -46,8 +59,8 @@ export const publicRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: skipIfWhitelisted,
-  keyGenerator: (req) => getClientIp(req),
-  handler: (req: Request, res: Response) => {
+  keyGenerator: (req: Request): string => getClientIp(req),
+  handler: (req: Request, res: Response): void => {
     res.status(429).json({
       error: "Too Many Requests",
       message: "Too many requests, please slow down",
@@ -64,12 +77,12 @@ export const authenticatedRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: skipIfWhitelisted,
-  keyGenerator: (req) => {
+  keyGenerator: (req: Request): string => {
     // Use user ID if authenticated, otherwise IP
     const userId = (req.user as any)?.id;
     return userId ? `user:${userId}` : getClientIp(req);
   },
-  handler: (req: Request, res: Response) => {
+  handler: (req: Request, res: Response): void => {
     res.status(429).json({
       error: "Too Many Requests",
       message: "Too many requests, please slow down",
@@ -86,7 +99,7 @@ export const adminRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: skipIfWhitelisted,
-  keyGenerator: (req) => {
+  keyGenerator: (req: Request): string => {
     const userId = (req.user as any)?.id;
     return userId ? `admin:${userId}` : getClientIp(req);
   },
@@ -107,7 +120,7 @@ export const quizSubmissionRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: skipIfWhitelisted,
-  keyGenerator: (req) => {
+  keyGenerator: (req: Request): string => {
     const userId = (req.user as any)?.id;
     const enrollmentId = req.body?.enrollmentId || req.params?.enrollmentId;
     return userId && enrollmentId ? `quiz:${userId}:${enrollmentId}` : getClientIp(req);
