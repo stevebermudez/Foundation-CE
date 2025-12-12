@@ -2066,9 +2066,28 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async exportCourseContentJSON(courseId: string): Promise<string> {
+  async exportCourseContentJSON(courseId: string, options?: { includeHTML?: boolean; stripHTML?: boolean }): Promise<string> {
     const course = await this.getCourse(courseId);
     const unitList = await this.getUnits(courseId);
+    
+    const includeHTML = options?.includeHTML !== false && !options?.stripHTML;
+    
+    // Helper to process content
+    const processContent = (content: string | null | undefined): string => {
+      if (!content) return '';
+      if (includeHTML) return content;
+      // Strip HTML
+      return content
+        .replace(/<[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    };
     
     const unitsWithContent = await Promise.all(unitList.map(async (unit) => {
       const lessonList = await this.getLessons(unit.id);
@@ -2078,6 +2097,7 @@ export class DatabaseStorage implements IStorage {
         id: lesson.id,
         lessonNumber: lesson.lessonNumber,
         title: lesson.title,
+        content: processContent(lesson.content),
         videoId: lesson.videoId,
         videoUrl: lesson.videoUrl,
         durationMinutes: lesson.durationMinutes,
@@ -2088,7 +2108,7 @@ export class DatabaseStorage implements IStorage {
         id: unit.id,
         unitNumber: unit.unitNumber,
         title: unit.title,
-        description: unit.description,
+        description: processContent(unit.description),
         hoursRequired: unit.hoursRequired,
         lessons: lessonsWithVideos,
         unitVideos: videos
@@ -2102,7 +2122,7 @@ export class DatabaseStorage implements IStorage {
         id: course?.id,
         name: course?.title,
         sku: course?.sku,
-        description: course?.description,
+        description: processContent(course?.description),
         hoursRequired: course?.hoursRequired,
         price: course?.price,
         state: course?.state,
@@ -2112,7 +2132,11 @@ export class DatabaseStorage implements IStorage {
       units: unitsWithContent,
       courseVideos,
       exportedAt: new Date().toISOString(),
-      formatVersion: "1.0"
+      formatVersion: "1.0",
+      exportOptions: {
+        includeHTML,
+        exportedWithHTML: includeHTML
+      }
     };
     
     return JSON.stringify(exportData, null, 2);
@@ -2150,30 +2174,52 @@ export class DatabaseStorage implements IStorage {
     includeDescriptions?: boolean;
     unitNumbers?: number[];
     examForms?: string[];
+    includeHTML?: boolean;
+    stripHTML?: boolean;
   }): Promise<Buffer> {
     const { Document, Packer, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel, WidthType, AlignmentType, convertInchesToTwip } = await import("docx");
     
-    // Helper function to strip HTML tags and convert to plain text
-    const stripHtml = (html: string): string => {
+    // Helper function to process HTML - either strip or keep based on options
+    const includeHTML = options?.includeHTML !== false && !options?.stripHTML;
+    
+    const processHtml = (html: string | null | undefined): string => {
       if (!html) return '';
-      return html
-        // Replace block elements with line breaks
-        .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n')
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<\/ul>|<\/ol>/gi, '\n')
-        // Remove all remaining HTML tags
-        .replace(/<[^>]+>/g, '')
-        // Decode common HTML entities
-        .replace(/&nbsp;/gi, ' ')
-        .replace(/&amp;/gi, '&')
-        .replace(/&lt;/gi, '<')
-        .replace(/&gt;/gi, '>')
-        .replace(/&quot;/gi, '"')
-        .replace(/&#39;/gi, "'")
-        // Clean up multiple newlines
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
+      if (includeHTML) {
+        // Keep HTML but convert to DOCX-compatible format
+        // DOCX doesn't support raw HTML, so we'll strip it but preserve structure
+        return html
+          .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n')
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<\/ul>|<\/ol>/gi, '\n')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&nbsp;/gi, ' ')
+          .replace(/&amp;/gi, '&')
+          .replace(/&lt;/gi, '<')
+          .replace(/&gt;/gi, '>')
+          .replace(/&quot;/gi, '"')
+          .replace(/&#39;/gi, "'")
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+      } else {
+        // Strip HTML tags and convert to plain text
+        return html
+          .replace(/<\/(p|div|h[1-6]|li|tr)>/gi, '\n')
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<\/ul>|<\/ol>/gi, '\n')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&nbsp;/gi, ' ')
+          .replace(/&amp;/gi, '&')
+          .replace(/&lt;/gi, '<')
+          .replace(/&gt;/gi, '>')
+          .replace(/&quot;/gi, '"')
+          .replace(/&#39;/gi, "'")
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+      }
     };
+    
+    // For backward compatibility
+    const stripHtml = processHtml;
     
     const opts = {
       includeLessons: options?.includeLessons !== false,
@@ -2212,7 +2258,7 @@ export class DatabaseStorage implements IStorage {
     if (opts.includeDescriptions && course?.description) {
       sections.push(
         new Paragraph({
-          text: stripHtml(course.description),
+          text: processHtml(course.description),
           spacing: { after: 200 }
         })
       );
@@ -2248,7 +2294,7 @@ export class DatabaseStorage implements IStorage {
       if (opts.includeDescriptions && unit.description) {
         sections.push(
           new Paragraph({
-            text: stripHtml(unit.description),
+            text: processHtml(unit.description),
             spacing: { after: 100 }
           })
         );
@@ -2302,8 +2348,8 @@ export class DatabaseStorage implements IStorage {
           
           // Lesson content (the actual script/text)
           if (lesson.content) {
-            // Strip HTML tags and convert to plain text
-            const cleanContent = stripHtml(lesson.content);
+            // Process HTML based on options
+            const cleanContent = processHtml(lesson.content);
             // Split content into paragraphs by double newlines
             const contentParagraphs = cleanContent.split(/\n\n+/).filter(p => p.trim());
             for (const para of contentParagraphs) {

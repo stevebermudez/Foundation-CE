@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Edit2, Trash2, AlertCircle, FileDown, Download, FileText, ClipboardList, Eye } from "lucide-react";
+import { Plus, Edit2, Trash2, AlertCircle, FileDown, Download, FileText, ClipboardList, Eye, PlayCircle } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -43,6 +43,15 @@ interface ExamFormInfo {
   timeLimit: number;
 }
 
+interface ExportOptions {
+  includeLessons?: boolean;
+  includeQuizzes?: boolean;
+  includeVideos?: boolean;
+  includeDescriptions?: boolean;
+  selectedExamForms?: string[];
+  includeHTML?: boolean;
+}
+
 function ExportDialog({ course, onClose }: { course: any; onClose: () => void }) {
   const { toast } = useToast();
   const [options, setOptions] = useState<ExportOptions>({
@@ -51,6 +60,7 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
     includeVideos: false,
     includeDescriptions: true,
     selectedExamForms: [],
+    includeHTML: true,
   });
   const [isExporting, setIsExporting] = useState(false);
   const [examForms, setExamForms] = useState<ExamFormInfo[]>([]);
@@ -98,6 +108,8 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
       if (!options.includeQuizzes) params.set('includeQuizzes', 'false');
       if (!options.includeVideos) params.set('includeVideos', 'false');
       if (!options.includeDescriptions) params.set('includeDescriptions', 'false');
+      if (options.includeHTML === false) params.set('stripHTML', 'true');
+      else if (options.includeHTML === true) params.set('includeHTML', 'true');
       
       // Add exam forms selection
       if (examForms.length > 0 && options.selectedExamForms.length > 0) {
@@ -174,6 +186,14 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
           />
           <Label htmlFor="includeVideos">Include video URLs (adds column to tables)</Label>
         </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="includeHTML"
+            checked={options.includeHTML !== false}
+            onCheckedChange={(checked) => setOptions(prev => ({ ...prev, includeHTML: !!checked }))}
+          />
+          <Label htmlFor="includeHTML">Preserve HTML formatting</Label>
+        </div>
         
         {/* Final Exam Forms Selection */}
         {!loadingForms && examForms.length > 0 && (
@@ -209,6 +229,165 @@ function ExportDialog({ course, onClose }: { course: any; onClose: () => void })
         <Button onClick={handleExport} disabled={isExporting} data-testid="button-export-docx">
           <Download className="h-4 w-4 mr-2" />
           {isExporting ? "Exporting..." : "Export to Word"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function VideoGenerationDialog({ course, onClose }: { course: any; onClose: () => void }) {
+  const { toast } = useToast();
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [preparedContent, setPreparedContent] = useState<any>(null);
+  const [showManualGuide, setShowManualGuide] = useState(false);
+
+  const handlePrepareContent = async () => {
+    setIsPreparing(true);
+    try {
+      const token = localStorage.getItem("adminToken");
+      const res = await fetch(`/api/courses/${course.id}/generate-videos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        credentials: 'include',
+        body: JSON.stringify({ provider: 'manual' })
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Failed to prepare content');
+      }
+
+      const result = await res.json();
+      setPreparedContent(result);
+      setShowManualGuide(true);
+      toast({
+        title: "Content Prepared",
+        description: `Prepared ${result.lessons?.length || 0} lessons for manual video creation`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Preparation Failed",
+        description: err.message || "Could not prepare content.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  if (showManualGuide && preparedContent) {
+    return (
+      <div className="space-y-4 max-h-[600px] overflow-y-auto">
+        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-md">
+          <h3 className="font-semibold mb-2">✅ Content Prepared Successfully!</h3>
+          <p className="text-sm mb-4">
+            {preparedContent.lessons?.length || 0} lessons ready for video creation. 
+            Follow the steps below to create videos using free tools.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-semibold mb-2">Step 1: Choose a Free Tool</h4>
+            <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+              <li><strong>Pictory.ai</strong> - Free: 3 videos/month - https://pictory.ai</li>
+              <li><strong>InVideo AI</strong> - Free: 4 videos/month - https://invideo.io</li>
+              <li><strong>Loom</strong> - Free: 25 videos/month - https://loom.com</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Step 2: Use Prepared Scripts</h4>
+            <p className="text-sm text-muted-foreground mb-2">
+              Each lesson has a formatted script ready to copy. Click on a lesson below to view its script.
+            </p>
+            <div className="space-y-2 max-h-48 overflow-y-auto border rounded p-2">
+              {preparedContent.lessons?.map((lesson: any, idx: number) => (
+                <div key={idx} className="p-2 bg-muted rounded text-sm">
+                  <div className="font-medium">{lesson.title}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {lesson.wordCount} words • ~{lesson.estimatedDuration} min
+                  </div>
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-xs">View Script</summary>
+                    <pre className="mt-2 p-2 bg-background rounded text-xs overflow-x-auto whitespace-pre-wrap">
+                      {lesson.script}
+                    </pre>
+                  </details>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Step 3: Create & Upload Videos</h4>
+            <ol className="list-decimal list-inside text-sm space-y-1 text-muted-foreground">
+              <li>Paste script into your chosen video tool</li>
+              <li>Generate video (takes 2-5 minutes)</li>
+              <li>Download the video</li>
+              <li>Upload to YouTube as <strong>Unlisted</strong></li>
+              <li>Copy YouTube URL</li>
+              <li>Add URL to lesson in admin panel</li>
+            </ol>
+          </div>
+
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm">
+            <p className="font-medium mb-1">💡 Tip:</p>
+            <p>You can create videos gradually using free tiers. No need to do all at once!</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 justify-end pt-4 border-t">
+          <Button variant="outline" onClick={() => { setShowManualGuide(false); setPreparedContent(null); }}>
+            Close
+          </Button>
+          <Button onClick={onClose}>
+            Got It
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md">
+        <h3 className="font-semibold mb-2">Manual Video Creation (No API Keys Needed)</h3>
+        <p className="text-sm text-muted-foreground">
+          This will prepare formatted scripts for all lessons. You can then use free tools like Pictory.ai, 
+          InVideo, or Loom to create videos manually. No API keys required!
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <h4 className="font-medium mb-2">How It Works:</h4>
+          <ol className="list-decimal list-inside text-sm space-y-1 text-muted-foreground">
+            <li>We prepare formatted scripts for each lesson</li>
+            <li>You copy scripts to free video tools (Pictory, InVideo, etc.)</li>
+            <li>Tools generate videos automatically</li>
+            <li>You upload videos to YouTube</li>
+            <li>Add YouTube URLs to lessons</li>
+          </ol>
+        </div>
+
+        <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-md text-sm">
+          <p className="font-medium mb-1">✅ Free Options:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Pictory.ai: 3 videos/month free</li>
+            <li>InVideo: 4 videos/month free</li>
+            <li>Loom: 25 videos/month free</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="flex gap-2 justify-end pt-4">
+        <Button variant="outline" onClick={onClose} disabled={isPreparing}>Cancel</Button>
+        <Button onClick={handlePrepareContent} disabled={isPreparing}>
+          {isPreparing ? "Preparing..." : "Prepare Content for Videos"}
         </Button>
       </div>
     </div>
@@ -847,6 +1026,7 @@ function CourseForm({ onSuccess, initialData }: { onSuccess: () => void; initial
 export default function AdminCoursesPage() {
   const [editingCourse, setEditingCourse] = useState<any | null>(null);
   const [exportingCourse, setExportingCourse] = useState<any | null>(null);
+  const [generatingVideoCourse, setGeneratingVideoCourse] = useState<any | null>(null);
   const [floridaComplianceCourse, setFloridaComplianceCourse] = useState<any | null>(null);
   
   const { data: courses = [], isLoading } = useQuery({
@@ -998,6 +1178,16 @@ export default function AdminCoursesPage() {
                         <ClipboardList className="h-4 w-4" aria-hidden="true" />
                       </Button>
                     )}
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setGeneratingVideoCourse(course)}
+                      data-testid={`button-generate-videos-${course.id}`}
+                      aria-label={`Generate videos for ${course.title}`}
+                      title="Generate Videos"
+                    >
+                      <PlayCircle className="h-4 w-4" aria-hidden="true" />
+                    </Button>
                     <Button
                       size="icon"
                       variant="outline"

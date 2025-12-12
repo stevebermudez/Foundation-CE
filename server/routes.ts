@@ -3862,6 +3862,182 @@ segment1.ts
     }
   });
 
+  // Prepare lesson content for manual video creation (no API keys needed)
+  app.get(
+    "/api/lessons/:lessonId/prepare-video",
+    isAdmin,
+    adminRateLimit,
+    validateUUID("lessonId"),
+    asyncHandler(async (req, res) => {
+      const { prepareLessonForVideo } = await import("./manualVideoHelper");
+      
+      try {
+        const content = await prepareLessonForVideo(req.params.lessonId);
+        res.json({
+          success: true,
+          content,
+          message: "Content prepared for manual video creation"
+        });
+      } catch (error: any) {
+        res.status(400).json({
+          success: false,
+          error: error.message || "Failed to prepare lesson content"
+        });
+      }
+    })
+  );
+
+  // Generate video from lesson content (automated - requires API keys)
+  app.post(
+    "/api/lessons/:lessonId/generate-video",
+    isAdmin,
+    adminRateLimit,
+    validateUUID("lessonId"),
+    asyncHandler(async (req, res) => {
+      const { generateVideoFromLesson } = await import("./videoGenerationService");
+      
+      // Validate request body
+      const { z } = await import("zod");
+      const videoGenSchema = z.object({
+        provider: z.enum(['pictory', 'tts-slides', 'manual']).optional(),
+        useElevenLabs: z.boolean().optional(),
+        useGoogleTTS: z.boolean().optional(),
+        voiceId: z.string().optional(),
+        language: z.string().max(10).optional(),
+        videoStyle: z.enum(['slides', 'animated', 'talking-head', 'math', 'explainer']).optional(),
+        includeSubtitles: z.boolean().optional()
+      });
+      
+      const validated = videoGenSchema.parse(req.body);
+      
+      const options = {
+        lessonId: req.params.lessonId,
+        provider: validated.provider || 'manual',
+        useElevenLabs: validated.useElevenLabs,
+        useGoogleTTS: validated.useGoogleTTS,
+        voiceId: validated.voiceId,
+        language: validated.language || 'en-US',
+        videoStyle: validated.videoStyle || 'explainer',
+        includeSubtitles: validated.includeSubtitles !== false
+      };
+      
+      const result = await generateVideoFromLesson(options);
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          videoUrl: result.videoUrl,
+          youtubeVideoId: result.youtubeVideoId,
+          duration: result.duration,
+          message: "Video generated and uploaded successfully"
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: result.error,
+          warnings: result.warnings
+        });
+      }
+    })
+  );
+
+  // Batch generate videos for multiple lessons
+  app.post(
+    "/api/courses/:courseId/generate-videos",
+    isAdmin,
+    adminRateLimit,
+    validateUUID("courseId"),
+    asyncHandler(async (req, res) => {
+      const { batchGenerateVideos } = await import("./videoGenerationService");
+      const storage = new (await import("./storage")).DatabaseStorage();
+      
+      // Validate request body
+      const { z } = await import("zod");
+      const batchVideoGenSchema = z.object({
+        provider: z.enum(['pictory', 'tts-slides', 'manual']).optional(),
+        useElevenLabs: z.boolean().optional(),
+        useGoogleTTS: z.boolean().optional(),
+        voiceId: z.string().optional(),
+        language: z.string().max(10).optional(),
+        videoStyle: z.enum(['slides', 'animated', 'talking-head', 'math', 'explainer']).optional(),
+        includeSubtitles: z.boolean().optional()
+      });
+      
+      const validated = batchVideoGenSchema.parse(req.body);
+      
+      // Get all lessons for the course
+      const units = await storage.getUnits(req.params.courseId);
+      const lessonIds: string[] = [];
+      
+      for (const unit of units) {
+        const unitLessons = await storage.getLessons(unit.id);
+        lessonIds.push(...unitLessons.map(l => l.id));
+      }
+      
+      if (lessonIds.length === 0) {
+        return res.status(400).json({ error: "No lessons found for this course" });
+      }
+      
+      // Limit batch size to prevent overwhelming the system
+      const MAX_BATCH_SIZE = 50;
+      if (lessonIds.length > MAX_BATCH_SIZE) {
+        return res.status(400).json({
+          error: `Too many lessons (${lessonIds.length}). Maximum batch size is ${MAX_BATCH_SIZE}. Please process in smaller batches.`
+        });
+      }
+      
+      const options = {
+        provider: validated.provider || 'manual',
+        useElevenLabs: validated.useElevenLabs,
+        useGoogleTTS: validated.useGoogleTTS,
+        voiceId: validated.voiceId,
+        language: validated.language || 'en-US',
+        videoStyle: validated.videoStyle || 'explainer',
+        includeSubtitles: validated.includeSubtitles !== false
+      };
+      
+      // For manual workflow, prepare content instead of generating
+      if (options.provider === 'manual') {
+        const { batchPrepareLessons } = await import("./manualVideoHelper");
+        const preparedContent = await batchPrepareLessons(lessonIds);
+        
+        return res.json({
+          success: true,
+          message: `Prepared ${preparedContent.length} lessons for manual video creation`,
+          lessons: preparedContent,
+          instructions: [
+            'Content has been prepared for manual video creation',
+            'Use the provided scripts with free video tools (Pictory.ai, InVideo, etc.)',
+            'Upload generated videos to YouTube and add URLs to lessons'
+          ]
+        });
+      }
+      
+      // For automated providers, process in background
+      res.json({
+        message: `Started generating ${lessonIds.length} videos. This will take some time.`,
+        lessonCount: lessonIds.length,
+        estimatedTime: `${Math.ceil(lessonIds.length * 2)} minutes`
+      });
+      
+      // Process in background with proper error handling
+      batchGenerateVideos(lessonIds, options)
+        .then(results => {
+          const successCount = results.filter(r => r.success).length;
+          const failCount = results.filter(r => !r.success).length;
+          console.log(`[Video Generation] Batch complete: ${successCount} succeeded, ${failCount} failed`);
+          
+          if (failCount > 0) {
+            const failures = results.filter(r => !r.success);
+            console.error('[Video Generation] Failures:', failures.map(f => f.error));
+          }
+        })
+        .catch(err => {
+          console.error("[Video Generation] Batch error:", err);
+        });
+    })
+  );
+
   // LMS Data Export Routes (for plug-and-play LMS integration)
   app.get("/api/export/course/:courseId", isAdmin, async (req, res) => {
     try {
@@ -3974,8 +4150,10 @@ segment1.ts
     isAdmin,
     async (req, res) => {
       try {
+        const includeHTML = req.query.includeHTML !== 'false' && req.query.stripHTML !== 'true';
         const jsonContent = await storage.exportCourseContentJSON(
           req.params.courseId,
+          { includeHTML, stripHTML: !includeHTML }
         );
         res.setHeader("Content-Type", "application/json");
         res.setHeader(
@@ -4198,6 +4376,156 @@ segment1.ts
       } catch (err) {
         console.error("Error exporting full course data:", err);
         res.status(500).json({ error: "Failed to export course data" });
+      }
+    }
+  );
+
+  // ===== Comprehensive LMS Import/Export Routes =====
+  
+  // Export course in various LMS formats
+  app.get(
+    "/api/export/course/:courseId/lms/:format",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { exportSCORM, exportIMSCC, exportQTI, exportxAPI } = await import("./lmsImportExportService");
+        const format = req.params.format as 'scorm12' | 'scorm2004' | 'imscc' | 'qti' | 'xapi';
+        const includeHTML = req.query.includeHTML !== 'false' && req.query.stripHTML !== 'true';
+        const includeQuizzes = req.query.includeQuizzes !== 'false';
+        
+        const options = {
+          includeHTML,
+          stripHTML: !includeHTML,
+          includeQuizzes,
+          includeAssessments: includeQuizzes,
+          includeVideos: req.query.includeVideos !== 'false',
+          includeMetadata: req.query.includeMetadata !== 'false'
+        };
+        
+        let buffer: Buffer | object;
+        let contentType: string;
+        let filename: string;
+        
+        switch (format) {
+          case 'scorm12':
+            buffer = await exportSCORM(req.params.courseId, '1.2', options);
+            contentType = 'application/zip';
+            filename = `scorm12-${req.params.courseId}.zip`;
+            break;
+          case 'scorm2004':
+            buffer = await exportSCORM(req.params.courseId, '2004', options);
+            contentType = 'application/zip';
+            filename = `scorm2004-${req.params.courseId}.zip`;
+            break;
+          case 'imscc':
+            buffer = await exportIMSCC(req.params.courseId, options);
+            contentType = 'application/zip';
+            filename = `imscc-${req.params.courseId}.zip`;
+            break;
+          case 'qti':
+            const qtiExports = await exportQTI(req.params.courseId, options);
+            // Return QTI as JSON with multiple files (would need to be zipped in production)
+            return res.json({ files: qtiExports, format: 'qti' });
+          case 'xapi':
+            buffer = await exportxAPI(req.params.courseId, options);
+            contentType = 'application/json';
+            filename = `xapi-${req.params.courseId}.json`;
+            break;
+          default:
+            return res.status(400).json({ error: `Unsupported format: ${format}` });
+        }
+        
+        res.setHeader("Content-Type", contentType);
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.send(buffer);
+      } catch (err: any) {
+        console.error("Error exporting LMS package:", err);
+        res.status(500).json({ error: err.message || "Failed to export LMS package" });
+      }
+    }
+  );
+
+  // Import course from LMS package
+  app.post(
+    "/api/import/course/lms",
+    isAdmin,
+    async (req, res) => {
+      try {
+        const { importLMSPackage } = await import("./lmsImportExportService");
+        
+        if (!req.body || !req.body.file) {
+          return res.status(400).json({ error: "File data required" });
+        }
+        
+        // In production, you'd handle multipart/form-data file upload
+        // For now, assuming base64 encoded file in body
+        const fileBuffer = Buffer.from(req.body.file, req.body.encoding || 'base64');
+        const format = req.body.format as string | undefined;
+        const extractQuizzes = req.body.extractQuizzes !== false;
+        const extractAssessments = req.body.extractAssessments !== false;
+        const createUnits = req.body.createUnits !== false;
+        const overwriteExisting = req.body.overwriteExisting === true;
+        
+        const result = await importLMSPackage(fileBuffer, {
+          format: format as any,
+          extractQuizzes,
+          extractAssessments,
+          createUnits,
+          overwriteExisting
+        });
+        
+        res.json(result);
+      } catch (err: any) {
+        console.error("Error importing LMS package:", err);
+        res.status(500).json({ error: err.message || "Failed to import LMS package" });
+      }
+    }
+  );
+
+  // Import course from file upload (multipart/form-data)
+  app.post(
+    "/api/import/course/lms/upload",
+    isAdmin,
+    async (req: any, res) => {
+      try {
+        const { importLMSPackage } = await import("./lmsImportExportService");
+        const multer = await import("multer");
+        
+        // Configure multer for memory storage
+        const upload = multer.default({
+          storage: multer.memoryStorage(),
+          limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
+        });
+        
+        // Handle single file upload
+        upload.single('file')(req, res, async (err: any) => {
+          if (err) {
+            return res.status(400).json({ error: err.message || "File upload error" });
+          }
+          
+          if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+          }
+          
+          const format = req.body.format as string | undefined;
+          const extractQuizzes = req.body.extractQuizzes !== 'false';
+          const extractAssessments = req.body.extractAssessments !== 'false';
+          const createUnits = req.body.createUnits !== 'false';
+          const overwriteExisting = req.body.overwriteExisting === 'true';
+          
+          const result = await importLMSPackage(req.file.buffer, {
+            format: format as any,
+            extractQuizzes,
+            extractAssessments,
+            createUnits,
+            overwriteExisting
+          });
+          
+          res.json(result);
+        });
+      } catch (err: any) {
+        console.error("Error importing LMS package:", err);
+        res.status(500).json({ error: err.message || "Failed to import LMS package" });
       }
     }
   );
@@ -5088,6 +5416,26 @@ segment1.ts
     } catch (err) {
       console.error("Error applying course outline:", err);
       res.status(500).json({ error: "Failed to apply course outline" });
+    }
+  });
+
+  // Format course lesson content (convert plain text to HTML)
+  app.post("/api/admin/courses/:courseId/format-lessons", isAdmin, async (req, res) => {
+    try {
+      const { formatCourseLessons } = await import("./formatCourseLessons");
+      const courseId = req.params.courseId;
+      
+      // Get course to find SKU
+      const course = await storage.getCourse(courseId);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      
+      await formatCourseLessons(course.sku);
+      res.json({ success: true, message: `Formatted lessons for course: ${course.title}` });
+    } catch (err: any) {
+      console.error("Error formatting course lessons:", err);
+      res.status(500).json({ error: err.message || "Failed to format course lessons" });
     }
   });
 
